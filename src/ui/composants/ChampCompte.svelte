@@ -36,6 +36,42 @@
   let actif = $state(0);
   let focus = $state(false);
   let liste: HTMLDivElement | undefined = $state();
+  let champ: HTMLInputElement | undefined = $state();
+
+  /**
+   * Position de la liste, fixée par rapport à la fenêtre : elle n'est jamais coupée par la carte qui contient le champ,
+   * s'ouvre vers le haut quand la place manque en bas et suit le champ quand la page défile.
+   */
+  let pos = $state({ left: 0, top: 0 as number | null, bas: null as number | null, largeur: 440, hauteur: 440 });
+  function placer() {
+    if (!champ) return;
+    const r = champ.getBoundingClientRect();
+    const largeur = Math.min(440, window.innerWidth - 16);
+    let left = aligne === 'droite' ? r.right - largeur : r.left;
+    left = Math.max(8, Math.min(left, window.innerWidth - largeur - 8));
+    const dessous = window.innerHeight - r.bottom - 12;
+    const dessus = r.top - 12;
+    const versLeHaut = dessous < 240 && dessus > dessous;
+    const hauteur = Math.max(160, Math.min(440, versLeHaut ? dessus : dessous));
+    pos = versLeHaut
+      ? { left, top: null, bas: window.innerHeight - r.top + 4, largeur, hauteur }
+      : { left, top: r.bottom + 4, bas: null, largeur, hauteur };
+  }
+  $effect(() => {
+    if (!ouvert) return;
+    placer();
+    // Défilement de la page : la liste suit le champ (son propre défilement est ignoré).
+    const suivre = (e: Event) => {
+      if (liste && e.target instanceof Node && liste.contains(e.target)) return;
+      placer();
+    };
+    window.addEventListener('scroll', suivre, true);
+    window.addEventListener('resize', placer);
+    return () => {
+      window.removeEventListener('scroll', suivre, true);
+      window.removeEventListener('resize', placer);
+    };
+  });
 
   // Synchronisation quand la valeur est changée de l'extérieur (modification, remise à zéro de la ligne).
   $effect(() => {
@@ -139,6 +175,7 @@
 <div class="champ-compte">
   <input
     {id}
+    bind:this={champ}
     class="champ"
     class:invalide={inconnu}
     role="combobox"
@@ -157,7 +194,20 @@
     onblur={sortie}
   />
   {#if ouvert}
-    <div class="liste" class:droite={aligne === 'droite'} id={`${id}-liste`} role="listbox" bind:this={liste}>
+    <!-- Un clic dans la liste (barre de défilement, molette) garde le focus dans le champ : la liste reste ouverte. -->
+    <div
+      class="liste"
+      id={`${id}-liste`}
+      role="listbox"
+      tabindex="-1"
+      bind:this={liste}
+      style:left={`${pos.left}px`}
+      style:top={pos.top === null ? null : `${pos.top}px`}
+      style:bottom={pos.bas === null ? null : `${pos.bas}px`}
+      style:width={`${pos.largeur}px`}
+      style:max-height={`${pos.hauteur}px`}
+      onmousedown={(e) => e.preventDefault()}
+    >
       {#if resultats.length === 0}
         <div class="aucun">Aucun compte ne correspond à « {texte} ».</div>
       {/if}
@@ -194,15 +244,14 @@
   .intitule { font-size: 12px; color: var(--c-texte-2); padding: 2px 2px 0; min-height: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .intitule.erreur { color: var(--c-negatif); white-space: normal; }
   .liste {
-    position: absolute; z-index: 20; left: 0; top: 34px; width: 380px; max-height: 300px; overflow-y: auto;
-    background: #fff; border: 1px solid var(--c-bordure); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    position: fixed; z-index: 50; overflow-y: auto; overscroll-behavior: contain;
+    background: #fff; border: 1px solid var(--c-bordure); border-radius: 8px; box-shadow: 0 8px 24px rgba(16, 24, 40, 0.16);
   }
-  .liste.droite { left: auto; right: 0; }
   .groupe {
     position: sticky; top: 0; background: var(--c-fond-2); color: var(--c-structure);
     font-weight: bold; font-size: 12px; padding: 5px 10px; border-bottom: 1px solid var(--c-bordure-2);
   }
-  .option { padding: 6px 10px; display: flex; gap: 10px; cursor: pointer; justify-content: space-between; }
+  .option { padding: 7px 12px; display: flex; gap: 10px; cursor: pointer; justify-content: space-between; }
   .nom { min-width: 0; }
   .option:hover { background: var(--c-zebra); }
   .option.sel { background: var(--c-selection); }

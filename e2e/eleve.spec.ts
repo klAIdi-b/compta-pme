@@ -62,3 +62,25 @@ test('la tablette en paysage affiche le journal sans débordement', async ({ pag
   const libelle = await page.locator('#saisie-libelle').boundingBox();
   expect(libelle!.width).toBeGreaterThan(120);
 });
+
+test('la liste des comptes se manipule entièrement à la souris', async ({ page }) => {
+  await commencer(page, 'cycles', /Cycles du Léman/);
+  await page.goto('./#journal');
+  const fermerVisite = page.getByRole('button', { name: /Passer|Fermer la visite|Terminer/ });
+  if (await fermerVisite.first().isVisible().catch(() => false)) await fermerVisite.first().click();
+  await page.getByLabel('Compte au débit, ligne 1').click();
+  const liste = page.getByRole('listbox');
+  await expect(liste).toBeVisible();
+  // La liste n'est pas coupée par la carte de saisie : elle montre une dizaine de comptes au moins.
+  const boite = await liste.boundingBox();
+  expect(boite!.height).toBeGreaterThan(300);
+  // Un clic dans la liste hors d'un compte (titre de classe, barre de défilement) ne la ferme pas.
+  await liste.getByText(/Classe 1/).click();
+  await expect(liste).toBeVisible();
+  // La molette fait défiler la liste, qui reste ouverte ; on choisit ensuite un compte à la souris.
+  await liste.hover();
+  await page.mouse.wheel(0, 600);
+  await expect(liste).toBeVisible();
+  await liste.getByRole('option', { name: /Achats de marchandises/ }).click();
+  await expect(page.getByLabel('Compte au débit, ligne 1')).toHaveValue('Achats de marchandises');
+});
