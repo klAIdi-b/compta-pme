@@ -329,9 +329,9 @@
   .cartes-exo { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; padding: 4px 18px 16px; }
   .exercice {
     display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border: 1px solid var(--c-bordure-2); border-radius: 8px;
-    cursor: pointer; background: #fff; transition: border-color 0.12s, box-shadow 0.12s;
+    cursor: pointer; background: #fff;
   }
-  .exercice:hover { border-color: #b8c7d8; box-shadow: var(--ombre); }
+  .exercice:hover { border-color: #b8c7d8; }
   .exercice.choisi { border-color: var(--c-structure); box-shadow: 0 0 0 2px var(--c-selection); background: #fbfdff; }
   .exercice input { margin-top: 3px; }
   .infos { flex: 1; min-width: 0; }

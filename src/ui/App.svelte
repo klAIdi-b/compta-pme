@@ -265,7 +265,7 @@
   .eleve { color: var(--c-texte-2); white-space: nowrap; display: flex; align-items: center; gap: 8px; }
   .initiales { width: 32px; height: 32px; border-radius: 50%; background: var(--c-selection); color: var(--c-structure); display: grid; place-items: center; font-weight: bold; font-size: 12px; text-transform: uppercase; }
   .lateral { background: var(--c-nuit); color: #fff; padding: 12px; overflow-y: auto; gap: 2px; }
-  .rubrique { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #9fb6cc; padding: 14px 10px 6px; }
+  .rubrique { font-size: 12px; font-weight: bold; color: #9fb6cc; padding: 16px 10px 6px; }
   .lateral a { display: flex; align-items: center; gap: 10px; padding: 8px 10px; color: #dce6f0; text-decoration: none; border-radius: 6px; }
   .lateral a:hover { background: rgba(255, 255, 255, 0.07); color: #fff; }
   .lateral a.actif { background: rgba(255, 255, 255, 0.13); color: #fff; font-weight: bold; box-shadow: inset 3px 0 0 var(--c-accent); }

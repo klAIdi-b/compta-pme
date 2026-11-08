@@ -1,5 +1,6 @@
 /* Charte visuelle : couleurs validées (maquettes phase 2a) — design modernisé validé le 07.11.2026
-   (maquette public/maquettes/design-moderne.html). Voir CLAUDE.md. */
+   (maquette public/maquettes/design-moderne.html), épuré le 08.11.2026 (maquette palettes.html, palette bleu et orange
+   conservée) : libellés en minuscules, consultation à plat, seule la saisie en relief. Voir CLAUDE.md. */
 :root {
   --c-structure: #1f4e78;
   --c-structure-2: #163a5a;
@@ -24,6 +25,7 @@
   --c-bordure-2: #e3e8ef;   /* cartes et tableaux */
   --c-bordure-3: #eef2f6;   /* séparations internes */
   --ombre: 0 1px 2px rgba(16, 24, 40, 0.06), 0 1px 3px rgba(16, 24, 40, 0.08);
+  --ombre-relief: 0 1px 2px rgba(16, 24, 40, 0.06), 0 4px 14px rgba(16, 24, 40, 0.07);
   --rayon: 8px;
 }
 
@@ -50,7 +52,8 @@ h2 { font-size: 15px; color: var(--c-texte); margin: 0; }
 .titre .sous { color: var(--c-texte-2); }
 
 /* Cartes */
-.carte { background: var(--c-fond); border: 1px solid var(--c-bordure-2); border-radius: var(--rayon); box-shadow: var(--ombre); overflow: hidden; }
+/* Surfaces de consultation à plat ; seule la saisie du journal est en relief (--ombre-relief). */
+.carte { background: var(--c-fond); border: 1px solid var(--c-bordure-2); border-radius: var(--rayon); overflow: hidden; }
 .carte > h2, .carte > header { padding: 14px 18px; border-bottom: 1px solid var(--c-bordure-3); }
 .carte > .corps-carte { padding: 16px 18px; }
 
@@ -71,7 +74,7 @@ h2 { font-size: 15px; color: var(--c-texte); margin: 0; }
 table { border-collapse: collapse; width: 100%; }
 th {
   background: var(--c-fond-tete); color: var(--c-texte-2); font-weight: bold; text-align: left;
-  padding: 10px 12px; font-size: 12px; white-space: nowrap; text-transform: uppercase; letter-spacing: 0.04em;
+  padding: 10px 12px; font-size: 12.5px; white-space: nowrap;
   border-bottom: 1px solid var(--c-bordure-2);
 }
 th.montant { text-align: right; }

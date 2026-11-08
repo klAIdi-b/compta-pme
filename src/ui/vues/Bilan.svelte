@@ -45,13 +45,13 @@
   </div>
 {/if}
 
-<div class="chiffres" aria-label="Chiffres clés">
-  <div class="tuile"><span class="etiq">Total du bilan</span><span class="val num">{m(b.totalActif)}</span></div>
-  <div class="tuile"><span class="etiq">Liquidités</span><span class="val num">{m(liquidites)}</span></div>
-  <div class="tuile"><span class="etiq">Capitaux propres</span><span class="val num">{m(capitauxPropres)}</span></div>
-  <div class="tuile">
-    <span class="etiq">{b.resultat < 0 ? "Perte de l'exercice" : "Bénéfice de l'exercice"}</span>
-    <span class="val num" class:negatif={b.resultat < 0}>{m(Math.abs(b.resultat))}</span>
+<div class="synthese" aria-label="Synthèse du bilan">
+  <div><span>Total du bilan</span><b class="num">{m(b.totalActif)}</b></div>
+  <div><span>Liquidités</span><b class="num">{m(liquidites)}</b></div>
+  <div><span>Capitaux propres</span><b class="num">{m(capitauxPropres)}</b></div>
+  <div>
+    <span>{b.resultat < 0 ? "Perte de l'exercice" : "Bénéfice de l'exercice"}</span>
+    <b class="num" class:negatif={b.resultat < 0}>{m(Math.abs(b.resultat))}</b>
   </div>
 </div>
 
@@ -70,11 +70,11 @@
 <style>
   .options { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; }
   .bandeau { margin-bottom: 16px; }
-  .chiffres { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-bottom: 18px; }
-  .tuile { background: #fff; border: 1px solid var(--c-bordure-2); border-radius: var(--rayon); box-shadow: var(--ombre); padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; }
-  .etiq { font-size: 12px; color: var(--c-texte-2); text-transform: uppercase; letter-spacing: 0.05em; font-weight: bold; }
-  .val { font-size: 21px; font-weight: bold; color: var(--c-texte); }
-  .val.negatif { color: var(--c-negatif); }
-  @media (max-width: 1100px) { .chiffres { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .synthese { display: flex; flex-wrap: wrap; background: #fff; border: 1px solid var(--c-bordure-2); border-radius: var(--rayon); margin-bottom: 18px; }
+  .synthese div { flex: 1 1 160px; padding: 12px 18px; border-left: 1px solid var(--c-bordure-2); }
+  .synthese div:first-child { border-left: 0; }
+  .synthese span { display: block; font-size: 13px; color: var(--c-texte-2); }
+  .synthese b { font-size: 17px; }
+  .synthese b.negatif { color: var(--c-negatif); }
   p { margin-top: 12px; }
 </style>

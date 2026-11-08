@@ -239,6 +239,12 @@
     d.ecritures.map((e, i) => ({ e, i })).sort((a, b) => (a.e.date < b.e.date ? -1 : a.e.date > b.e.date ? 1 : a.i - b.i)).map((x) => x.e),
   );
 
+  /** Largeur d'un plateau de la balance, en pour cent du plus grand total. */
+  function partBalance(x: Centimes): number {
+    const max = Math.max(totalDebit, totalCredit);
+    return max > 0 ? (x / max) * 100 : 0;
+  }
+
   function ecartTexte(x: Centimes) {
     return x > 0 ? `il manque ${m(x)} au crédit` : `il manque ${m(-x)} au débit`;
   }
@@ -309,16 +315,25 @@
       </table>
 
       <div class="equilibre" data-visite="equilibre">
-        <div class="totaux">
-          <span>Total débit<br /><b class="num">{m(totalDebit)}</b></span>
-          <span>Total crédit<br /><b class="num">{m(totalCredit)}</b></span>
-        </div>
-        <div class="etat-equilibre" aria-live="polite">
-          {#if utiles.length && ecart !== 0}
-            <div class="ecart">Écriture non équilibrée : {ecartTexte(ecart)}.</div>
-          {:else if equilibree}
-            <span class="ok">Écriture équilibrée</span>
-          {/if}
+        <!-- Balance débit / crédit : les deux plateaux se rejoignent quand l'écriture est équilibrée. -->
+        <div class="plateaux">
+          <div class="plateau">
+            <span class="lib-plateau">Total au débit</span>
+            <b class="num somme">{m(totalDebit)}</b>
+            <span class="jauge" aria-hidden="true"><i style:width={`${partBalance(totalDebit)}%`}></i></span>
+          </div>
+          <div class="etat-equilibre" aria-live="polite">
+            {#if utiles.length && ecart !== 0}
+              <div class="ecart">Écriture non équilibrée : {ecartTexte(ecart)}.</div>
+            {:else if equilibree}
+              <span class="ok equilibree">Écriture équilibrée</span>
+            {/if}
+          </div>
+          <div class="plateau credit">
+            <span class="lib-plateau">Total au crédit</span>
+            <b class="num somme">{m(totalCredit)}</b>
+            <span class="jauge" aria-hidden="true"><i style:width={`${partBalance(totalCredit)}%`}></i></span>
+          </div>
         </div>
         <div class="boutons">
           <button class="btn" onclick={reinitialiser}>Annuler</button>
@@ -493,17 +508,25 @@
     border: none; background: none; color: var(--c-texte-2); font-size: 18px; line-height: 1; cursor: pointer; padding: 6px 4px;
   }
   .retirer:hover { color: var(--c-negatif); }
+  .saisie { box-shadow: var(--ombre-relief); border-radius: 10px; }
   .equilibre {
-    display: flex; align-items: center; justify-content: space-between; gap: 16px;
-    padding: 12px 18px; border-top: 1px solid var(--c-bordure-3); background: var(--c-fond-tete);
+    display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;
+    padding: 14px 18px; border-top: 1px solid var(--c-bordure-3);
   }
-  .totaux { display: flex; gap: 24px; color: var(--c-texte-2); }
-  .totaux b { color: var(--c-texte); }
-  .etat-equilibre { flex: 1; }
+  .plateaux { flex: 1; min-width: 320px; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 14px; }
+  .plateau { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .plateau.credit { align-items: flex-end; text-align: right; }
+  .lib-plateau { font-size: 13px; color: var(--c-texte-2); }
+  .somme { font-size: 19px; color: var(--c-texte); }
+  .jauge { display: flex; width: 100%; height: 6px; border-radius: 3px; background: var(--c-bordure-3); overflow: hidden; }
+  .credit .jauge { justify-content: flex-end; }
+  .jauge i { display: block; height: 100%; border-radius: 3px; background: var(--c-structure); transition: width 0.2s ease; }
+  .etat-equilibre { text-align: center; max-width: 260px; }
+  .equilibree { display: inline-block; padding: 6px 12px; border-radius: 8px; background: var(--c-ok-fond); }
   .ecart { border-left: 4px solid var(--c-accent); padding: 5px 10px; color: var(--c-alerte-texte); font-weight: bold; background: var(--c-alerte-fond); border-radius: 6px; }
   .boutons { display: flex; gap: 8px; flex: none; }
   .erreurs { margin: 0 14px 10px; }
-  .aide-clavier { font-size: 12px; color: var(--c-texte-2); padding: 8px 18px 12px; background: var(--c-fond-tete); }
+  .aide-clavier { font-size: 12px; color: var(--c-texte-2); padding: 0 18px 12px; }
 
   .journal { font-size: 13px; table-layout: fixed; }
   .journal td { padding: 8px 8px; overflow: hidden; }
