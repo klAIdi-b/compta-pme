@@ -147,7 +147,7 @@
     aria-controls={`${id}-liste`}
     aria-activedescendant={ouvert && resultats[actif] ? `${id}-o${actif}` : undefined}
     autocomplete="off"
-    placeholder="Nom du compte"
+    placeholder="Nom du compte…"
     data-champ
     bind:value={texte}
     oninput={saisie}

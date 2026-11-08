@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onDestroy } from 'svelte';
   import { enseignant } from '../enseignant.svelte';
   import { etat } from '../etat.svelte';
   import { plan } from '../../data/plan';
@@ -201,6 +202,21 @@
     enregistrer();
     enseignant.edition = null;
   }
+
+  /**
+   * Enregistrement sans message quand l'éditeur disparaît (guide, nom du site, fermeture de l'espace) ou que l'onglet
+   * se ferme : aucune modification n'est perdue faute d'avoir cliqué sur « Enregistrer ».
+   */
+  function sauverEnSilence() {
+    if (!enseignant.trouver(id)) return;
+    enseignant.enregistrer(construire());
+    enseignant.sauver();
+  }
+  onDestroy(sauverEnSilence);
+  $effect(() => {
+    window.addEventListener('pagehide', sauverEnSilence);
+    return () => window.removeEventListener('pagehide', sauverEnSilence);
+  });
 
   function ajouterOperation() {
     const dernier = operations.at(-1);
@@ -405,7 +421,7 @@
     </p>
     <div class="outils-comptes">
       <label class="sr-only" for="ex-filtre-comptes">Rechercher un compte</label>
-      <input id="ex-filtre-comptes" class="champ" type="search" placeholder="Rechercher par nom ou numéro" bind:value={filtreComptes} />
+      <input id="ex-filtre-comptes" class="champ" type="search" placeholder="Rechercher par nom ou numéro…" bind:value={filtreComptes} />
       {#if comptesAjoutes.length || comptesMasques.length}
         <button class="btn-lien" onclick={retablirNiveau}>Revenir aux comptes du niveau</button>
       {/if}

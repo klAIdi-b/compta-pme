@@ -295,9 +295,9 @@
           {#each lignes as l, i (l.cle)}
             <tr data-ligne={i}>
               {#if i === 0}
-                <td><input id="saisie-date" class="champ num" aria-label="Date" placeholder="JJ.MM.AAAA" data-champ bind:value={date} /></td>
-                <td><input id="saisie-piece" class="champ num" aria-label="Pièce" data-champ bind:value={piece} /></td>
-                <td><input id="saisie-libelle" class="champ" aria-label="Libellé" data-champ bind:value={libelle} /></td>
+                <td><input id="saisie-date" class="champ num" aria-label="Date" placeholder="JJ.MM.AAAA" autocomplete="off" data-champ bind:value={date} /></td>
+                <td><input id="saisie-piece" class="champ num" aria-label="Pièce" autocomplete="off" data-champ bind:value={piece} /></td>
+                <td><input id="saisie-libelle" class="champ" aria-label="Libellé" autocomplete="off" data-champ bind:value={libelle} /></td>
               {:else}
                 <td></td><td></td><td></td>
               {/if}

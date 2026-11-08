@@ -146,6 +146,7 @@
 {:else}
   {@const s = etat.session}
   {@const genre = etat.genre}
+  <a class="lien-evitement" href="#contenu-principal">Aller au contenu</a>
   <div class="app">
     <header class="entete" data-visite="entete">
       {#if genre === 'travail'}
@@ -211,7 +212,7 @@
       </div>
     </nav>
 
-    <main class="principal">
+    <main class="principal" id="contenu-principal" tabindex="-1">
       {#if genre === 'apercu'}
         <div class="bandeau-apercu" role="status">
           <span><b>Aperçu enseignant.</b> Vous voyez l'exercice comme vos élèves{s.exercice.mode === 'evaluation' ? ' (évaluation : aucun retour pendant la saisie)' : ''}. Ce que vous saisissez ici n'est ni enregistré dans l'exercice, ni dans une copie.</span>

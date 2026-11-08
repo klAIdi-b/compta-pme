@@ -40,11 +40,20 @@ body {
 #app { height: 100%; }
 
 .num, .montant { font-variant-numeric: tabular-nums; }
+
+/* Tablettes : pas de délai de double-tap, surbrillance du toucher discrète. */
+a, button, input, select, textarea, label, summary { touch-action: manipulation; -webkit-tap-highlight-color: rgba(31, 78, 120, 0.12); }
+
+/* Lien d'évitement : visible seulement au clavier. */
+.lien-evitement { position: absolute; left: 8px; top: -60px; z-index: 100; background: #fff; color: var(--c-structure); padding: 8px 14px; border-radius: 6px; font-weight: bold; box-shadow: var(--ombre-relief); }
+.lien-evitement:focus { top: 8px; }
+main:focus { outline: none; }
 .montant { text-align: right; white-space: nowrap; }
 .negatif { color: var(--c-negatif); }
 .discret { color: var(--c-texte-2); }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
+h1, h2 { text-wrap: balance; }
 h1 { font-size: 22px; color: var(--c-texte); margin: 0; letter-spacing: -0.01em; }
 h2 { font-size: 15px; color: var(--c-texte); margin: 0; }
 

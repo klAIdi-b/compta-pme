@@ -31,4 +31,9 @@ test("l'enseignant crée une variante d'évaluation d'un dossier", async ({ page
   await expect(page.getByRole('button', { name: 'Copier le lien pour les élèves' }).first()).toBeVisible();
   await page.getByRole('button', { name: "Variante d'évaluation" }).first().click();
   await expect(page.locator('#ex-titre')).toHaveValue(/variante d'évaluation/);
+  // Une modification non enregistrée survit à l'ouverture du guide (enregistrement automatique).
+  await page.locator('#ex-titre').fill('Variante modifiée sans enregistrer');
+  await page.getByRole('button', { name: 'Guide', exact: true }).click();
+  await page.getByRole('button', { name: 'Fermer le guide' }).click();
+  await expect(page.locator('#ex-titre')).toHaveValue('Variante modifiée sans enregistrer');
 });
