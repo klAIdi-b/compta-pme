@@ -7,6 +7,7 @@
   import EspaceEnseignant from './vues/EspaceEnseignant.svelte';
   import AvancementEntete from './composants/AvancementEntete.svelte';
   import Icone from './composants/Icone.svelte';
+  import { vueEleve } from './modes';
   import { dateHeure, periode } from './format';
   import Accueil from './vues/Accueil.svelte';
   import TableauDeBord from './vues/TableauDeBord.svelte';
@@ -44,7 +45,7 @@
   }
 
   const statut = $derived(
-    etat.session && etat.session.role === 'eleve'
+    etat.genre === 'travail' && etat.session
       ? statutExport(etat.session.dossier, $state.snapshot(etat.session.fiches), etat.session.dernierExport)
       : 'vide',
   );
@@ -84,6 +85,9 @@
     }
     enseignant.ouvert = true;
   }
+
+  /** Écran affiché (machine à états explicite : src/ui/modes.ts). */
+  const ecran = $derived(etat.ecran(enseignant.ouvert));
 
   type Entree = { vue: Vue; libelle: string };
   type Rubrique = { titre: string | null; entrees: Entree[] };
@@ -133,17 +137,18 @@
   const libelleVue = $derived(rubriques.flatMap((r) => r.entrees).find((e) => e.vue === etat.vue)?.libelle ?? '');
 </script>
 
-{#if etat.guide}
+{#if ecran === 'guide' && etat.guide}
   <Guide partie={etat.guide} onFermer={() => (etat.guide = null)} />
-{:else if enseignant.ouvert}
+{:else if ecran === 'enseignant'}
   <EspaceEnseignant />
-{:else if !etat.session || etat.accueilOuvert}
+{:else if ecran === 'accueil' || !etat.session}
   <Accueil onEnseignant={() => (enseignant.ouvert = true)} />
 {:else}
   {@const s = etat.session}
+  {@const genre = etat.genre}
   <div class="app">
     <header class="entete" data-visite="entete">
-      {#if s.role === 'eleve' && !s.apercu}
+      {#if genre === 'travail'}
         <button class="logo logo-bouton" title="Retour à la page d'accueil" onclick={() => etat.allerAccueil()}>
           <span class="pastille-logo" aria-hidden="true">CP</span>Compta PME
         </button>
@@ -156,12 +161,12 @@
         <span class="meta">{s.dossier.formeJuridique === 'raison individuelle' ? 'Raison individuelle' : s.dossier.formeJuridique}</span>
         <span class="meta">Exercice {periode(s.dossier.debut, s.dossier.fin)}</span>
         <span class="badge badge-niveau" title="Formation et niveau de difficulté">{etiquetteNiveau(s.exercice)}</span>
-        <span class="badge badge-mode" class:corrige={s.role === 'corrige'} title="Mode">
-          {s.role === 'corrige' ? 'Saisie du corrigé' : LIBELLES_MODE[s.exercice.mode]}
+        <span class="badge badge-mode" class:corrige={genre === 'corrige'} title="Mode">
+          {genre === 'corrige' ? 'Saisie du corrigé' : LIBELLES_MODE[s.exercice.mode]}
         </span>
       </div>
-      {#if s.role === 'eleve'}<AvancementEntete />{/if}
-      {#if s.role === 'eleve'}
+      {#if vueEleve(genre)}<AvancementEntete />{/if}
+      {#if vueEleve(genre)}
         <div class="eleve" title={`${s.eleve.prenom} ${s.eleve.nom} · ${s.eleve.classe}`}>
           <span class="initiales" aria-hidden="true">{(s.eleve.prenom[0] ?? '') + (s.eleve.nom[0] ?? '')}</span>
           <span class="nom-eleve">{s.eleve.prenom} {s.eleve.nom} · {s.eleve.classe}</span>
@@ -185,10 +190,10 @@
         {/each}
       {/each}
       <div class="bas">
-        {#if s.role === 'corrige'}
+        {#if genre === 'corrige'}
           <button class="action-lateral principale" onclick={() => terminerCorrige(true)}>Enregistrer le corrigé</button>
           <button class="action-lateral" onclick={() => terminerCorrige(false)}>Abandonner</button>
-        {:else if s.apercu}
+        {:else if genre === 'apercu'}
           <button class="action-lateral principale" onclick={fermerApercu}>Fermer l'aperçu</button>
         {:else}
           <button class="action-lateral principale" onclick={exporterMaCopie}>Exporter ma copie</button>
@@ -207,7 +212,7 @@
     </nav>
 
     <main class="principal">
-      {#if s.apercu}
+      {#if genre === 'apercu'}
         <div class="bandeau-apercu" role="status">
           <span><b>Aperçu enseignant.</b> Vous voyez l'exercice comme vos élèves{s.exercice.mode === 'evaluation' ? ' (évaluation : aucun retour pendant la saisie)' : ''}. Ce que vous saisissez ici n'est ni enregistré dans l'exercice, ni dans une copie.</span>
           <button class="btn" onclick={fermerApercu}>Fermer l'aperçu</button>

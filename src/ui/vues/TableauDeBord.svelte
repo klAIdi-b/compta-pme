@@ -15,7 +15,7 @@
   }
   // L'accueil s'ouvre par-dessus le travail en cours : rien n'est effacé tant qu'un autre exercice n'est pas commencé.
   function quitter() {
-    etat.accueilOuvert = true;
+    etat.allerAccueil();
   }
 </script>
 
@@ -52,7 +52,7 @@
       </button>
       <button class="btn" onclick={() => (etat.visiteOuverte = true)}>Revoir la visite guidée</button>
       <button class="btn" onclick={recommencer}>Recommencer l'exercice</button>
-      {#if !s.apercu}<button class="btn" onclick={quitter}>Changer d'exercice</button>{/if}
+      {#if etat.genre === 'travail'}<button class="btn" onclick={quitter}>Changer d'exercice</button>{/if}
     </div>
   </div>
 </section>

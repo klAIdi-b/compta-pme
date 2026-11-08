@@ -1,6 +1,7 @@
 <script lang="ts">
   import { tick } from 'svelte';
   import { etat } from '../etat.svelte';
+  import { vueEleve } from '../modes';
   import { comptesDisponibles } from '../../engine/dossier';
   import { ajouterEcriture, estExtournee, extourner, modifierEcriture, nouvelId } from '../../engine/journal';
   import { diagnostiquer, enregistrerTentative, solutionDisponible, INDICES, type Diagnostic } from '../../engine/correction';
@@ -32,7 +33,7 @@
   const avecBouclement = $derived(bouclementCorrige(ex));
   const retour = $derived(
     ex.mode === 'entrainement' &&
-      etat.session!.role === 'eleve' &&
+      vueEleve(etat.genre) &&
       (corrigeParPiece.size > 0 || avecBouclement) &&
       operations.length > 0,
   );
@@ -43,7 +44,7 @@
   function solutionDe(k: string) {
     return k === PIECE_BOUCLEMENT ? corrigeBouclement(d, ex) : corrigeParPiece.get(k);
   }
-  const modifAutorisee = $derived(ex.mode === 'entrainement' && ex.parametres.modificationDirecte && etat.session!.role === 'eleve');
+  const modifAutorisee = $derived(ex.mode === 'entrainement' && ex.parametres.modificationDirecte && vueEleve(etat.genre));
   const suivi = $derived(etat.session!.suivi);
 
   function evaluer(dossier: Dossier, piece: string, compter: boolean) {

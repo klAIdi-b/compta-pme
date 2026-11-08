@@ -1,5 +1,6 @@
 <script lang="ts">
   import { etat } from '../etat.svelte';
+  import { vueEleve } from '../modes';
   import { boucler, estBoucle, reouvrir } from '../../engine/closing';
   import { compteDeResultat } from '../../engine/statements';
   import { m } from '../format';
@@ -11,7 +12,7 @@
   const boucle = $derived(d.ecritures.length > 0 && estBoucle(d));
   const cr = $derived(compteDeResultat(d));
   const correction = $derived(
-    etat.exercice.mode === 'entrainement' && etat.session!.role === 'eleve' && bouclementCorrige(etat.exercice)
+    etat.exercice.mode === 'entrainement' && vueEleve(etat.genre) && bouclementCorrige(etat.exercice)
       ? diagnostiquerBouclement(d, etat.exercice)
       : null,
   );

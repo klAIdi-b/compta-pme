@@ -47,6 +47,12 @@ Trois exercices de démonstration (un par niveau, ~15 opérations, entreprise fi
 - Bouclement : deux modes — `compteDeResultat` (via 9000, **par défaut**) et `aLaReouverture` (résultat et privé intégrés au capital à la réouverture).
 - Versionnement : Git, dépôt GitHub, déploiement GitHub Pages par GitHub Actions (`.github/workflows/`).
 
+## États de l'application (08.11.2026)
+
+- Machines à états explicites dans `src/ui/modes.ts` (pur, testé dans `tests/modes.test.ts`) : **ne plus tester `role` / `apercu` / `accueilOuvert` directement**, passer par `etat.genre` (`travail` | `apercu` | `corrige`), `vueEleve()`, `peutOuvrirAccueil()` et `etat.ecran()` (priorité guide > espace enseignant > accueil > logiciel).
+- Seul un `travail` d'élève est mis de côté (`aMettreDeCote`) pendant un aperçu ou un corrigé, jamais remplacé ; l'accueil ne recouvre jamais un aperçu ni un corrigé. Format enregistré inchangé (`role` + `apercu`).
+- États déjà explicites ailleurs : statut d'opération (`StatutOperation`, `correction.ts`), statut d'export de la copie (`statutExport`), rubrique (`Vue`, adresse `#vue`).
+
 ## Supports de cours de référence (inspiration uniquement)
 
 - `D:\E&S_Edition 2022\` (manuel romand Économie & Société, CREME-CIIP : volumes CFC profils B/E, F&C profil M), `D:\Cours_Compta\`, `D:\Cours gestion\`.

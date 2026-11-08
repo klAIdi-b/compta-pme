@@ -8,6 +8,7 @@ import { plan as planParDefaut } from '../data/plan';
 import { ecrire, lire } from '../io/stockage';
 import type { DernierExport } from '../io/fichiers';
 import type { Suivi } from '../engine/correction';
+import { aMettreDeCote, ecranAffiche, genreSession, peutOuvrirAccueil, vueEleve, type Ecran, type GenreSession } from './modes';
 
 export type Vue =
   | 'tableau'
@@ -123,8 +124,18 @@ class Etat {
     }
     // Arrivée sur le site (sans rubrique dans l'adresse) avec un travail en cours : l'accueil propose de le reprendre.
     const lienExercice = new URLSearchParams(location.search).has('exercice');
-    if (this.session?.role === 'eleve' && !this.session.apercu && (lienExercice || !location.hash || location.hash === '#')) this.accueilOuvert = true;
+    if (this.genre === 'travail' && (lienExercice || !location.hash || location.hash === '#')) this.accueilOuvert = true;
     window.addEventListener('hashchange', () => (this.vue = vueDepuisAdresse()));
+  }
+
+  /** Genre de la session active (voir src/ui/modes.ts). */
+  get genre(): GenreSession | null {
+    return genreSession(this.session);
+  }
+
+  /** Écran à afficher ; `enseignantOuvert` vient de l'état de l'espace enseignant. */
+  ecran(enseignantOuvert: boolean): Ecran {
+    return ecranAffiche({ guide: this.guide !== null, enseignantOuvert, session: this.session, accueilOuvert: this.accueilOuvert });
   }
 
   get dossier(): Dossier {
@@ -170,7 +181,7 @@ class Etat {
 
   /** Session d'un exercice : en cours (active ou mise en réserve) ou nulle. */
   sessionDe(exerciceId: string): Session | null {
-    if (this.session && this.session.role === 'eleve' && !this.session.apercu && this.session.exercice.id === exerciceId) return this.session;
+    if (this.genre === 'travail' && this.session!.exercice.id === exerciceId) return this.session;
     return this.autres[exerciceId] ?? null;
   }
 
@@ -181,7 +192,7 @@ class Etat {
   commencer(eleve: Eleve, exercice: Exercice, role: Session['role'] = 'eleve') {
     if (role !== 'eleve') return this.nouvelleSession(eleve, exercice, role);
     const actif = this.session;
-    if (actif && actif.role === 'eleve' && !actif.apercu) {
+    if (actif && this.genre === 'travail') {
       if (actif.exercice.id === exercice.id) {
         actif.eleve = eleve;
         return this.reprendre();
@@ -205,7 +216,7 @@ class Etat {
   /** Bouton « Commencer la saisie » : ouvre le journal, avec la visite guidée la première fois. */
   commencerSaisie() {
     this.aller('journal');
-    if (!this.prefs.visiteVue && this.session?.role === 'eleve') this.visiteOuverte = true;
+    if (!this.prefs.visiteVue && vueEleve(this.genre)) this.visiteOuverte = true;
   }
 
   majSuivi(s: Suivi) {
@@ -222,7 +233,7 @@ class Etat {
 
   /** L'enseignant saisit le corrigé dans le journal ; les écritures existantes du corrigé sont reprises. */
   ouvrirCorrige(ex: Exercice) {
-    if (this.session && this.session.role === 'eleve') this.sessionMiseDeCote = this.session;
+    this.sessionMiseDeCote = aMettreDeCote(this.session, this.sessionMiseDeCote);
     this.nouvelleSession({ prenom: 'Enseignant', nom: '', classe: '' }, { ...ex, corrige: [] }, 'corrige');
     let d = this.session!.dossier;
     (ex.corrige ?? []).forEach((c, i) => {
@@ -241,18 +252,18 @@ class Etat {
 
   /** Aperçu enseignant : ouvre l'exercice comme un élève, sans toucher au travail en cours dans ce navigateur. */
   ouvrirApercu(ex: Exercice) {
-    if (this.session && this.session.role === 'eleve' && !this.session.apercu) this.sessionMiseDeCote = this.session;
+    this.sessionMiseDeCote = aMettreDeCote(this.session, this.sessionMiseDeCote);
     this.nouvelleSession({ prenom: 'Aperçu', nom: 'enseignant', classe: '—' }, ex, 'eleve');
     this.session!.apercu = true;
   }
 
-  /** Ferme l'aperçu et restaure le travail mis de côté. */
-  /** Clic sur le nom du site : retour à la page d'accueil (le travail en cours est conservé). */
+  /** Clic sur le nom du site ou « Changer d'exercice » : page d'accueil, le travail en cours est conservé. */
   allerAccueil() {
     this.guide = null;
-    if (this.session?.role === 'eleve' && !this.session.apercu) this.accueilOuvert = true;
+    if (peutOuvrirAccueil(this.genre)) this.accueilOuvert = true;
   }
 
+  /** Ferme l'aperçu et restaure le travail mis de côté. */
   fermerApercu() {
     this.session = this.sessionMiseDeCote;
     this.sessionMiseDeCote = null;

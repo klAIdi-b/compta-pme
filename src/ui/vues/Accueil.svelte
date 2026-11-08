@@ -13,8 +13,8 @@
 
   // ---- Travail en cours (reprise) ----
   /** Session au moment de l'ouverture de l'accueil : sert seulement à préremplir le formulaire. */
-  const depart = etat.session?.role === 'eleve' ? etat.session : (Object.values(etat.autres)[0] ?? null);
-  const enCours = $derived(etat.session && etat.session.role === 'eleve' ? etat.session : null);
+  const depart = etat.genre === 'travail' ? etat.session : (Object.values(etat.autres)[0] ?? null);
+  const enCours = $derived(etat.genre === 'travail' ? etat.session : null);
   const av = $derived(enCours ? avancementSession(enCours) : null);
   const correction = $derived(enCours ? avecCorrection(enCours) : false);
   const exporte = $derived(enCours ? statutExport(enCours.dossier, $state.snapshot(enCours.fiches), enCours.dernierExport) : 'vide');

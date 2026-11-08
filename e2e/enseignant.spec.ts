@@ -15,6 +15,9 @@ test("l'enseignant ouvre son espace, regarde un dossier en aperçu et revient su
   await page.getByRole('button', { name: 'Dossiers', exact: true }).click();
   await page.getByRole('button', { name: 'Aperçu' }).first().click();
   await expect(page.getByText('Aperçu enseignant.')).toBeVisible();
+  // L'aperçu ne mène pas à l'accueil élève : nom du site non cliquable, pas de « Changer d'exercice ».
+  await expect(page.getByRole('button', { name: 'Compta PME' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: "Changer d'exercice" })).toHaveCount(0);
   await page.locator('.bandeau-apercu').getByRole('button', { name: "Fermer l'aperçu" }).click();
   await expect(page.getByRole('heading', { name: 'Dossiers de pièces comptables' })).toBeVisible();
 
