@@ -36,6 +36,7 @@ Trois exercices de démonstration (un par niveau, ~15 opérations, entreprise fi
 ## Contraintes techniques
 
 - Svelte 5 + Vite + TypeScript strict ; tests Vitest. Pas de bibliothèque UI, pas de routeur. Dépendances futures prévues : `jspdf` + `jspdf-autotable` (chargés à la demande, phase 5). Toute autre dépendance doit être justifiée.
+- Chargement à la demande (08.11.2026, `composants/Differe.svelte`) : Théorie, Guide et espace enseignant sont des fichiers séparés, comme les PDF ; le journal n'utilise que le sommaire `src/data/theorie-index.ts` (test de cohérence avec `theorie.ts`). Ne pas réimporter ces vues statiquement.
 - 100 % navigateur : aucun serveur, aucune donnée en ligne (LPD, LIPAD). Stockage localStorage, échanges par fichiers. Site statique (GitHub Pages, `base: './'`), utilisable hors ligne (service worker écrit à la main).
 - **Montants en centimes entiers (`number` entier), jamais de flottants.** Format affiché `1'234.50`, dates `JJ.MM.AAAA`, monnaie CHF.
 - Interface entièrement en français.

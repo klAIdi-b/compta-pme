@@ -14,7 +14,7 @@
   import ChampCompte from '../composants/ChampCompte.svelte';
   import ChampMontant from '../composants/ChampMontant.svelte';
   import PieceVue from '../composants/PieceVue.svelte';
-  import { chapitrePourComptes } from '../../data/theorie';
+  import { chapitrePourComptes } from '../../data/theorie-index';
 
   type LigneSaisie = { cle: number; debit: string | null; credit: string | null; montant: Centimes | null };
 

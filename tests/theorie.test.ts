@@ -57,3 +57,10 @@ describe('lien de l’indice vers la théorie', () => {
     expect(chapitrePourComptes(['1060', '1020'], 'CFC1')?.id).toBe('journal');
   });
 });
+
+describe('sommaire de la théorie (chargé avec le journal)', () => {
+  it('reste identique aux chapitres', async () => {
+    const { SOMMAIRE } = await import('../src/data/theorie-index');
+    expect(SOMMAIRE).toEqual(CHAPITRES.map((c) => ({ id: c.id, titre: c.titre, niveau: c.niveau })));
+  });
+});

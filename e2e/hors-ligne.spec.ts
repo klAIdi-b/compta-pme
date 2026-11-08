@@ -32,5 +32,14 @@ test('après une première visite, le logiciel fonctionne entièrement hors lign
   await page.getByRole('button', { name: 'Exporter en PDF' }).click();
   const fichier = await telechargement;
   expect(fichier.suggestedFilename()).toMatch(/\.pdf$/);
+
+  // Les écrans chargés à la demande (théorie, guide, espace enseignant) s'ouvrent aussi hors ligne.
+  await page.getByRole('link', { name: 'Théorie' }).click();
+  await expect(page.getByRole('heading', { name: 'Théorie' })).toBeVisible();
+  await page.getByRole('button', { name: "Guide d'utilisation" }).click();
+  await expect(page.getByRole('button', { name: 'Fermer le guide' })).toBeVisible();
+  await page.getByRole('button', { name: 'Fermer le guide' }).click();
+  await page.getByRole('button', { name: 'Espace enseignant' }).click();
+  await expect(page.getByLabel('Code', { exact: true })).toBeVisible();
   await context.setOffline(false);
 });

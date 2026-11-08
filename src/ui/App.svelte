@@ -4,7 +4,7 @@
   import { enseignant } from './enseignant.svelte';
   import { EXT_COPIE, empreinteTravail, exporterCopie, nomFichier, statutExport } from '../io/fichiers';
   import { telecharger, telechargerBlob } from './fichiers-navigateur';
-  import EspaceEnseignant from './vues/EspaceEnseignant.svelte';
+  import Differe from './composants/Differe.svelte';
   import AvancementEntete from './composants/AvancementEntete.svelte';
   import Icone from './composants/Icone.svelte';
   import { vueEleve } from './modes';
@@ -21,13 +21,11 @@
   import Tva from './vues/Tva.svelte';
   import Salaire from './vues/Salaire.svelte';
   import Repartition from './vues/Repartition.svelte';
-  import Theorie from './vues/Theorie.svelte';
   import FicheDegres from './vues/FicheDegres.svelte';
   import FicheFlux from './vues/FicheFlux.svelte';
   import FicheSeuil from './vues/FicheSeuil.svelte';
   import Analyse from './vues/Analyse.svelte';
   import Visite from './composants/Visite.svelte';
-  import Guide from './vues/Guide.svelte';
 
   function exporterMaCopie() {
     const s = etat.session!;
@@ -138,9 +136,9 @@
 </script>
 
 {#if ecran === 'guide' && etat.guide}
-  <Guide partie={etat.guide} onFermer={() => (etat.guide = null)} />
+  <Differe charger={() => import('./vues/Guide.svelte')} props={{ partie: etat.guide, onFermer: () => (etat.guide = null) }} />
 {:else if ecran === 'enseignant'}
-  <EspaceEnseignant />
+  <Differe charger={() => import('./vues/EspaceEnseignant.svelte')} props={{}} />
 {:else if ecran === 'accueil' || !etat.session}
   <Accueil onEnseignant={() => (enseignant.ouvert = true)} />
 {:else}
@@ -240,7 +238,7 @@
       {:else if etat.vue === 'degres' && etat.fonctions.has('degres')}<FicheDegres />
       {:else if etat.vue === 'flux' && etat.fonctions.has('flux')}<FicheFlux />
       {:else if etat.vue === 'seuil' && etat.fonctions.has('seuil')}<FicheSeuil />
-      {:else if etat.vue === 'theorie'}<Theorie />
+      {:else if etat.vue === 'theorie'}<Differe charger={() => import('./vues/Theorie.svelte')} props={{}} />
       {:else}<TableauDeBord />
       {/if}
     </main>
