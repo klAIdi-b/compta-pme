@@ -139,3 +139,67 @@ export function comparaisonOperation(ex: Exercice, d: Dossier, piece: string): {
     piece === PIECE_BOUCLEMENT ? (corrigeBouclement(d, ex)?.lignes ?? []) : ((ex.corrige ?? []).find((c) => c.piece === piece)?.lignes ?? []);
   return { eleve, corrige };
 }
+
+// ---------- Bilan de la classe (remédiation) ----------
+
+export interface CopieNommee {
+  /** Nom affiché de l'élève (« Nom Prénom »). */
+  nom: string;
+  dossier: Dossier;
+}
+
+export interface AnalyseOperation {
+  piece: string;
+  reussites: number;
+  total: number;
+  /** Erreurs de la plus fréquente à la moins fréquente, avec les élèves concernés (groupes de remédiation). */
+  erreurs: { diagnostic: Diagnostic; eleves: string[] }[];
+  /**
+   * Écriture fausse saisie à l'identique par au moins deux élèves (la plus fréquente), en lignes regroupées par compte
+   * et par côté : montre la confusion précise à reprendre en classe.
+   */
+  fauteCommune: { lignes: LigneEcriture[]; eleves: string[] } | null;
+}
+
+/** Lignes d'une opération regroupées par compte et par côté, dans un ordre stable (débit puis crédit). */
+function lignesRegroupees(lignes: readonly LigneEcriture[]): LigneEcriture[] {
+  return [...agreger(lignes)]
+    .map(([cle, montant]) => {
+      const [compte, sens] = cle.split('|') as [string, string];
+      return sens === 'D' ? { debit: compte, credit: null, montant } : { debit: null, credit: compte, montant };
+    })
+    .sort((a, b) => (a.debit ? 0 : 1) - (b.debit ? 0 : 1) || (a.debit ?? a.credit!).localeCompare(b.debit ?? b.credit!));
+}
+
+/** Bilan de la classe, opération par opération, dans l'ordre de l'énoncé. */
+export function analyseClasse(ex: Exercice, copies: readonly CopieNommee[]): AnalyseOperation[] {
+  const parPiece = new Map<string, { a: AnalyseOperation; fautes: Map<string, { lignes: LigneEcriture[]; eleves: string[] }> }>();
+  for (const copie of copies) {
+    for (const o of corrigerCopie(ex, copie.dossier).operations) {
+      let x = parPiece.get(o.piece);
+      if (!x) {
+        x = { a: { piece: o.piece, reussites: 0, total: 0, erreurs: [], fauteCommune: null }, fautes: new Map() };
+        parPiece.set(o.piece, x);
+      }
+      x.a.total++;
+      if (o.diagnostic === 'juste') {
+        x.a.reussites++;
+        continue;
+      }
+      const err = x.a.erreurs.find((e) => e.diagnostic === o.diagnostic);
+      if (err) err.eleves.push(copie.nom);
+      else x.a.erreurs.push({ diagnostic: o.diagnostic, eleves: [copie.nom] });
+      if (o.diagnostic === 'manquante') continue;
+      const lignes = lignesRegroupees(comparaisonOperation(ex, copie.dossier, o.piece).eleve);
+      const cle = lignes.map((l) => `${l.debit ?? ''}|${l.credit ?? ''}|${l.montant}`).join(';');
+      const f = x.fautes.get(cle);
+      if (f) f.eleves.push(copie.nom);
+      else x.fautes.set(cle, { lignes, eleves: [copie.nom] });
+    }
+  }
+  return [...parPiece.values()].map(({ a, fautes }) => {
+    a.erreurs.sort((p, q) => q.eleves.length - p.eleves.length);
+    const plus = [...fautes.values()].sort((p, q) => q.eleves.length - p.eleves.length)[0];
+    return { ...a, fauteCommune: plus && plus.eleves.length >= 2 ? plus : null };
+  });
+}

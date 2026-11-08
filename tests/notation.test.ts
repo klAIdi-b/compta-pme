@@ -114,3 +114,36 @@ describe('détail d’une copie : écritures de l’élève et corrigé', () => 
     expect(comparaisonOperation(demoCfc1, d, '2').eleve).toEqual([]);
   });
 });
+
+describe('bilan de la classe', () => {
+  it('nomme les élèves de chaque erreur et repère la faute commune', async () => {
+    const { analyseClasse } = await import('../src/engine/notation');
+    // Opération 1 du corrigé, puis la même écriture inversée chez deux élèves.
+    const juste = demoCfc1.corrige!.find((c) => c.piece === '1')!;
+    const inverse = juste.lignes.map((l) => ({ debit: l.credit, credit: l.debit, montant: l.montant }));
+    const avec = (lignes: LigneEcriture[]) => {
+      const r = ajouterEcriture(creerDossier(demoCfc1, plan), { id: 'E1', date: '2026-03-01', piece: '1', libelle: 'x', lignes });
+      if (!r.ok) throw new Error(r.erreurs.join());
+      return r.valeur;
+    };
+    const copies = [
+      { nom: 'Alpha Ana', dossier: avec(juste.lignes) },
+      { nom: 'Bravo Ben', dossier: avec(inverse) },
+      { nom: 'Charlie Cléa', dossier: avec(inverse) },
+      { nom: 'Delta Dan', dossier: creerDossier(demoCfc1, plan) },
+    ];
+    const op1 = analyseClasse(demoCfc1, copies).find((a) => a.piece === '1')!;
+    expect(op1).toMatchObject({ reussites: 1, total: 4 });
+    expect(op1.erreurs[0]).toEqual({ diagnostic: 'inversee', eleves: ['Bravo Ben', 'Charlie Cléa'] });
+    expect(op1.erreurs[1]).toEqual({ diagnostic: 'manquante', eleves: ['Delta Dan'] });
+    expect(op1.fauteCommune?.eleves).toEqual(['Bravo Ben', 'Charlie Cléa']);
+    // Lignes regroupées : débit d'abord.
+    expect(op1.fauteCommune?.lignes[0]?.debit).toBeTruthy();
+  });
+
+  it('pas de faute commune quand chaque erreur est différente', async () => {
+    const { analyseClasse } = await import('../src/engine/notation');
+    const copies = [{ nom: 'Seul Sam', dossier: dossierAvec([]) }];
+    expect(analyseClasse(demoCfc1, copies).every((a) => a.fauteCommune === null)).toBe(true);
+  });
+});

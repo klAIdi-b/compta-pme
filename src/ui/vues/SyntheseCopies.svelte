@@ -8,7 +8,7 @@
   import { exercicesDemo } from '../../data/demos';
   import { DOSSIERS_EVALUATION } from '../../data/dossiers';
   import type { Exercice } from '../../engine/exercice';
-  import { comparaisonOperation, corrigerCopie, statistiquesOperations, type CorrectionCopie } from '../../engine/notation';
+  import { analyseClasse, comparaisonOperation, corrigerCopie, type CorrectionCopie } from '../../engine/notation';
   import { formatMontant } from '../../engine/money';
   import type { LigneEcriture } from '../../engine/dossier';
   import { LIBELLES_DIAGNOSTIC } from '../../engine/correction';
@@ -33,7 +33,15 @@
           .sort((a, b) => `${a.copie.eleve.nom} ${a.copie.eleve.prenom}`.localeCompare(`${b.copie.eleve.nom} ${b.copie.eleve.prenom}`, 'fr'))
       : [],
   );
-  const stats = $derived(statistiquesOperations(lignes.map((l) => l.correction)));
+  /** Bilan de la classe par opération ; « à reprendre d'abord » trie par taux de réussite croissant. */
+  let ordre = $state<'enonce' | 'reprendre'>('reprendre');
+  const analyse = $derived(
+    exercice ? analyseClasse(exercice, lignes.map((l) => ({ nom: `${l.copie.eleve.nom} ${l.copie.eleve.prenom}`, dossier: l.copie.dossier }))) : [],
+  );
+  const taux = (a: { reussites: number; total: number }) => (a.total ? a.reussites / a.total : 1);
+  const stats = $derived(ordre === 'enonce' ? analyse : [...analyse].sort((a, b) => taux(a) - taux(b)));
+  /** Plan de la première copie : sert à afficher les noms des comptes de la faute commune. */
+  const copieRef = $derived(lignes[0]?.copie);
   const moyenne = $derived(lignes.length ? lignes.reduce((s, l) => s + l.correction.note, 0) / lignes.length : 0);
   const texteOp = (piece: string) =>
     piece === PIECE_BOUCLEMENT ? 'Écritures de bouclement' : (exercice?.operations.find((o) => o.numero === piece)?.texte ?? '');
@@ -209,25 +217,52 @@
   </section>
 
   <section class="carte">
-    <h2>Réussite par opération et erreurs les plus fréquentes</h2>
+    <header class="tete-bilan">
+      <h2>Bilan de la classe par opération</h2>
+      <div class="segments" role="group" aria-label="Ordre des opérations">
+        <button aria-pressed={ordre === 'reprendre'} onclick={() => (ordre = 'reprendre')}>À reprendre d'abord</button>
+        <button aria-pressed={ordre === 'enonce'} onclick={() => (ordre = 'enonce')}>Ordre de l'énoncé</button>
+      </div>
+    </header>
+    <p class="discret petit aide-bilan">
+      Pour chaque erreur, ouvrez la liste des élèves concernés pour former des groupes de remédiation. La faute commune est
+      l'écriture fausse saisie à l'identique par au moins deux élèves.
+    </p>
     <table>
       <thead>
         <tr>
           <th style="width:50px">N°</th>
           <th>Opération</th>
-          <th class="montant" style="width:110px">Réussite</th>
-          <th style="width:320px">Erreurs les plus fréquentes</th>
+          <th style="width:170px">Réussite</th>
+          <th style="width:360px">Erreurs</th>
         </tr>
       </thead>
       <tbody>
-        {#each stats as s, i}
+        {#each stats as s, i (s.piece)}
+          {@const pc = Math.round(taux(s) * 100)}
           <tr class:zebre={i % 2 === 1}>
             <td class="num">{s.piece}</td>
-            <td>{texteOp(s.piece)}</td>
-            <td class="montant">{s.reussites} / {s.total} ({Math.round((s.reussites / s.total) * 100)} %)</td>
+            <td>
+              {texteOp(s.piece)}
+              {#if s.fauteCommune && copieRef}
+                <div class="faute-commune">
+                  <b>Faute commune ({s.fauteCommune.eleves.length} élèves) :</b>
+                  {#each lisibles(s.fauteCommune.lignes, copieRef) as t}<div class="ligne-ecr">{t}</div>{/each}
+                </div>
+              {/if}
+            </td>
+            <td>
+              <div class="reussite"><span class="num">{s.reussites} / {s.total}</span> <span class="discret">({pc} %)</span></div>
+              <span class="jauge" aria-hidden="true"><i class:faible={pc < 50} style:width={`${pc}%`}></i></span>
+            </td>
             <td>
               {#if s.erreurs.length === 0}<span class="ok">Aucune erreur</span>{/if}
-              {#each s.erreurs.slice(0, 3) as e, j}{j ? ' · ' : ''}{LIBELLES_DIAGNOSTIC[e.diagnostic]} ({e.nombre}){/each}
+              {#each s.erreurs as e}
+                <details class="erreur">
+                  <summary>{LIBELLES_DIAGNOSTIC[e.diagnostic]} <span class="discret">({e.eleves.length})</span></summary>
+                  <div class="eleves">{e.eleves.join(', ')}</div>
+                </details>
+              {/each}
             </td>
           </tr>
         {/each}
@@ -253,4 +288,14 @@
   .cote-a-cote { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-size: 12px; }
   .etiquette { font-weight: bold; color: var(--c-structure); margin-bottom: 2px; }
   .ligne-ecr { font-variant-numeric: tabular-nums; }
+  .tete-bilan { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .aide-bilan { margin: 0; padding: 10px 18px 0; }
+  .faute-commune { margin-top: 6px; padding: 6px 10px; border-left: 3px solid var(--c-accent); background: var(--c-alerte-fond); font-size: 12px; border-radius: 4px; }
+  .reussite { margin-bottom: 4px; }
+  .jauge { display: flex; height: 6px; border-radius: 3px; background: var(--c-bordure-3); overflow: hidden; }
+  .jauge i { display: block; height: 100%; background: var(--c-ok); }
+  .jauge i.faible { background: var(--c-accent); }
+  .erreur summary { cursor: pointer; }
+  .erreur + .erreur { margin-top: 3px; }
+  .eleves { font-size: 12px; color: var(--c-texte-2); padding: 2px 0 4px 14px; }
 </style>
