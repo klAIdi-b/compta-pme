@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Maquette palettes</title>
+<style>
+  /* Cinq palettes, inspirées d'applications reconnues (inspiration seulement, aucune marque reprise). */
+  :root, [data-palette='actuelle'] {
+    --nuit: #11304d; --nuit-texte: #dce6f0; --nuit-titre: #9fb6cc; --nuit-actif: rgba(255,255,255,.13); --nuit-fort: #fff;
+    --primaire: #1f4e78; --action: #c4501a; --action-texte: #fff; --accent: #e8601c;
+    --fond: #f4f6fa; --selection: #d6e4f0; --zebra: #f7fafd; --logo: #c4501a;
+  }
+  [data-palette='indigo'] {
+    --nuit: #0a2540; --nuit-texte: #d5dbe6; --nuit-titre: #8f9db3; --nuit-actif: rgba(255,255,255,.12); --nuit-fort: #fff;
+    --primaire: #3d32d6; --action: #635bff; --action-texte: #fff; --accent: #635bff;
+    --fond: #f6f9fc; --selection: #e5e4ff; --zebra: #f9faff; --logo: #635bff;
+  }
+  [data-palette='vert'] {
+    --nuit: #163300; --nuit-texte: #dfeccf; --nuit-titre: #a6c08a; --nuit-actif: rgba(159,232,112,.18); --nuit-fort: #fff;
+    --primaire: #2a5a10; --action: #9fe870; --action-texte: #163300; --accent: #3d8a1f;
+    --fond: #f4f6f1; --selection: #e0f4d2; --zebra: #f8fbf5; --logo: #9fe870;
+  }
+  [data-palette='neutre'] {
+    --nuit: #f7f7f5; --nuit-texte: #37352f; --nuit-titre: #6b6a65; --nuit-actif: #e9e9e6; --nuit-fort: #1f1e1b;
+    --primaire: #1a5fa8; --action: #1f6fc5; --action-texte: #fff; --accent: #1f6fc5;
+    --fond: #ffffff; --selection: #e5eefa; --zebra: #fafaf9; --logo: #37352f;
+  }
+  [data-palette='sarcelle'] {
+    --nuit: #0f172a; --nuit-texte: #cbd5e1; --nuit-titre: #8392a8; --nuit-actif: rgba(20,184,166,.16); --nuit-fort: #fff;
+    --primaire: #0f766e; --action: #0f766e; --action-texte: #fff; --accent: #0d9488;
+    --fond: #f1f5f9; --selection: #ccf4ec; --zebra: #f8fafc; --logo: #0f766e;
+  }
+  :root { --texte: #1b2430; --texte-2: #5b6675; --bordure: #d5dce5; --bordure-2: #e6ebf1; --negatif: #b00020; --ok: #1d6b3a; }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.45 Arial, Helvetica, sans-serif; color: var(--texte); background: #e9edf2; }
+  .num { font-variant-numeric: tabular-nums; }
+  .m { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+  /* Barre de la maquette (ne fait pas partie du logiciel) */
+  .choix { background: #fff; border-bottom: 1px solid var(--bordure); padding: 14px 20px; display: flex; gap: 18px; align-items: center; flex-wrap: wrap; }
+  .choix h1 { font-size: 16px; margin: 0; }
+  .choix p { margin: 0; color: var(--texte-2); font-size: 13px; flex-basis: 100%; }
+  .palettes { display: flex; gap: 8px; flex-wrap: wrap; }
+  .palettes button { font: inherit; display: flex; align-items: center; gap: 8px; padding: 7px 12px; border: 1px solid var(--bordure); background: #fff; border-radius: 8px; cursor: pointer; }
+  .palettes button[aria-pressed='true'] { border-color: var(--texte); box-shadow: 0 0 0 1px var(--texte); font-weight: bold; }
+  .pastilles { display: inline-flex; }
+  .pastilles i { width: 14px; height: 14px; border-radius: 50%; border: 2px solid #fff; margin-left: -4px; }
+  .pastilles i:first-child { margin-left: 0; }
+  .note { padding: 10px 20px; font-size: 13px; color: var(--texte-2); background: #fff; border-bottom: 1px solid var(--bordure); }
+  .note b { color: var(--texte); }
+
+  /* Logiciel */
+  .app { display: grid; grid-template-columns: 220px minmax(0, 1fr); grid-template-rows: 58px auto; min-height: 760px; background: var(--fond); margin: 20px; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,.08); }
+  .tete { grid-column: 1 / -1; display: flex; align-items: center; gap: 16px; background: #fff; border-bottom: 1px solid var(--bordure-2); padding: 0 20px; }
+  .logo { display: flex; align-items: center; gap: 10px; font-weight: bold; width: 180px; }
+  .logo span { width: 28px; height: 28px; border-radius: 7px; background: var(--logo); color: var(--action-texte); display: grid; place-items: center; font-size: 12px; }
+  [data-palette='neutre'] .logo span { color: #fff; }
+  .dossier { flex: 1; display: flex; gap: 10px; align-items: baseline; }
+  .dossier small { color: var(--texte-2); }
+  .etiquette { font-size: 12px; font-weight: bold; padding: 3px 9px; border-radius: 6px; background: var(--selection); color: var(--primaire); }
+  .initiales { width: 32px; height: 32px; border-radius: 50%; background: var(--selection); color: var(--primaire); display: grid; place-items: center; font-weight: bold; font-size: 12px; }
+
+  nav { background: var(--nuit); padding: 14px 12px; color: var(--nuit-texte); }
+  [data-palette='neutre'] nav { border-right: 1px solid var(--bordure-2); }
+  nav h2 { font-size: 12px; font-weight: bold; color: var(--nuit-titre); margin: 16px 10px 6px; }
+  nav a { display: flex; gap: 10px; align-items: center; padding: 8px 10px; border-radius: 6px; color: var(--nuit-texte); text-decoration: none; cursor: pointer; }
+  nav a.actif { background: var(--nuit-actif); color: var(--nuit-fort); font-weight: bold; box-shadow: inset 3px 0 0 var(--accent); }
+  nav svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+  main { padding: 24px 28px 40px; min-width: 0; }
+  main h1 { font-size: 22px; margin: 0 0 4px; }
+  .sous { color: var(--texte-2); margin: 0 0 20px; }
+
+  /* Saisie : la seule surface en relief */
+  .saisie { background: #fff; border-radius: 10px; box-shadow: 0 1px 2px rgba(16,24,40,.06), 0 4px 14px rgba(16,24,40,.07); overflow: hidden; }
+  .operation { padding: 14px 20px; border-bottom: 1px solid var(--bordure-2); }
+  .operation b { color: var(--primaire); }
+  table { border-collapse: collapse; width: 100%; }
+  th { text-align: left; font-size: 12.5px; font-weight: bold; color: var(--texte-2); padding: 10px 12px; border-bottom: 1px solid var(--bordure-2); white-space: nowrap; }
+  th.m { text-align: right; }
+  td { padding: 9px 12px; border-bottom: 1px solid var(--bordure-2); }
+  .grille td { padding: 6px 8px; border: 0; }
+  .champ { width: 100%; font: inherit; padding: 8px 10px; border: 1px solid var(--bordure); border-radius: 6px; background: #fff; color: var(--texte); }
+  .champ:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent); }
+  .compte small { color: var(--texte-2); margin-left: 6px; }
+
+  /* Élément signature : la balance débit / crédit */
+  .balance { padding: 16px 20px 18px; border-top: 1px solid var(--bordure-2); }
+  .plateaux { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 14px; }
+  .plateau { display: flex; flex-direction: column; gap: 6px; }
+  .plateau.credit { align-items: flex-end; text-align: right; }
+  .plateau .libelle { font-size: 13px; color: var(--texte-2); }
+  .plateau .montant { font-size: 22px; font-weight: bold; font-variant-numeric: tabular-nums; }
+  .jauge { height: 8px; width: 100%; background: var(--bordure-2); border-radius: 4px; overflow: hidden; display: flex; }
+  .credit .jauge { justify-content: flex-end; }
+  .jauge i { display: block; height: 100%; background: var(--primaire); border-radius: 4px; transition: width .25s ease; }
+  .fleau { width: 120px; text-align: center; font-size: 13px; font-weight: bold; padding: 7px 10px; border-radius: 8px; }
+  .fleau.ok { background: #e3f2e8; color: var(--ok); }
+  .fleau.ecart { background: #fdf0ec; color: #b34a12; }
+  .actions { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; gap: 12px; flex-wrap: wrap; }
+  .aide { font-size: 12.5px; color: var(--texte-2); }
+  .btn { font: inherit; font-weight: bold; padding: 9px 16px; border-radius: 7px; border: 1px solid var(--bordure); background: #fff; color: var(--texte); cursor: pointer; }
+  .btn-principal { background: var(--action); border-color: var(--action); color: var(--action-texte); }
+  .btn-principal[disabled] { background: #e4e8ee; border-color: #e4e8ee; color: #5f6b78; cursor: not-allowed; }
+  .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) { .jauge i { transition: none; } }
+
+  /* Consultation : surfaces plates */
+  .plat { margin-top: 28px; }
+  .plat h2 { font-size: 16px; margin: 0 0 10px; }
+  .plat .cadre { background: #fff; border: 1px solid var(--bordure-2); border-radius: 8px; overflow: hidden; }
+  tr.z td { background: var(--zebra); }
+  .statut { font-size: 12px; font-weight: bold; padding: 2px 9px; border-radius: 6px; }
+  .statut.juste { background: #e3f2e8; color: var(--ok); }
+  .statut.revoir { background: #fdf0ec; color: #b34a12; }
+
+  /* Bilan */
+  .synthese { display: flex; flex-wrap: wrap; background: #fff; border: 1px solid var(--bordure-2); border-radius: 8px; margin-bottom: 18px; }
+  .synthese div { flex: 1 1 160px; padding: 12px 18px; border-left: 1px solid var(--bordure-2); }
+  .synthese div:first-child { border-left: 0; }
+  .synthese span { display: block; font-size: 13px; color: var(--texte-2); }
+  .synthese b { font-size: 17px; font-variant-numeric: tabular-nums; }
+  .bilan { display: grid; grid-template-columns: 1fr 1fr; background: #fff; border: 1px solid var(--bordure-2); border-radius: 8px; overflow: hidden; }
+  .bilan section + section { border-left: 1px solid var(--bordure-2); }
+  .bilan h3 { margin: 0; padding: 12px 16px; font-size: 15px; border-bottom: 2px solid var(--primaire); color: var(--primaire); }
+  .groupe { font-weight: bold; padding: 12px 16px 4px; }
+  .poste { display: grid; grid-template-columns: 44px 1fr 100px 100px; padding: 4px 16px; }
+  .poste .n { color: var(--texte-2); }
+  .sous-total { border-top: 1px solid var(--texte); font-weight: bold; }
+  .total { display: flex; justify-content: space-between; padding: 10px 16px; font-weight: bold; border-top: 1px solid var(--texte); border-bottom: 3px double var(--texte); margin-top: 8px; }
+  .egalite { color: var(--ok); font-weight: bold; margin-top: 12px; }
+  [hidden] { display: none !important; }
+
+  @media (max-width: 900px) {
+    .app { grid-template-columns: 1fr; margin: 12px; }
+    nav { display: none; }
+    .bilan { grid-template-columns: 1fr; }
+    .bilan section + section { border-left: 0; border-top: 1px solid var(--bordure-2); }
+    .plateaux { grid-template-columns: 1fr; }
+    .plateau.credit { align-items: flex-start; text-align: left; }
+  }
+</style>
+</head>
+<body data-palette="actuelle">
+
+<div class="choix">
+  <h1>Maquette : palette et design épuré</h1>
+  <div class="palettes" role="group" aria-label="Palette"></div>
+  <p id="description"></p>
+</div>
+<div class="note">
+  <b>Ce qui change dans les cinq versions :</b> libellés en minuscules, une seule surface en relief (la saisie),
+  consultation à plat, bande de synthèse sobre au bilan, et un élément signature : la balance débit / crédit du
+  journal. Modifiez le montant au crédit pour voir la balance réagir. Arial et rouge des montants négatifs conservés.
+</div>
+
+<div class="app">
+  <header class="tete">
+    <div class="logo"><span>CP</span>Compta PME</div>
+    <div class="dossier"><b>Cycles du Léman</b><small id="fil">/ Journal</small></div>
+    <span class="etiquette">CFC niveau 1</span>
+    <span class="etiquette">Entraînement</span>
+    <span class="initiales" title="Léa Martin, 1CFC1">LM</span>
+  </header>
+
+  <nav aria-label="Rubriques">
+    <a data-vue="tableau"><svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5M5.5 9.5V20h13V9.5"/></svg>Tableau de bord</a>
+    <h2>Saisie</h2>
+    <a data-vue="journal" class="actif"><svg viewBox="0 0 24 24"><path d="M6 3.5h9l3.5 3.5v13.5H6zM9 9h7M9 13h7M9 17h4"/></svg>Journal</a>
+    <h2>Consultation</h2>
+    <a><svg viewBox="0 0 24 24"><path d="M4 5h16M12 5v14M4 19h16"/></svg>Comptes</a>
+    <a><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4zM4 9h16M9 9v11"/></svg>Grand livre</a>
+    <h2>États financiers</h2>
+    <a data-vue="bilan"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M2 20h20"/></svg>Bilan</a>
+    <a><svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8M15 7h6v6"/></svg>Compte de résultat</a>
+    <h2>Clôture</h2>
+    <a><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7"/></svg>Bouclement</a>
+  </nav>
+
+  <main>
+    <div id="vue-journal">
+      <h1>Journal</h1>
+      <p class="sous">1 écriture validée, 1 opération sur 15 saisie</p>
+
+      <section class="saisie" aria-label="Nouvelle écriture">
+        <div class="operation"><b>Opération 2.</b> Ventes au comptant de la période, 12'350.00.</div>
+        <table class="grille">
+          <thead><tr><th style="width:120px">Date</th><th style="width:70px">Pièce</th><th>Libellé</th><th>Compte au débit</th><th>Compte au crédit</th><th class="m" style="width:130px">Montant</th></tr></thead>
+          <tbody><tr>
+            <td><input class="champ num" value="31.01.2026" aria-label="Date"></td>
+            <td><input class="champ num" value="2" aria-label="Pièce"></td>
+            <td><input class="champ" value="Ventes au comptant" aria-label="Libellé"></td>
+            <td><div class="champ compte">Caisse<small>1000</small></div></td>
+            <td><div class="champ compte">Ventes de marchandises<small>3200</small></div></td>
+            <td><input class="champ m" id="mt-debit" value="12'350.00" aria-label="Montant au débit" readonly></td>
+          </tr></tbody>
+        </table>
+        <div class="balance" aria-live="polite">
+          <div class="plateaux">
+            <div class="plateau"><span class="libelle">Total au débit</span><span class="montant" id="tot-d">12'350.00</span><div class="jauge"><i id="j-d"></i></div></div>
+            <div class="fleau" id="fleau"></div>
+            <div class="plateau credit"><span class="libelle">Total au crédit</span><span class="montant" id="tot-c">12'350.00</span><div class="jauge"><i id="j-c"></i></div></div>
+          </div>
+          <div class="actions">
+            <label class="aide">Essayer un autre montant au crédit :
+              <input class="champ m" id="essai" value="12'350.00" style="width:120px;display:inline-block;margin-left:6px"></label>
+            <div style="display:flex;gap:8px"><button class="btn">Annuler</button><button class="btn btn-principal" id="valider">Valider l'écriture</button></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="plat">
+        <h2>Écritures validées</h2>
+        <div class="cadre"><table>
+          <thead><tr><th>Date</th><th>Pièce</th><th>Libellé</th><th>Débit</th><th>Crédit</th><th class="m">Montant</th><th>Correction</th></tr></thead>
+          <tbody>
+            <tr><td class="num">05.01.2026</td><td>1</td><td>Achat de marchandises à crédit</td><td>Achats de marchandises</td><td>Dettes fournisseurs</td><td class="m">4'800.00</td><td><span class="statut juste">Juste</span></td></tr>
+            <tr class="z"><td class="num">12.01.2026</td><td>3</td><td>Paiement du loyer</td><td>Banque</td><td>Loyers</td><td class="m">2'100.00</td><td><span class="statut revoir">À revoir</span></td></tr>
+          </tbody>
+        </table></div>
+      </section>
+    </div>
+
+    <div id="vue-bilan" hidden>
+      <h1>Bilan au 01.01.2026</h1>
+      <p class="sous">Bilan d'ouverture, montants en CHF</p>
+      <div class="synthese" aria-label="Synthèse">
+        <div><span>Total du bilan</span><b>93'000.00</b></div>
+        <div><span>Liquidités</span><b>35'700.00</b></div>
+        <div><span>Capitaux propres</span><b>55'400.00</b></div>
+        <div><span>Résultat de l'exercice</span><b>0.00</b></div>
+      </div>
+      <div class="bilan">
+        <section>
+          <h3>Actif</h3>
+          <div class="groupe">Actifs circulants</div>
+          <div class="poste"><span class="n num">1000</span><span>Caisse</span><span class="m">3'500.00</span><span></span></div>
+          <div class="poste"><span class="n num">1010</span><span>Poste (CP)</span><span class="m">4'200.00</span><span></span></div>
+          <div class="poste"><span class="n num">1020</span><span>Banque (n/avoir)</span><span class="m">28'000.00</span><span></span></div>
+          <div class="poste"><span class="n num">1100</span><span>Créances clients</span><span class="m">2'300.00</span><span></span></div>
+          <div class="poste"><span class="n num">1200</span><span>Stock de marchandises</span><span class="m">18'000.00</span><span class="m sous-total">56'000.00</span></div>
+          <div class="groupe">Actifs immobilisés</div>
+          <div class="poste"><span class="n num">1510</span><span>Mobilier et installations</span><span class="m">15'000.00</span><span></span></div>
+          <div class="poste"><span class="n num">1530</span><span>Véhicules</span><span class="m">22'000.00</span><span class="m sous-total">37'000.00</span></div>
+          <div class="total"><span>Total de l'actif</span><span class="num">93'000.00</span></div>
+        </section>
+        <section>
+          <h3>Passif</h3>
+          <div class="groupe">Capitaux étrangers à court terme</div>
+          <div class="poste"><span class="n num">2000</span><span>Dettes fournisseurs</span><span class="m">7'600.00</span><span class="m sous-total">7'600.00</span></div>
+          <div class="groupe">Capitaux étrangers à long terme</div>
+          <div class="poste"><span class="n num">2400</span><span>Emprunt bancaire à long terme</span><span class="m">30'000.00</span><span class="m sous-total">30'000.00</span></div>
+          <div class="groupe">Capitaux propres</div>
+          <div class="poste"><span class="n num">2800</span><span>Capital</span><span class="m">55'400.00</span><span class="m sous-total">55'400.00</span></div>
+          <div class="total"><span>Total du passif</span><span class="num">93'000.00</span></div>
+        </section>
+      </div>
+      <p class="egalite">Total de l'actif = total du passif</p>
+    </div>
+  </main>
+</div>
+
+<script>
+  const PALETTES = [
+    { id: 'actuelle', nom: 'Bleu et orange (actuelle)', couleurs: ['#11304d', '#1f4e78', '#c4501a', '#d6e4f0'],
+      texte: "La palette actuelle, dans l'esprit des logiciels comptables suisses (Banana, Abacus). Sérieuse et familière ; l'orange de l'école reste le seul accent." },
+    { id: 'indigo', nom: 'Indigo', couleurs: ['#0a2540', '#635bff', '#e5e4ff', '#f6f9fc'],
+      texte: "Inspirée des services de paiement en ligne comme Stripe : bleu marine profond et indigo lumineux. Moderne, très « fintech », reste sobre pour la comptabilité." },
+    { id: 'vert', nom: 'Vert confiance', couleurs: ['#163300', '#9fe870', '#e0f4d2', '#f4f6f1'],
+      texte: "Inspirée des banques en ligne comme Wise : vert forêt et vert clair. Chaleureuse et rassurante ; le bouton principal clair se distingue fortement. Plus audacieuse au projecteur." },
+    { id: 'neutre', nom: 'Neutre clair', couleurs: ['#f7f7f5', '#37352f', '#1f6fc5', '#e5eefa'],
+      texte: "Inspirée des outils de travail comme Notion ou Linear : barre latérale claire, gris chauds, un seul bleu pour l'action. La plus calme et la plus lisible ; peu de couleur." },
+    { id: 'sarcelle', nom: 'Ardoise et sarcelle', couleurs: ['#0f172a', '#0f766e', '#ccf4ec', '#f1f5f9'],
+      texte: "Inspirée des banques mobiles comme N26 : ardoise presque noire et vert sarcelle. Élégante et contemporaine ; le vert sarcelle se distingue bien du rouge des montants négatifs." },
+  ];
+  const zone = document.querySelector('.palettes');
+  const desc = document.getElementById('description');
+  function choisir(id) {
+    document.body.dataset.palette = id;
+    const p = PALETTES.find((x) => x.id === id);
+    desc.textContent = p.texte;
+    zone.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.id === id)));
+  }
+  PALETTES.forEach((p) => {
+    const b = document.createElement('button');
+    b.dataset.id = p.id;
+    b.innerHTML = `<span class="pastilles">${p.couleurs.map((c) => `<i style="background:${c}"></i>`).join('')}</span>${p.nom}`;
+    b.onclick = () => choisir(p.id);
+    zone.appendChild(b);
+  });
+  choisir('actuelle');
+
+  // Rubriques Journal / Bilan
+  document.querySelectorAll('nav a[data-vue]').forEach((a) => a.addEventListener('click', () => {
+    const v = a.dataset.vue;
+    if (v === 'tableau') return;
+    document.querySelectorAll('nav a').forEach((x) => x.classList.toggle('actif', x === a));
+    document.getElementById('vue-journal').hidden = v !== 'journal';
+    document.getElementById('vue-bilan').hidden = v !== 'bilan';
+    document.getElementById('fil').textContent = '/ ' + a.textContent.trim();
+  }));
+
+  // Balance débit / crédit
+  const DEBIT = 1235000;
+  const fmt = (c) => (c / 100).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, "'");
+  function balance() {
+    const v = Math.round(parseFloat(document.getElementById('essai').value.replace(/'/g, '')) * 100) || 0;
+    const max = Math.max(DEBIT, v, 1);
+    document.getElementById('tot-c').textContent = fmt(v);
+    document.getElementById('j-d').style.width = (DEBIT / max * 100) + '%';
+    document.getElementById('j-c').style.width = (v / max * 100) + '%';
+    const f = document.getElementById('fleau');
+    const ecart = DEBIT - v;
+    f.className = 'fleau ' + (ecart === 0 ? 'ok' : 'ecart');
+    f.textContent = ecart === 0 ? 'Équilibrée' : (ecart > 0 ? `Il manque ${fmt(ecart)} au crédit` : `Il manque ${fmt(-ecart)} au débit`);
+    document.getElementById('valider').disabled = ecart !== 0;
+  }
+  document.getElementById('essai').addEventListener('input', balance);
+  balance();
+</script>
+</body>
+</html>
