@@ -141,7 +141,7 @@
 
 <div class="page">
   <header class="bandeau-haut">
-    <span class="logo">Compta PME</span>
+    <button class="logo logo-bouton" title="Retour à la page d'accueil" onclick={() => { fermer(); etat.allerAccueil(); }}>Compta PME</button>
     <span class="titre-espace">Espace enseignant</span>
     <button class="btn-lien fermer" onclick={() => (etat.guide = 'enseignant')}>Guide</button>
     <button class="btn-lien fermer" onclick={fermer}>Fermer l'espace enseignant</button>

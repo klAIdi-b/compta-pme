@@ -103,6 +103,10 @@ label.bloc { display: block; font-weight: bold; margin-bottom: 5px; font-size: 1
 .vide { padding: 28px 14px; text-align: center; color: var(--c-texte-2); }
 .ok { color: var(--c-ok); font-weight: bold; }
 
+/* Nom du site cliquable : retour à la page d'accueil. */
+.logo-bouton { font: inherit; border: 0; background: none; padding: 0; cursor: pointer; text-align: left; }
+.logo-bouton:hover { text-decoration: underline; text-underline-offset: 3px; }
+
 kbd {
   font: 11px Arial, sans-serif; border: 1px solid var(--c-bordure); border-bottom-width: 2px;
   border-radius: 4px; padding: 0 4px; background: #fff; color: var(--c-texte);

@@ -1,5 +1,6 @@
 <!-- Guide d'utilisation : accessible depuis l'accueil, la barre latérale et l'espace enseignant. -->
 <script lang="ts">
+  import { etat } from '../etat.svelte';
   import { GUIDE } from '../../data/guide';
 
   let { onFermer, partie = 'eleve' }: { onFermer: () => void; partie?: 'eleve' | 'enseignant' } = $props();
@@ -10,7 +11,7 @@
 
 <div class="page">
   <header class="bandeau-haut">
-    <span class="logo">Compta PME</span>
+    <button class="logo logo-bouton" title="Retour à la page d'accueil" onclick={() => etat.allerAccueil()}>Compta PME</button>
     <span class="titre-espace">Guide d'utilisation</span>
     <button class="btn-lien fermer" onclick={onFermer}>Fermer le guide</button>
   </header>

@@ -42,12 +42,14 @@ test('un élève comptabilise, voit le retour et son avancement, puis reprend so
   await page.getByRole('button', { name: /pièces/ }).click();
   await expect(page.getByRole('dialog', { name: 'Récapitulatif des pièces' })).toBeVisible();
 
-  // Retour à l'accueil sans rien perdre, puis reprise.
-  await page.goto('./');
+  // Retour à l'accueil par le nom du site, sans rien perdre, puis reprise.
+  await page.keyboard.press('Escape');
+  await page.getByRole('button', { name: 'Compta PME' }).click();
   await expect(page.getByRole('heading', { name: 'Bon retour, Léa' })).toBeVisible();
   await expect(page.getByText(/En cours · 2 \/ 15/)).toBeVisible();
   await page.getByRole('button', { name: 'Reprendre' }).first().click();
-  await expect(page.getByRole('heading', { name: 'Tableau de bord' })).toBeVisible();
+  // L'élève retrouve la rubrique qu'il avait quittée.
+  await expect(page.getByRole('heading', { name: 'Journal' })).toBeVisible();
 });
 
 test('la tablette en paysage affiche le journal sans débordement', async ({ page }) => {

@@ -143,7 +143,13 @@
   {@const s = etat.session}
   <div class="app">
     <header class="entete" data-visite="entete">
-      <div class="logo"><span class="pastille-logo" aria-hidden="true">CP</span>Compta PME</div>
+      {#if s.role === 'eleve' && !s.apercu}
+        <button class="logo logo-bouton" title="Retour à la page d'accueil" onclick={() => etat.allerAccueil()}>
+          <span class="pastille-logo" aria-hidden="true">CP</span>Compta PME
+        </button>
+      {:else}
+        <div class="logo"><span class="pastille-logo" aria-hidden="true">CP</span>Compta PME</div>
+      {/if}
       <div class="dossier">
         <strong>{s.dossier.raisonSociale}</strong>
         <span class="fil" aria-hidden="true">/ {libelleVue}</span>

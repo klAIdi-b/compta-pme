@@ -247,6 +247,12 @@ class Etat {
   }
 
   /** Ferme l'aperçu et restaure le travail mis de côté. */
+  /** Clic sur le nom du site : retour à la page d'accueil (le travail en cours est conservé). */
+  allerAccueil() {
+    this.guide = null;
+    if (this.session?.role === 'eleve' && !this.session.apercu) this.accueilOuvert = true;
+  }
+
   fermerApercu() {
     this.session = this.sessionMiseDeCote;
     this.sessionMiseDeCote = null;
