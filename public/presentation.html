@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="fr-CH">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="theme-color" content="#11304d" />
+<meta name="description" content="Compta PME : logiciel d'entraînement à la comptabilité en partie double pour les classes CFC et de maturité professionnelle. Correction immédiate, gratuit, sans compte, hors ligne." />
+<title>Compta PME</title>
+<style>
+  :root {
+    --nuit: #11304d; --structure: #1f4e78; --action: #c4501a; --action-fonce: #a8420f; --accent: #e8601c;
+    --fond: #f4f6fa; --texte: #1b2430; --texte-2: #5b6675; --bordure: #d5dce5; --bordure-2: #e6ebf1;
+    --selection: #d6e4f0; --ok: #1d6b3a; --ok-fond: #e3f2e8; --alerte: #b34a12; --alerte-fond: #fdf0ec;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; font: 17px/1.55 Arial, Helvetica, sans-serif; color: var(--texte); background: #fff; }
+  a { color: inherit; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+  .num { font-variant-numeric: tabular-nums; }
+  .large { max-width: 1140px; margin: 0 auto; padding: 0 24px; }
+  h1, h2, h3 { text-wrap: balance; margin: 0; }
+  h2 { font-size: clamp(26px, 3.2vw, 36px); line-height: 1.15; letter-spacing: -0.01em; }
+  h3 { font-size: 19px; }
+  p { margin: 0; }
+  .lien-evitement { position: absolute; left: 12px; top: -60px; background: #fff; color: var(--structure); padding: 8px 14px; border-radius: 6px; font-weight: bold; z-index: 10; }
+  .lien-evitement:focus { top: 12px; }
+
+  /* Boutons */
+  .btn { display: inline-flex; align-items: center; gap: 8px; font: inherit; font-size: 16px; font-weight: bold; text-decoration: none; padding: 13px 22px; border-radius: 8px; border: 2px solid transparent; cursor: pointer; }
+  .btn-action { background: var(--action); color: #fff; }
+  .btn-action:hover { background: var(--action-fonce); }
+  .btn-clair { border-color: rgba(255,255,255,.45); color: #fff; }
+  .btn-clair:hover { border-color: #fff; background: rgba(255,255,255,.06); }
+  .btn-trait { border-color: var(--bordure); color: var(--structure); background: #fff; }
+  .btn-trait:hover { border-color: var(--structure); }
+
+  /* En-tête */
+  .tete { background: var(--nuit); color: #fff; }
+  .tete .large { display: flex; align-items: center; gap: 28px; height: 72px; }
+  .marque { display: flex; align-items: center; gap: 10px; font-weight: bold; font-size: 18px; text-decoration: none; }
+  .marque span { width: 32px; height: 32px; border-radius: 8px; background: var(--action); display: grid; place-items: center; font-size: 13px; }
+  .tete nav { display: flex; gap: 22px; margin-left: auto; font-size: 15px; }
+  .tete nav a { text-decoration: none; color: #c9d7e6; }
+  .tete nav a:hover { color: #fff; }
+  .tete .btn { padding: 9px 16px; font-size: 15px; }
+
+  /* Ouverture */
+  .ouverture { background: var(--nuit); color: #fff; padding: 64px 0 96px; }
+  .ouverture .large { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 540px); gap: 56px; align-items: center; }
+  .ouverture h1 { font-size: clamp(34px, 4.6vw, 54px); line-height: 1.08; letter-spacing: -0.02em; }
+  .ouverture .chapeau { margin-top: 22px; font-size: 19px; color: #c9d7e6; max-width: 34em; }
+  .ouverture .actions { margin-top: 32px; display: flex; gap: 14px; flex-wrap: wrap; }
+  .ouverture .garanties { margin-top: 26px; display: flex; gap: 22px; flex-wrap: wrap; font-size: 14px; color: #9fb6cc; padding: 0; list-style: none; }
+  .garanties li::before { content: ''; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); margin-right: 8px; vertical-align: 2px; }
+
+  /* Démonstration : la saisie d'une écriture */
+  .demo { background: #fff; color: var(--texte); border-radius: 14px; box-shadow: 0 24px 60px rgba(0,0,0,.35); overflow: hidden; }
+  .demo-titre { padding: 14px 20px; font-size: 13px; font-weight: bold; color: var(--texte-2); border-bottom: 1px solid var(--bordure-2); display: flex; justify-content: space-between; }
+  .operation { padding: 16px 20px; background: #f3f8fd; border-bottom: 1px solid var(--bordure-2); font-size: 16px; }
+  .operation b { color: var(--structure); }
+  .saisie { padding: 16px 20px 6px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px 14px; }
+  .saisie label { font-size: 13px; font-weight: bold; color: var(--texte-2); display: block; margin-bottom: 5px; }
+  .saisie .plein { grid-column: 1 / -1; }
+  .champ { width: 100%; font: inherit; font-size: 16px; padding: 10px 12px; border: 1px solid var(--bordure); border-radius: 7px; background: #fff; color: var(--texte); }
+  select.champ { appearance: auto; }
+  .champ:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(232,96,28,.18); }
+  .champ.montant { text-align: right; font-variant-numeric: tabular-nums; }
+  .balance { display: grid; grid-template-columns: 1fr auto 1fr; gap: 12px; align-items: center; padding: 12px 20px; }
+  .plateau span { display: block; font-size: 12px; color: var(--texte-2); }
+  .plateau b { font-size: 18px; font-variant-numeric: tabular-nums; }
+  .plateau.c { text-align: right; }
+  .jauge { height: 6px; background: var(--bordure-2); border-radius: 3px; margin-top: 5px; overflow: hidden; display: flex; }
+  .plateau.c .jauge { justify-content: flex-end; }
+  .jauge i { display: block; height: 100%; background: var(--structure); border-radius: 3px; transition: width .25s ease; }
+  .fleau { font-size: 13px; font-weight: bold; padding: 6px 10px; border-radius: 8px; text-align: center; }
+  .fleau.ok { background: var(--ok-fond); color: var(--ok); }
+  .fleau.att { background: var(--fond); color: var(--texte-2); }
+  .demo-pied { padding: 0 20px 18px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .demo-pied .btn { padding: 10px 18px; font-size: 15px; }
+  .retour { margin: 0 20px 18px; padding: 10px 14px; border-radius: 8px; font-size: 15px; border-left: 4px solid; }
+  .retour.juste { background: var(--ok-fond); border-color: var(--ok); color: var(--ok); }
+  .retour.indice { background: var(--alerte-fond); border-color: var(--accent); color: var(--alerte); }
+  .retour button { font: inherit; font-weight: bold; color: var(--structure); background: none; border: 0; padding: 0; margin-left: 6px; text-decoration: underline; cursor: pointer; }
+  .retour .solution { margin-top: 6px; color: var(--texte); }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .jauge i { transition: none; } }
+
+  /* Faits */
+  .faits { border-bottom: 1px solid var(--bordure-2); }
+  .faits ul { list-style: none; margin: 0; padding: 26px 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+  .faits li { font-size: 15px; color: var(--texte-2); }
+  .faits b { display: block; color: var(--texte); font-size: 17px; }
+
+  /* Sections */
+  section.bloc { padding: 88px 0; }
+  section.pale { background: var(--fond); }
+  .intro-bloc { max-width: 42em; margin-bottom: 44px; }
+  .intro-bloc p { margin-top: 14px; color: var(--texte-2); font-size: 18px; }
+  .trois { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; }
+  .trois article { border-top: 3px solid var(--structure); padding-top: 18px; }
+  .trois article p { margin-top: 10px; color: var(--texte-2); }
+
+  .deux { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 56px; align-items: center; }
+  .liste-points { list-style: none; padding: 0; margin: 26px 0 0; display: grid; gap: 18px; }
+  .liste-points b { display: block; }
+  .liste-points span { color: var(--texte-2); }
+
+  /* Aperçu du bilan de la classe */
+  .apercu { background: #fff; border: 1px solid var(--bordure-2); border-radius: 12px; box-shadow: 0 10px 30px rgba(16,24,40,.08); overflow: hidden; font-size: 14px; }
+  .apercu-titre { padding: 14px 18px; font-weight: bold; border-bottom: 1px solid var(--bordure-2); display: flex; justify-content: space-between; gap: 10px; }
+  .apercu-titre span { font-weight: normal; color: var(--texte-2); font-size: 13px; }
+  .apercu table { width: 100%; border-collapse: collapse; }
+  .apercu th { text-align: left; font-size: 12.5px; color: var(--texte-2); padding: 9px 14px; border-bottom: 1px solid var(--bordure-2); }
+  .apercu td { padding: 10px 14px; border-bottom: 1px solid var(--bordure-2); vertical-align: top; }
+  .apercu tr:last-child td { border-bottom: 0; }
+  .barre { height: 6px; border-radius: 3px; background: var(--bordure-2); margin-top: 5px; overflow: hidden; }
+  .barre i { display: block; height: 100%; background: var(--ok); }
+  .barre i.faible { background: var(--accent); }
+  .faute { margin-top: 6px; padding: 6px 9px; border-left: 3px solid var(--accent); background: var(--alerte-fond); font-size: 12.5px; border-radius: 4px; }
+
+  /* Étapes */
+  .etapes { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; counter-reset: e; }
+  .etapes li { counter-increment: e; }
+  .etapes li::before { content: counter(e); display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: var(--nuit); color: #fff; font-weight: bold; margin-bottom: 16px; }
+  .etapes p { margin-top: 8px; color: var(--texte-2); }
+
+  /* Programme */
+  .programme { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+  .programme h3 { padding-bottom: 10px; border-bottom: 2px solid var(--structure); color: var(--structure); }
+  .programme ol { margin: 0; padding: 0; list-style: none; }
+  .programme li { display: grid; grid-template-columns: 84px 1fr; gap: 10px; padding: 11px 0; border-bottom: 1px solid var(--bordure-2); }
+  .programme li span { color: var(--texte-2); font-size: 15px; }
+
+  /* Confidentialité */
+  .confiance { background: #fff; border: 1px solid var(--bordure-2); border-left: 5px solid var(--structure); border-radius: 10px; padding: 32px 36px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 36px; }
+  .confiance p + p { margin-top: 12px; }
+  .confiance .discret { color: var(--texte-2); }
+
+  /* Appel final */
+  .final { background: var(--nuit); color: #fff; padding: 84px 0; text-align: center; }
+  .final p { color: #c9d7e6; margin: 16px auto 30px; max-width: 34em; font-size: 18px; }
+  .final .actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+  footer { padding: 28px 0; font-size: 14px; color: var(--texte-2); }
+  footer .large { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+
+  @media (max-width: 960px) {
+    .ouverture .large, .deux, .confiance { grid-template-columns: 1fr; }
+    .ouverture { padding: 40px 0 64px; }
+    .trois, .etapes { grid-template-columns: 1fr; gap: 28px; }
+    .faits ul { grid-template-columns: 1fr 1fr; }
+    .programme { grid-template-columns: 1fr; }
+    .tete nav { display: none; }
+    .tete .btn { margin-left: auto; }
+    section.bloc { padding: 60px 0; }
+  }
+  @media (max-width: 520px) {
+    body { font-size: 16px; }
+    .large { padding: 0 16px; }
+    .saisie { grid-template-columns: 1fr; }
+    .faits ul { grid-template-columns: 1fr; }
+    .confiance { padding: 22px; }
+    .apercu .col-erreurs { display: none; }
+  }
+</style>
+</head>
+<body>
+<a class="lien-evitement" href="#contenu">Aller au contenu</a>
+
+<header class="tete">
+  <div class="large">
+    <a class="marque" href="#"><span aria-hidden="true">CP</span>Compta PME</a>
+    <nav aria-label="Sections">
+      <a href="#eleves">Pour les élèves</a>
+      <a href="#enseignants">Pour les enseignants</a>
+      <a href="#demarrer">Démarrer</a>
+      <a href="#programme">Programme</a>
+    </nav>
+    <a class="btn btn-action" href="./">Ouvrir le logiciel</a>
+  </div>
+</header>
+
+<main id="contenu">
+  <section class="ouverture">
+    <div class="large">
+      <div>
+        <h1>La comptabilité en partie double, apprise en la pratiquant.</h1>
+        <p class="chapeau">
+          Compta PME est un logiciel d'entraînement pour les classes CFC et de maturité professionnelle. Les élèves
+          saisissent leurs écritures au journal ; le logiciel corrige chaque opération et leur dit quoi revoir.
+        </p>
+        <div class="actions">
+          <a class="btn btn-action" href="./">Ouvrir le logiciel</a>
+          <a class="btn btn-clair" href="./guide.html">Démarrer en 10 minutes</a>
+        </div>
+        <ul class="garanties">
+          <li>Gratuit</li><li>Sans compte ni installation</li><li>Aucune donnée en ligne</li>
+        </ul>
+      </div>
+
+      <div class="demo" aria-labelledby="demo-titre">
+        <div class="demo-titre"><span id="demo-titre">Essayez : comptabilisez cette opération</span><span>Journal</span></div>
+        <div class="operation"><b>Opération 1.</b> Achat de marchandises à crédit chez un fournisseur, 4'800.00.</div>
+        <div class="saisie">
+          <div>
+            <label for="debit">Compte au débit</label>
+            <select id="debit" class="champ"></select>
+          </div>
+          <div>
+            <label for="credit">Compte au crédit</label>
+            <select id="credit" class="champ"></select>
+          </div>
+          <div class="plein">
+            <label for="montant">Montant CHF</label>
+            <input id="montant" class="champ montant" inputmode="decimal" autocomplete="off" value="4'800.00" />
+          </div>
+        </div>
+        <div class="balance" aria-hidden="true">
+          <div class="plateau"><span>Total au débit</span><b id="tot-d">0.00</b><div class="jauge"><i id="j-d" style="width:0"></i></div></div>
+          <div class="fleau att" id="fleau">Choisissez les comptes</div>
+          <div class="plateau c"><span>Total au crédit</span><b id="tot-c">0.00</b><div class="jauge"><i id="j-c" style="width:0"></i></div></div>
+        </div>
+        <div class="demo-pied">
+          <button class="btn btn-action" id="valider" type="button">Valider l'écriture</button>
+          <a class="btn btn-trait" href="./?exercice=demo-cfc1-cycles-du-leman">Faire l'exercice complet</a>
+        </div>
+        <div id="retour" aria-live="polite"></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="faits">
+    <div class="large"><ul>
+      <li><b>33 exercices et dossiers</b>de pièces justificatives, classés par niveau</li>
+      <li><b>CFC et maturité pro</b>1re et 2e année CFC, profil M</li>
+      <li><b>Plan comptable PME</b>les numéros et intitulés du cours</li>
+      <li><b>Fonctionne hors ligne</b>après la première visite</li>
+    </ul></div>
+  </div>
+
+  <section class="bloc" id="eleves">
+    <div class="large">
+      <div class="intro-bloc">
+        <h2>Les élèves apprennent de leurs erreurs, pas de la solution.</h2>
+        <p>Chaque écriture est contrôlée dès sa validation. Le retour est gradué pour que l'élève cherche avant de voir la réponse.</p>
+      </div>
+      <div class="trois">
+        <article>
+          <h3>Un indice à la première erreur</h3>
+          <p>Débit et crédit inversés, bonne classe mais mauvais compte, montant erroné, TVA oubliée : l'élève sait quoi corriger, sans recevoir la réponse.</p>
+        </article>
+        <article>
+          <h3>La solution après deux essais</h3>
+          <p>Un lien mène au chapitre de théorie concerné. La solution ne s'affiche qu'après une deuxième tentative fausse.</p>
+        </article>
+        <article>
+          <h3>Les comptes par leur nom</h3>
+          <p>Comme en cours : l'élève choisit « Dettes fournisseurs », pas 2000. Le logiciel ne suggère jamais de contrepartie.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="bloc pale" id="enseignants">
+    <div class="large deux">
+      <div>
+        <h2>Vous voyez d'un coup d'œil ce qu'il faut reprendre en classe.</h2>
+        <ul class="liste-points">
+          <li><b>Correction automatique des copies</b><span>Importez les fichiers des élèves : points par opération, points partiels sur les écritures composées, note de 1 à 6.</span></li>
+          <li><b>Bilan de la classe par opération</b><span>Taux de réussite, élèves concernés par chaque erreur et faute commune, triés de la plus ratée à la mieux réussie.</span></li>
+          <li><b>Vos propres exercices</b><span>Créez un exercice, saisissez le corrigé dans le journal, ou tirez une variante d'évaluation d'un exercice fourni.</span></li>
+        </ul>
+      </div>
+      <figure class="apercu" aria-label="Exemple de bilan de la classe">
+        <div class="apercu-titre">Bilan de la classe par opération <span>22 copies, exemple</span></div>
+        <table>
+          <thead><tr><th>N°</th><th>Opération</th><th>Réussite</th><th class="col-erreurs">Erreurs</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="num">3</td>
+              <td>Vente de marchandises à crédit, 6'400.00
+                <div class="faute"><b>Faute commune (6 élèves) :</b> débit Ventes de marchandises, crédit Créances clients</div></td>
+              <td class="num">13 / 22<div class="barre"><i class="faible" style="width:59%"></i></div></td>
+              <td class="col-erreurs">Débit et crédit inversés (6)<br>Mauvais compte (3)</td>
+            </tr>
+            <tr>
+              <td class="num">7</td>
+              <td>Le client règle sa facture par la banque</td>
+              <td class="num">18 / 22<div class="barre"><i style="width:82%"></i></div></td>
+              <td class="col-erreurs">Bonne classe, mauvais compte (4)</td>
+            </tr>
+            <tr>
+              <td class="num">1</td>
+              <td>Achat de marchandises à crédit, 4'800.00</td>
+              <td class="num">22 / 22<div class="barre"><i style="width:100%"></i></div></td>
+              <td class="col-erreurs" style="color:var(--ok);font-weight:bold">Aucune erreur</td>
+            </tr>
+          </tbody>
+        </table>
+      </figure>
+    </div>
+  </section>
+
+  <section class="bloc" id="demarrer">
+    <div class="large">
+      <div class="intro-bloc">
+        <h2>En classe dès le prochain cours.</h2>
+        <p>Rien à installer, aucun compte à créer : un lien suffit.</p>
+      </div>
+      <ol class="etapes">
+        <li><h3>Envoyez le lien</h3><p>Aux élèves, le site ou le lien direct d'un exercice. Ils indiquent leur prénom, leur nom et leur classe.</p></li>
+        <li><h3>Les élèves s'exercent</h3><p>En entraînement avec correction immédiate, ou en évaluation sans aucun retour pendant la saisie.</p></li>
+        <li><h3>Récupérez les copies</h3><p>Chaque élève exporte sa copie ; vous l'importez dans l'espace enseignant pour la note et le bilan de la classe.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="bloc pale" id="programme">
+    <div class="large">
+      <div class="intro-bloc">
+        <h2>Le programme du cours, niveau par niveau.</h2>
+        <p>Chaque niveau n'affiche que les comptes et les fonctions qui le concernent.</p>
+      </div>
+      <div class="programme">
+        <div>
+          <h3>CFC employé·e de commerce</h3>
+          <ol>
+            <li><b>Niveau 1</b><span>Bases : bilan, comptes, journal, marchandises, bouclement</span></li>
+            <li><b>Niveau 2</b><span>TVA, méthode effective</span></li>
+            <li><b>Niveau 3</b><span>Opérations de clôture : amortissements, transitoires, créances, salaires</span></li>
+            <li><b>Niveau 4</b><span>Synthèse de plusieurs chapitres</span></li>
+          </ol>
+        </div>
+        <div>
+          <h3>Maturité professionnelle</h3>
+          <ol>
+            <li><b>Niveau 1</b><span>Opérations financières et commerciales, monnaies étrangères</span></li>
+            <li><b>Niveau 2</b><span>Clôture de l'entreprise individuelle</span></li>
+            <li><b>Niveau 3</b><span>Société anonyme : capital, répartition du bénéfice, réserves latentes</span></li>
+            <li><b>Niveau 4</b><span>Titres et immeubles</span></li>
+            <li><b>Niveau 5</b><span>Analyse financière : ratios, résultat par degrés, flux de trésorerie</span></li>
+            <li><b>Niveau 6</b><span>Synthèse</span></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="bloc">
+    <div class="large">
+      <div class="confiance">
+        <div>
+          <h2>Les données des élèves restent à l'école.</h2>
+        </div>
+        <div>
+          <p>Compta PME fonctionne entièrement dans le navigateur : aucun serveur, aucune inscription, aucune donnée envoyée en ligne. Le travail est enregistré sur l'ordinateur de l'élève ; les copies s'échangent par fichier.</p>
+          <p class="discret">Conçu dans le respect de la LPD et de la LIPAD.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="final">
+    <div class="large">
+      <h2>Essayez-le avec votre prochaine classe.</h2>
+      <p>Ouvrez un exercice comme un élève, puis découvrez l'espace enseignant. Cela prend dix minutes.</p>
+      <div class="actions">
+        <a class="btn btn-action" href="./">Ouvrir le logiciel</a>
+        <a class="btn btn-clair" href="./guide.html">Lire le guide</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="large">
+    <span>Compta PME, logiciel pédagogique de comptabilité, Genève.</span>
+    <span><a href="./guide.html">Guide d'utilisation</a></span>
+  </div>
+</footer>
+
+<script>
+  // Démonstration : même logique de retour gradué que le logiciel, sur une seule opération.
+  const COMPTES = [
+    ['Classe 1 : Actifs', [['1000', 'Caisse'], ['1020', 'Banque (n/avoir)'], ['1100', 'Créances clients']]],
+    ['Classe 2 : Passifs', [['2000', 'Dettes fournisseurs']]],
+    ['Classe 3 : Produits', [['3200', 'Ventes de marchandises']]],
+    ['Classe 4 : Charges de marchandises', [['4200', 'Achats de marchandises']]],
+    ['Classe 6 : Autres charges', [['6000', 'Loyers']]],
+  ];
+  const NOMS = Object.fromEntries(COMPTES.flatMap(([, l]) => l));
+  const ATTENDU = { d: '4200', c: '2000', m: 480000 };
+  const $ = (id) => document.getElementById(id);
+  for (const id of ['debit', 'credit']) {
+    const s = $(id);
+    s.add(new Option('Choisissez un compte…', ''));
+    for (const [titre, liste] of COMPTES) {
+      const g = document.createElement('optgroup');
+      g.label = titre;
+      for (const [n, nom] of liste) g.appendChild(new Option(nom, n));
+      s.appendChild(g);
+    }
+  }
+  const fmt = (c) => (c / 100).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, "'");
+  const lire = () => Math.round(parseFloat($('montant').value.replace(/['\s]/g, '').replace(',', '.')) * 100) || 0;
+  function balance() {
+    const m = lire();
+    const d = $('debit').value ? m : 0;
+    const c = $('credit').value ? m : 0;
+    const max = Math.max(d, c, 1);
+    $('tot-d').textContent = fmt(d);
+    $('tot-c').textContent = fmt(c);
+    $('j-d').style.width = (d / max) * 100 + '%';
+    $('j-c').style.width = (c / max) * 100 + '%';
+    const f = $('fleau');
+    const pret = d > 0 && c > 0;
+    f.className = 'fleau ' + (pret ? 'ok' : 'att');
+    f.textContent = pret ? 'Écriture équilibrée' : 'Choisissez les comptes';
+  }
+  let erreurs = 0;
+  function valider() {
+    const d = $('debit').value, c = $('credit').value, m = lire();
+    const r = $('retour');
+    if (!d || !c) { r.innerHTML = '<div class="retour indice">Choisissez un compte au débit et un compte au crédit.</div>'; return; }
+    if (d === ATTENDU.d && c === ATTENDU.c && m === ATTENDU.m) {
+      r.innerHTML = '<div class="retour juste"><b>Juste.</b> Les achats de marchandises augmentent (débit) et la dette envers le fournisseur aussi (crédit).</div>';
+      return;
+    }
+    erreurs++;
+    let indice;
+    if (d === ATTENDU.c && c === ATTENDU.d) indice = 'Le débit et le crédit sont inversés.';
+    else if (d === ATTENDU.d && c === ATTENDU.c) indice = "Les comptes sont justes, mais le montant ne correspond pas à l'opération.";
+    else if ([d, c].every((x, i) => x[0] === [ATTENDU.d, ATTENDU.c][i][0])) indice = "Bonne classe de comptes, mais un compte n'est pas le bon.";
+    else indice = "Au moins un compte n'est pas le bon : demandez-vous quels comptes l'opération modifie.";
+    r.innerHTML = '<div class="retour indice">' + indice + (erreurs >= 2 ? ' <button type="button" id="voir">Voir la solution</button>' : '') + '</div>';
+    const b = $('voir');
+    if (b) b.onclick = () => {
+      b.insertAdjacentHTML('afterend', '<div class="solution">Débit ' + NOMS[ATTENDU.d] + ' (4200), crédit ' + NOMS[ATTENDU.c] + " (2000), 4'800.00.</div>");
+      b.remove();
+    };
+  }
+  ['debit', 'credit', 'montant'].forEach((id) => $(id).addEventListener('input', balance));
+  $('valider').addEventListener('click', valider);
+  balance();
+</script>
+</body>
+</html>
