@@ -248,7 +248,7 @@
           {@const ouvert = rechercheActive || g.visibles.some((x) => x.id === choix)}
           <details class="niveau" open={ouvert}>
             <summary>
-              <strong>Niveau {g.difficulte}{g.titre ? ` — ${g.titre}` : ''}</strong>
+              <strong>Niveau {g.difficulte}{g.titre ? ` · ${g.titre}` : ''}</strong>
               <span class="discret petit">{g.visibles.length} {g.visibles.length > 1 ? 'exercices' : 'exercice'}</span>
             </summary>
             <div class="cartes-exo">{#each g.visibles as ex (ex.id)}{@render ligne(ex)}{/each}</div>

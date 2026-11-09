@@ -548,7 +548,7 @@
   .solution-detail td { border: none; padding: 2px 14px 2px 0; background: none !important; }
   .mention { font-size: 12px; color: var(--c-texte-2); font-style: italic; margin-left: 4px; }
 
-  .enonce ol { margin: 0; padding: 0; list-style: none; max-height: calc(100vh - 170px); overflow-y: auto; }
+  .enonce ol { margin: 0; padding: 0; list-style: none; max-height: calc(100vh - 170px); max-height: calc(100dvh - 170px); overflow-y: auto; }
   .enonce li { border-bottom: 1px solid var(--c-bordure-2); }
   .enonce li button {
     display: grid; grid-template-columns: 26px 1fr; gap: 2px 4px; width: 100%; text-align: left;

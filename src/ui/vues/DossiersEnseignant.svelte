@@ -76,7 +76,7 @@
 {#each groupes as g, i}
   {#if i === 0 || groupes[i - 1]!.filiere !== g.filiere}<h2 class="filiere">{LIBELLES_FILIERE[g.filiere]}</h2>{/if}
   <section class="carte">
-    <h3>Niveau {g.difficulte}{g.titre ? ` — ${g.titre}` : ''}</h3>
+    <h3>Niveau {g.difficulte}{g.titre ? ` · ${g.titre}` : ''}</h3>
     <table class="tableau">
       <thead>
         <tr><th>Dossier</th><th class="num">Pièces</th><th>Pour les élèves</th><th>Pour l'enseignant</th></tr>
