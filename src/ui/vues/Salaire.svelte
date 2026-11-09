@@ -60,7 +60,7 @@
       {#each lignes as l, i (l.cle)}
         <tr>
           <td><input class="champ" aria-label="Rubrique" bind:value={l.libelle} /></td>
-          <td><input class="champ montant num" aria-label="Taux en %" inputmode="decimal" bind:value={l.taux} placeholder="—" /></td>
+          <td><input class="champ montant num" aria-label="Taux en %" inputmode="decimal" bind:value={l.taux} placeholder="-" /></td>
           <td>
             <ChampMontant id={`fiche-${l.cle}`} libelle={`Montant ${l.libelle}`} bind:valeur={l.montant} />
             {#if fausses.has(i)}<div class="faux">Montant à revoir (taux × salaire brut, arrondi aux 5 centimes)</div>{/if}

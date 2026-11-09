@@ -51,7 +51,7 @@
 <style>
   .legende { margin: -8px 0 14px; font-size: 13px; }
   .un { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 16px; align-items: start; }
-  .liste { max-height: calc(100vh - 190px); overflow-y: auto; }
+  .liste { max-height: calc(100vh - 190px); max-height: calc(100dvh - 190px); overflow-y: auto; }
   .liste button {
     display: grid; grid-template-columns: 42px 1fr auto; gap: 6px; width: 100%; text-align: left;
     font: inherit; color: inherit; background: none; border: none; border-bottom: 1px solid var(--c-bordure-2);

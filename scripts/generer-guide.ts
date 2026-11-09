@@ -48,14 +48,17 @@ const html = `<title>Guide Compta PME</title>
 /* Mise en page : colonne de lecture unique, sommaire en tête, charte de l'application (bleu structure, orange d'action). */
 :root {
   --fond: #ffffff; --texte: #1d2733; --discret: #5a6675; --structure: #1F4E78; --accent: #C4501A;
+  --sur-accent: #ffffff; --accent-texte: #A8420F;
   --pale: #F1F6FB; --selection: #D6E4F0; --bordure: #d5dde6;
   --police: Arial, "Helvetica Neue", Helvetica, sans-serif;
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
   --fond: #121a22; --texte: #e3e9ef; --discret: #9fb0c1; --structure: #8fbbe3; --accent: #f08a55;
+  --sur-accent: #121a22; --accent-texte: #f08a55;
   --pale: #1a2632; --selection: #22384d; --bordure: #2c3b4a; color-scheme: dark } }
 :root[data-theme="dark"] {
   --fond: #121a22; --texte: #e3e9ef; --discret: #9fb0c1; --structure: #8fbbe3; --accent: #f08a55;
+  --sur-accent: #121a22; --accent-texte: #f08a55;
   --pale: #1a2632; --selection: #22384d; --bordure: #2c3b4a; color-scheme: dark }
 html, body { margin: 0; }
 body { background: var(--fond); color: var(--texte); font-family: var(--police); font-size: 16px; line-height: 1.55; }
@@ -66,7 +69,7 @@ header { border-bottom: 3px solid var(--structure); padding-bottom: 18px; margin
 h1 { font-size: 30px; margin: 0 0 8px; color: var(--structure); text-wrap: balance; }
 .chapeau { margin: 0; max-width: 62ch; }
 .acces { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; margin-top: 14px; }
-.lien-site { display: inline-block; background: var(--accent); color: #fff; text-decoration: none; font-weight: bold;
+.lien-site { display: inline-block; background: var(--accent); color: var(--sur-accent); text-decoration: none; font-weight: bold;
   padding: 8px 14px; border-radius: 3px; }
 .lien-site:focus-visible, a:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 .acces code { font-size: 14px; color: var(--discret); word-break: break-all; }
@@ -92,7 +95,7 @@ ol.etapes li::before { content: counter(e); position: absolute; left: 0; top: 1p
   font-variant-numeric: tabular-nums; }
 .retenir { border-left: 4px solid var(--accent); background: var(--pale); padding: 10px 14px; margin: 12px 0; }
 .retenir p { margin: 2px 0 0; }
-.etiquette { text-transform: uppercase; letter-spacing: 0.08em; font-size: 11px; font-weight: bold; color: var(--accent); }
+.etiquette { text-transform: uppercase; letter-spacing: 0.08em; font-size: 11px; font-weight: bold; color: var(--accent-texte); }
 footer { margin-top: 48px; border-top: 1px solid var(--bordure); padding-top: 12px; font-size: 13px; color: var(--discret); }
 </style>
 <div class="page">

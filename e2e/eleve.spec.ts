@@ -84,3 +84,19 @@ test('la liste des comptes se manipule entièrement à la souris', async ({ page
   await liste.getByRole('option', { name: /Achats de marchandises/ }).click();
   await expect(page.getByLabel('Compte au débit, ligne 1')).toHaveValue('Achats de marchandises');
 });
+
+test('Échap ferme le récapitulatif des pièces et rend le focus au bouton', async ({ page }) => {
+  await page.goto('./');
+  await page.getByLabel('Prénom').fill('Léa');
+  await page.getByLabel('Nom', { exact: true }).fill('Martin');
+  await page.getByLabel('Classe').fill('2CFC1');
+  await page.getByLabel('Rechercher un exercice').fill('outils');
+  await page.getByText(/Outils & Cie/).first().click();
+  await page.getByRole('button', { name: 'Commencer' }).click();
+  const declencheur = page.locator('.avancement .declencheur');
+  await declencheur.click();
+  await expect(page.getByRole('dialog', { name: 'Récapitulatif des pièces' })).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('dialog', { name: 'Récapitulatif des pièces' })).toHaveCount(0);
+  await expect(declencheur).toBeFocused();
+});

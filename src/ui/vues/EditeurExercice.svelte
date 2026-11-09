@@ -25,6 +25,7 @@
   import { dt, m, normaliser, TITRES_CLASSES } from '../format';
   import ChampCompte from '../composants/ChampCompte.svelte';
   import ChampMontant from '../composants/ChampMontant.svelte';
+  import BoutonRetirer from '../composants/BoutonRetirer.svelte';
   import { PIECE_BOUCLEMENT, POINTS_BOUCLEMENT_PAR_DEFAUT } from '../../engine/correction-bouclement';
 
   let { id }: { id: string } = $props();
@@ -256,7 +257,7 @@
   <div class="corps-carte grille">
     <div class="large">
       <label class="bloc" for="ex-titre">Titre de l'exercice</label>
-      <input id="ex-titre" class="champ" bind:value={titre} placeholder="Ex. Cycles du Léman — premier trimestre" />
+      <input id="ex-titre" class="champ" bind:value={titre} placeholder="Ex. Cycles du Léman, premier trimestre" />
     </div>
     <div>
       <label class="bloc" for="ex-niveau">Comptes et fonctions</label>
@@ -275,7 +276,7 @@
       <label class="bloc" for="ex-difficulte">Niveau de difficulté</label>
       <select id="ex-difficulte" class="champ" bind:value={difficulte}>
         {#each [1, 2, 3, 4, 5] as n}
-          <option value={n}>Niveau {n}{TITRES_DIFFICULTE[filiere][n] ? ` — ${TITRES_DIFFICULTE[filiere][n]}` : ''}</option>
+          <option value={n}>Niveau {n}{TITRES_DIFFICULTE[filiere][n] ? ` · ${TITRES_DIFFICULTE[filiere][n]}` : ''}</option>
         {/each}
       </select>
     </div>
@@ -456,8 +457,8 @@
               <tr>
                 <td><ChampCompte id={`ouv-${l.cle}`} libelle={`Compte ${col.titre}, ligne ${i + 1}`} comptes={comptesBilan} bind:valeur={l.compte} /></td>
                 <td style="width:140px"><ChampMontant id={`ouvm-${l.cle}`} libelle={`Montant, ligne ${i + 1}`} bind:valeur={l.montant} /></td>
-                <td style="width:30px">
-                  <button class="retirer" aria-label="Retirer la ligne" onclick={() => col.lignes.splice(i, 1)}>×</button>
+                <td class="cellule-retirer">
+                  <BoutonRetirer libelle={`Retirer la ligne ${i + 1}`} direct={!l.compte && !l.montant} onretirer={() => col.lignes.splice(i, 1)} />
                 </td>
               </tr>
             {/each}
@@ -500,7 +501,7 @@
             <td><textarea class="champ" aria-label="Texte" rows="2" bind:value={o.texte}></textarea></td>
             <td><input class="champ num points" type="number" min="0" step="0.5" aria-label="Points" bind:value={o.points} /></td>
             <td class="petit">{corrigeSaisi.has(o.numero.trim()) ? 'Saisi' : 'À saisir'}</td>
-            <td><button class="retirer" aria-label="Retirer l'opération" onclick={() => operations.splice(i, 1)}>×</button></td>
+            <td class="cellule-retirer"><BoutonRetirer libelle={`Retirer l'opération ${o.numero}`} direct={!o.texte.trim()} onretirer={() => operations.splice(i, 1)} /></td>
           </tr>
         {/each}
       </tbody>
@@ -555,8 +556,7 @@
   h3 { font-size: 13px; color: var(--c-structure); margin: 0 0 6px; }
   .bilan td, .ops td { border: none; padding: 3px 4px; }
   .pied-bilan { display: flex; justify-content: space-between; padding: 6px 4px; border-top: 1px solid var(--c-texte); margin-top: 4px; }
-  .retirer { border: none; background: none; color: var(--c-texte-2); font-size: 18px; cursor: pointer; padding: 6px 4px; }
-  .retirer:hover { color: var(--c-negatif); }
+  .cellule-retirer { width: 30px; text-align: right; white-space: nowrap; }
   .pied-ops { display: flex; gap: 18px; align-items: center; margin-top: 10px; flex-wrap: wrap; }
   .points { text-align: right; }
   .points-b { width: 80px; text-align: right; margin-left: 8px; }

@@ -24,3 +24,38 @@ test("l'enseignant ouvre son espace, regarde un dossier en aperçu et revient su
   await page.getByRole('button', { name: 'Relecture', exact: true }).click();
   await expect(page.getByText(/0 \/ \d+ éléments validés/)).toBeVisible();
 });
+
+test("retirer une opération demande une confirmation, sauf si la ligne est encore vide", async ({ page }) => {
+  await page.goto('./');
+  await page.getByRole('button', { name: 'Espace enseignant' }).click();
+  await page.getByLabel('Code', { exact: true }).fill(CODE_ESSAI);
+  await page.getByLabel('Confirmer le code').fill(CODE_ESSAI);
+  await page.getByRole('button', { name: 'Entrer' }).click();
+  await page.getByRole('button', { name: 'Nouvel exercice' }).click();
+
+  const lignes = page.locator('table.ops tbody tr');
+  const avant = await lignes.count();
+  await page.getByRole('button', { name: 'Ajouter une opération' }).click();
+  await expect(lignes).toHaveCount(avant + 1);
+  const ligne = lignes.last();
+
+  // Ligne encore vide : retrait direct.
+  await ligne.getByRole('button', { name: /^Retirer l'opération/ }).click();
+  await expect(lignes).toHaveCount(avant);
+
+  // Ligne remplie : le premier clic arme le bouton, rien n'est retiré ; le second retire.
+  await page.getByRole('button', { name: 'Ajouter une opération' }).click();
+  await lignes.last().getByLabel('Texte').fill('Achat de marchandises à crédit');
+  await lignes.last().getByRole('button', { name: /^Retirer l'opération/ }).click();
+  await expect(lignes).toHaveCount(avant + 1);
+  const confirmer = lignes.last().getByRole('button', { name: /^Confirmer/ });
+  await expect(confirmer).toHaveText('Confirmer');
+
+  // Le focus part ailleurs : le bouton revient au repos.
+  await lignes.last().getByLabel('Texte').focus();
+  await expect(lignes.last().getByRole('button', { name: /^Confirmer/ })).toHaveCount(0);
+
+  await lignes.last().getByRole('button', { name: /^Retirer l'opération/ }).click();
+  await lignes.last().getByRole('button', { name: /^Confirmer/ }).click();
+  await expect(lignes).toHaveCount(avant);
+});

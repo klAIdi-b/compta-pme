@@ -9,6 +9,14 @@
   const a = $derived(avancementSession(s));
   const correction = $derived(avecCorrection(s));
   let ouvert = $state(false);
+  let declencheur = $state<HTMLButtonElement | null>(null);
+
+  /** Échap ferme le récapitulatif et rend le focus au bouton qui l'a ouvert. */
+  function touche(e: KeyboardEvent) {
+    if (!ouvert || e.key !== 'Escape') return;
+    ouvert = false;
+    declencheur?.focus();
+  }
 
   const LIBELLES: Record<StatutOperation, string> = {
     juste: 'Juste',
@@ -25,9 +33,11 @@
   }
 </script>
 
+<svelte:window onkeydown={touche} />
+
 {#if a}
   <div class="avancement">
-    <button class="declencheur" aria-expanded={ouvert} aria-controls="recap-avancement" onclick={() => (ouvert = !ouvert)}>
+    <button class="declencheur" bind:this={declencheur} aria-expanded={ouvert} aria-controls="recap-avancement" onclick={() => (ouvert = !ouvert)}>
       <span>{a.saisies} / {a.total} pièces</span>
       <BarreAvancement {a} {correction} largeur={120} />
     </button>

@@ -27,7 +27,7 @@
       })),
     },
     ...classerExercices(exercicesDemo).map((g) => ({
-      titre: `${LIBELLES_FILIERE[g.filiere]} · niveau ${g.difficulte}${g.titre ? ` — ${g.titre}` : ''}`,
+      titre: `${LIBELLES_FILIERE[g.filiere]} · niveau ${g.difficulte}${g.titre ? ` · ${g.titre}` : ''}`,
       lignes: g.exercices.map((ex) => ({
         cle: `ex:${ex.id}`,
         groupe: `${g.filiere} · niveau ${g.difficulte}`,

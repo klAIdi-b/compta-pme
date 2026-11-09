@@ -218,7 +218,7 @@
         </div>
       {/if}
       {#if etat.stockageIndisponible}
-        <div class="alerte" style="margin-bottom:16px">
+        <div class="alerte" role="alert" style="margin-bottom:16px">
           Le navigateur refuse l'enregistrement local (navigation privée ?). Votre travail sera perdu à la fermeture de
           la page.
         </div>
@@ -247,7 +247,7 @@
 {/if}
 
 <style>
-  .app { display: grid; grid-template-columns: 232px minmax(0, 1fr); grid-template-rows: 60px minmax(0, 1fr); height: 100vh; }
+  .app { display: grid; grid-template-columns: 232px minmax(0, 1fr); grid-template-rows: 60px minmax(0, 1fr); height: 100vh; height: 100dvh; }
   .entete {
     grid-column: 1 / -1; display: flex; align-items: center; gap: 24px; padding: 0 20px;
     background: var(--c-fond); border-bottom: 1px solid var(--c-bordure);

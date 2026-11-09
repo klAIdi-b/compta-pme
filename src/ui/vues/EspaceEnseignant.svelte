@@ -193,7 +193,7 @@
           <select class="champ modele" bind:value={modeleId} aria-label="Exercice de départ">
             <option value="">Partir d'un exemple…</option>
             {#each exercicesDemo as modele}
-              <option value={modele.id}>{etiquetteNiveau(modele)} — {modele.titre}</option>
+              <option value={modele.id}>{etiquetteNiveau(modele)} · {modele.titre}</option>
             {/each}
           </select>
           <button
