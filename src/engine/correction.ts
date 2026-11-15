@@ -134,6 +134,8 @@ export interface SuiviOperation {
   essais: number;
   dernier: Diagnostic;
   solutionVue: boolean;
+  /** Bouclement : niveau d'aide consulté par étape (1 la règle, 2 les comptes), information pour l'enseignant. */
+  aides?: Record<string, number>;
 }
 
 export type Suivi = Record<string, SuiviOperation>;

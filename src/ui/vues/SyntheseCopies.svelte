@@ -107,6 +107,15 @@
   let voirJustes = $state(false);
 
   /** Lignes d'écriture lisibles : « Débit Banque (1020) · Crédit Ventes (3200) · 1'000.00 ». */
+  /** Aides au bouclement consultées par l'élève (information, sans effet sur les points). */
+  function texteAides(copie: Copie): string {
+    const aides = copie.suivi?.[PIECE_BOUCLEMENT]?.aides ?? {};
+    const parties = Object.entries(aides)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([piece, n]) => `${piece} ${n >= 2 ? 'règle et comptes' : 'règle'}`);
+    return parties.length ? `Aide consultée : ${parties.join(', ')}` : '';
+  }
+
   function lisibles(lignes: LigneEcriture[], copie: Copie): string[] {
     const nom = new Map(copie.dossier.plan.map((c) => [c.numero, c.intitule]));
     const cpt = (n: string) => `${nom.get(n) ?? n} (${n})`;
@@ -184,7 +193,10 @@
                       <tr>
                         <td class="num" style="width:40px">{o.piece}</td>
                         <td>{texteOp(o.piece)}</td>
-                        <td style="width:220px" class:faux={o.diagnostic !== 'juste'}>{LIBELLES_DIAGNOSTIC[o.diagnostic]}</td>
+                        <td style="width:220px" class:faux={o.diagnostic !== 'juste'}>
+                          {LIBELLES_DIAGNOSTIC[o.diagnostic]}
+                          {#if o.piece === PIECE_BOUCLEMENT && texteAides(l.copie)}<div class="aides-vues">{texteAides(l.copie)}</div>{/if}
+                        </td>
                         <td class="montant" style="width:80px">{fmt(o.points)} / {fmt(o.max)}</td>
                       </tr>
                       {#if voirJustes || o.diagnostic !== 'juste'}
@@ -288,6 +300,7 @@
   .cote-a-cote { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-size: 12px; }
   .etiquette { font-weight: bold; color: var(--c-structure); margin-bottom: 2px; }
   .ligne-ecr { font-variant-numeric: tabular-nums; }
+  .aides-vues { font-weight: normal; font-size: 12px; color: var(--c-texte-2); }
   .tete-bilan { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
   .aide-bilan { margin: 0; padding: 10px 18px 0; }
   .faute-commune { margin-top: 6px; padding: 6px 10px; border-left: 3px solid var(--c-accent); background: var(--c-alerte-fond); font-size: 12px; border-radius: 4px; }

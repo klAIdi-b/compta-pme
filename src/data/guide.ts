@@ -209,8 +209,9 @@ export const GUIDE: PartieGuide[] = [
                 'en entraînement, chaque résultat est contrôlé.',
               'Résultat par degrés, Flux de trésorerie et Seuil de rentabilité (maturité) : calculez chaque degré ou chaque ' +
                 'flux d’après vos comptes avant bouclement ; en entraînement, chaque résultat est contrôlé.',
-              "Bouclement : passez vous-même les écritures de bouclement au journal (pièces B1, B2…). Selon l'exercice, " +
-                'elles sont corrigées comme les opérations.',
+              "Bouclement : depuis l'écran Bouclement, « Saisir les écritures de bouclement » ouvre le journal sur la pièce B1. " +
+                "Chaque étape affiche sa consigne ; en entraînement, « Besoin d'aide ? » rappelle la règle, puis les comptes " +
+                "concernés (sans les montants). Selon l'exercice, ces écritures sont corrigées comme les opérations.",
             ],
           },
           { type: 'p', texte: 'Ce que vous écrivez dans les fiches est enregistré avec votre travail.' },

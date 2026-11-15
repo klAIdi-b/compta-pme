@@ -15,6 +15,7 @@
   import ChampMontant from '../composants/ChampMontant.svelte';
   import PieceVue from '../composants/PieceVue.svelte';
   import { chapitrePourComptes } from '../../data/theorie-index';
+  import { comptesDeLEtape, etapesBouclement, etapesSaisies } from '../../engine/guide-bouclement';
 
   type LigneSaisie = { cle: number; debit: string | null; credit: string | null; montant: Centimes | null };
 
@@ -46,6 +47,22 @@
   }
   const modifAutorisee = $derived(ex.mode === 'entrainement' && ex.parametres.modificationDirecte && vueEleve(etat.genre));
   const suivi = $derived(etat.session!.suivi);
+
+  // ---- Accompagnement des écritures de bouclement (B1, B2…) ----
+  const etapes = $derived(
+    ex.parametres.modeBouclement === 'compteDeResultat' && !ex.parametres.bouclementAutomatique ? etapesBouclement(d.formeJuridique) : [],
+  );
+  const etapeCourante = $derived(etapes.find((e) => e.piece === piece.trim().toUpperCase()));
+  const etapesFaites = $derived(etapesSaisies(d));
+  /** Aides seulement en entraînement, comme le retour gradué. */
+  const aidesPermises = $derived(ex.mode === 'entrainement' && vueEleve(etat.genre));
+  const niveauAide = $derived(etapeCourante ? (suivi[PIECE_BOUCLEMENT]?.aides?.[etapeCourante.piece] ?? 0) : 0);
+  function demanderAide(niveau: number) {
+    if (!etapeCourante) return;
+    const ancien = suivi[PIECE_BOUCLEMENT] ?? { essais: 0, solutionVue: false, dernier: 'manquante' as Diagnostic };
+    const aides = { ...(ancien.aides ?? {}), [etapeCourante.piece]: Math.max(niveau, ancien.aides?.[etapeCourante.piece] ?? 0) };
+    etat.majSuivi({ ...suivi, [PIECE_BOUCLEMENT]: { ...ancien, aides } });
+  }
 
   function evaluer(dossier: Dossier, piece: string, compter: boolean) {
     if (!retour) return;
@@ -142,9 +159,12 @@
 
   function reinitialiser() {
     editionId = null;
-    const o = prochaineOperation();
-    piece = o?.numero ?? '';
-    date = o ? dt(o.date) : date;
+    // Pendant le bouclement, la grille propose l'étape suivante (B2 après B1…).
+    const etape = etapeCourante;
+    const suivante = etape ? etapes.slice(etapes.indexOf(etape) + 1).find((e) => !etapesFaites.has(e.piece)) : undefined;
+    const o = suivante ? undefined : prochaineOperation();
+    piece = suivante?.piece ?? o?.numero ?? '';
+    date = suivante ? dt(d.fin) : o ? dt(o.date) : date;
     libelle = '';
     lignes = [nouvelleLigne()];
     erreurs = [];
@@ -302,7 +322,42 @@
   <div class="colonne-principale">
     <section class="carte saisie" aria-label="Nouvelle écriture" data-visite="saisie">
       <h2>{editionId ? `Modification de la pièce ${piece}` : 'Nouvelle écriture'}</h2>
-      {#if operationCourante}
+      {#if etapeCourante}
+        {@const rang = etapes.indexOf(etapeCourante) + 1}
+        <div class="operation-courante etape-bouclement">
+          <div><b>Bouclement, étape {rang} sur {etapes.length} ({etapeCourante.piece}).</b> {etapeCourante.consigne}</div>
+          <ol class="etapes-b" aria-label="Étapes du bouclement">
+            {#each etapes as e (e.piece)}
+              <li class:faite={etapesFaites.has(e.piece)} class:active={e === etapeCourante}>
+                <span class="coche" aria-hidden="true">{etapesFaites.has(e.piece) ? '✓' : ''}</span>{e.piece} {e.titre}{#if etapesFaites.has(e.piece)}<span class="sr-only"> (saisie)</span>{/if}
+              </li>
+            {/each}
+          </ol>
+          {#if aidesPermises}
+            {#if niveauAide >= 1}
+              <div class="aide-b"><b>La règle :</b> {etapeCourante.regle}</div>
+            {/if}
+            {#if niveauAide >= 2}
+              {@const comptesB = comptesDeLEtape(d, etapeCourante.piece)}
+              <div class="aide-b">
+                {#if comptesB.length}
+                  <b>Comptes concernés :</b> {comptesB.map((c) => c.intitule).join(', ')}.
+                  Les montants se trouvent dans vos comptes.
+                  <button class="btn-lien" onclick={() => etat.aller('balance')}>Voir les soldes dans la balance</button>
+                {:else}
+                  <b>Comptes concernés :</b> aucun compte de charges ou de produits n'a de solde pour l'instant. Saisissez
+                  d'abord les opérations de l'énoncé.
+                {/if}
+              </div>
+            {/if}
+            {#if niveauAide === 0}
+              <button class="btn-lien aide-lien" onclick={() => demanderAide(1)}>Besoin d'aide ?</button>
+            {:else if niveauAide === 1}
+              <button class="btn-lien aide-lien" onclick={() => demanderAide(2)}>Quels comptes sont concernés ?</button>
+            {/if}
+          {/if}
+        </div>
+      {:else if operationCourante}
         <div class="operation-courante">
           <b>{operationCourante.piece ? 'Pièce' : 'Opération'} {operationCourante.numero}.</b> {operationCourante.texte}
           {#if operationCourante.piece}
@@ -546,6 +601,14 @@
   .saisie tbody tr:hover td { background: none; }
   .operation-courante { padding: 12px 18px; background: #f3f8fd; border-bottom: 1px solid var(--c-bordure-3); line-height: 1.45; }
   .bascule-piece { margin-left: 10px; font-size: 13px; }
+  .etapes-b { list-style: none; margin: 8px 0 0; padding: 0; display: flex; gap: 8px; flex-wrap: wrap; font-size: 13px; }
+  .etapes-b li { padding: 3px 10px; border-radius: 999px; background: #fff; border: 1px solid var(--c-bordure-2); color: var(--c-texte-2); }
+  .etapes-b li.active { border-color: var(--c-structure); color: var(--c-structure); font-weight: bold; }
+  .etapes-b li.faite { background: var(--c-ok-fond); border-color: transparent; color: var(--c-ok); }
+  .coche { display: inline-block; min-width: 0; margin-right: 4px; }
+  .coche:empty { margin-right: 0; }
+  .aide-b { margin-top: 8px; padding: 8px 12px; background: #fff; border-left: 3px solid var(--c-structure); border-radius: 4px; font-size: 14px; }
+  .aide-lien { display: inline-block; margin-top: 8px; font-size: 13.5px; font-weight: bold; }
   .zone-piece { padding: 14px 18px; background: var(--c-fond-2); border-bottom: 1px solid var(--c-bordure-3); max-height: 420px; overflow-y: auto; }
   .grille-saisie { min-width: 0; }
   .ajout-ligne { display: flex; align-items: center; gap: 14px; padding: 2px 14px 12px; flex-wrap: wrap; font-size: 13px; }

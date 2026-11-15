@@ -177,3 +177,25 @@ test("l'écran Bouclement mène au journal sur la pièce B1 et explique la réou
   await expect(page.locator('#saisie-piece')).toHaveValue('B1');
   await expect(page.locator('#saisie-date')).toHaveValue('31.12.2026');
 });
+
+test('le bouclement guide l’élève étape par étape, avec une aide en deux niveaux', async ({ page }) => {
+  await commencer(page, 'cycles', /Cycles du Léman/);
+  await page.goto('./#journal');
+  const fermerVisite = page.getByRole('button', { name: /Passer|Fermer la visite|Terminer/ });
+  if (await fermerVisite.first().isVisible().catch(() => false)) await fermerVisite.first().click();
+  await saisir(page, 'Ventes au comptant', '1000', '3200', '12350');
+  await page.goto('./#bouclement');
+  await page.getByRole('button', { name: 'Saisir les écritures de bouclement (B1)' }).click();
+  await expect(page.getByText('Bouclement, étape 1 sur 3 (B1).')).toBeVisible();
+  await expect(page.getByText('La règle :')).toHaveCount(0);
+  await page.getByRole('button', { name: "Besoin d'aide ?" }).click();
+  await expect(page.getByText('La règle :')).toBeVisible();
+  await page.getByRole('button', { name: 'Quels comptes sont concernés ?' }).click();
+  await expect(page.locator('.aide-b', { hasText: 'Comptes concernés' })).toContainText('Ventes de marchandises');
+  // Aucun montant dans les aides.
+  await expect(page.locator('.aide-b', { hasText: 'Comptes concernés' })).not.toContainText(/\d'\d{3}\.\d{2}|\d+\.\d{2}/);
+  // Après B1 (ici simplifiée : une seule vente), la grille propose B2.
+  await saisir(page, 'Clôture', '3200', '9000', '12350');
+  await expect(page.locator('#saisie-piece')).toHaveValue('B2');
+  await expect(page.getByText('Bouclement, étape 2 sur 3 (B2).')).toBeVisible();
+});
