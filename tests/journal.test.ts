@@ -136,3 +136,29 @@ describe('dossier exemple', () => {
     expect(dossierExemple().ecritures).toHaveLength(7);
   });
 });
+
+describe('suppression d’une écriture', () => {
+  it('retire une écriture, ou une écriture extournée avec son extourne, ou une extourne seule', async () => {
+    const { supprimerEcriture, extourner, ajouterEcriture } = await import('../src/engine/journal');
+    const { creerDossier } = await import('../src/engine/exercice');
+    const { demoCfc1 } = await import('../src/data/demo-cfc1');
+    const { plan, chf } = await import('./fixtures');
+    let d = creerDossier(demoCfc1, plan);
+    const r1 = ajouterEcriture(d, { id: 'E1', date: '2026-01-05', piece: '1', libelle: 'x', lignes: [{ debit: '1000', credit: '1020', montant: chf(100) }] });
+    if (!r1.ok) throw new Error();
+    d = r1.valeur;
+    // Écriture simple
+    const s1 = supprimerEcriture(d, 'E1');
+    expect(s1.ok && s1.valeur.ecritures.length).toBe(0);
+    // Écriture extournée : l'extourne part avec elle
+    const ex = extourner(d, 'E1', '2026-01-06');
+    if (!ex.ok) throw new Error();
+    const s2 = supprimerEcriture(ex.valeur, 'E1');
+    expect(s2.ok && s2.valeur.ecritures.length).toBe(0);
+    // Extourne seule : l'écriture d'origine reste
+    const idExtourne = ex.valeur.ecritures.find((e) => e.extourneDe === 'E1')!.id;
+    const s3 = supprimerEcriture(ex.valeur, idExtourne);
+    expect(s3.ok && s3.valeur.ecritures.map((e) => e.id)).toEqual(['E1']);
+    expect(supprimerEcriture(d, 'E9').ok).toBe(false);
+  });
+});

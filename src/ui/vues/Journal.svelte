@@ -3,7 +3,7 @@
   import { etat } from '../etat.svelte';
   import { vueEleve } from '../modes';
   import { comptesDisponibles } from '../../engine/dossier';
-  import { ajouterEcriture, estExtournee, extourner, modifierEcriture, nouvelId } from '../../engine/journal';
+  import { ajouterEcriture, estExtournee, extourner, modifierEcriture, nouvelId, supprimerEcriture } from '../../engine/journal';
   import { diagnostiquer, enregistrerTentative, solutionDisponible, INDICES, type Diagnostic } from '../../engine/correction';
   import type { Dossier, Ecriture } from '../../engine/dossier';
   import { bouclementCorrige, corrigeBouclement, diagnostiquerBouclement, PIECE_BOUCLEMENT } from '../../engine/correction-bouclement';
@@ -215,6 +215,30 @@
     evaluer(r.valeur, e.piece, false);
   }
 
+  /** Suppression d'une écriture (et de son extourne éventuelle) ; les tentatives déjà comptées restent comptées. */
+  function demanderSuppression(id: string) {
+    const e = d.ecritures.find((x) => x.id === id);
+    if (!e) return;
+    const avecExtourne = !e.extourneDe && estExtournee(d, id);
+    const ok = confirm(
+      `Supprimer ${e.extourneDe ? "l'extourne de " : ''}la pièce ${e.piece} « ${e.libelle} » ?` +
+        (avecExtourne ? '\n\nSon extourne sera supprimée aussi.' : '') +
+        '\n\nVous pourrez ensuite saisir à nouveau l\'opération.',
+    );
+    if (!ok) return;
+    const r = supprimerEcriture(d, id);
+    if (!r.ok) return alert(r.erreurs.join('\n'));
+    if (editionId === id) reinitialiser();
+    etat.majDossier(r.valeur);
+    evaluer(r.valeur, e.piece, false);
+    // La grille propose aussitôt la pièce supprimée, pour la saisir à nouveau (si l'élève n'a rien commencé).
+    if (!e.extourneDe && utiles.length === 0 && !libelle.trim()) {
+      piece = e.piece;
+      date = dt(e.date);
+      tick().then(() => document.getElementById('saisie-libelle')?.focus());
+    }
+  }
+
   async function modifier(e: Ecriture) {
     editionId = e.id;
     date = dt(e.date);
@@ -401,9 +425,12 @@
                     </td>
                   {/if}
                   <td class="actions">
-                    {#if j === 0 && !extournee && !e.extourneDe}
-                      {#if modifAutorisee}<button class="btn-lien" onclick={() => modifier(e)}>Modifier</button>{/if}
-                      <button class="btn-lien" onclick={() => demanderExtourne(e.id)}>Extourner</button>
+                    {#if j === 0}
+                      {#if !extournee && !e.extourneDe}
+                        {#if modifAutorisee}<button class="btn-lien" onclick={() => modifier(e)}>Modifier</button>{/if}
+                        <button class="btn-lien" onclick={() => demanderExtourne(e.id)}>Extourner</button>
+                      {/if}
+                      <button class="btn-lien supprimer" aria-label={`Supprimer la pièce ${e.piece}${e.extourneDe ? ' (extourne)' : ''}`} onclick={() => demanderSuppression(e.id)}>Supprimer</button>
                     {/if}
                   </td>
                 </tr>
@@ -423,8 +450,8 @@
                         <b>Indice :</b> {INDICES[st]}
                         {kc === PIECE_BOUCLEMENT ? '(Écritures de bouclement prises ensemble.) ' : ''}
                         {modifAutorisee
-                          ? "Corrigez par une extourne ou modifiez l'écriture."
-                          : "Corrigez par une extourne, puis saisissez à nouveau l'opération."}
+                          ? "Modifiez l'écriture, ou supprimez-la et saisissez à nouveau l'opération."
+                          : "Supprimez l'écriture (ou extournez-la), puis saisissez à nouveau l'opération."}
                         {#if solutionDisponible(s) && !s?.solutionVue}
                           <button class="btn-lien solution" onclick={() => voirSolution(kc)}>Voir la solution</button>
                         {/if}
@@ -533,6 +560,8 @@
   .journal th { padding: 9px 8px; }
   .int { display: block; color: var(--c-texte-2); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .actions { text-align: right; white-space: nowrap; }
+  .actions .btn-lien + .btn-lien { margin-left: 10px; }
+  .supprimer { color: var(--c-negatif); }
   tr.annulee td { color: #7a8591; }
   .barre { text-decoration: line-through; }
   .statut { font-size: 12px; font-weight: bold; white-space: nowrap; display: inline-block; padding: 2px 9px; border-radius: 999px; }

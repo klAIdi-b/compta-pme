@@ -99,6 +99,16 @@ export function extourner(d: Dossier, id: string, date: string): Resultat<Dossie
   return ajouterEcriture(d, inverse);
 }
 
+/**
+ * Suppression d'une écriture validée (choix de l'enseignant le 15.11.2026 : l'élève peut supprimer une écriture fausse
+ * et la saisir à nouveau ; l'extourne reste possible). Supprimer une écriture extournée retire aussi son extourne ;
+ * supprimer une extourne rend son effet à l'écriture d'origine.
+ */
+export function supprimerEcriture(d: Dossier, id: string): Resultat<Dossier> {
+  if (!d.ecritures.some((e) => e.id === id)) return echec(`Écriture ${id} introuvable.`);
+  return ok({ ...d, ecritures: d.ecritures.filter((e) => e.id !== id && e.extourneDe !== id) });
+}
+
 /** Modification directe (entraînement, si l'enseignant l'autorise). */
 export function modifierEcriture(d: Dossier, id: string, nouvelle: Omit<Ecriture, 'id'>): Resultat<Dossier> {
   const i = d.ecritures.findIndex((e) => e.id === id);

@@ -100,3 +100,17 @@ test('Échap ferme le récapitulatif des pièces et rend le focus au bouton', as
   await expect(page.getByRole('dialog', { name: 'Récapitulatif des pièces' })).toHaveCount(0);
   await expect(declencheur).toBeFocused();
 });
+
+test("l'élève supprime une écriture fausse et la saisit à nouveau", async ({ page }) => {
+  await commencer(page, 'cycles', /Cycles du Léman/);
+  await page.goto('./#journal');
+  const fermerVisite = page.getByRole('button', { name: /Passer|Fermer la visite|Terminer/ });
+  if (await fermerVisite.first().isVisible().catch(() => false)) await fermerVisite.first().click();
+  await saisir(page, 'Essai', '2000', '4200', '4800');
+  await expect(page.getByText('À revoir').first()).toBeVisible();
+  page.once('dialog', (d) => d.accept());
+  await page.getByRole('button', { name: 'Supprimer la pièce 1' }).click();
+  await expect(page.getByText("Aucune écriture pour l'instant.")).toBeVisible();
+  await saisir(page, 'Achat de marchandises à crédit', '4200', '2000', '4800');
+  await expect(page.getByText('Juste').first()).toBeVisible();
+});
