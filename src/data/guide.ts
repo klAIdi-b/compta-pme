@@ -110,7 +110,7 @@ export const GUIDE: PartieGuide[] = [
             texte:
               'Cliquez dans un champ compte : la liste de tous les comptes de l’exercice s’ouvre, classée par classe. Vous ' +
               'pouvez aussi taper une partie du nom (« banque », « dettes four ») : la liste se réduit. Choisissez avec la ' +
-              'souris, au doigt ou avec les flèches puis Entrée.',
+              'souris, au doigt, ou avec les flèches puis Tab ou Entrée : le compte en surbrillance est choisi.',
           },
           {
             type: 'retenir',

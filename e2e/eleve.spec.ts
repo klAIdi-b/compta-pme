@@ -114,3 +114,26 @@ test("l'élève supprime une écriture fausse et la saisit à nouveau", async ({
   await saisir(page, 'Achat de marchandises à crédit', '4200', '2000', '4800');
   await expect(page.getByText('Juste').first()).toBeVisible();
 });
+
+test('Tab choisit le compte en surbrillance, comme Entrée', async ({ page }) => {
+  await commencer(page, 'cycles', /Cycles du Léman/);
+  await page.goto('./#journal');
+  const fermerVisite = page.getByRole('button', { name: /Passer|Fermer la visite|Terminer/ });
+  if (await fermerVisite.first().isVisible().catch(() => false)) await fermerVisite.first().click();
+  const deb = page.getByLabel('Compte au débit, ligne 1');
+  // Plusieurs comptes correspondent : la flèche désigne le deuxième, Tab le choisit.
+  await deb.click();
+  await deb.pressSequentially('d');
+  const options = page.getByRole('option');
+  expect(await options.count()).toBeGreaterThan(1);
+  await deb.press('ArrowDown');
+  const designe = (await options.nth(1).locator('.nom').textContent())!;
+  await deb.press('Tab');
+  await expect(deb).toHaveValue(designe);
+  await expect(page.getByLabel('Compte au crédit, ligne 1')).toBeFocused();
+  // Sans flèche, Tab choisit le premier compte en surbrillance.
+  const cre = page.getByLabel('Compte au crédit, ligne 1');
+  await cre.pressSequentially('dettes');
+  await cre.press('Tab');
+  await expect(cre).toHaveValue(/Dettes/);
+});

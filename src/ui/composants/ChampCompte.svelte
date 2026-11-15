@@ -139,9 +139,9 @@
       e.stopPropagation();
       ouvert = false;
     } else if (e.key === 'Tab' && ouvert) {
-      // Tab ne choisit jamais à la place de l'élève : seulement s'il ne reste qu'un compte
-      // ou si l'élève a lui-même désigné un compte avec les flèches.
-      if (texte.trim() && !compte && (resultats.length === 1 || navigue)) choisir(resultats[actif]!);
+      // Tab choisit le compte en surbrillance, comme Entrée (choix de l'enseignant le 15.11.2026), dès que l'élève a
+      // tapé une partie du nom ou désigné un compte (flèches, souris). Champ vide sans désignation : simple passage.
+      if (resultats.length && !compte && (texte.trim() || navigue)) choisir(resultats[actif]!);
       ouvert = false;
     }
     if (e.key === 'ArrowDown' || e.key === 'ArrowUp') navigue = true;
@@ -221,6 +221,10 @@
             aria-selected={i === actif}
             class="option"
             class:sel={i === actif}
+            onmouseenter={() => {
+              actif = i;
+              navigue = true;
+            }}
             onmousedown={(e) => {
               e.preventDefault();
               choisir(c);

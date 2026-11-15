@@ -372,7 +372,7 @@
       {/if}
       <div class="aide-clavier">
         <kbd>Tab</kbd> champ suivant · <kbd>Entrée</kbd> ligne suivante, puis validation quand l'écriture est équilibrée ·
-        <kbd>Échap</kbd> retire la ligne · compte : cliquez dans le champ ou tapez une partie du nom du compte
+        <kbd>Échap</kbd> retire la ligne · compte : cliquez dans le champ ou tapez une partie du nom, puis <kbd>Tab</kbd> ou <kbd>Entrée</kbd> choisit le compte en surbrillance
       </div>
       </div>
       </div>
