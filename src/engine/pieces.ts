@@ -18,6 +18,7 @@ export type TypePiece =
   | 'avis-credit'
   | 'fiche-salaire'
   | 'note-interne'
+  | 'note-credit'
   | 'avis-dividende';
 
 export interface Partie {
@@ -151,6 +152,47 @@ export function ticket(o: {
     ttc,
     tva,
     ht: ttc - tva,
+  };
+}
+
+// ---------- Note de crédit (retour de marchandises, rabais accordé après facturation) ----------
+
+/**
+ * Note de crédit : document par lequel le vendeur réduit une facture déjà envoyée (retour, rabais, remise).
+ * Pour l'émetteur, c'est une diminution de sa créance ; pour le destinataire, une diminution de sa dette.
+ */
+export function noteCredit(o: {
+  emetteur: Partie;
+  destinataire: Partie;
+  numero: string;
+  date: DateISO;
+  /** Facture corrigée (« facture n° … du … »). */
+  reference: string;
+  motif: string;
+  articles: { designation: string; quantite?: number; prixUnitaire: Centimes }[];
+  mentions?: string[];
+}): { piece: PieceComptable; montant: Centimes } {
+  const lignes = o.articles.map((a) => ({
+    designation: a.designation,
+    quantite: a.quantite !== undefined ? String(a.quantite) : undefined,
+    prixUnitaire: a.quantite !== undefined ? a.prixUnitaire : undefined,
+    montant: (a.quantite ?? 1) * a.prixUnitaire,
+  }));
+  const montant = lignes.reduce((t, l) => t + l.montant, 0);
+  return {
+    piece: {
+      type: 'note-credit',
+      titre: 'NOTE DE CRÉDIT',
+      numero: o.numero,
+      date: o.date,
+      emetteur: o.emetteur,
+      destinataire: o.destinataire,
+      texte: [`Concerne : ${o.reference}.`, o.motif],
+      lignes,
+      totaux: [{ libelle: 'Montant porté en déduction de votre dette', montant, fort: true }],
+      mentions: o.mentions,
+    },
+    montant,
   };
 }
 

@@ -75,6 +75,18 @@ export function varianteExercice(ex: Exercice, facteur: number, id: string): Exe
       ...(p.seuil
         ? { seuil: { ...p.seuil, prixVente: fois(p.seuil.prixVente, k), coutVariable: fois(p.seuil.coutVariable, k), chargesFixes: fois(p.seuil.chargesFixes, k) } }
         : {}),
+      ...(p.echellePrix
+        ? {
+            echellePrix: {
+              ...p.echellePrix,
+              pab: fois(p.echellePrix.pab, k),
+              fraisAchat:
+                p.echellePrix.fraisAchat.type === 'chf'
+                  ? { type: 'chf' as const, valeur: fois(p.echellePrix.fraisAchat.valeur, k) }
+                  : p.echellePrix.fraisAchat,
+            },
+          }
+        : {}),
     },
   };
 }

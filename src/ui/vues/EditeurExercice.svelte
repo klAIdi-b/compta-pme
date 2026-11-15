@@ -59,6 +59,22 @@
   let tvaMethode = $state<'net' | 'brut'>(source.parametres.tvaMethode ?? 'net');
   let ficheSalaire = $state(source.parametres.ficheSalaire ?? false);
   let calculatriceTva = $state(source.parametres.calculatriceTva ?? false);
+  let ficheBilanOuverture = $state(source.parametres.ficheBilanOuverture ?? false);
+  let ficheMargeBrute = $state(source.parametres.ficheMargeBrute ?? false);
+  const ech0 = source.parametres.echellePrix;
+  let echArticle = $state(ech0?.article ?? '');
+  let echPab = $state<number | null>(ech0?.pab ?? null);
+  let echRabais = $state(ech0 ? String(ech0.rabaisObtenu) : '');
+  let echEscompte = $state(ech0 ? String(ech0.escompteObtenu) : '');
+  let echFraisType = $state<'chf' | 'pc'>(ech0?.fraisAchat.type ?? 'chf');
+  let echFraisChf = $state<number | null>(ech0?.fraisAchat.type === 'chf' ? ech0.fraisAchat.valeur : null);
+  let echFraisPc = $state(ech0?.fraisAchat.type === 'pc' ? String(ech0.fraisAchat.valeur) : '');
+  let echFg = $state(ech0 ? String(ech0.fraisGeneraux) : '');
+  let echBn = $state(ech0 ? String(ech0.beneficeNet) : '');
+  let echEscompteAcc = $state(ech0 ? String(ech0.escompteAccorde) : '');
+  let echRabaisAcc = $state(ech0 ? String(ech0.rabaisAccorde) : '');
+  /** Pourcentage saisi (virgule acceptée), borné entre 0 et 99. */
+  const taux = (t: string) => Math.min(99, Math.max(0, Number(t.replace(',', '.').replace('%', '').trim()) || 0));
   const rep0 = source.parametres.repartition;
   let repBenefice = $state<number | null>(rep0?.benefice ?? null);
   let repReporte = $state<number | null>(rep0 ? Math.abs(rep0.reporte) : null);
@@ -164,6 +180,22 @@
         tvaMethode,
         ficheSalaire,
         calculatriceTva,
+        ficheBilanOuverture,
+        ficheMargeBrute,
+        echellePrix:
+          echPab !== null && echPab > 0
+            ? {
+                article: echArticle.trim(),
+                pab: echPab,
+                rabaisObtenu: taux(echRabais),
+                escompteObtenu: taux(echEscompte),
+                fraisAchat: echFraisType === 'chf' ? { type: 'chf' as const, valeur: echFraisChf ?? 0 } : { type: 'pc' as const, valeur: taux(echFraisPc) },
+                fraisGeneraux: Math.max(0, Number(echFg.replace(',', '.')) || 0),
+                beneficeNet: Math.max(0, Number(echBn.replace(',', '.')) || 0),
+                escompteAccorde: taux(echEscompteAcc),
+                rabaisAccorde: taux(echRabaisAcc),
+              }
+            : undefined,
         repartition:
           niveau === 'MP' && formeJuridique !== 'raison individuelle' && repBenefice !== null && repCapital !== null
             ? {
@@ -372,10 +404,39 @@
       <label class="case"><input type="checkbox" bind:checked={ficheSalaire} /> Fiche « Décompte de salaire »</label>
       <label class="case large"><input type="checkbox" bind:checked={calculatriceTva} /> Calculatrice de TVA (aide au calcul)</label>
     {/if}
+    <label class="case"><input type="checkbox" bind:checked={ficheBilanOuverture} /> Fiche « Bilan d'ouverture »</label>
+    <label class="case"><input type="checkbox" bind:checked={ficheMargeBrute} /> Fiche « Marge brute »</label>
     {#if mode === 'entrainement'}
       <label class="case large"><input type="checkbox" bind:checked={modificationDirecte} /> Autoriser la modification directe des écritures validées</label>
     {/if}
   </div>
+</section>
+
+<section class="carte">
+  <h2>Échelle des prix (fiche de l'élève, facultative)</h2>
+  <div class="corps-carte grille">
+    <div><label class="bloc" for="ech-a">Article (« une machine à café »)</label><input id="ech-a" class="champ" bind:value={echArticle} /></div>
+    <div><label class="bloc" for="ech-pab">Prix d'achat brut (PAB)</label><ChampMontant id="ech-pab" libelle="Prix d'achat brut" bind:valeur={echPab} /></div>
+    <div><label class="bloc" for="ech-r">Rabais obtenu, % du PAB</label><input id="ech-r" class="champ montant num" inputmode="decimal" bind:value={echRabais} /></div>
+    <div><label class="bloc" for="ech-e">Escompte obtenu, % du PAC</label><input id="ech-e" class="champ montant num" inputmode="decimal" bind:value={echEscompte} /></div>
+    <div>
+      <label class="bloc" for="ech-ft">Frais d'achat</label>
+      <select id="ech-ft" class="champ" bind:value={echFraisType}>
+        <option value="chf">Montant en CHF</option>
+        <option value="pc">En % du PAN</option>
+      </select>
+    </div>
+    {#if echFraisType === 'chf'}
+      <div><label class="bloc" for="ech-fc">Frais d'achat, CHF</label><ChampMontant id="ech-fc" libelle="Frais d'achat" bind:valeur={echFraisChf} /></div>
+    {:else}
+      <div><label class="bloc" for="ech-fp">Frais d'achat, % du PAN</label><input id="ech-fp" class="champ montant num" inputmode="decimal" bind:value={echFraisPc} /></div>
+    {/if}
+    <div><label class="bloc" for="ech-fg">Frais généraux, % du PRA</label><input id="ech-fg" class="champ montant num" inputmode="decimal" bind:value={echFg} /></div>
+    <div><label class="bloc" for="ech-bn">Bénéfice net, % du PR</label><input id="ech-bn" class="champ montant num" inputmode="decimal" bind:value={echBn} /></div>
+    <div><label class="bloc" for="ech-ea">Escompte accordé, % du PVC</label><input id="ech-ea" class="champ montant num" inputmode="decimal" bind:value={echEscompteAcc} /></div>
+    <div><label class="bloc" for="ech-ra">Rabais accordé, % du PVB</label><input id="ech-ra" class="champ montant num" inputmode="decimal" bind:value={echRabaisAcc} /></div>
+  </div>
+  <p class="petit discret aide-seuil">Laissez le prix d'achat brut vide pour ne pas proposer la fiche aux élèves. Un taux vide vaut 0 %.</p>
 </section>
 
 {#if niveau === 'MP' && formeJuridique !== 'raison individuelle'}

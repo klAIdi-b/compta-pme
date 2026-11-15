@@ -24,6 +24,9 @@
   import FicheDegres from './vues/FicheDegres.svelte';
   import FicheFlux from './vues/FicheFlux.svelte';
   import FicheSeuil from './vues/FicheSeuil.svelte';
+  import FicheBilanOuverture from './vues/FicheBilanOuverture.svelte';
+  import FicheMargeBrute from './vues/FicheMargeBrute.svelte';
+  import FicheEchelle from './vues/FicheEchelle.svelte';
   import Analyse from './vues/Analyse.svelte';
   import Visite from './composants/Visite.svelte';
 
@@ -97,6 +100,7 @@
       {
         titre: 'Saisie',
         entrees: [
+          ...(f.has('bilanOuverture') ? [{ vue: 'bilanOuverture' as Vue, libelle: "Bilan d'ouverture" }] : []),
           { vue: 'journal', libelle: 'Journal' },
           ...(f.has('salaire') ? [{ vue: 'salaire' as Vue, libelle: 'Décompte de salaire' }] : []),
         ],
@@ -114,10 +118,12 @@
         entrees: [
           { vue: 'bilan', libelle: 'Bilan' },
           { vue: 'resultat', libelle: 'Compte de résultat' },
+          ...(f.has('margeBrute') ? [{ vue: 'margeBrute' as Vue, libelle: 'Marge brute' }] : []),
           ...(f.has('degres') ? [{ vue: 'degres' as Vue, libelle: 'Résultat par degrés' }] : []),
           ...(f.has('flux') ? [{ vue: 'flux' as Vue, libelle: 'Flux de trésorerie' }] : []),
           ...(f.has('analyse') ? [{ vue: 'analyse' as Vue, libelle: 'Analyse' }] : []),
           ...(f.has('seuil') ? [{ vue: 'seuil' as Vue, libelle: 'Seuil de rentabilité' }] : []),
+          ...(f.has('echelle') ? [{ vue: 'echelle' as Vue, libelle: 'Échelle des prix' }] : []),
         ],
       },
       {
@@ -238,6 +244,9 @@
       {:else if etat.vue === 'degres' && etat.fonctions.has('degres')}<FicheDegres />
       {:else if etat.vue === 'flux' && etat.fonctions.has('flux')}<FicheFlux />
       {:else if etat.vue === 'seuil' && etat.fonctions.has('seuil')}<FicheSeuil />
+      {:else if etat.vue === 'bilanOuverture' && etat.fonctions.has('bilanOuverture')}<FicheBilanOuverture />
+      {:else if etat.vue === 'margeBrute' && etat.fonctions.has('margeBrute')}<FicheMargeBrute />
+      {:else if etat.vue === 'echelle' && etat.fonctions.has('echelle')}<FicheEchelle />
       {:else if etat.vue === 'theorie'}<Differe charger={() => import('./vues/Theorie.svelte')} props={{}} />
       {:else}<TableauDeBord />
       {/if}

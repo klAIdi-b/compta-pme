@@ -49,10 +49,12 @@ function verifierForme(_d: Dossier): string | null {
 }
 
 /**
- * Écritures de bouclement proposées (servent aussi de corrigé) en mode 'compteDeResultat' :
- * 1. virement du compte privé au capital ;
- * 2. clôture des charges et produits par le compte de résultat ;
- * 3. virement du résultat au capital.
+ * Écritures de bouclement proposées (servent aussi de corrigé) en mode 'compteDeResultat'.
+ * Raison individuelle (méthode du cours, choisie par l'enseignant le 09.11.2026) :
+ * 1. clôture des charges et produits par le compte de résultat ;
+ * 2. virement du résultat (bénéfice ou perte) au compte privé ;
+ * 3. virement du solde du compte privé au capital.
+ * Sociétés (pas de compte privé) : 1. clôture des charges et produits ; 2. résultat viré au bénéfice reporté.
  */
 export function ecrituresDeBouclement(d: Dossier, o: OptionsBouclement = optionsBouclement(d.formeJuridique)): Resultat<Ecriture[]> {
   const err = verifierForme(d);
@@ -70,25 +72,7 @@ export function ecrituresDeBouclement(d: Dossier, o: OptionsBouclement = options
     lignes,
   });
 
-  // 1. Compte privé
-  const lignesPrive: LigneEcriture[] = [];
-  let totalPrive: Centimes = 0;
-  for (const n of o.comptesPrives) {
-    const solde = s.get(n)?.solde ?? 0;
-    if (solde === 0) continue;
-    totalPrive += solde;
-    lignesPrive.push(solde > 0 ? { debit: null, credit: n, montant: solde } : { debit: n, credit: null, montant: -solde });
-  }
-  if (lignesPrive.length) {
-    lignesPrive.push(
-      totalPrive > 0
-        ? { debit: o.compteCapital, credit: null, montant: totalPrive }
-        : { debit: null, credit: o.compteCapital, montant: -totalPrive },
-    );
-    res.push(ecriture('Virement du compte privé au capital propre', simplifier(lignesPrive)));
-  }
-
-  // 2. Clôture des charges et des produits
+  // 1. Clôture des charges et des produits
   const lignes: LigneEcriture[] = [];
   let auDebitDuCR: Centimes = 0; // soldes débiteurs repris au débit du compte de résultat
   let auCreditDuCR: Centimes = 0;
@@ -109,10 +93,34 @@ export function ecrituresDeBouclement(d: Dossier, o: OptionsBouclement = options
     res.push(ecriture('Clôture des comptes de charges et de produits', lignes));
   }
 
-  // 3. Résultat
+  // 2. Résultat : au compte privé (raison individuelle) ou au bénéfice reporté (société)
   const r = resultatExercice(d);
-  if (r > 0) res.push(ecriture("Bénéfice de l'exercice", [{ debit: o.compteResultat, credit: o.compteCapital, montant: r }]));
-  if (r < 0) res.push(ecriture("Perte de l'exercice", [{ debit: o.compteCapital, credit: o.compteResultat, montant: -r }]));
+  const prive = o.comptesPrives[0];
+  const destination = prive ?? o.compteCapital;
+  const vers = prive ? 'au compte privé' : 'au bénéfice reporté';
+  if (r > 0) res.push(ecriture(`Bénéfice de l'exercice viré ${vers}`, [{ debit: o.compteResultat, credit: destination, montant: r }]));
+  if (r < 0) res.push(ecriture(`Perte de l'exercice virée ${vers}`, [{ debit: destination, credit: o.compteResultat, montant: -r }]));
+
+  // 3. Solde du compte privé (résultat compris) viré au capital
+  if (o.comptesPrives.length) {
+    const lignesPrive: LigneEcriture[] = [];
+    let totalPrive: Centimes = 0;
+    for (const n of o.comptesPrives) {
+      // Le résultat vient d'être viré au premier compte privé (convention : solde créditeur négatif).
+      const solde = (s.get(n)?.solde ?? 0) - (n === prive ? r : 0);
+      if (solde === 0) continue;
+      totalPrive += solde;
+      lignesPrive.push(solde > 0 ? { debit: null, credit: n, montant: solde } : { debit: n, credit: null, montant: -solde });
+    }
+    if (lignesPrive.length) {
+      lignesPrive.push(
+        totalPrive > 0
+          ? { debit: o.compteCapital, credit: null, montant: totalPrive }
+          : { debit: null, credit: o.compteCapital, montant: -totalPrive },
+      );
+      res.push(ecriture('Solde du compte privé viré au capital', simplifier(lignesPrive)));
+    }
+  }
   return ok(res);
 }
 

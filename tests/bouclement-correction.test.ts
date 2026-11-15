@@ -54,12 +54,12 @@ describe('correction du bouclement', () => {
     expect(diagnostiquerBouclement(d, ex)).toBe('juste');
   });
 
-  it('incomplète si seul le compte privé est viré, inversée si débit et crédit sont permutés', () => {
+  it('incomplète si seule la clôture des charges et produits est passée, inversée si débit et crédit sont permutés', () => {
     const base = operations();
     expect(diagnostiquerBouclement(base, ex)).toBe('manquante');
-    expect(diagnostiquerBouclement(passer(base, 'B1', [{ debit: '2800', credit: '2850', montant: chf(800) }]), ex)).toBe('incomplete');
     const attendues = ecrituresDeBouclement(base);
     if (!attendues.ok) throw new Error();
+    expect(diagnostiquerBouclement(passer(base, 'B1', attendues.valeur[0]!.lignes), ex)).toBe('incomplete');
     let d = base;
     attendues.valeur.forEach((e) => (d = passer(d, 'B', e.lignes.map((l) => ({ debit: l.credit, credit: l.debit, montant: l.montant })))));
     expect(diagnostiquerBouclement(d, ex)).toBe('inversee');

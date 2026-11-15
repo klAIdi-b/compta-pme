@@ -152,15 +152,75 @@ export const CHAPITRES: Chapitre[] = [
         ],
       },
       {
-        titre: 'Ordre des postes',
+        titre: 'Des inventaires au bilan',
         blocs: [
           {
             type: 'p',
             texte:
-              "Selon CO art. 959a, l'actif se divise en actifs circulants (liquidités, créances, stocks, actifs " +
-              'transitoires) et actifs immobilisés (machines, mobilier, véhicules, immeubles). On classe les actifs ' +
-              "du plus liquide au moins liquide. Le passif se divise en capitaux étrangers à court terme, capitaux " +
-              "étrangers à long terme et capitaux propres ; on les classe du plus exigible au moins exigible.",
+              "Avant de dresser le bilan, on recense tout ce que l'entreprise possède et tout ce qu'elle doit : ce sont " +
+              "les inventaires (comptage de la caisse, relevés de la poste et de la banque, liste des marchandises, du " +
+              "mobilier et des véhicules, factures pas encore encaissées ou pas encore payées). Chaque élément " +
+              "d'inventaire est rattaché à un compte.",
+          },
+          {
+            type: 'tableau',
+            entetes: ["Élément d'inventaire", 'Compte'],
+            lignes: [
+              ['Billets et pièces dans le tiroir-caisse', '1000 Caisse'],
+              ['Avoir sur le compte postal', '1010 Poste (CP)'],
+              ['Solde en notre faveur à la banque', '1020 Banque (n/avoir)'],
+              ['Factures envoyées aux clients, pas encore encaissées', '1100 Créances clients'],
+              ['Marchandises destinées à la vente', '1200 Stock de marchandises'],
+              ['Ordinateurs, imprimantes, logiciels', '1521 Infrastructure informatique'],
+              ['Camionnette de livraison', '1530 Véhicules'],
+              ['Factures de fournisseurs de marchandises à payer', '2000 Dettes fournisseurs'],
+              ["Solde de l'hypothèque sur l'immeuble", '2401 Dettes hypothécaires'],
+              ['Apports du propriétaire', '2800 Capital'],
+            ],
+          },
+          {
+            type: 'p',
+            texte:
+              "Exemple : Mme Favre ouvre une agence d'événements à Genève. Elle apporte 60'000.00 de fonds propres, " +
+              "emprunte 35'000.00 à sa banque pour cinq ans et obtient 5'000.00 de crédit d'un fournisseur. Avec ces " +
+              "100'000.00, elle achète du mobilier (40'000.00), du matériel informatique (22'000.00) et un véhicule " +
+              "(20'000.00) ; elle dépose 15'000.00 sur son compte postal et garde 3'000.00 en caisse.",
+          },
+          {
+            type: 'tableau',
+            entetes: ['Actif (emplois des fonds)', 'Montant', 'Passif (sources des fonds)', 'Montant'],
+            lignes: [
+              ['Caisse', "3'000.00", 'Autres dettes', "5'000.00"],
+              ['Poste', "15'000.00", 'Emprunt bancaire à long terme', "35'000.00"],
+              ['Mobilier et installations', "40'000.00", 'Capital', "60'000.00"],
+              ['Infrastructure informatique', "22'000.00", '', ''],
+              ['Véhicules', "20'000.00", '', ''],
+              ['Total', "100'000.00", 'Total', "100'000.00"],
+            ],
+          },
+          {
+            type: 'retenir',
+            texte: "Le passif dit d'où viennent les fonds (les sources) ; l'actif dit à quoi ils ont servi (les emplois).",
+          },
+        ],
+      },
+      {
+        titre: 'Les cinq masses du bilan',
+        blocs: [
+          {
+            type: 'p',
+            texte:
+              "Selon CO art. 959a, le bilan se range en cinq grands groupes, appelés masses. À l'actif : les actifs " +
+              "circulants (liquidités, créances, stocks, actifs transitoires), qui se transforment rapidement en argent, " +
+              "puis les actifs immobilisés (machines, mobilier, véhicules, immeubles), qui servent durablement, plus " +
+              "d'un an. Au passif : les capitaux étrangers à court terme (dettes à payer dans les douze mois), les " +
+              "capitaux étrangers à long terme (dettes à plus d'un an, comme un emprunt ou une hypothèque) et les " +
+              "capitaux propres (apports du propriétaire et résultats laissés dans l'entreprise).",
+          },
+          {
+            type: 'retenir',
+            texte:
+              "Actifs : du plus liquide au moins liquide. Dettes : de la plus exigible (à payer le plus tôt) à la moins exigible.",
           },
           {
             type: 'tableau',
@@ -169,6 +229,85 @@ export const CHAPITRES: Chapitre[] = [
               ['Actifs circulants : Caisse, Poste, Banque, Créances clients, Stock de marchandises', 'Capitaux étrangers à court terme : Dettes fournisseurs, Autres dettes, Banque (n/dette)'],
               ['Actifs immobilisés : Machines et appareils, Mobilier et installations, Véhicules, Immeubles', 'Capitaux étrangers à long terme : Emprunt bancaire à long terme, Dettes hypothécaires'],
               ['', 'Capitaux propres : Capital (et Privé pour la raison individuelle)'],
+            ],
+          },
+        ],
+      },
+      {
+        titre: 'Fortune nette ou découvert',
+        blocs: [
+          {
+            type: 'p',
+            texte:
+              "Les capitaux propres représentent la fortune nette de l'entreprise : ce qui resterait au propriétaire si " +
+              "l'on vendait tous les actifs et payait toutes les dettes. On les calcule ainsi : capitaux propres = actifs " +
+              "− capitaux étrangers. Si les dettes dépassent les actifs, il n'y a plus de fortune nette mais un découvert, " +
+              "qui figure du côté de l'actif pour que le bilan reste équilibré.",
+          },
+          {
+            type: 'tableau',
+            entetes: ['Situation', 'Résultat du calcul', 'Place au bilan'],
+            lignes: [
+              ["Actifs 84'000.00, capitaux étrangers 61'500.00", "Fortune nette (capital) 22'500.00", 'Passif'],
+              ["Actifs 84'000.00, capitaux étrangers 91'500.00", "Découvert 7'500.00", 'Actif'],
+            ],
+          },
+        ],
+      },
+      {
+        titre: 'Le plan comptable',
+        blocs: [
+          {
+            type: 'p',
+            texte:
+              "Le plan comptable est la liste ordonnée de tous les comptes d'une entreprise. Le plan du cours suit le plan " +
+              "comptable général PME : chaque compte porte un numéro, dont chaque chiffre précise sa place. Le premier " +
+              "chiffre donne la classe, les deux premiers la masse, les trois premiers le groupe, les quatre chiffres le compte.",
+          },
+          {
+            type: 'tableau',
+            entetes: ['Numéro', 'Niveau', 'Exemple'],
+            lignes: [
+              ['1', 'Classe', 'Actifs'],
+              ['10', 'Masse', 'Actifs circulants'],
+              ['100', 'Groupe', 'Liquidités'],
+              ['1000', 'Compte', 'Caisse'],
+            ],
+          },
+          {
+            type: 'tableau',
+            entetes: ['Classe', 'Contenu', 'Famille'],
+            lignes: [
+              ['1', 'Actifs', 'Comptes du bilan'],
+              ['2', 'Passifs (capitaux étrangers et capitaux propres)', 'Comptes du bilan'],
+              ['3', "Chiffre d'affaires (ventes de marchandises et de prestations)", 'Comptes de gestion'],
+              ['4', 'Charges de marchandises et de services', 'Comptes de gestion'],
+              ['5', 'Charges de personnel', 'Comptes de gestion'],
+              ["6", "Autres charges d'exploitation, amortissements, résultat financier", 'Comptes de gestion'],
+              ['7', "Activités annexes d'exploitation", 'Comptes de gestion'],
+              ['8', 'Hors exploitation, exceptionnels, impôts', 'Comptes de gestion'],
+              ['9', 'Clôture (9000 Compte de résultat)', 'Comptes de clôture'],
+            ],
+          },
+        ],
+      },
+      {
+        titre: 'Les quatre variations du bilan',
+        blocs: [
+          {
+            type: 'p',
+            texte:
+              "Une opération qui ne touche que des comptes du bilan peut faire varier son total, ou seulement changer sa " +
+              "composition. Quand le total ne change pas, on parle de permutation.",
+          },
+          {
+            type: 'tableau',
+            entetes: ['Opération (exemple)', 'Effet', 'Total du bilan'],
+            lignes: [
+              ["Achat d'un scooter à crédit", 'Actif + et passif +', 'augmente'],
+              ['Paiement par la poste de la facture du scooter', 'Actif − et passif −', 'diminue'],
+              ['Retrait au guichet postal pour alimenter la caisse', 'Actif + et actif −', 'inchangé (permutation d\'actifs)'],
+              ["Une dette envers la banque remboursée par un apport du propriétaire", 'Passif − et passif +', 'inchangé (permutation de passifs)'],
             ],
           },
         ],
@@ -237,6 +376,39 @@ export const CHAPITRES: Chapitre[] = [
           },
         ],
       },
+      {
+        titre: 'Ouvrir les comptes',
+        blocs: [
+          {
+            type: 'p',
+            texte:
+              "Au début de l'exercice, chaque poste du bilan d'ouverture devient un compte. Un compte d'actif s'ouvre au " +
+              "débit, du même côté que l'actif au bilan ; un compte de passif s'ouvre au crédit. Ce premier montant est le " +
+              "solde initial (SI, ou solde à nouveau, San). En fin d'exercice, le solde final (SF, ou solde pour bilan, " +
+              "Spb) de chaque compte est reporté au bilan final, qui sert de bilan d'ouverture à l'exercice suivant.",
+          },
+        ],
+      },
+      {
+        titre: 'Raisonner en trois questions',
+        blocs: [
+          {
+            type: 'liste',
+            items: [
+              'Quels comptes sont touchés par cette opération ?',
+              'De quel type est chaque compte (actif, passif, charge, produit), donc de quel côté augmente-t-il ?',
+              "Chaque compte augmente-t-il ou diminue-t-il ? L'augmentation s'inscrit du côté +, la diminution du côté −.",
+            ],
+          },
+          {
+            type: 'p',
+            texte:
+              "Exemple : Mme Favre achète un scooter de 5'000.00, payable à 30 jours. Le compte Véhicules (actif) augmente : " +
+              "débit. Le compte Autres dettes (passif) augmente : crédit.",
+          },
+          { type: 'ecritures', exemples: [{ cas: "Achat d'un scooter à crédit, 5'000.00", lignes: s('1530', '2010', 5000) }] },
+        ],
+      },
     ],
   },
   {
@@ -283,6 +455,56 @@ export const CHAPITRES: Chapitre[] = [
                 cas: "Achat d'une machine de 8'000.00 : 3'000.00 payés par la banque, le solde à crédit",
                 lignes: [D('1500', 8000), C('1020', 3000), C('2000', 5000)],
               },
+              {
+                cas: "Achat d'un véhicule de 32'000.00 : l'ancien véhicule est repris pour 12'000.00, le solde est payé par la banque",
+                lignes: [D('1530', 32000), C('1530', 12000), C('1020', 20000)],
+              },
+              {
+                cas: "Paiement par la poste de 7'000.00 : solde d'une facture du garage 2'000.00 et remboursement partiel de l'emprunt 5'000.00",
+                lignes: [D('2010', 2000), D('2400', 5000), C('1010', 7000)],
+              },
+            ],
+          },
+        ],
+      },
+      {
+        titre: 'Facture comptabilisée ou non ?',
+        blocs: [
+          {
+            type: 'p',
+            texte:
+              "L'énoncé précise souvent si une facture « était comptabilisée ». Si oui, la dette (ou la créance) existe déjà " +
+              "dans les comptes : le paiement la solde. Si non, on passe directement l'achat (ou la vente) contre le moyen " +
+              "de paiement, sans passer par la dette.",
+          },
+          {
+            type: 'ecritures',
+            exemples: [
+              { cas: "12.02 — Facture reçue pour une imprimante, 550.00 (facture comptabilisée)", lignes: s('1521', '2010', 550) },
+              { cas: '10.03 — Paiement de cette facture par la banque', lignes: s('2010', '1020', 550) },
+              { cas: 'Même achat payé par la banque, la facture n\'ayant pas été comptabilisée', lignes: s('1521', '1020', 550) },
+            ],
+          },
+        ],
+      },
+      {
+        titre: 'Du journal au grand livre',
+        blocs: [
+          {
+            type: 'p',
+            texte:
+              "Le grand livre réunit tous les comptes de l'entreprise. Chaque écriture du journal est reportée dans les " +
+              "comptes qu'elle touche, au débit ou au crédit, avec sa date ou son numéro de pièce. Le journal suit l'ordre " +
+              "du temps ; le grand livre classe les mêmes montants par compte.",
+          },
+          {
+            type: 'liste',
+            items: [
+              "Ouvrir les comptes d'actif et de passif d'après le bilan d'ouverture.",
+              'Passer chaque opération au journal, puis la reporter dans les comptes du grand livre.',
+              'Clôturer les comptes de charges et de produits par le compte de résultat (9000).',
+              'Virer le bénéfice ou la perte au compte privé, puis le solde du compte privé au capital.',
+              "Clôturer les comptes d'actif et de passif et dresser le bilan final, qui servira à rouvrir l'exercice suivant.",
             ],
           },
         ],
@@ -328,6 +550,58 @@ export const CHAPITRES: Chapitre[] = [
               'les charges à gauche, les produits à droite (CO art. 959b, adapté au niveau).',
           },
           { type: 'retenir', texte: 'Le bénéfice du compte de résultat est le même que la différence qui apparaît au bilan.' },
+          {
+            type: 'p',
+            texte:
+              "Les totaux des deux côtés sont toujours égaux : le bénéfice s'inscrit donc du côté des charges, la perte du " +
+              "côté des produits. Les comptes de charges et de produits s'appellent comptes de gestion ; une charge augmente " +
+              'au débit, un produit au crédit.',
+          },
+        ],
+      },
+      {
+        titre: 'Choisir le bon compte de produit ou de charge',
+        blocs: [
+          {
+            type: 'tableau',
+            entetes: ["Activité de l'entreprise", 'Compte de produit'],
+            lignes: [
+              ['Vente de marchandises (magasin, grossiste)', '3200 Ventes de marchandises'],
+              ['Conseil (fiduciaire, avocat, médecin)', '3400 Honoraires'],
+              ['Entretien, réparation, installation (garage, électricien)', '3410 Produits des travaux'],
+              ['Transport de personnes ou de biens (taxi)', '3420 Produits des courses'],
+              ['Autres prestations (cotisations d\'une association…)', '3430 Autres produits'],
+            ],
+          },
+          {
+            type: 'p',
+            texte:
+              "Les comptes 3400 à 3430 sont activés par l'enseignant selon l'entreprise de l'exercice. Une charge " +
+              "d'exploitation qui n'a pas de compte propre dans le plan de l'exercice va au compte 6700 Autres charges " +
+              "d'exploitation (ACE).",
+          },
+        ],
+      },
+      {
+        titre: "Effet d'une opération sur le résultat et sur le bilan",
+        blocs: [
+          {
+            type: 'tableau',
+            entetes: ['Opération', 'Résultat', 'Bilan'],
+            lignes: [
+              ['Achat de marchandises payé en espèces', 'bénéfice diminue', 'actif diminue'],
+              ['Amortissement des machines', 'bénéfice diminue', 'actif diminue'],
+              ['Vente de marchandises à crédit', 'bénéfice augmente', 'actif augmente'],
+              ['Intérêts reçus sur le compte bancaire', 'bénéfice augmente', 'actif augmente'],
+              ["Paiement d'une facture de fournisseur déjà comptabilisée", 'aucun effet', 'actif et passif diminuent'],
+            ],
+          },
+          {
+            type: 'retenir',
+            texte:
+              "Une charge diminue le bénéfice, un produit l'augmente. Une opération qui ne touche que des comptes du bilan " +
+              "n'a aucun effet sur le résultat.",
+          },
         ],
       },
       {
@@ -353,26 +627,34 @@ export const CHAPITRES: Chapitre[] = [
             type: 'p',
             texte:
               "À la fin de l'exercice, on solde les comptes de charges et de produits par le compte 9000 Compte de résultat. " +
-              "Le compte en T 9000 reproduit alors le compte de résultat. Les écritures de bouclement portent les pièces " +
-              'B1, B2, B3…, dans cet ordre :',
+              "Le compte en T 9000 reproduit alors le compte de résultat. Le résultat passe ensuite par le compte privé : " +
+              "le compte privé réunit ainsi tout ce que l'exercice a rapporté au propriétaire (bénéfice) ou lui a coûté " +
+              "(perte, prélèvements). Son solde, la variation de la fortune nette, est enfin viré au capital. Les écritures " +
+              'de bouclement portent les pièces B1, B2, B3, dans cet ordre :',
           },
           {
             type: 'liste',
             items: [
-              'virer le solde du compte privé au capital ;',
               'solder chaque compte de charges et de produits par le compte 9000 ;',
-              'virer le solde du compte 9000 (bénéfice ou perte) au capital.',
+              'virer le solde du compte 9000 au compte privé : un bénéfice au crédit du privé, une perte au débit ;',
+              'virer le solde du compte privé au capital : un solde créditeur augmente le capital, un solde débiteur le diminue.',
             ],
           },
           {
             type: 'ecritures',
-            titre: 'Exemple (montants fictifs)',
+            titre: 'Exemple (montants fictifs : bénéfice 9\'000.00, prélèvements privés 6\'000.00)',
             exemples: [
-              { cas: 'B1 — Virement du compte privé au capital', lignes: s('2800', '2850', 6000) },
-              { cas: 'B2 — Clôture des charges', lignes: [D('9000', 52000), C('4200', 30000), C('5200', 15000), C('6000', 7000)] },
-              { cas: 'B2 — Clôture des produits', lignes: s('3200', '9000', 61000) },
-              { cas: "B3 — Bénéfice de l'exercice viré au capital", lignes: s('9000', '2800', 9000) },
+              { cas: 'B1 — Clôture des charges', lignes: [D('9000', 52000), C('4200', 30000), C('5200', 15000), C('6000', 7000)] },
+              { cas: 'B1 — Clôture des produits', lignes: s('3200', '9000', 61000) },
+              { cas: "B2 — Bénéfice de l'exercice viré au compte privé", lignes: s('9000', '2850', 9000) },
+              { cas: 'B3 — Solde du compte privé viré au capital (9\'000.00 − 6\'000.00)', lignes: s('2850', '2800', 3000) },
             ],
+          },
+          {
+            type: 'retenir',
+            texte:
+              "Si le bénéfice est inférieur aux prélèvements, ou en cas de perte, le compte privé a un solde débiteur : " +
+              "l'écriture B3 est alors 2800 Capital au débit, 2850 Privé au crédit, et le capital diminue.",
           },
           {
             type: 'p',
@@ -388,23 +670,103 @@ export const CHAPITRES: Chapitre[] = [
     id: 'marchandises',
     titre: 'Marchandises et stock',
     niveau: 'CFC1',
-    resume: 'Achats, ventes, marge brute et variation du stock.',
+    resume: "Comptes de marchandises, rabais, escomptes, frais d'achat et de vente, compte de résultat à deux degrés, CAN, PRAMA, PRAMV.",
     sections: [
       {
-        titre: 'Achats et ventes',
+        titre: "L'entreprise commerciale",
         blocs: [
           {
             type: 'p',
             texte:
-              "Les achats de marchandises sont une charge (4200 Achats de marchandises) ; les ventes sont un produit " +
-              "(3200 Ventes de marchandises). Pendant l'exercice, on ne touche pas au compte 1200 Stock de marchandises : " +
-              'il garde la valeur du dernier inventaire.',
+              "Une entreprise commerciale achète des marchandises et les revend sans les transformer (librairie, magasin " +
+              "de sport). Une entreprise industrielle transforme des matières en produits finis ; une entreprise de " +
+              "services vend des prestations. Ce qui distingue le commerce, c'est le stock de marchandises.",
+          },
+        ],
+      },
+      {
+        titre: 'Les quatre comptes de marchandises',
+        blocs: [
+          {
+            type: 'tableau',
+            entetes: ['Compte', 'Au débit', 'Au crédit'],
+            lignes: [
+              ['1200 Stock de marchandises (actif)', 'Solde initial ; augmentation du stock à la clôture', 'Diminution du stock à la clôture ; solde final'],
+              ['4200 Achats de marchandises (charge)', 'Achats au comptant ou à crédit', 'Retours de marchandises aux fournisseurs'],
+              ['3200 Ventes de marchandises (produit)', 'Retours de marchandises par les clients', 'Ventes au comptant ou à crédit'],
+              ['4280 Variation de stocks (charge)', 'Diminution du stock', 'Augmentation du stock'],
+            ],
+          },
+          {
+            type: 'p',
+            texte:
+              "Pendant l'exercice, on ne touche pas au compte 1200 Stock de marchandises : il garde la valeur du dernier " +
+              "inventaire. Le solde du compte 3200 est le chiffre d'affaires brut.",
           },
           {
             type: 'ecritures',
             exemples: [
               { cas: 'Achat de marchandises à crédit, 6\'000.00', lignes: s('4200', '2000', 6000) },
               { cas: 'Vente de marchandises à crédit, 9\'500.00', lignes: s('1100', '3200', 9500) },
+              { cas: 'Retour de marchandises défectueuses au fournisseur, 700.00 (facture comptabilisée)', lignes: s('2000', '4200', 700) },
+              { cas: 'Un client retourne des marchandises, 800.00 (facture comptabilisée)', lignes: s('3200', '1100', 800) },
+            ],
+          },
+        ],
+      },
+      {
+        titre: 'Rabais, remises et escomptes',
+        blocs: [
+          {
+            type: 'liste',
+            items: [
+              'Rabais : réduction pour un défaut de la marchandise, des soldes ou une liquidation.',
+              'Remise : réduction pour une grande quantité ou pour un client privilégié (revendeur).',
+              "Escompte : réduction pour un paiement rapide (par exemple 2 % à 10 jours, net à 30 jours).",
+            ],
+          },
+          {
+            type: 'p',
+            texte:
+              "Les déductions accordées aux clients vont au débit de 3209 Déductions accordées : elles diminuent le chiffre " +
+              "d'affaires. Les déductions obtenues des fournisseurs vont au crédit de 4209 Déductions obtenues : elles " +
+              'diminuent le coût des achats. Exemples sans TVA :',
+          },
+          {
+            type: 'ecritures',
+            exemples: [
+              { cas: 'Rabais de 150.00 accordé à un client sur une facture comptabilisée', lignes: s('3209', '1100', 150) },
+              {
+                cas: "Un client paie par la poste une facture de 2'000.00 en déduisant 2 % d'escompte",
+                lignes: [D('1010', 1960), D('3209', 40), C('1100', 2000)],
+              },
+              {
+                cas: "Nous payons par la poste une facture de marchandises de 3'000.00 avec 2 % d'escompte",
+                lignes: [D('2000', 3000), C('1010', 2940), C('4209', 60)],
+              },
+              { cas: 'Remise de 300.00 obtenue après coup du fournisseur (facture comptabilisée)', lignes: s('2000', '4209', 300) },
+            ],
+          },
+        ],
+      },
+      {
+        titre: "Frais d'achat, frais de vente et prélèvements de marchandises",
+        blocs: [
+          {
+            type: 'p',
+            texte:
+              "Les droits de douane, le transport et l'assurance des marchandises achetées sont des frais d'achat (4270 " +
+              "Frais d'achats) : ils augmentent le coût des marchandises. Les frais d'expédition et d'emballage des " +
+              "marchandises vendues, à la charge de l'entreprise, vont au débit de 3210 Frais de ventes : ils diminuent le " +
+              "chiffre d'affaires. Quand le propriétaire prend des marchandises pour son usage personnel, on les inscrit " +
+              'au débit de son compte privé et au crédit de 3720 Prestations propres.',
+          },
+          {
+            type: 'ecritures',
+            exemples: [
+              { cas: "Droits de douane sur des marchandises importées, payés en espèces, 120.00", lignes: s('4270', '1000', 120) },
+              { cas: 'Frais de livraison des marchandises vendues, payés par la banque, 480.00', lignes: s('3210', '1020', 480) },
+              { cas: 'Le propriétaire prend des marchandises pour 300.00 pour son usage personnel', lignes: s('2850', '3720', 300) },
             ],
           },
         ],
@@ -426,11 +788,64 @@ export const CHAPITRES: Chapitre[] = [
               { cas: 'Diminution du stock de 800.00', lignes: s('4280', '1200', 800) },
             ],
           },
+        ],
+      },
+      {
+        titre: 'Le compte de résultat à deux degrés',
+        blocs: [
           {
             type: 'p',
             texte:
-              "Prix de revient des marchandises vendues = achats − augmentation du stock (ou + diminution du stock). " +
-              'Marge brute = ventes − prix de revient des marchandises vendues.',
+              "Dans une entreprise commerciale, le compte de résultat se présente en deux degrés. Le 1er degré réunit les " +
+              "comptes de marchandises (3200, 3209, 3210, 3720, 3805 d'un côté, 4200, 4209, 4270, 4280 de l'autre) : il " +
+              "dégage la marge brute, appelée aussi bénéfice brut. Le 2e degré oppose la marge brute aux autres charges " +
+              "d'exploitation (salaires, loyer, publicité, amortissements…) et dégage le bénéfice net ou la perte nette.",
+          },
+          {
+            type: 'tableau',
+            entetes: ['Degré', 'Charges', 'Produits'],
+            lignes: [
+              ['1er degré', 'Achats, frais d\'achats, diminution de stock, marge brute', 'Ventes, prestations propres, moins déductions accordées, frais de ventes, pertes sur créances ; augmentation de stock'],
+              ['2e degré', 'Salaires, loyer, publicité, amortissements…, bénéfice net', 'Marge brute (perte nette éventuelle)'],
+            ],
+          },
+          {
+            type: 'retenir',
+            texte: 'La marge brute doit couvrir toutes les autres charges d\'exploitation ; sinon, l\'entreprise subit une perte.',
+          },
+        ],
+      },
+      {
+        titre: 'CAB, CAN, PRAMA, PRAMV et marge brute',
+        blocs: [
+          {
+            type: 'liste',
+            items: [
+              "CAB, chiffre d'affaires brut = ventes de marchandises (solde du compte 3200).",
+              "CAN, chiffre d'affaires net = ventes + prestations propres − déductions accordées − frais de ventes − pertes sur créances.",
+              "PRAMA, prix de revient d'achat des marchandises achetées = achats + frais d'achats − déductions obtenues.",
+              "PRAMV, prix de revient d'achat des marchandises vendues = PRAMA + diminution de stock, ou PRAMA − augmentation de stock.",
+              'Marge brute = CAN − PRAMV ; taux de marge brute = marge brute ÷ CAN × 100.',
+            ],
+          },
+          {
+            type: 'p',
+            texte:
+              "Exemple (Librairie du Molard) : ventes 80'000.00, prestations propres 600.00, déductions accordées 2'500.00, " +
+              "frais de ventes 1'200.00, pertes sur créances 400.00 ; achats 50'000.00, frais d'achats 1'500.00, déductions " +
+              "obtenues 1'800.00 ; stock initial 12'000.00, stock final 14'500.00.",
+          },
+          {
+            type: 'tableau',
+            entetes: ['Grandeur', 'Calcul', 'Montant'],
+            lignes: [
+              ['CAN', "80'000 + 600 − 2'500 − 1'200 − 400", "76'500.00"],
+              ['PRAMA', "50'000 + 1'500 − 1'800", "49'700.00"],
+              ['Variation de stock', "14'500 − 12'000 (augmentation)", "2'500.00"],
+              ['PRAMV', "49'700 − 2'500", "47'200.00"],
+              ['Marge brute', "76'500 − 47'200", "29'300.00"],
+              ['Taux de marge brute', "29'300 ÷ 76'500 × 100", '38,3 %'],
+            ],
           },
         ],
       },
@@ -455,6 +870,116 @@ export const CHAPITRES: Chapitre[] = [
             type: 'retenir',
             texte:
               "Inventaire intermittent : le stock du bilan n'est juste qu'après l'écriture de variation de stock au bouclement.",
+          },
+        ],
+      },
+    ],
+  },
+
+  {
+    id: 'prix',
+    titre: 'Échelle des prix et nombre clé',
+    niveau: 'CFC1',
+    resume: "Du prix d'achat brut au prix de vente brut : calculer chaque étape, puis passer de l'une à l'autre d'un seul calcul.",
+    sections: [
+      {
+        titre: "Du prix d'achat brut au prix de revient d'achat",
+        blocs: [
+          {
+            type: 'liste',
+            items: [
+              "PAB, prix d'achat brut : le prix affiché par le fournisseur.",
+              "PAC, prix d'achat à crédit = PAB − rabais (ou remise) obtenu.",
+              "PAN, prix d'achat net = PAC − escompte obtenu : le montant payé au fournisseur.",
+              "PRA, prix de revient d'achat = PAN + frais d'achat (transport, douane) : le coût de la marchandise arrivée dans l'entreprise.",
+            ],
+          },
+          {
+            type: 'tableau',
+            entetes: ['Étape', 'Base de calcul', 'CHF'],
+            lignes: [
+              ['PAB', '100 %', "2'000.00"],
+              ['− Rabais 5 %', 'en % du PAB', '100.00'],
+              ['= PAC', '95 % du PAB ; 100 % pour l\'escompte', "1'900.00"],
+              ['− Escompte 2 %', 'en % du PAC', '38.00'],
+              ['= PAN', '', "1'862.00"],
+              ["+ Frais d'achat", 'montant donné', '138.00'],
+              ['= PRA', '', "2'000.00"],
+            ],
+          },
+        ],
+      },
+      {
+        titre: 'Du prix de revient d\'achat au prix de vente net',
+        blocs: [
+          {
+            type: 'liste',
+            items: [
+              'PR, prix de revient = PRA + frais généraux (FG : salaires, loyer, publicité…).',
+              'PVN, prix de vente net = PR + bénéfice net (BN) : le montant encaissé auprès du client.',
+              'Bénéfice brut (BB) = FG + BN = PVN − PRA.',
+            ],
+          },
+          {
+            type: 'tableau',
+            entetes: ['Étape', 'Base de calcul', 'CHF'],
+            lignes: [
+              ['PRA', '100 % pour les FG', "2'000.00"],
+              ['+ Frais généraux 20 %', 'en % du PRA', '400.00'],
+              ['= PR', '100 % pour le BN', "2'400.00"],
+              ['+ Bénéfice net 22,5 %', 'en % du PR', '540.00'],
+              ['= PVN', '', "2'940.00"],
+              ['Bénéfice brut', "PVN − PRA = 400 + 540", '940.00'],
+            ],
+          },
+        ],
+      },
+      {
+        titre: 'Du prix de vente net au prix de vente brut',
+        blocs: [
+          {
+            type: 'p',
+            texte:
+              "Si l'entreprise accorde à son tour un escompte et un rabais, elle les ajoute au PVN pour fixer le prix " +
+              "affiché. Attention à la base : l'escompte se calcule sur le PVC et le rabais sur le PVB. On part donc du " +
+              'pourcentage restant : PVN = 98 % du PVC pour 2 % d\'escompte.',
+          },
+          {
+            type: 'tableau',
+            entetes: ['Étape', 'Base de calcul', 'CHF'],
+            lignes: [
+              ['PVN', '98 % du PVC', "2'940.00"],
+              ['+ Escompte 2 %', 'en % du PVC', '60.00'],
+              ['= PVC, prix de vente à crédit', '100 % ; 96 % du PVB', "3'000.00"],
+              ['+ Rabais 4 %', 'en % du PVB', '125.00'],
+              ['= PVB, prix de vente brut (affiché)', '100 %', "3'125.00"],
+            ],
+          },
+          {
+            type: 'retenir',
+            texte:
+              "Chaque pourcentage se rapporte à une base (le 100 %). Repérez-la avant de calculer : rabais et escompte " +
+              "obtenus sur le PAB et le PAC, frais généraux sur le PRA, bénéfice net sur le PR, escompte et rabais accordés sur le PVC et le PVB, sauf si l'énoncé en décide autrement.",
+          },
+        ],
+      },
+      {
+        titre: 'Le nombre clé',
+        blocs: [
+          {
+            type: 'p',
+            texte:
+              "Quand tous les pourcentages restent les mêmes pour un assortiment, on calcule une seule fois le coefficient " +
+              "qui passe d'un prix à l'autre : le nombre clé. Exemple : PAN 400.00, frais d'achat 10 % du PAN, bénéfice brut " +
+              "25 % du PRA. PRA = 440.00, PVN = 550.00.",
+          },
+          {
+            type: 'tableau',
+            entetes: ['Pour passer', 'Nombre clé', 'Utilisation'],
+            lignes: [
+              ['du PAN au PVN', '550 ÷ 400 = 1,375', "Un article au PAN de 640.00 se vend 640 × 1,375 = 880.00"],
+              ['du PVN au PAN', '400 ÷ 550 = 0,7273', 'Un article vendu 880.00 a coûté 880 × 0,7273 ≈ 640.00'],
+            ],
           },
         ],
       },

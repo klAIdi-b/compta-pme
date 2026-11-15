@@ -13,6 +13,7 @@ import { bilan, compteDeResultat } from '../engine/statements';
 import { repartir } from '../engine/repartition';
 import { RATIOS, ratios } from '../engine/analyse';
 import { degres, fluxTresorerie, seuil } from '../engine/tableaux';
+import { bilanOuverture, echelle, margeBrute, MASSES } from '../engine/fiches-cfc';
 import { formatMontant as m } from '../engine/money';
 import { formatDate as dt } from '../engine/dates';
 import { cote, lignesEtat } from './copie';
@@ -384,6 +385,58 @@ export async function genererPdfCorrige(
       columnStyles: { 1: { halign: 'right', cellWidth: 34 } },
     });
     y = finY(doc, y) + 8;
+  }
+
+  // Fiches du cours CFC (bilan d'ouverture, marge brute, échelle des prix), si l'exercice les propose.
+  const tableauFiche = (titre: string, lignes: [string, string][], largeur = 44) => {
+    y = titreSection(doc, titre, y);
+    autoTable(doc, {
+      startY: y,
+      margin: { left: MARGE, right: MARGE },
+      body: lignes,
+      styles: { font: 'helvetica', fontSize: 9, cellPadding: 1.4 },
+      columnStyles: { 1: { halign: 'right', cellWidth: largeur } },
+    });
+    y = finY(doc, y) + 8;
+  };
+  if (ex.parametres.ficheBilanOuverture) {
+    const b = bilanOuverture(ex.ouvertureActif, ex.ouverturePassif);
+    const titreMasse = new Map(MASSES.map((x) => [x.cle, x.titre]));
+    tableauFiche("Fiche « Bilan d'ouverture » : classement des comptes", b.postes.map((x): [string, string] => [`${nom.get(x.numero) ?? x.numero} (${x.numero})`, titreMasse.get(x.masse) ?? '']), 70);
+    tableauFiche("Fiche « Bilan d'ouverture » : totaux", [
+      ...MASSES.filter((x) => x.cle !== 'capitauxPropres').map((x): [string, string] => [x.titre, m(b.totaux[x.cle])]),
+      ['Total des actifs', m(b.totalActifs)],
+      ['Total des capitaux étrangers', m(b.capitauxEtrangers)],
+      [b.fortuneNette >= 0 ? 'Capitaux propres (fortune nette)' : 'Découvert', m(Math.abs(b.fortuneNette))],
+    ]);
+  }
+  if (ex.parametres.ficheMargeBrute) {
+    const r = margeBrute(d);
+    tableauFiche('Fiche « Marge brute »', [
+      ["CAB, chiffre d'affaires brut", m(r.cab)],
+      ["CAN, chiffre d'affaires net", m(r.can)],
+      ['PRAMA', m(r.prama)],
+      ['PRAMV', m(r.prmv)],
+      ['Marge brute', m(r.margeBrute)],
+      ['Taux de marge brute', Number.isFinite(r.tauxMargeBrute) ? `${r.tauxMargeBrute.toFixed(1)} %` : '—'],
+    ]);
+  }
+  if (ex.parametres.echellePrix) {
+    const e = echelle(ex.parametres.echellePrix);
+    const cle = (n: number) => n.toFixed(4).replace('.', ',');
+    tableauFiche(`Fiche « Échelle des prix »${ex.parametres.echellePrix.article ? ` (${ex.parametres.echellePrix.article})` : ''}`, [
+      ['PAB', m(ex.parametres.echellePrix.pab)],
+      ['PAC', m(e.pac)],
+      ['PAN', m(e.pan)],
+      ['PRA', m(e.pra)],
+      ['PR', m(e.pr)],
+      ['PVN', m(e.pvn)],
+      ['Bénéfice brut', m(e.beneficeBrut)],
+      ['PVC', m(e.pvc)],
+      ['PVB', m(e.pvb)],
+      ['Nombre clé PAN → PVN', cle(e.nombreClePanPvn)],
+      ['Nombre clé PAB → PVB', cle(e.nombreClePabPvb)],
+    ]);
   }
 
   const bi = bilan(d);

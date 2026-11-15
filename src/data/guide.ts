@@ -203,6 +203,9 @@ export const GUIDE: PartieGuide[] = [
               'Décompte de salaire : calculez les retenues et le salaire net avant de passer l’écriture.',
               'TVA : le décompte TVA due moins impôt préalable, d’après vos comptes.',
               'Répartition du bénéfice et Analyse (maturité) : calculez les montants et les ratios demandés.',
+              "Bilan d'ouverture, Marge brute et Échelle des prix (si l'enseignant les propose) : classez les comptes dans " +
+                'les masses du bilan, calculez la marge brute d’après vos comptes avant bouclement, ou le prix de vente d’un article ; ' +
+                'en entraînement, chaque résultat est contrôlé.',
               'Résultat par degrés, Flux de trésorerie et Seuil de rentabilité (maturité) : calculez chaque degré ou chaque ' +
                 'flux d’après vos comptes avant bouclement ; en entraînement, chaque résultat est contrôlé.',
               "Bouclement : passez vous-même les écritures de bouclement au journal (pièces B1, B2…). Selon l'exercice, " +

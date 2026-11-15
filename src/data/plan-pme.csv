@@ -59,17 +59,17 @@ numero;intitule;classe;type;niveau_min
 2970;Bénéfice reporté (./. Perte reportée);2;passif;MP
 2979;Bénéfice d'exercice (./. Perte d'exercice);2;passif;MP
 3200;Ventes de marchandises;3;produit;CFC1
-3209;Déductions accordées;3;produit;MP
-3210;Frais de ventes;3;produit;-
+3209;Déductions accordées;3;produit;CFC1
+3210;Frais de ventes;3;produit;CFC1
 3400;Honoraires;3;produit;-
 3410;Produits des travaux;3;produit;-
 3420;Produits des courses;3;produit;-
 3430;Autres produits;3;produit;-
-3720;Prestations propres;3;produit;-
+3720;Prestations propres;3;produit;CFC1
 3805;Pertes s/créances;3;produit;CFC2
 4200;Achats de marchandises;4;charge;CFC1
-4209;Déductions obtenues;4;charge;MP
-4270;Frais d'achats;4;charge;MP
+4209;Déductions obtenues;4;charge;CFC1
+4270;Frais d'achats;4;charge;CFC1
 4280;Variation de stocks;4;charge;CFC1
 5200;Salaires;5;charge;CFC1
 5270;Charges sociales;5;charge;CFC2

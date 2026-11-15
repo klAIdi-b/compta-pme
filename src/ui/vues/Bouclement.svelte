@@ -76,7 +76,11 @@
         <p><button class="btn btn-principal" onclick={boucleAutomatiquement}>Passer les écritures de bouclement</button></p>
         {#if erreurBouclement}<div class="alerte" role="alert">{erreurBouclement}</div>{/if}
       {:else if mode === 'compteDeResultat'}
-        <p class="discret">Passez au journal les écritures de bouclement (compte privé, clôture des charges et produits par le compte 9000, résultat), avec des pièces B1, B2, B3.</p>
+        {#if d.formeJuridique === 'raison individuelle'}
+          <p class="discret">Passez au journal les écritures de bouclement, avec des pièces B1, B2, B3 : clôture des charges et produits par le compte 9000, puis résultat viré au compte privé, puis solde du compte privé viré au capital.</p>
+        {:else}
+          <p class="discret">Passez au journal les écritures de bouclement, avec des pièces B1 et B2 : clôture des charges et produits par le compte 9000, puis résultat viré au bénéfice reporté.</p>
+        {/if}
       {/if}
     {/if}
     <button class="btn btn-principal" disabled={mode === 'compteDeResultat' && !boucle} onclick={rouvrir}>Ouvrir l'exercice suivant</button>

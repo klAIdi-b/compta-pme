@@ -17,6 +17,7 @@ export const SOMMAIRE: EntreeSommaire[] = [
   { id: 'journal', titre: 'Le journal et les écritures', niveau: 'CFC1' },
   { id: 'resultat', titre: 'Compte de résultat, compte privé et bouclement', niveau: 'CFC1' },
   { id: 'marchandises', titre: 'Marchandises et stock', niveau: 'CFC1' },
+  { id: 'prix', titre: 'Échelle des prix et nombre clé', niveau: 'CFC1' },
   { id: 'tva', titre: 'TVA — méthode effective', niveau: 'CFC2' },
   { id: 'amortissements', titre: 'Amortissements', niveau: 'CFC2' },
   { id: 'transitoires', titre: 'Actifs et passifs transitoires', niveau: 'CFC2' },
@@ -51,7 +52,7 @@ const THEMES: { id: string; comptes: string[] }[] = [
   { id: 'societes', comptes: ['1850', '1860', '2810', '2900', '2950', '2960', '2970', '2230', '6550'] },
   { id: 'provisions', comptes: ['2600', '2640', '2660', '2690'] },
   { id: 'interets', comptes: ['6900', '6950'] },
-  { id: 'marchandises', comptes: ['1200', '3200', '3209', '4200', '4209', '4270', '4280'] },
+  { id: 'marchandises', comptes: ['1200', '3200', '3209', '3210', '3720', '4200', '4209', '4270', '4280'] },
 ];
 
 export function chapitrePourComptes(comptes: readonly string[], niveau: Niveau): EntreeSommaire | null {

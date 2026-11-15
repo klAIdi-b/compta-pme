@@ -11,13 +11,25 @@ import type { Compte, Niveau } from './plan';
 import { comptesDuNiveau, NIVEAUX } from './plan';
 import type { DonneesRepartition } from './repartition';
 import type { DonneesSeuil } from './tableaux';
+import type { DonneesEchelle } from './fiches-cfc';
 import type { PieceComptable } from './pieces';
 
 export type LibellesT = 'SI/SF' | 'San/Spb';
 export type Mode = 'entrainement' | 'evaluation';
 
 /** Rubriques de l'application ; une rubrique non activée n'apparaît pas. */
-export type Fonction = 'tva' | 'salaire' | 'calculatriceTva' | 'repartition' | 'analyse' | 'degres' | 'flux' | 'seuil';
+export type Fonction =
+  | 'tva'
+  | 'salaire'
+  | 'calculatriceTva'
+  | 'repartition'
+  | 'analyse'
+  | 'degres'
+  | 'flux'
+  | 'seuil'
+  | 'bilanOuverture'
+  | 'margeBrute'
+  | 'echelle';
 
 export interface Operation {
   numero: string;
@@ -82,6 +94,12 @@ export interface Exercice {
     repartition?: DonneesRepartition;
     /** MP : données de la fiche « Seuil de rentabilité » (prix, coût variable, charges fixes, quantité). */
     seuil?: DonneesSeuil;
+    /** Tous niveaux : fiche « Bilan d'ouverture » (classer les comptes dans les masses, fortune nette). */
+    ficheBilanOuverture?: boolean;
+    /** Tous niveaux : fiche « Marge brute » (CAB, CAN, PRAMA, PRAMV d'après les comptes). */
+    ficheMargeBrute?: boolean;
+    /** Tous niveaux : données de la fiche « Échelle des prix ». */
+    echellePrix?: DonneesEchelle;
   };
   corrige?: EcritureCorrigee[];
   /** Points par opération (numéro → points) ; 1 point par défaut. */
@@ -111,6 +129,9 @@ export function planSelonForme(plan: Compte[], forme: FormeJuridique): Compte[] 
 /** Fonctions visibles pour un exercice : celles du niveau, plus les options choisies par l'enseignant. */
 export function fonctionsExercice(ex: Exercice): Set<Fonction> {
   const f = fonctionsDuNiveau(ex.niveau);
+  if (ex.parametres.ficheBilanOuverture) f.add('bilanOuverture');
+  if (ex.parametres.ficheMargeBrute) f.add('margeBrute');
+  if (ex.parametres.echellePrix) f.add('echelle');
   const cfc2 = NIVEAUX.indexOf(ex.niveau) >= NIVEAUX.indexOf('CFC2');
   if (cfc2 && ex.parametres.ficheSalaire) f.add('salaire');
   if (cfc2 && ex.parametres.calculatriceTva) f.add('calculatriceTva');
