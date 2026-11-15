@@ -124,7 +124,16 @@
 
   function choisirOperation(numero: string) {
     const o = operations.find((x) => x.numero === numero);
-    if (!o) return;
+    if (!o) {
+      // Écritures de bouclement (B1, B2…) : pièce proposée, datée de la fin de l'exercice.
+      if (/^B\d+$/.test(numero)) {
+        piece = numero;
+        date = dt(d.fin);
+        erreurs = [];
+        tick().then(() => document.getElementById('saisie-libelle')?.focus());
+      }
+      return;
+    }
     piece = o.numero;
     date = dt(o.date);
     erreurs = [];

@@ -31,8 +31,18 @@
     etat.majDossier(r.valeur);
   }
 
+  /** Année de l'exercice comptable suivant (réouverture). */
+  const anneeSuivante = $derived(Number(d.fin.slice(0, 4)) + 1);
+  /** Première pièce de bouclement libre (B1, B2…), pour ouvrir le journal dessus. */
+  const prochaineB = $derived.by(() => {
+    const prises = new Set(d.ecritures.map((e) => e.piece));
+    let n = 1;
+    while (prises.has(`B${n}`)) n++;
+    return `B${n}`;
+  });
+
   function rouvrir() {
-    if (!confirm("Ouvrir l'exercice suivant ? L'exercice actuel sera archivé.")) return;
+    if (!confirm(`Ouvrir l'exercice comptable ${anneeSuivante} ? L'exercice actuel sera archivé et le bilan de clôture deviendra le bilan d'ouverture.`)) return;
     const r = reouvrir(d, mode);
     if (!r.ok) return alert(r.erreurs.join('\n'));
     etat.session!.archives.push(d);
@@ -81,9 +91,25 @@
         {:else}
           <p class="discret">Passez au journal les écritures de bouclement, avec des pièces B1 et B2 : clôture des charges et produits par le compte 9000, puis résultat viré au bénéfice reporté.</p>
         {/if}
+        <p><button class="btn btn-principal" onclick={() => etat.ouvrirOperation(prochaineB)}>Saisir les écritures de bouclement ({prochaineB})</button></p>
       {/if}
     {/if}
-    <button class="btn btn-principal" disabled={mode === 'compteDeResultat' && !boucle} onclick={rouvrir}>Ouvrir l'exercice suivant</button>
+  </div>
+</section>
+
+<section class="carte">
+  <h2>Exercice comptable suivant</h2>
+  <div class="corps-carte">
+    <p class="discret">
+      La réouverture archive l'exercice actuel et reporte le bilan de clôture comme bilan d'ouverture du
+      1er janvier {anneeSuivante}. C'est facultatif : l'exercice de l'énoncé est terminé une fois le bouclement passé.
+    </p>
+    <p>
+      <button class="btn" disabled={mode === 'compteDeResultat' && !boucle} onclick={rouvrir}>Ouvrir l'exercice comptable {anneeSuivante}</button>
+      {#if mode === 'compteDeResultat' && !boucle}
+        <span class="discret petit-inline">Disponible quand les écritures de bouclement sont passées au journal.</span>
+      {/if}
+    </p>
   </div>
 </section>
 
@@ -91,4 +117,5 @@
   section { margin-bottom: 16px; }
   .revoir { color: var(--c-alerte-texte); }
   .petit { font-size: 12px; margin: 6px 0 0; }
+  .petit-inline { font-size: 13px; margin-left: 10px; }
 </style>
