@@ -386,17 +386,17 @@
           {#if operations[0]}Commencez par saisir l'opération {operations[0].numero}.{/if}
         </p>
       {:else}
-        <table class="journal">
+        <div class="defilement"><table class="journal">
           <thead>
             <tr>
-              <th style="width:90px">Date</th>
-              <th style="width:52px">Pièce</th>
-              <th>Libellé</th>
-              <th style="width:170px">Débit</th>
-              <th style="width:170px">Crédit</th>
-              <th class="montant" style="width:96px">Montant</th>
-              {#if retour}<th style="width:86px">Correction</th>{/if}
-              <th style={`width:${modifAutorisee ? 140 : 84}px`}><span class="sr-only">Actions</span></th>
+              <th class="j-date">Date</th>
+              <th class="j-piece">Pièce</th>
+              <th class="j-libelle">Libellé</th>
+              <th class="j-compte">Débit</th>
+              <th class="j-compte">Crédit</th>
+              <th class="montant j-montant">Montant</th>
+              {#if retour}<th class="j-correction">Correction</th>{/if}
+              <th class="j-actions"><span class="sr-only">Actions</span></th>
             </tr>
           </thead>
           <tbody>
@@ -426,11 +426,13 @@
                   {/if}
                   <td class="actions">
                     {#if j === 0}
-                      {#if !extournee && !e.extourneDe}
-                        {#if modifAutorisee}<button class="btn-lien" onclick={() => modifier(e)}>Modifier</button>{/if}
-                        <button class="btn-lien" onclick={() => demanderExtourne(e.id)}>Extourner</button>
-                      {/if}
-                      <button class="btn-lien supprimer" aria-label={`Supprimer la pièce ${e.piece}${e.extourneDe ? ' (extourne)' : ''}`} onclick={() => demanderSuppression(e.id)}>Supprimer</button>
+                      <div class="boutons-ecriture">
+                        {#if !extournee && !e.extourneDe}
+                          {#if modifAutorisee}<button class="action-ecr" onclick={() => modifier(e)}>Modifier</button>{/if}
+                          <button class="action-ecr" onclick={() => demanderExtourne(e.id)}>Extourner</button>
+                        {/if}
+                        <button class="action-ecr supprimer" aria-label={`Supprimer la pièce ${e.piece}${e.extourneDe ? ' (extourne)' : ''}`} onclick={() => demanderSuppression(e.id)}>Supprimer</button>
+                      </div>
                     {/if}
                   </td>
                 </tr>
@@ -481,7 +483,7 @@
               {/if}
             {/each}
           </tbody>
-        </table>
+        </table></div>
       {/if}
     </section>
   </div>
@@ -560,8 +562,34 @@
   .journal th { padding: 9px 8px; }
   .int { display: block; color: var(--c-texte-2); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .actions { text-align: right; white-space: nowrap; }
-  .actions .btn-lien + .btn-lien { margin-left: 10px; }
-  .supprimer { color: var(--c-negatif); }
+  /* Actions d'une écriture : petits boutons empilés, toujours visibles dans une colonne étroite. */
+  .boutons-ecriture { display: flex; flex-direction: column; gap: 4px; align-items: stretch; }
+  .action-ecr {
+    font: inherit; font-size: 12.5px; font-weight: bold; padding: 4px 8px; border-radius: 6px; cursor: pointer;
+    background: #fff; color: var(--c-structure); border: 1px solid var(--c-bordure); text-align: center;
+  }
+  .action-ecr:hover { background: var(--c-survol); border-color: var(--c-structure); }
+  .action-ecr.supprimer { color: var(--c-negatif); border-color: #e9c3c9; }
+  .action-ecr.supprimer:hover { background: #fdf2f4; border-color: var(--c-negatif); }
+  /* Écran étroit : le tableau défile plutôt que de couper les colonnes. */
+  .defilement { overflow-x: auto; }
+  .defilement .journal { min-width: 720px; }
+  .j-date { width: 90px; }
+  .j-piece { width: 52px; }
+  .j-compte { width: 170px; }
+  .j-montant { width: 96px; }
+  .j-correction { width: 86px; }
+  .j-actions { width: 112px; }
+  /* Tablette et petit écran : colonnes resserrées pour laisser de la place au libellé. */
+  @media (max-width: 1280px) {
+    .j-date { width: 82px; }
+    .j-piece { width: 44px; }
+    .j-compte { width: 130px; }
+    .j-montant { width: 84px; }
+    .j-correction { width: 78px; }
+    .j-actions { width: 100px; }
+    .journal td, .journal th { padding-left: 6px; padding-right: 6px; }
+  }
   tr.annulee td { color: #7a8591; }
   .barre { text-decoration: line-through; }
   .statut { font-size: 12px; font-weight: bold; white-space: nowrap; display: inline-block; padding: 2px 9px; border-radius: 999px; }
