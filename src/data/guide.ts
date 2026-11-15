@@ -127,7 +127,8 @@ export const GUIDE: PartieGuide[] = [
             type: 'p',
             texte:
               "Quand une opération touche plus de deux comptes, saisissez plusieurs lignes : sur chaque ligne, un compte au " +
-              "débit ou au crédit avec son montant. Après chaque ligne, Entrée ouvre une nouvelle ligne. Sous la grille, " +
+              "débit ou au crédit avec son montant. Cliquez sur « Ajouter une ligne » sous la grille (ou appuyez sur Entrée à la fin d'une ligne). " +
+              "Sous la grille, " +
               "l'écart entre débit et crédit s'affiche tant que l'écriture n'est pas équilibrée ; elle se valide dès que " +
               "l'écart est nul.",
           },

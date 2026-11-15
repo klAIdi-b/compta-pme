@@ -197,6 +197,13 @@
     }
   }
 
+  /** Nouvelle ligne pour une écriture composée ; le curseur va dans son compte au débit. */
+  async function ajouterLigne() {
+    lignes.push(nouvelleLigne());
+    await tick();
+    document.getElementById(`debit-${lignes[lignes.length - 1]!.cle}`)?.focus();
+  }
+
   function retirerLigne(i: number) {
     if (lignes.length > 1) lignes.splice(i, 1);
     else lignes = [nouvelleLigne()];
@@ -337,6 +344,10 @@
           {/each}
         </tbody>
       </table>
+      <div class="ajout-ligne">
+        <button type="button" class="btn-ajout" onclick={ajouterLigne}><span aria-hidden="true">+</span> Ajouter une ligne</button>
+        <span class="discret">Écriture composée : une ligne par compte, au débit ou au crédit.</span>
+      </div>
 
       <div class="equilibre" data-visite="equilibre">
         <!-- Balance débit / crédit : les deux plateaux se rejoignent quand l'écriture est équilibrée. -->
@@ -348,7 +359,7 @@
           </div>
           <div class="etat-equilibre" aria-live="polite">
             {#if utiles.length && ecart !== 0}
-              <div class="ecart">Écriture non équilibrée : {ecartTexte(ecart)}.</div>
+              <div class="ecart">Écriture non équilibrée : {ecartTexte(ecart)}.{#if lignes.length === 1} Ajoutez une ligne pour une écriture composée.{/if}</div>
             {:else if equilibree}
               <span class="ok equilibree">Écriture équilibrée</span>
             {/if}
@@ -528,6 +539,12 @@
   .bascule-piece { margin-left: 10px; font-size: 13px; }
   .zone-piece { padding: 14px 18px; background: var(--c-fond-2); border-bottom: 1px solid var(--c-bordure-3); max-height: 420px; overflow-y: auto; }
   .grille-saisie { min-width: 0; }
+  .ajout-ligne { display: flex; align-items: center; gap: 14px; padding: 2px 14px 12px; flex-wrap: wrap; font-size: 13px; }
+  .btn-ajout {
+    font: inherit; font-weight: bold; font-size: 13.5px; color: var(--c-structure); background: #fff; cursor: pointer;
+    border: 1px dashed var(--c-structure); border-radius: 6px; padding: 6px 12px;
+  }
+  .btn-ajout:hover { background: var(--c-survol); border-style: solid; }
   /* Grand écran : la pièce justificative à côté de la grille de saisie. */
   @media (min-width: 1600px) {
     .plan-saisie.avec-piece { display: grid; grid-template-columns: minmax(0, 1fr) 380px; }

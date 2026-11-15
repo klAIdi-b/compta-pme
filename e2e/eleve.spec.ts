@@ -137,3 +137,31 @@ test('Tab choisit le compte en surbrillance, comme Entrée', async ({ page }) =>
   await cre.press('Tab');
   await expect(cre).toHaveValue(/Dettes/);
 });
+
+test('une écriture composée se saisit avec le bouton « Ajouter une ligne »', async ({ page }) => {
+  await commencer(page, 'cycles', /Cycles du Léman/);
+  await page.goto('./#journal');
+  const fermerVisite = page.getByRole('button', { name: /Passer|Fermer la visite|Terminer/ });
+  if (await fermerVisite.first().isVisible().catch(() => false)) await fermerVisite.first().click();
+  await page.locator('#saisie-piece').fill('14');
+  await page.locator('#saisie-libelle').fill('Achat de marchandises');
+  const choisir = async (champ: string, compte: string) => {
+    const c = page.getByLabel(champ);
+    await c.click();
+    await c.pressSequentially(compte);
+    await c.press('Tab');
+  };
+  await choisir('Compte au débit, ligne 1', 'achats de m');
+  await page.getByLabel('Montant, ligne 1').fill('3000');
+  await page.getByRole('button', { name: 'Ajouter une ligne' }).click();
+  await expect(page.getByLabel('Compte au débit, ligne 2')).toBeFocused();
+  await choisir('Compte au crédit, ligne 2', 'caisse');
+  await page.getByLabel('Montant, ligne 2').fill('1000');
+  await page.getByRole('button', { name: 'Ajouter une ligne' }).click();
+  await choisir('Compte au crédit, ligne 3', 'dettes f');
+  await page.getByLabel('Montant, ligne 3').fill('2000');
+  await page.getByLabel('Montant, ligne 3').press('Tab');
+  await expect(page.getByText('Écriture équilibrée')).toBeVisible();
+  await page.getByRole('button', { name: "Valider l'écriture" }).click();
+  await expect(page.getByText('Juste').first()).toBeVisible();
+});
