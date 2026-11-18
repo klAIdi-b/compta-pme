@@ -35,3 +35,15 @@ describe('lot ch. 14 TVA (manuel E&S)', () => {
     expect(K.solde).toBe(111200);
   });
 });
+
+describe('lot ch. 25 salaires (manuel E&S)', () => {
+  it('Confiserie du Bourg-de-Four : nets, LPP selon le salaire coordonné, charges patronales', async () => {
+    const { CONTROLES_CONFISERIE: S, dossierConfiserie } = await import('../src/data/dossiers/cfc-manuel-salaires');
+    expect(controlerExercice(dossierConfiserie, plan).erreurs).toEqual([]);
+    expect([S.s2.net, S.s3.net, S.s4.net, S.s5.net]).toEqual([421780, 677970, 204425, 117000]);
+    expect(S.avsEmployes).toBe(S.patronAvs); // même taux, arrondis identiques
+    expect(S.lppEmployes).toBe(55985);
+    expect(S.patronAlfa).toBe(40440);
+    for (const e of dossierConfiserie.corrige!) expect(somme(e.lignes, 'debit')).toBe(somme(e.lignes, 'credit'));
+  });
+});

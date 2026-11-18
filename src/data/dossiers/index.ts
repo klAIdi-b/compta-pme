@@ -4,6 +4,7 @@ import type { TableauComplement } from './outils';
 import { dossierPolyglotte, dossierSaveurs } from './cfc-bases';
 import { dossierGarage, dossierHifi } from './cfc-manuel';
 import { dossierElectromenager } from './cfc-manuel-tva';
+import { dossierConfiserie } from './cfc-manuel-salaires';
 import { dossierBabel, dossierMenuiserie, dossierOutils } from './cfc-tva-cloture';
 import { dossierBoulangerie, dossierFleurs, dossierMeubles } from './cfc-creances-salaires';
 import { dossierOptique, dossierPrecimeca } from './mp';
@@ -16,7 +17,7 @@ import { complementCartonnages, dossierCartonnages } from './mp-dissolution';
 
 export const DOSSIERS: Exercice[] = [
   dossierSaveurs, dossierPolyglotte, dossierGarage, dossierHifi, dossierOutils, dossierElectromenager, dossierMenuiserie, dossierBabel,
-  dossierMeubles, dossierBoulangerie, dossierFleurs, dossierTerroirs, dossierZufferey, dossierBrasserie, dossierLemanbio, dossierAteliers, dossierCartonnages, dossierOptique, dossierPrecimeca, dossierCarrosserie, dossierSports, dossierRhoneMobilite,
+  dossierMeubles, dossierBoulangerie, dossierConfiserie, dossierFleurs, dossierTerroirs, dossierZufferey, dossierBrasserie, dossierLemanbio, dossierAteliers, dossierCartonnages, dossierOptique, dossierPrecimeca, dossierCarrosserie, dossierSports, dossierRhoneMobilite,
 ];
 
 /** Version d'évaluation d'un dossier : même contenu, aucun retour pendant la saisie, corrigé absent du fichier élève. */
