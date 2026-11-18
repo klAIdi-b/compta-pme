@@ -432,4 +432,107 @@ export const manuelTruffaz: Exercice = {
   ],
 };
 
-export const exercicesManuel: Exercice[] = [manuelFavre, manuelVinotheque, manuelLacroix, manuelBrodard, manuelMontBlanc, manuelTruffaz];
+// ───────────────────────── Ch. 35 — clôture de l'entreprise individuelle (vol. 4 profil E, exercice 35.5) ─────────────────────────
+// Les douze écritures de clôture du livre sont reprises ; la balance du livre (illisible dans le fichier numérisé) est
+// remplacée par un bilan d'ouverture et des opérations de l'année résumées, construits pour l'exercice.
+export const manuelLambert: Exercice = {
+  id: 'manuel-cfc4-lambert-horlogerie-cloture',
+  titre: 'Lambert Horlogerie — clôture annuelle de l’entreprise individuelle',
+  niveau: 'CFC2',
+  filiere: 'CFC',
+  difficulte: 4,
+  sujets: [
+    'Inventaire et variation de stock',
+    'Ducroire',
+    'Amortissements (direct, indirect, constant, dégressif)',
+    'Actifs et passifs transitoires',
+    'Immeuble locatif hors exploitation',
+    'Salaire et intérêt du propriétaire',
+    'Bouclement',
+  ],
+  raisonSociale: 'Lambert Horlogerie',
+  formeJuridique: 'raison individuelle',
+  debut: '2026-01-01',
+  fin: '2026-12-31',
+  introduction:
+    "L'entreprise n'est pas assujettie à la TVA. Les opérations 1 à 10 résument l'année ; les opérations 11 à 25 sont " +
+    "les écritures de clôture du 31 décembre. L'immeuble locatif est hors exploitation : ses charges, son amortissement " +
+    "et ses intérêts vont en charges hors exploitation, ses loyers en produits hors exploitation. " +
+    `${CONSIGNE} Bouclez ensuite l'exercice.`,
+  situation:
+    "Patrick Lambert vend des montres dans sa boutique de la rue du Rhône, Lambert Horlogerie. Il possède aussi un immeuble locatif à " +
+    "Champel, dont les appartements sont loués.\n\n" +
+    "Toutes les opérations courantes de l'année sont comptabilisées. Il vous demande maintenant de passer les écritures " +
+    "de clôture : inventaire, ducroire, amortissements, écritures transitoires, puis son salaire et l'intérêt sur ses " +
+    "apports, avant de boucler l'exercice.",
+  operations: [
+    { numero: '1', date: '2026-12-20', texte: "Récapitulatif de l'année : ventes de montres à crédit, 1'500'000.00." },
+    { numero: '2', date: '2026-12-20', texte: "Récapitulatif de l'année : paiements des clients sur le compte bancaire, 1'400'000.00." },
+    { numero: '3', date: '2026-12-20', texte: "Récapitulatif de l'année : achats de montres à crédit, 900'000.00." },
+    { numero: '4', date: '2026-12-20', texte: "Récapitulatif de l'année : paiements aux fournisseurs par la banque, 880'000.00." },
+    { numero: '5', date: '2026-12-20', texte: "Récapitulatif de l'année : salaires des employés payés par la banque, 180'000.00." },
+    { numero: '6', date: '2026-12-20', texte: "Récapitulatif de l'année : frais d'administration payés par la banque, 18'000.00." },
+    { numero: '7', date: '2026-10-20', texte: "Paiement par la poste de l'abonnement à la revue horlogère, du 1er novembre au 31 octobre suivant, 300.00." },
+    { numero: '8', date: '2026-12-20', texte: "Récapitulatif de l'année : loyers de l'immeuble locatif encaissés par la banque, 60'000.00." },
+    { numero: '9', date: '2026-12-20', texte: "Récapitulatif de l'année : charges de l'immeuble locatif payées par la banque, 12'000.00." },
+    { numero: '10', date: '2026-12-20', texte: "Récapitulatif de l'année : prélèvements de Patrick Lambert sur le compte bancaire, 40'000.00." },
+    { numero: '11', date: '2026-12-31', texte: "Le stock final de montres, selon l'inventaire, est estimé à 360'000.00." },
+    { numero: '12', date: '2026-12-31', texte: 'Ajuster le ducroire pour qu’il atteigne le maximum admis fiscalement : 5 % des créances clients.' },
+    { numero: '13', date: '2026-12-31', texte: 'Amortissements directs : mobilier 20 % et infrastructure informatique 30 %, de la valeur au bilan.' },
+    { numero: '14', date: '2026-12-31', texte: "Véhicules : amortissement indirect constant de 20 % de la valeur d'acquisition, 60'000.00." },
+    { numero: '15', date: '2026-12-31', texte: "Immeuble locatif : amortissement indirect décroissant de 2 % de la valeur comptable." },
+    { numero: '16', date: '2026-12-31', texte: "Intérêts courus sur l'emprunt bancaire, 8'200.00." },
+    { numero: '17', date: '2026-12-31', texte: "Abonnement à la revue payé le 20.10 (opération 7) : tenir compte de la part de l'exercice prochain." },
+    {
+      numero: '18',
+      date: '2026-12-31',
+      texte: "Un locataire (loyer annuel 15'000.00) a versé d'avance en décembre le loyer du premier trimestre de l'année prochaine ; il est compris dans l'opération 8.",
+    },
+    { numero: '19', date: '2026-12-31', texte: "Un autre locataire doit encore son loyer de décembre, 1'200.00." },
+    {
+      numero: '20',
+      date: '2026-12-31',
+      texte: "Intérêt couru sur la dette hypothécaire de l'immeuble locatif, 250'000.00 à 3,6 %, échéances semestrielles au 31.03 et au 30.09.",
+    },
+    { numero: '21', date: '2026-12-31', texte: 'La facture de téléphone de décembre, 180.00, arrivera en janvier.' },
+    { numero: '22', date: '2026-12-31', texte: "Montres livrées le 20 décembre, 12'000.00 : la facture n'est pas encore arrivée." },
+    { numero: '23', date: '2026-12-31', texte: "Il reste du matériel de bureau en stock pour 250.00, qui sera utilisé l'exercice prochain." },
+    { numero: '24', date: '2026-12-31', texte: "Salaire de Patrick Lambert pour son travail dans l'entreprise, 50'000.00." },
+    { numero: '25', date: '2026-12-31', texte: "Intérêt de 4 % sur le capital de Patrick Lambert au 1er janvier, 535'000.00." },
+  ],
+  ouvertureActif: montants({
+    '1000': 2000, '1010': 8000, '1020': 60000, '1100': 250000, '1200': 300000, '1510': 30000, '1520': 20000, '1530': 60000, '1600': 400000,
+  }),
+  ouverturePassif: montants({ '1109': 15000, '1539': 15000, '1609': 40000, '2000': 75000, '2400': 200000, '2401': 250000, '2800': 535000 }),
+  mode: 'entrainement',
+  parametres: { ...parametresBase, corrigerBouclement: true, comptesAjoutes: ['6900', '8000', '8100'] },
+  corrige: [
+    { piece: '1', lignes: s('1100', '3200', 1500000) },
+    { piece: '2', lignes: s('1020', '1100', 1400000) },
+    { piece: '3', lignes: s('4200', '2000', 900000) },
+    { piece: '4', lignes: s('2000', '1020', 880000) },
+    { piece: '5', lignes: s('5200', '1020', 180000) },
+    { piece: '6', lignes: s('6500', '1020', 18000) },
+    { piece: '7', lignes: s('6500', '1010', 300) },
+    { piece: '8', lignes: s('1020', '8100', 60000) },
+    { piece: '9', lignes: s('8000', '1020', 12000) },
+    { piece: '10', lignes: s('2850', '1020', 40000) },
+    { piece: '11', lignes: s('1200', '4280', 60000) },
+    { piece: '12', lignes: s('3805', '1109', 2500) }, // 350'000 × 5 % = 17'500 ; ducroire 15'000
+    { piece: '13', lignes: [D('6800', 12000), C('1510', 6000), C('1520', 6000)] },
+    { piece: '14', lignes: s('6800', '1539', 12000) },
+    { piece: '15', lignes: s('8000', '1609', 7200) }, // (400'000 − 40'000) × 2 %
+    { piece: '16', lignes: s('6900', '2300', 8200) },
+    { piece: '17', lignes: s('1300', '6500', 250) }, // 10 mois sur 12
+    { piece: '18', lignes: s('8100', '2300', 3750) },
+    { piece: '19', lignes: s('1300', '8100', 1200) },
+    { piece: '20', lignes: s('8000', '2300', 2250) }, // 250'000 × 3,6 % × 3/12
+    { piece: '21', lignes: s('6510', '2300', 180) },
+    { piece: '22', lignes: s('4200', '2300', 12000) },
+    { piece: '23', lignes: s('1300', '6500', 250) },
+    { piece: '24', lignes: s('5200', '2850', 50000) },
+    { piece: '25', lignes: s('6900', '2850', 21400) },
+  ],
+};
+
+export const exercicesManuel: Exercice[] = [manuelFavre, manuelVinotheque, manuelLacroix, manuelBrodard, manuelMontBlanc, manuelTruffaz, manuelLambert];

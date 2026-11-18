@@ -53,9 +53,17 @@ const attendus: Record<string, { resultat: number; soldes: Record<string, number
     resultat: -47200,
     soldes: { '1300': 18800, '2300': -44200, '1020': 98200, '6000': 0, '6500': 0, '6300': 3000 },
   },
+  // Produits 1'557'450.00 − charges 1'175'030.00 − ducroire 2'500.00.
+  'manuel-cfc4-lambert-horlogerie-cloture': {
+    resultat: 379920,
+    soldes: {
+      '1020': 390000, '1010': 7700, '1100': 350000, '1109': -17500, '1200': 360000, '1510': 24000, '1520': 14000,
+      '1539': -27000, '1609': -47200, '1300': 1700, '2300': -26380, '2000': -95000, '2850': -31400,
+    },
+  },
 };
 
-describe('exercices tirés des chapitres 1, 12, 14 et 22 à 24 du manuel', () => {
+describe('exercices tirés des chapitres 1, 12, 14, 22 à 24 et 35 du manuel', () => {
   for (const ex of exercicesManuel) {
     describe(ex.titre, () => {
       it("passe le contrôle de l'exercice sans erreur ni avertissement", () => {
