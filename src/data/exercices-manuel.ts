@@ -535,4 +535,125 @@ export const manuelLambert: Exercice = {
   ],
 };
 
-export const exercicesManuel: Exercice[] = [manuelFavre, manuelVinotheque, manuelLacroix, manuelBrodard, manuelMontBlanc, manuelTruffaz, manuelLambert];
+// ───────────────────────── MP, F&C vol. 2, ch. 36 — fondation et augmentation du capital (36.4, 36.5, exemples) ─────────────────────────
+export const manuelZephyr: Exercice = {
+  id: 'manuel-mp3-zephyr-automation-fondation',
+  titre: 'Zéphyr Automation SA — fondation et augmentation du capital',
+  niveau: 'MP',
+  filiere: 'MP',
+  difficulte: 3,
+  sujets: ['Souscription et libération', 'Apports en nature', 'Créances apportées et ducroire', 'Bons de participation', 'Agio', 'Frais de fondation (FAO)'],
+  raisonSociale: 'Zéphyr Automation SA',
+  formeJuridique: 'SA',
+  debut: '2026-01-01',
+  fin: '2026-12-31',
+  introduction:
+    "La société est fondée en janvier 2026 ; elle n'a pas encore de bilan. Les actionnaires et les participants sont " +
+    "suivis dans un seul compte par catégorie. L'agio est viré aux réserves légales issues du capital ; les frais de " +
+    "fondation et d'augmentation du capital sont des charges. " + CONSIGNE,
+  situation:
+    "Trois ingénieurs, Mme Kristen, M. Carlos et M. Rossi, fondent Zéphyr Automation SA à Plan-les-Ouates pour concevoir " +
+    "des robots d'emballage. Chacun apporte une partie en nature (matériel, véhicule, machine, créances de son ancienne " +
+    "activité) et le solde en espèces.\n\n" +
+    "Vous tenez la comptabilité dès la fondation : souscription et libération du capital-actions, émission de bons de " +
+    "participation, puis, en fin d'année, une augmentation du capital avec agio.",
+  operations: [
+    { numero: '1', date: '2026-01-05', texte: "Souscription intégrale du capital-actions de 200'000.00, divisé en 200 actions nominatives de 1'000.00." },
+    {
+      numero: '2',
+      date: '2026-01-10',
+      texte:
+        "Mme Kristen libère ses 55 actions : matériel informatique 25'000.00, créances commerciales de 30'000.00 (ducroire de " +
+        '10 % à constituer), le solde versé à la banque.',
+    },
+    { numero: '3', date: '2026-01-10', texte: "M. Carlos libère ses 50 actions : un véhicule estimé à 20'000.00, le solde versé à la banque." },
+    { numero: '4', date: '2026-01-10', texte: "M. Rossi libère les 95 actions restantes : une machine estimée à 40'000.00, le solde versé à la banque." },
+    { numero: '5', date: '2026-01-15', texte: "La banque débite une commission de 0,25 % sur les versements en espèces des opérations 2 à 4, et 2'400.00 de frais de fondation." },
+    { numero: '6', date: '2026-01-20', texte: "Souscription de 500 bons de participation de 100.00 de valeur nominale, sans droit de vote." },
+    { numero: '7', date: '2026-01-25', texte: 'Les participants libèrent entièrement les bons de participation à la banque.' },
+    {
+      numero: '8',
+      date: '2026-11-10',
+      texte: "L'assemblée générale décide d'augmenter le capital-actions de 100 actions de 1'000.00, avec un agio de 200.00 par action : souscription intégrale.",
+    },
+    { numero: '9', date: '2026-11-20', texte: "Les nouvelles actions sont libérées à 60 %, ainsi que l'agio entier, à la banque." },
+    { numero: '10', date: '2026-11-25', texte: "Facture du notaire pour l'augmentation du capital, 6'500.00." },
+  ],
+  ouvertureActif: {},
+  ouverturePassif: {},
+  mode: 'entrainement',
+  parametres: { ...parametresBase, corrigerBouclement: false, comptesAjoutes: ['1850', '1860', '2810', '6550'] },
+  corrige: [
+    { piece: '1', lignes: s('1850', '2800', 200000) },
+    { piece: '2', lignes: [D('1520', 25000), D('1100', 30000), D('1020', 3000), C('1109', 3000), C('1850', 55000)] },
+    { piece: '3', lignes: [D('1530', 20000), D('1020', 30000), C('1850', 50000)] },
+    { piece: '4', lignes: [D('1500', 40000), D('1020', 55000), C('1850', 95000)] },
+    { piece: '5', lignes: s('6550', '1020', 2620) }, // 88'000 × 0,25 % = 220 + 2'400
+    { piece: '6', lignes: s('1860', '2810', 50000) },
+    { piece: '7', lignes: s('1020', '1860', 50000) },
+    { piece: '8', lignes: [D('1850', 120000), C('2800', 100000), C('2900', 20000)] },
+    { piece: '9', lignes: s('1020', '1850', 80000) }, // 60 % de 100'000 + agio 20'000
+    { piece: '10', lignes: s('6550', '2010', 6500) },
+  ],
+};
+
+// ───────────────────────── MP, F&C vol. 2, ch. 54 — titres (54.14, 54.15) ─────────────────────────
+export const manuelRiveGauche: Exercice = {
+  id: 'manuel-mp4-rive-gauche-participations-titres',
+  titre: 'Rive Gauche Participations SA — portefeuille de titres',
+  niveau: 'MP',
+  filiere: 'MP',
+  difficulte: 4,
+  sujets: ['Achat et vente de titres', 'Coupons et dividendes', 'Impôt anticipé', 'Droits de garde', 'Évaluation à l’inventaire', 'Intérêt couru'],
+  raisonSociale: 'Rive Gauche Participations SA',
+  formeJuridique: 'SA',
+  debut: '2026-01-01',
+  fin: '2026-12-31',
+  introduction:
+    "Les titres sont portés au prix d'achat, frais compris ; une vente est créditée au compte Titres pour son produit " +
+    "net de frais. À la clôture, la différence entre le solde du compte et l'inventaire est un bénéfice ou une perte de " +
+    "cours. L'impôt anticipé de 35 % est récupérable. " + CONSIGNE,
+  situation:
+    "Rive Gauche Participations SA, à Carouge, place ses liquidités dans des actions et des obligations suisses. La " +
+    "directrice, Mme Ducret, suit le portefeuille avec la banque, qui exécute les ordres et encaisse les coupons.\n\n" +
+    "Elle vous confie les opérations de l'année sur titres : ventes, achats, coupons et dividendes, remboursement " +
+    "d'obligations, puis l'évaluation du portefeuille et l'intérêt couru au 31 décembre.",
+  operations: [
+    { numero: '1', date: '2026-03-16', texte: "La banque vend 8 actions C (nominal 500.00) au cours de 1'940.00 ; frais de vente 111.00." },
+    { numero: '2', date: '2026-05-19', texte: "La banque encaisse les coupons de 32 obligations de 1'000.00 de nominal, taux 3 %, impôt anticipé 35 %." },
+    { numero: '3', date: '2026-05-28', texte: 'La banque encaisse le dividende de 5 actions (nominal 500.00) : 45.00 par action, impôt anticipé 35 %.' },
+    {
+      numero: '4',
+      date: '2026-06-30',
+      texte: "Échéance : la banque encaisse le remboursement de 4 obligations Ville de Bienne de 10'000.00 au nominal et leur dernier coupon annuel de 2,8 %, impôt anticipé 35 %.",
+    },
+    { numero: '5', date: '2026-08-30', texte: 'La banque achète 10 actions Yams (nominal 50.00) au cours de 750.00 ; frais d’achat 86.00.' },
+    { numero: '6', date: '2026-09-30', texte: 'La banque débite 50.00 de droits de garde pour le portefeuille.' },
+    { numero: '7', date: '2026-11-20', texte: "L'Administration fédérale des contributions rembourse sur le compte bancaire l'impôt anticipé des opérations 2 à 4." },
+    { numero: '8', date: '2026-12-31', texte: "Inventaire du portefeuille au cours du 31 décembre : 74'000.00. Comptabiliser la différence de cours." },
+    {
+      numero: '9',
+      date: '2026-12-31',
+      texte: "Intérêt couru sur 2 obligations Canton de Fribourg de 10'000.00 en portefeuille, taux 3 %, coupon annuel au 15 septembre (année de 360 jours).",
+    },
+  ],
+  ouvertureActif: montants({ '1020': 200000, '1060': 120000, '1100': 30000, '1500': 150000 }),
+  ouverturePassif: montants({ '2000': 20000, '2800': 400000, '2900': 30000, '2970': 50000 }),
+  mode: 'entrainement',
+  parametres: { ...parametresBase, corrigerBouclement: false },
+  corrige: [
+    { piece: '1', lignes: s('1020', '1060', 15409) }, // 8 × 1'940 − 111
+    { piece: '2', lignes: [D('1020', 624), D('1176', 336), C('6952', 960)] },
+    { piece: '3', lignes: [D('1020', 146.25), D('1176', 78.75), C('6952', 225)] },
+    { piece: '4', lignes: [D('1020', 40728), D('1176', 392), C('1060', 40000), C('6952', 1120)] },
+    { piece: '5', lignes: s('1060', '1020', 7586) },
+    { piece: '6', lignes: s('6940', '1020', 50) },
+    { piece: '7', lignes: s('1020', '1176', 806.75) },
+    { piece: '8', lignes: s('1060', '6952', 1823) }, // 120'000 − 15'409 − 40'000 + 7'586 = 72'177 ; inventaire 74'000
+    { piece: '9', lignes: s('1300', '6952', 175) }, // 20'000 × 3 % × 105/360
+  ],
+};
+
+export const exercicesManuel: Exercice[] = [
+  manuelFavre, manuelVinotheque, manuelLacroix, manuelBrodard, manuelMontBlanc, manuelTruffaz, manuelLambert, manuelZephyr, manuelRiveGauche,
+];

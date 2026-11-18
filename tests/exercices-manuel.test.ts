@@ -61,9 +61,19 @@ const attendus: Record<string, { resultat: number; soldes: Record<string, number
       '1539': -27000, '1609': -47200, '1300': 1700, '2300': -26380, '2000': -95000, '2850': -31400,
     },
   },
+  // Frais de fondation 2'620.00 et d'augmentation 6'500.00 ; 40'000.00 encore à libérer.
+  'manuel-mp3-zephyr-automation-fondation': {
+    resultat: -9120,
+    soldes: { '1850': 40000, '1860': 0, '1020': 215380, '2800': -300000, '2810': -50000, '2900': -20000, '1109': -3000, '1100': 30000 },
+  },
+  // Produits des titres 4'303.00 − droits de garde 50.00.
+  'manuel-mp4-rive-gauche-participations-titres': {
+    resultat: 4253,
+    soldes: { '1060': 74000, '1176': 0, '1300': 175, '1020': 250078 },
+  },
 };
 
-describe('exercices tirés des chapitres 1, 12, 14, 22 à 24 et 35 du manuel', () => {
+describe('exercices tirés du manuel E&S (CFC) et de F&C (MP)', () => {
   for (const ex of exercicesManuel) {
     describe(ex.titre, () => {
       it("passe le contrôle de l'exercice sans erreur ni avertissement", () => {
