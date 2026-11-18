@@ -1,5 +1,5 @@
-// Exercices de journal tirés des cas du manuel E&S (édition 2019) : volume 1, ch. 1 « Structure du bilan et du
-// résultat » et volume 2, ch. 12 « Comptabilité de l'entreprise commerciale ». Droits d'utilisation obtenus par
+// Exercices de journal tirés des cas du manuel E&S : volume 1, ch. 1 « Structure du bilan et du résultat », volume 2,
+// ch. 12 « Comptabilité de l'entreprise commerciale » (édition 2019) et ch. 14 « TVA » (édition 2022). Droits d'utilisation obtenus par
 // l'enseignant (09.11.2026) ; choix : reformuler en gardant les cas. Entreprises genevoises fictives.
 import type { Exercice } from '../engine/exercice';
 
@@ -185,4 +185,83 @@ export const manuelVinotheque: Exercice = {
   ],
 };
 
-export const exercicesManuel: Exercice[] = [manuelFavre, manuelVinotheque];
+// ───────────────────────── Ch. 14 — TVA (vol. 2, exercice 14.8, taux actuels 8,1 % et 2,6 %) ─────────────────────────
+// Montants hors taxe du livre conservés ; montants TVA comprise recalculés aux taux en vigueur (arrondi aux 5 centimes).
+export const manuelLacroix: Exercice = {
+  id: 'manuel-cfc2-maison-lacroix-tva',
+  titre: 'Maison Lacroix — TVA du premier trimestre',
+  niveau: 'CFC2',
+  filiere: 'CFC',
+  difficulte: 2,
+  sujets: ['TVA au net (8,1 % et 2,6 %)', 'Exportation sans TVA', 'Rabais avec correction de la TVA', 'Décompte et paiement de la TVA'],
+  raisonSociale: 'Maison Lacroix',
+  formeJuridique: 'raison individuelle',
+  debut: '2026-01-01',
+  fin: '2026-12-31',
+  introduction:
+    "L'entreprise est assujettie à la TVA (méthode effective, comptabilisation au net). Taux : 8,1 % sur le mobilier, la " +
+    "décoration, l'énergie et le téléphone ; 2,6 % sur les journaux. Les livraisons à l'étranger sont exonérées. " +
+    `${CONSIGNE} L'opération 14 est le décompte TVA du trimestre.`,
+  situation:
+    "Maison Lacroix vend du mobilier et des objets de décoration à Carouge. Hélène Lacroix a ouvert le magasin cette " +
+    "année ; les ventes du comptoir sont enregistrées chaque fin de mois, et une première commande est partie à " +
+    "l'étranger.\n\n" +
+    "Elle vous confie la comptabilité du premier trimestre : séparer la TVA à chaque opération, établir le décompte au " +
+    "31 mars, puis enregistrer le paiement à l'Administration fédérale des contributions.",
+  operations: [
+    { numero: '1', date: '2026-01-20', texte: "Première vente de marchandises à l'étranger, sur facture, 10'800.00 (exportation exonérée de TVA)." },
+    { numero: '2', date: '2026-01-31', texte: "Ventes du mois en espèces, 6'486.00 (TVA 8,1 % comprise)." },
+    { numero: '3', date: '2026-01-31', texte: "Versement de 6'000.00 de la caisse sur le compte postal." },
+    { numero: '4', date: '2026-02-14', texte: "Vente exceptionnelle au comptant pour la Saint-Valentin, 11'891.00 (TVA 8,1 % comprise)." },
+    {
+      numero: '5',
+      date: '2026-02-15',
+      texte: "Paiement par virement postal des factures d'électricité et de téléphone de janvier, non comptabilisées, 432.40 (TVA 8,1 % comprise).",
+    },
+    { numero: '6', date: '2026-02-25', texte: "Achat de marchandises à crédit, 25'200.00 hors TVA (TVA 8,1 %)." },
+    { numero: '7', date: '2026-02-28', texte: "Ventes du mois en espèces, 7'350.80 (TVA 8,1 % comprise)." },
+    {
+      numero: '8',
+      date: '2026-03-03',
+      texte: 'Une partie des marchandises reçues le 25.02 est défectueuse : le fournisseur accorde un rabais de 540.50 (TVA 8,1 % comprise).',
+    },
+    { numero: '9', date: '2026-03-04', texte: 'Paiement par virement bancaire du montant net de la facture du 25.02 (opérations 6 et 8).' },
+    { numero: '10', date: '2026-03-15', texte: "Achat de marchandises à crédit, 9'729.00 (TVA 8,1 % comprise)." },
+    {
+      numero: '11',
+      date: '2026-03-20',
+      texte: "Paiement par virement postal de l'abonnement au quotidien régional, facture non comptabilisée, 410.40 (TVA 2,6 % comprise).",
+    },
+    { numero: '12', date: '2026-03-31', texte: "Ventes du mois en espèces, 32'430.00 (TVA 8,1 % comprise)." },
+    {
+      numero: '13',
+      date: '2026-03-31',
+      texte: "Sur les ventes encaissées ce jour, 20'000.00 sont versés sur le compte bancaire ; Hélène Lacroix garde le solde pour ses besoins personnels.",
+    },
+    { numero: '14', date: '2026-03-31', texte: "Décompte TVA du premier trimestre : virer l'impôt préalable et le solde dû à l'AFC." },
+    { numero: '15', date: '2026-04-20', texte: 'Paiement de la TVA due par virement bancaire.' },
+  ],
+  ouvertureActif: montants({ '1000': 3000, '1010': 8000, '1020': 25000, '1100': 4000, '1200': 40000, '1510': 30000 }),
+  ouverturePassif: montants({ '2000': 6000, '2800': 104000 }),
+  mode: 'entrainement',
+  parametres: { ...parametresBase, corrigerBouclement: false, tvaMethode: 'net' },
+  corrige: [
+    { piece: '1', lignes: s('1100', '3200', 10800) },
+    { piece: '2', lignes: [D('1000', 6486), C('3200', 6000), C('2200', 486)] },
+    { piece: '3', lignes: s('1010', '1000', 6000) },
+    { piece: '4', lignes: [D('1000', 11891), C('3200', 11000), C('2200', 891)] },
+    { piece: '5', lignes: [D('6700', 400), D('1171', 32.4), C('1010', 432.4)] },
+    { piece: '6', lignes: [D('4200', 25200), D('1170', 2041.2), C('2000', 27241.2)] },
+    { piece: '7', lignes: [D('1000', 7350.8), C('3200', 6800), C('2200', 550.8)] },
+    { piece: '8', lignes: [D('2000', 540.5), C('4200', 500), C('1170', 40.5)] },
+    { piece: '9', lignes: s('2000', '1020', 26700.7) },
+    { piece: '10', lignes: [D('4200', 9000), D('1170', 729), C('2000', 9729)] },
+    { piece: '11', lignes: [D('6700', 400), D('1171', 10.4), C('1010', 410.4)] },
+    { piece: '12', lignes: [D('1000', 32430), C('3200', 30000), C('2200', 2430)] },
+    { piece: '13', lignes: [D('1020', 20000), D('2850', 12430), C('1000', 32430)] },
+    { piece: '14', lignes: [D('2200', 4357.8), C('1170', 2729.7), C('1171', 42.8), C('2205', 1585.3)] },
+    { piece: '15', lignes: s('2205', '1020', 1585.3) },
+  ],
+};
+
+export const exercicesManuel: Exercice[] = [manuelFavre, manuelVinotheque, manuelLacroix];

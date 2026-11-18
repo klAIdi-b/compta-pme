@@ -30,9 +30,17 @@ const attendus: Record<string, { resultat: number; soldes: Record<string, number
     resultat: 8553,
     soldes: { '1020': 38863, '1000': 6100, '1100': 5550, '2000': -16340, '1200': 25500 },
   },
+  // Ventes 64'600.00 − achats nets 33'700.00 − autres charges 800.00 ; comptes de TVA soldés par le décompte.
+  'manuel-cfc2-maison-lacroix-tva': {
+    resultat: 30100,
+    soldes: {
+      '1000': 22727.8, '1010': 13157.2, '1020': 16714, '1100': 14800, '2000': -15729,
+      '1170': 0, '1171': 0, '2200': 0, '2205': 0, '2850': 12430,
+    },
+  },
 };
 
-describe('exercices tirés des chapitres 1 et 12 du manuel', () => {
+describe('exercices tirés des chapitres 1, 12 et 14 du manuel', () => {
   for (const ex of exercicesManuel) {
     describe(ex.titre, () => {
       it("passe le contrôle de l'exercice sans erreur ni avertissement", () => {
