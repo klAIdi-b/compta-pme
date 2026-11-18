@@ -38,9 +38,24 @@ const attendus: Record<string, { resultat: number; soldes: Record<string, number
       '1170': 0, '1171': 0, '2200': 0, '2205': 0, '2850': 12430,
     },
   },
+  // Ventes 34'700.00 − pertes nettes 33'391.50 + produits exceptionnels 15'050.00.
+  'manuel-cfc3-materiaux-brodard-creances': {
+    resultat: 16358.5,
+    soldes: { '1000': 6500, '1010': 20217, '1020': 70500, '1100': 19170, '1108': 19000, '1109': -958.5, '2000': -12070 },
+  },
+  // Amortissements 58'869.00 (perte, aucune autre opération de résultat).
+  'manuel-cfc3-imprimerie-mont-blanc-amortissements': {
+    resultat: -58869,
+    soldes: { '1500': 198000, '1509': -88500, '1549': -9600, '1510': 16000, '1520': 6480, '1530': 1, '1020': 32000 },
+  },
+  // Charges de l'exercice : assurances 3'000, réparations 3'900 + 6'000, salaires 32'000, intérêt 2'300.
+  'manuel-cfc3-truffaz-transports-transitoires': {
+    resultat: -47200,
+    soldes: { '1300': 18800, '2300': -44200, '1020': 98200, '6000': 0, '6500': 0, '6300': 3000 },
+  },
 };
 
-describe('exercices tirés des chapitres 1, 12 et 14 du manuel', () => {
+describe('exercices tirés des chapitres 1, 12, 14 et 22 à 24 du manuel', () => {
   for (const ex of exercicesManuel) {
     describe(ex.titre, () => {
       it("passe le contrôle de l'exercice sans erreur ni avertissement", () => {

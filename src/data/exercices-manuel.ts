@@ -264,4 +264,172 @@ export const manuelLacroix: Exercice = {
   ],
 };
 
-export const exercicesManuel: Exercice[] = [manuelFavre, manuelVinotheque, manuelLacroix];
+// ───────────────────────── Ch. 22 — pertes sur créances (vol. 3, exercices 22.1 et 22.2) ─────────────────────────
+export const manuelBrodard: Exercice = {
+  id: 'manuel-cfc3-materiaux-brodard-creances',
+  titre: 'Matériaux Brodard — pertes sur créances et ducroire',
+  niveau: 'CFC2',
+  filiere: 'CFC',
+  difficulte: 3,
+  sujets: ['Poursuites et frais de poursuite', 'Acte de défaut de biens', 'Créances douteuses', 'Créance amortie récupérée', 'Ducroire'],
+  raisonSociale: 'Matériaux Brodard',
+  formeJuridique: 'raison individuelle',
+  debut: '2026-01-01',
+  fin: '2026-12-31',
+  introduction:
+    "L'entreprise n'est pas assujettie à la TVA. Les frais de poursuite avancés sont à la charge du débiteur. Une " +
+    "créance amortie lors d'un exercice précédent et récupérée est un produit exceptionnel. " +
+    `${CONSIGNE} Au 31.12, le ducroire est fixé à 5 % des créances clients (sans les créances douteuses).`,
+  situation:
+    "Matériaux Brodard vend des matériaux de construction aux artisans et aux particuliers de la région de Vernier. Pierre " +
+    "Brodard accorde volontiers des délais de paiement, mais plusieurs clients ne paient plus : relances, poursuites, " +
+    "faillites.\n\n" +
+    "Il vous confie le suivi comptable de ses créances pour l'année : enregistrer les pertes, les montants récupérés, " +
+    "les créances douteuses, puis ajuster le ducroire au 31 décembre.",
+  operations: [
+    { numero: '1', date: '2026-01-10', texte: "Vente de marchandises à crédit à Pittet, un de nos plus gros clients, 15'700.00." },
+    { numero: '2', date: '2026-02-16', texte: "Trois rappels restés sans réponse : nous poursuivons Pittet et avançons 103.00 de frais à l'Office des poursuites, par virement postal." },
+    { numero: '3', date: '2026-04-20', texte: "Pittet est insolvable, la poursuite est restée infructueuse : l'Office des poursuites nous remet un acte de défaut de biens de 15'803.00." },
+    { numero: '4', date: '2026-05-05', texte: "Notre client Prisco nous devait 12'300.00. À la suite des poursuites, l'Office vire 5'500.00 sur notre compte bancaire ; acte de défaut de biens pour le solde." },
+    { numero: '5', date: '2026-05-20', texte: "Faillite de Joray, débiteur à risque dont la créance de 4'500.00 figure en créances douteuses : l'Office des faillites vire 3'200.00 sur le compte postal, le solde est perdu." },
+    { numero: '6', date: '2026-06-10', texte: "Contre toute attente, nous recevons sur le compte bancaire 5'000.00 sur la créance de Lumière, complètement amortie il y a trois ans." },
+    { numero: '7', date: '2026-08-14', texte: "Vente de marchandises à crédit à Patrizio, 19'000.00 ; conditions : net à 60 jours ou 2 % d'escompte à 20 jours." },
+    { numero: '8', date: '2026-09-15', texte: "Notre client Grivet nous devait 12'500.00 : les poursuites rapportent 3'500.00 en espèces ; acte de défaut de biens pour le solde." },
+    { numero: '9', date: '2026-09-22', texte: "Notre client Paulin est parti sans laisser d'adresse ; après de vaines recherches, nous annulons sa créance de 1'030.00." },
+    { numero: '10', date: '2026-10-12', texte: "Lionel, dont nous avions amorti la créance il y a six ans, verse 7'120.00 sur notre compte postal." },
+    { numero: '11', date: '2026-10-26', texte: "Nous réglons une facture de marchandises déjà comptabilisée en cédant d'anciens actes de défaut de biens (créances amorties), pour 2'930.00." },
+    { numero: '12', date: '2026-12-15', texte: 'Quatre mois plus tard, la facture de Patrizio (opération 7) est toujours impayée : nous la virons en créances douteuses.' },
+    { numero: '13', date: '2026-12-31', texte: 'Ajustement du ducroire : 5 % des créances clients (compte Créances clients, sans les créances douteuses).' },
+  ],
+  ouvertureActif: montants({ '1000': 3000, '1010': 10000, '1020': 60000, '1100': 45000, '1108': 4500, '1200': 30000, '1500': 40000 }),
+  ouverturePassif: montants({ '1109': 1500, '2000': 15000, '2800': 176000 }),
+  mode: 'entrainement',
+  parametres: { ...parametresBase, corrigerBouclement: false },
+  corrige: [
+    { piece: '1', lignes: s('1100', '3200', 15700) },
+    { piece: '2', lignes: s('1100', '1010', 103) },
+    { piece: '3', lignes: s('3805', '1100', 15803) },
+    { piece: '4', lignes: [D('1020', 5500), D('3805', 6800), C('1100', 12300)] },
+    { piece: '5', lignes: [D('1010', 3200), D('3805', 1300), C('1108', 4500)] },
+    { piece: '6', lignes: s('1020', '8510', 5000) },
+    { piece: '7', lignes: s('1100', '3200', 19000) },
+    { piece: '8', lignes: [D('1000', 3500), D('3805', 9000), C('1100', 12500)] },
+    { piece: '9', lignes: s('3805', '1100', 1030) },
+    { piece: '10', lignes: s('1010', '8510', 7120) },
+    { piece: '11', lignes: s('2000', '8510', 2930) },
+    { piece: '12', lignes: s('1108', '1100', 19000) },
+    // Créances clients 19'170.00 × 5 % = 958.50 ; ducroire 1'500.00 → diminution de 541.50.
+    { piece: '13', lignes: s('1109', '3805', 541.5) },
+  ],
+};
+
+// ───────────────────────── Ch. 23 — amortissements (vol. 3, exercices 23.9 à 23.11) ─────────────────────────
+export const manuelMontBlanc: Exercice = {
+  id: 'manuel-cfc3-imprimerie-mont-blanc-amortissements',
+  titre: 'Imprimerie du Mont-Blanc — amortissements de fin d’année',
+  niveau: 'CFC2',
+  filiere: 'CFC',
+  difficulte: 3,
+  sujets: ['Amortissement direct et indirect', 'Linéaire (constant) et dégressif (décroissant)', 'Prorata temporis', 'Valeur pour mémoire'],
+  raisonSociale: 'Imprimerie du Mont-Blanc',
+  formeJuridique: 'raison individuelle',
+  debut: '2026-01-01',
+  fin: '2026-12-31',
+  introduction:
+    "L'entreprise n'est pas assujettie à la TVA. Les machines et l'outillage sont amortis de façon indirecte (fonds " +
+    "d'amortissements cumulés), les autres immobilisations de façon directe. Le taux constant s'applique à la valeur " +
+    "d'acquisition, le taux dégressif à la valeur comptable. " + CONSIGNE,
+  situation:
+    "L'Imprimerie du Mont-Blanc, rue du Mont-Blanc, imprime des affiches, des cartes et des brochures pour les commerces " +
+    "et les associations genevoises. Julien Mottet, le propriétaire, a acheté cette année une nouvelle presse numérique.\n\n" +
+    "Avant d'établir les comptes annuels, il vous demande de calculer et de comptabiliser les amortissements de chaque " +
+    "immobilisation, selon la méthode choisie pour chacune.",
+  operations: [
+    { numero: '1', date: '2026-06-30', texte: "Achat d'une presse numérique, 48'000.00 ; nous comptabilisons la facture." },
+    { numero: '2', date: '2026-09-15', texte: 'Paiement de la presse par virement bancaire.' },
+    { numero: '3', date: '2026-12-31', texte: "Machines possédées toute l'année (valeur d'acquisition 150'000.00) : amortissement indirect constant de 25 %." },
+    { numero: '4', date: '2026-12-31', texte: 'Presse achetée le 30.06 : même méthode et même taux que les autres machines, prorata temporis.' },
+    { numero: '5', date: '2026-12-31', texte: "Outillage (valeur d'acquisition 16'000.00) : amortissement indirect constant de 20 %." },
+    { numero: '6', date: '2026-12-31', texte: "Ordinateurs achetés il y a un an pour 18'000.00 : amortissement direct dégressif de 40 % (deuxième année)." },
+    { numero: '7', date: '2026-12-31', texte: "Mobilier (valeur d'acquisition 40'000.00) : amortissement direct constant de 15 %." },
+    { numero: '8', date: '2026-12-31', texte: "Le véhicule figure au bilan pour 1'850.00 : nous ne laissons que 1.00 pour mémoire (amortissement direct)." },
+  ],
+  ouvertureActif: montants({
+    '1000': 2000, '1020': 80000, '1100': 15000, '1200': 10000, '1500': 150000, '1510': 22000, '1520': 10800, '1530': 1850, '1540': 16000,
+  }),
+  ouverturePassif: montants({ '1509': 45000, '1549': 6400, '2000': 10000, '2400': 60000, '2800': 186250 }),
+  mode: 'entrainement',
+  parametres: { ...parametresBase, corrigerBouclement: false, comptesAjoutes: ['1540', '1549'] },
+  corrige: [
+    { piece: '1', lignes: s('1500', '2000', 48000) },
+    { piece: '2', lignes: s('2000', '1020', 48000) },
+    { piece: '3', lignes: s('6800', '1509', 37500) },
+    { piece: '4', lignes: s('6800', '1509', 6000) }, // 48'000 × 25 % × 6/12
+    { piece: '5', lignes: s('6800', '1549', 3200) },
+    { piece: '6', lignes: s('6800', '1520', 4320) }, // 18'000 × 60 % = 10'800 ; 10'800 × 40 %
+    { piece: '7', lignes: s('6800', '1510', 6000) },
+    { piece: '8', lignes: s('6800', '1530', 1849) },
+  ],
+};
+
+// ───────────────────────── Ch. 24 — comptes transitoires (vol. 3, exercices 24.8 et 24.10) ─────────────────────────
+export const manuelTruffaz: Exercice = {
+  id: 'manuel-cfc3-truffaz-transports-transitoires',
+  titre: 'Truffaz Transports — actifs et passifs transitoires',
+  niveau: 'CFC2',
+  filiere: 'CFC',
+  difficulte: 3,
+  sujets: ['Actifs transitoires', 'Passifs transitoires', 'Charges payées d’avance', 'Charges à payer', 'Intérêt couru (prorata)'],
+  raisonSociale: 'Truffaz Transports',
+  formeJuridique: 'raison individuelle',
+  debut: '2026-01-01',
+  fin: '2026-12-31',
+  introduction:
+    "L'entreprise n'est pas assujettie à la TVA. Les opérations 1 à 5 ont eu lieu pendant l'année ; les opérations 6 à " +
+    "14 sont les écritures transitoires du 31 décembre : chaque charge doit être rattachée à l'exercice qu'elle concerne. " +
+    CONSIGNE,
+  situation:
+    "Truffaz Transports livre des marchandises dans tout le canton avec ses camionnettes. Anne Truffaz possède aussi le " +
+    "bâtiment où se trouvent le bureau et l'atelier, financé en partie par une dette hypothécaire.\n\n" +
+    "En décembre, elle a payé plusieurs charges qui concernent déjà l'année prochaine, alors que d'autres factures de " +
+    "cette année n'arriveront qu'en janvier. Elle vous demande de passer les écritures transitoires pour que le résultat " +
+    "de l'exercice soit juste.",
+  operations: [
+    { numero: '1', date: '2026-03-01', texte: "Paiement par la banque de l'assurance responsabilité civile de l'entreprise, période du 01.03.2026 au 28.02.2027, 2'400.00." },
+    { numero: '2', date: '2026-10-31', texte: "Paiement par la banque de l'assurance de l'immeuble commercial, semestre du 01.11.2026 au 30.04.2027, 3'000.00." },
+    { numero: '3', date: '2026-12-15', texte: "Paiement par la banque du loyer d'un dépôt pour le premier semestre 2027, 15'000.00." },
+    { numero: '4', date: '2026-12-20', texte: 'Paiement par la banque des abonnements à des revues professionnelles pour 2027, 600.00.' },
+    { numero: '5', date: '2026-12-28', texte: "Paiement par la banque de la prime d'assurance des camionnettes pour 2027, 800.00." },
+    { numero: '6', date: '2026-12-31', texte: 'Loyer du dépôt payé le 15.12 (opération 3) : il concerne entièrement le prochain exercice.' },
+    { numero: '7', date: '2026-12-31', texte: 'Abonnements payés le 20.12 (opération 4) : ils concernent entièrement le prochain exercice.' },
+    { numero: '8', date: '2026-12-31', texte: 'Prime des camionnettes payée le 28.12 (opération 5) : elle concerne entièrement le prochain exercice.' },
+    { numero: '9', date: '2026-12-31', texte: "Assurance responsabilité civile (opération 1) : tenir compte de la part qui concerne l'exercice prochain." },
+    { numero: '10', date: '2026-12-31', texte: "Assurance de l'immeuble (opération 2) : tenir compte de la part qui concerne l'exercice prochain." },
+    { numero: '11', date: '2026-12-31', texte: "La facture des réparations faites en décembre sur les camionnettes, 3'900.00, n'arrivera qu'en janvier." },
+    { numero: '12', date: '2026-12-31', texte: "Les salaires de décembre, 32'000.00, ne seront versés qu'au début de janvier." },
+    { numero: '13', date: '2026-12-31', texte: "Réparations en cours sur l'immeuble commercial : la facture de 6'000.00 arrivera l'année prochaine." },
+    { numero: '14', date: '2026-12-31', texte: "Dette hypothécaire de 230'000.00 à 3 %, intérêt payable chaque année le 31 août : comptabiliser l'intérêt couru." },
+  ],
+  ouvertureActif: montants({ '1000': 2000, '1020': 120000, '1100': 20000, '1530': 60000, '1600': 500000 }),
+  ouverturePassif: montants({ '2000': 8000, '2401': 230000, '2800': 464000 }),
+  mode: 'entrainement',
+  parametres: { ...parametresBase, corrigerBouclement: false, comptesAjoutes: ['6900'] },
+  corrige: [
+    { piece: '1', lignes: s('6300', '1020', 2400) },
+    { piece: '2', lignes: s('6300', '1020', 3000) },
+    { piece: '3', lignes: s('6000', '1020', 15000) },
+    { piece: '4', lignes: s('6500', '1020', 600) },
+    { piece: '5', lignes: s('6300', '1020', 800) },
+    { piece: '6', lignes: s('1300', '6000', 15000) },
+    { piece: '7', lignes: s('1300', '6500', 600) },
+    { piece: '8', lignes: s('1300', '6300', 800) },
+    { piece: '9', lignes: s('1300', '6300', 400) }, // 2 mois sur 12
+    { piece: '10', lignes: s('1300', '6300', 2000) }, // 4 mois sur 6
+    { piece: '11', lignes: s('6200', '2300', 3900) },
+    { piece: '12', lignes: s('5200', '2300', 32000) },
+    { piece: '13', lignes: s('6100', '2300', 6000) },
+    { piece: '14', lignes: s('6900', '2300', 2300) }, // 230'000 × 3 % × 4/12
+  ],
+};
+
+export const exercicesManuel: Exercice[] = [manuelFavre, manuelVinotheque, manuelLacroix, manuelBrodard, manuelMontBlanc, manuelTruffaz];
