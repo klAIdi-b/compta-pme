@@ -88,6 +88,21 @@ export function resultatExercice(d: Dossier): Centimes {
   return r;
 }
 
+/**
+ * Résultat encore à virer : résultat des charges et produits, moins ce qui a déjà été viré par le compte de résultat
+ * (classe 9). Bouclement du cours (18.11.2026) : B1 Compte de résultat / Privé ramène ce montant à zéro sans solder
+ * les charges et produits au journal. Reste juste si les charges et produits ont été soldés par 9000 (ancienne méthode).
+ */
+export function resultatAVirer(d: Dossier): Centimes {
+  const plan = indexPlan(d.plan);
+  let r = 0;
+  for (const [n, x] of soldes(d)) {
+    const t = plan.get(n)?.type;
+    if (t === 'produit' || t === 'charge' || t === 'bouclement') r -= x.solde;
+  }
+  return r;
+}
+
 export interface CompteDeResultat {
   charges: Groupe[];
   produits: Groupe[];
@@ -135,7 +150,7 @@ export function bilan(d: Dossier): Bilan {
   const s = soldes(d);
   const actif = construire(GROUPES_ACTIF, plan, s);
   const passif = construire(GROUPES_PASSIF, plan, s);
-  const resultat = resultatExercice(d);
+  const resultat = resultatAVirer(d);
   if (resultat > 0) {
     // Bénéfice : dans les capitaux propres, au passif.
     const poste: Poste = { numero: '', intitule: "Bénéfice de l'exercice", montant: resultat };

@@ -77,7 +77,7 @@
   <h2>Détermination du résultat</h2>
   <div class="corps-carte">
     {#if boucle}
-      <p class="ok">L'exercice est bouclé : charges, produits, compte privé et compte de résultat sont soldés.</p>
+      <p class="ok">L'exercice est bouclé : le résultat est viré et le compte privé est soldé.</p>
     {:else}
       <p>Total des produits {m(cr.totalProduits)} − total des charges {m(cr.totalCharges)} =
         <b>{cr.resultat >= 0 ? 'bénéfice' : 'perte'} de {m(Math.abs(cr.resultat))}</b>.</p>
@@ -87,9 +87,9 @@
         {#if erreurBouclement}<div class="alerte" role="alert">{erreurBouclement}</div>{/if}
       {:else if mode === 'compteDeResultat'}
         {#if d.formeJuridique === 'raison individuelle'}
-          <p class="discret">Passez au journal les écritures de bouclement, avec des pièces B1, B2, B3 : clôture des charges et produits par le compte 9000, puis résultat viré au compte privé, puis solde du compte privé viré au capital.</p>
+          <p class="discret">Passez au journal les écritures de bouclement, avec les pièces B1 et B2 : B1 résultat viré du compte de résultat au compte privé, puis B2 solde du compte privé viré au capital.</p>
         {:else}
-          <p class="discret">Passez au journal les écritures de bouclement, avec des pièces B1 et B2 : clôture des charges et produits par le compte 9000, puis résultat viré au bénéfice reporté.</p>
+          <p class="discret">Passez au journal l'écriture de bouclement B1 : résultat viré du compte de résultat au bénéfice reporté.</p>
         {/if}
         <p><button class="btn btn-principal" onclick={() => etat.ouvrirOperation(prochaineB)}>Saisir les écritures de bouclement ({prochaineB})</button></p>
       {/if}

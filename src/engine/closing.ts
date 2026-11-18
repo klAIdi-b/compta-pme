@@ -12,7 +12,7 @@ import type { Dossier, Ecriture, LigneEcriture, Resultat } from './dossier';
 import { controlerOuverture, echec, indexPlan, ok } from './dossier';
 import { ajouterEcriture, nouvelId } from './journal';
 import { soldes } from './ledger';
-import { resultatExercice } from './statements';
+import { resultatAVirer, resultatExercice } from './statements';
 
 export type ModeBouclement = 'compteDeResultat' | 'aLaReouverture';
 
@@ -50,11 +50,11 @@ function verifierForme(_d: Dossier): string | null {
 
 /**
  * Écritures de bouclement proposées (servent aussi de corrigé) en mode 'compteDeResultat'.
- * Raison individuelle (méthode du cours, choisie par l'enseignant le 09.11.2026) :
- * 1. clôture des charges et produits par le compte de résultat ;
- * 2. virement du résultat (bénéfice ou perte) au compte privé ;
- * 3. virement du solde du compte privé au capital.
- * Sociétés (pas de compte privé) : 1. clôture des charges et produits ; 2. résultat viré au bénéfice reporté.
+ * Méthode du cours (précisée par l'enseignant le 18.11.2026) : les élèves ne soldent pas les charges et produits au
+ * journal ; le compte de résultat est établi à part. Raison individuelle :
+ * B1 résultat viré au compte privé (bénéfice : Compte de résultat / Privé ; perte : Privé / Compte de résultat) ;
+ * B2 solde du compte privé viré au capital (absent si le privé est soldé).
+ * Sociétés (pas de compte privé) : B1 résultat viré au bénéfice reporté.
  */
 export function ecrituresDeBouclement(d: Dossier, o: OptionsBouclement = optionsBouclement(d.formeJuridique)): Resultat<Ecriture[]> {
   const err = verifierForme(d);
@@ -72,36 +72,15 @@ export function ecrituresDeBouclement(d: Dossier, o: OptionsBouclement = options
     lignes,
   });
 
-  // 1. Clôture des charges et des produits
-  const lignes: LigneEcriture[] = [];
-  let auDebitDuCR: Centimes = 0; // soldes débiteurs repris au débit du compte de résultat
-  let auCreditDuCR: Centimes = 0;
-  for (const [n, x] of [...s.entries()].sort(([a], [b]) => a.localeCompare(b))) {
-    const t = plan.get(n)?.type;
-    if ((t !== 'charge' && t !== 'produit') || x.solde === 0) continue;
-    if (x.solde > 0) {
-      lignes.push({ debit: null, credit: n, montant: x.solde });
-      auDebitDuCR += x.solde;
-    } else {
-      lignes.push({ debit: n, credit: null, montant: -x.solde });
-      auCreditDuCR -= x.solde;
-    }
-  }
-  if (lignes.length) {
-    if (auDebitDuCR) lignes.unshift({ debit: o.compteResultat, credit: null, montant: auDebitDuCR });
-    if (auCreditDuCR) lignes.push({ debit: null, credit: o.compteResultat, montant: auCreditDuCR });
-    res.push(ecriture('Clôture des comptes de charges et de produits', lignes));
-  }
-
-  // 2. Résultat : au compte privé (raison individuelle) ou au bénéfice reporté (société)
-  const r = resultatExercice(d);
+  // B1. Résultat : au compte privé (raison individuelle) ou au bénéfice reporté (société)
+  const r = resultatAVirer(d);
   const prive = o.comptesPrives[0];
   const destination = prive ?? o.compteCapital;
   const vers = prive ? 'au compte privé' : 'au bénéfice reporté';
   if (r > 0) res.push(ecriture(`Bénéfice de l'exercice viré ${vers}`, [{ debit: o.compteResultat, credit: destination, montant: r }]));
   if (r < 0) res.push(ecriture(`Perte de l'exercice virée ${vers}`, [{ debit: destination, credit: o.compteResultat, montant: -r }]));
 
-  // 3. Solde du compte privé (résultat compris) viré au capital
+  // B2. Solde du compte privé (résultat compris) viré au capital
   if (o.comptesPrives.length) {
     const lignesPrive: LigneEcriture[] = [];
     let totalPrive: Centimes = 0;
@@ -151,16 +130,11 @@ export function boucler(d: Dossier, o: OptionsBouclement = optionsBouclement(d.f
   return ok({ ...courant, comptesAjoutes: d.comptesAjoutes, comptesMasques: d.comptesMasques });
 }
 
-/** Vrai si les charges, produits, comptes privés et de bouclement sont tous soldés. */
+/** Vrai quand tout le résultat a été viré et que les comptes privés sont soldés. */
 export function estBoucle(d: Dossier, o: OptionsBouclement = optionsBouclement(d.formeJuridique)): boolean {
-  const plan = indexPlan(d.plan);
-  for (const [n, x] of soldes(d)) {
-    const t = plan.get(n)?.type;
-    if (x.solde !== 0 && (t === 'charge' || t === 'produit' || t === 'bouclement' || o.comptesPrives.includes(n))) {
-      return false;
-    }
-  }
-  return true;
+  if (resultatAVirer(d) !== 0) return false;
+  const s = soldes(d);
+  return o.comptesPrives.every((n) => (s.get(n)?.solde ?? 0) === 0);
 }
 
 /**

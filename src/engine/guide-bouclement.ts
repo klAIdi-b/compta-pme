@@ -1,11 +1,12 @@
-// Accompagnement des écritures de bouclement (validé par l'enseignant le 15.11.2026) : consigne de chaque étape,
-// aide en deux niveaux (la règle, puis les comptes concernés sans les montants). La solution reste réservée au
-// retour gradué habituel (après un essai faux). Méthode du cours : voir closing.ts (B1, B2, B3).
+// Accompagnement des écritures de bouclement (validé par l'enseignant le 15.11.2026, méthode précisée le 18.11.2026) :
+// consigne de chaque étape, sens de l'écriture, aide en deux niveaux (la règle, puis les comptes concernés sans les
+// montants). La solution reste réservée au retour gradué habituel (après un essai faux).
+// Méthode du cours : les charges et produits ne sont pas soldés au journal (le compte de résultat est établi à part) ;
+// raison individuelle B1 résultat au compte privé, B2 compte privé au capital ; société B1 résultat au bénéfice reporté.
 
 import type { Dossier } from './dossier';
 import { indexPlan } from './dossier';
 import { optionsBouclement } from './closing';
-import { soldes } from './ledger';
 import { ecrituresRetenues } from './correction';
 
 export interface EtapeBouclement {
@@ -20,35 +21,22 @@ export interface EtapeBouclement {
   but: string;
 }
 
-const B1: EtapeBouclement = {
-  piece: 'B1',
-  titre: 'Charges et produits',
-  consigne: 'Soldez tous les comptes de charges et de produits en les virant au compte de résultat.',
-  regle:
-    'Un compte se solde en inscrivant son solde du côté opposé. Les charges ont un solde au débit : on les inscrit au ' +
-    'crédit, et le compte de résultat au débit. Les produits font l’inverse.',
-  but:
-    'Le compte de résultat rassemble toutes les charges et tous les produits de l’exercice : sa différence donne le ' +
-    'bénéfice ou la perte. Les comptes de charges et de produits repartent ainsi à zéro pour l’exercice suivant.',
-};
-
 export function etapesBouclement(forme: Dossier['formeJuridique']): EtapeBouclement[] {
   if (forme === 'raison individuelle') {
     return [
-      B1,
       {
-        piece: 'B2',
+        piece: 'B1',
         titre: 'Résultat au compte privé',
-        consigne: 'Virez le résultat de l’exercice (bénéfice ou perte) au compte privé.',
+        consigne: 'Virez le résultat de l’exercice (bénéfice ou perte) du compte de résultat au compte privé.',
         regle:
-          'Après B1, la différence du compte de résultat est le résultat. Un bénéfice est un solde au crédit : on le ' +
-          'solde en l’inscrivant au débit, contre le compte privé. Une perte fait l’inverse.',
+          'Le compte de résultat montre le bénéfice ou la perte de l’exercice. Un bénéfice se vire en l’inscrivant au ' +
+          'débit du compte de résultat et au crédit du compte privé. Une perte fait l’inverse.',
         but:
           'Le résultat revient au propriétaire de l’entreprise : on le reporte au compte privé, où figurent déjà ses ' +
           'prélèvements.',
       },
       {
-        piece: 'B3',
+        piece: 'B2',
         titre: 'Compte privé au capital',
         consigne: 'Virez le solde du compte privé au capital (si le compte privé n’est pas déjà soldé).',
         regle:
@@ -61,14 +49,13 @@ export function etapesBouclement(forme: Dossier['formeJuridique']): EtapeBouclem
     ];
   }
   return [
-    B1,
     {
-      piece: 'B2',
+      piece: 'B1',
       titre: 'Résultat au bénéfice reporté',
-      consigne: 'Virez le résultat de l’exercice (bénéfice ou perte) au bénéfice reporté.',
+      consigne: 'Virez le résultat de l’exercice (bénéfice ou perte) du compte de résultat au bénéfice reporté.',
       regle:
-        'Après B1, la différence du compte de résultat est le résultat. Un bénéfice est un solde au crédit : on le ' +
-        'solde en l’inscrivant au débit, contre le bénéfice reporté. Une perte fait l’inverse.',
+        'Le compte de résultat montre le bénéfice ou la perte de l’exercice. Un bénéfice se vire en l’inscrivant au ' +
+        'débit du compte de résultat et au crédit du bénéfice reporté. Une perte fait l’inverse.',
       but:
         'Le bénéfice d’une société est à la disposition de l’assemblée générale : on l’inscrit au bénéfice reporté, ' +
         'd’où il sera réparti.',
@@ -78,24 +65,14 @@ export function etapesBouclement(forme: Dossier['formeJuridique']): EtapeBouclem
 
 const estPieceBouclement = (piece: string) => /^B\d+$/.test(piece);
 
-/**
- * Aide de niveau 2 : comptes concernés par l'étape, par leur nom, sans montants. Pour B1, les charges et produits
- * dont le solde n'est pas nul avant le bouclement de l'élève.
- */
+/** Aide de niveau 2 : comptes concernés par l'étape, par leur nom, sans montants. */
 export function comptesDeLEtape(d: Dossier, piece: string): { numero: string; intitule: string }[] {
   const plan = indexPlan(d.plan);
   const o = optionsBouclement(d.formeJuridique);
   const nom = (n: string) => ({ numero: n, intitule: plan.get(n)?.intitule ?? n });
-  if (piece === 'B1') {
-    const avant: Dossier = { ...d, ecritures: d.ecritures.filter((e) => !estPieceBouclement(e.piece)) };
-    return [...soldes(avant).entries()]
-      .filter(([n, x]) => x.solde !== 0 && ['charge', 'produit'].includes(plan.get(n)?.type ?? ''))
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([n]) => nom(n));
-  }
   const prive = o.comptesPrives[0];
-  if (piece === 'B2') return [nom(o.compteResultat), nom(prive ?? o.compteCapital)];
-  if (piece === 'B3' && prive) return [nom(prive), nom(o.compteCapital)];
+  if (piece === 'B1') return [nom(o.compteResultat), nom(prive ?? o.compteCapital)];
+  if (piece === 'B2' && prive) return [nom(prive), nom(o.compteCapital)];
   return [];
 }
 

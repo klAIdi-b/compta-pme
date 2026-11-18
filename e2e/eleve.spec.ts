@@ -186,18 +186,18 @@ test('le bouclement guide l’élève étape par étape, avec une aide en deux n
   await saisir(page, 'Ventes au comptant', '1000', '3200', '12350');
   await page.goto('./#bouclement');
   await page.getByRole('button', { name: 'Saisir les écritures de bouclement (B1)' }).click();
-  await expect(page.getByText('Bouclement, étape 1 sur 3 (B1).')).toBeVisible();
+  await expect(page.getByText('Bouclement, étape 1 sur 2 (B1).')).toBeVisible();
   await expect(page.getByText('La règle :')).toHaveCount(0);
   await page.getByRole('button', { name: "Besoin d'aide ?" }).click();
   await expect(page.getByText('La règle :')).toBeVisible();
   await page.getByRole('button', { name: 'Quels comptes sont concernés ?' }).click();
-  await expect(page.locator('.aide-b', { hasText: 'Comptes concernés' })).toContainText('Ventes de marchandises');
+  await expect(page.locator('.aide-b', { hasText: 'Comptes concernés' })).toContainText('Compte de résultat');
   // Aucun montant dans les aides.
   await expect(page.locator('.aide-b', { hasText: 'Comptes concernés' })).not.toContainText(/\d'\d{3}\.\d{2}|\d+\.\d{2}/);
-  // Après B1 (ici simplifiée : une seule vente), la grille propose B2.
-  await saisir(page, 'Clôture', '3200', '9000', '12350');
+  // Après B1 (résultat au compte privé), la grille propose B2.
+  await saisir(page, 'Bénéfice au privé', '9000', '2850', '12350');
   await expect(page.locator('#saisie-piece')).toHaveValue('B2');
-  await expect(page.getByText('Bouclement, étape 2 sur 3 (B2).')).toBeVisible();
+  await expect(page.getByText('Bouclement, étape 2 sur 2 (B2).')).toBeVisible();
 });
 
 test("l'élève modifie une écriture fausse : solution dès la 1re erreur, double-clic ou clic dans l'énoncé", async ({ page }) => {

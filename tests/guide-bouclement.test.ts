@@ -18,42 +18,37 @@ function dossierAvecCorrige(ex: typeof demoCfc1): Dossier {
   return d;
 }
 
-describe('accompagnement du bouclement', () => {
-  it('trois étapes pour la raison individuelle, deux pour une société', () => {
-    expect(etapesBouclement('raison individuelle').map((e) => e.piece)).toEqual(['B1', 'B2', 'B3']);
-    expect(etapesBouclement('SA').map((e) => e.piece)).toEqual(['B1', 'B2']);
+describe('accompagnement du bouclement (méthode du cours)', () => {
+  it('deux étapes pour la raison individuelle, une pour une société', () => {
+    expect(etapesBouclement('raison individuelle').map((e) => e.piece)).toEqual(['B1', 'B2']);
+    expect(etapesBouclement('SA').map((e) => e.piece)).toEqual(['B1']);
   });
 
-  it('les consignes et les règles ne contiennent ni numéro de compte ni montant', () => {
+  it('les consignes, règles et explications ne contiennent ni numéro de compte ni montant', () => {
     for (const e of [...etapesBouclement('raison individuelle'), ...etapesBouclement('SA')]) {
       // Les numéros de pièce (B1, B2…) sont permis.
       expect((e.consigne + e.regle + e.but).replace(/B\d/g, '')).not.toMatch(/\d/);
     }
   });
 
-  it('B1 : les charges et produits non soldés, B2 et B3 : les comptes du virement', () => {
+  it('B1 : compte de résultat et compte privé ; B2 : compte privé et capital', () => {
     const d = dossierAvecCorrige(demoCfc1);
-    const b1 = comptesDeLEtape(d, 'B1');
-    expect(b1.length).toBeGreaterThan(2);
-    expect(b1.every((c) => /^[3-8]/.test(c.numero))).toBe(true);
-    expect(comptesDeLEtape(d, 'B2').map((c) => c.numero)).toEqual(['9000', '2850']);
-    expect(comptesDeLEtape(d, 'B3').map((c) => c.numero)).toEqual(['2850', '2800']);
-    expect(comptesDeLEtape(d, 'B3')[0]!.intitule).toBeTruthy();
+    expect(comptesDeLEtape(d, 'B1').map((c) => c.numero)).toEqual(['9000', '2850']);
+    expect(comptesDeLEtape(d, 'B2').map((c) => c.numero)).toEqual(['2850', '2800']);
+    expect(comptesDeLEtape(d, 'B2')[1]!.intitule).toBeTruthy();
   });
 
-  it('les comptes de B1 restent ceux d’avant le bouclement, même une fois B1 passée', () => {
+  it('étapes saisies après le bouclement', () => {
     const d = dossierAvecCorrige(demoCfc1);
-    const avant = comptesDeLEtape(d, 'B1');
     const r = boucler(d);
     if (!r.ok) throw new Error(r.erreurs.join());
-    expect(comptesDeLEtape(r.valeur, 'B1')).toEqual(avant);
-    expect([...etapesSaisies(r.valeur)].sort()).toEqual(['B1', 'B2', 'B3']);
+    expect([...etapesSaisies(r.valeur)].sort()).toEqual(['B1', 'B2']);
     expect(etapesSaisies(d).size).toBe(0);
   });
 
-  it('société : B2 vers le bénéfice reporté', () => {
+  it('société : B1 vers le bénéfice reporté', () => {
     const d = dossierAvecCorrige(demoMp);
-    expect(comptesDeLEtape(d, 'B2').map((c) => c.numero)).toEqual(['9000', '2970']);
-    expect(comptesDeLEtape(d, 'B3')).toEqual([]);
+    expect(comptesDeLEtape(d, 'B1').map((c) => c.numero)).toEqual(['9000', '2970']);
+    expect(comptesDeLEtape(d, 'B2')).toEqual([]);
   });
 });

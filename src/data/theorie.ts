@@ -621,40 +621,37 @@ export const CHAPITRES: Chapitre[] = [
         ],
       },
       {
-        titre: 'Le bouclement par le compte 9000',
+        titre: 'Le bouclement : résultat et compte privé',
         blocs: [
           {
             type: 'p',
             texte:
-              "À la fin de l'exercice, on solde les comptes de charges et de produits par le compte 9000 Compte de résultat. " +
-              "Le compte en T 9000 reproduit alors le compte de résultat. Le résultat passe ensuite par le compte privé : " +
+              "À la fin de l'exercice, on établit le compte de résultat : il reprend les soldes des comptes de charges et " +
+              "de produits, et sa différence est le bénéfice ou la perte. Le résultat passe ensuite par le compte privé : " +
               "le compte privé réunit ainsi tout ce que l'exercice a rapporté au propriétaire (bénéfice) ou lui a coûté " +
-              "(perte, prélèvements). Son solde, la variation de la fortune nette, est enfin viré au capital. Les écritures " +
-              'de bouclement portent les pièces B1, B2, B3, dans cet ordre :',
+              "(perte, prélèvements). Son solde, la variation de la fortune nette, est enfin viré au capital. Au journal, " +
+              'les écritures de bouclement portent les pièces B1 et B2 :',
           },
           {
             type: 'liste',
             items: [
-              'solder chaque compte de charges et de produits par le compte 9000 ;',
-              'virer le solde du compte 9000 au compte privé : un bénéfice au crédit du privé, une perte au débit ;',
-              'virer le solde du compte privé au capital : un solde créditeur augmente le capital, un solde débiteur le diminue.',
+              'B1 : virer le résultat du compte de résultat au compte privé : un bénéfice au crédit du privé, une perte au débit ;',
+              'B2 : virer le solde du compte privé au capital : un solde créditeur augmente le capital, un solde débiteur le diminue.',
             ],
           },
           {
             type: 'ecritures',
             titre: 'Exemple (montants fictifs : bénéfice 9\'000.00, prélèvements privés 6\'000.00)',
             exemples: [
-              { cas: 'B1 — Clôture des charges', lignes: [D('9000', 52000), C('4200', 30000), C('5200', 15000), C('6000', 7000)] },
-              { cas: 'B1 — Clôture des produits', lignes: s('3200', '9000', 61000) },
-              { cas: "B2 — Bénéfice de l'exercice viré au compte privé", lignes: s('9000', '2850', 9000) },
-              { cas: 'B3 — Solde du compte privé viré au capital (9\'000.00 − 6\'000.00)', lignes: s('2850', '2800', 3000) },
+              { cas: "B1 — Bénéfice de l'exercice viré au compte privé", lignes: s('9000', '2850', 9000) },
+              { cas: 'B2 — Solde du compte privé viré au capital (9\'000.00 − 6\'000.00)', lignes: s('2850', '2800', 3000) },
             ],
           },
           {
             type: 'retenir',
             texte:
               "Si le bénéfice est inférieur aux prélèvements, ou en cas de perte, le compte privé a un solde débiteur : " +
-              "l'écriture B3 est alors 2800 Capital au débit, 2850 Privé au crédit, et le capital diminue.",
+              "l'écriture B2 est alors 2800 Capital au débit, 2850 Privé au crédit, et le capital diminue.",
           },
           {
             type: 'p',
