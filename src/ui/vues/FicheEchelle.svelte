@@ -7,7 +7,7 @@
 
   const x = $derived(etat.exercice.parametres.echellePrix!);
   const e = $derived(echelle(x));
-  const entrainement = $derived(etat.exercice.mode === 'entrainement');
+  const entrainement = $derived(etat.retour);
   const session = etat.session!;
   if (!session.fiches.echelle) session.fiches.echelle = {};
   const saisies = session.fiches.echelle;

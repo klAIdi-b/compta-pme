@@ -5,7 +5,7 @@
   import FicheCalcul, { type SectionCalcul } from '../composants/FicheCalcul.svelte';
 
   const g = $derived(degres(etat.dossier));
-  const entrainement = $derived(etat.exercice.mode === 'entrainement');
+  const entrainement = $derived(etat.retour);
   const session = etat.session!;
   if (!session.fiches.degres) session.fiches.degres = {};
   const saisies = session.fiches.degres;

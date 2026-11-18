@@ -320,6 +320,7 @@
       <label class="bloc" for="ex-mode">Mode</label>
       <select id="ex-mode" class="champ" bind:value={mode}>
         <option value="entrainement">Entraînement (retour immédiat)</option>
+        <option value="formative">Évaluation formative (correction montrée à l'élève quand il termine)</option>
         <option value="evaluation">Évaluation (aucun retour)</option>
       </select>
     </div>
@@ -406,9 +407,6 @@
     {/if}
     <label class="case"><input type="checkbox" bind:checked={ficheBilanOuverture} /> Fiche « Bilan d'ouverture »</label>
     <label class="case"><input type="checkbox" bind:checked={ficheMargeBrute} /> Fiche « Marge brute »</label>
-    {#if mode === 'entrainement'}
-      <label class="case large"><input type="checkbox" bind:checked={modificationDirecte} /> Autoriser la modification directe des écritures validées</label>
-    {/if}
   </div>
 </section>
 

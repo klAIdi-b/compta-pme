@@ -114,11 +114,11 @@ export function decoderCorrige(s: string): EcritureCorrigee[] {
 
 // ---------- Exercice ----------
 
-/** Fichier distribué aux élèves : sans corrigé en évaluation, corrigé encodé en entraînement. */
+/** Fichier distribué aux élèves : sans corrigé en évaluation, corrigé encodé en entraînement et en évaluation formative. */
 export function exporterExercice(ex: Exercice): string {
   const { corrige, ...sansCorrige } = ex;
   const f: FichierExercice = { format: 'compta-pme/exercice', version: VERSION, exercice: sansCorrige };
-  if (ex.mode === 'entrainement' && corrige?.length) f.corrigeEncode = encoderCorrige(corrige);
+  if (ex.mode !== 'evaluation' && corrige?.length) f.corrigeEncode = encoderCorrige(corrige);
   return JSON.stringify(f, null, 2);
 }
 

@@ -5,7 +5,7 @@
   import FicheCalcul, { type SectionCalcul } from '../composants/FicheCalcul.svelte';
 
   const f = $derived(fluxTresorerie(etat.dossier));
-  const entrainement = $derived(etat.exercice.mode === 'entrainement');
+  const entrainement = $derived(etat.retour);
   const session = etat.session!;
   if (!session.fiches.flux) session.fiches.flux = {};
   const saisies = session.fiches.flux;

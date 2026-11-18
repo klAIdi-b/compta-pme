@@ -15,7 +15,16 @@ import type { DonneesEchelle } from './fiches-cfc';
 import type { PieceComptable } from './pieces';
 
 export type LibellesT = 'SI/SF' | 'San/Spb';
-export type Mode = 'entrainement' | 'evaluation';
+/**
+ * Mode d'un exercice : entraînement (retour immédiat), évaluation formative (aucun retour pendant la saisie, correction
+ * et note indicative montrées à l'élève quand il termine ; choix de l'enseignant le 18.11.2026), évaluation (aucun retour).
+ */
+export type Mode = 'entrainement' | 'formative' | 'evaluation';
+
+/** Retour (statuts, indices, solutions, contrôle des fiches) visible par l'élève. */
+export function retourVisible(mode: Mode, formativeTerminee: boolean): boolean {
+  return mode === 'entrainement' || (mode === 'formative' && formativeTerminee);
+}
 
 /** Rubriques de l'application ; une rubrique non activée n'apparaît pas. */
 export type Fonction =
@@ -237,7 +246,7 @@ export function controlerExercice(ex: Exercice, plan: Compte[]): { erreurs: stri
   const sansCorrige = ex.operations.filter((o) => !corrige.has(o.numero)).map((o) => o.numero);
   if (sansCorrige.length) {
     const msg = `Opérations sans corrigé : ${sansCorrige.join(', ')}.`;
-    if (ex.mode === 'entrainement') avertissements.push(`${msg} Aucun retour ne sera donné aux élèves pour ces opérations.`);
+    if (ex.mode !== 'evaluation') avertissements.push(`${msg} Aucun retour ne sera donné aux élèves pour ces opérations.`);
     else avertissements.push(`${msg} Elles ne pourront pas être corrigées automatiquement.`);
   }
   for (const c of ex.corrige ?? []) {
@@ -284,7 +293,11 @@ export function corrigeDepuisEcritures(d: Dossier): EcritureCorrigee[] {
   return [...parPiece].map(([piece, lignes]) => ({ piece, lignes }));
 }
 
-export const LIBELLES_MODE: Record<Mode, string> = { entrainement: 'Entraînement', evaluation: 'Évaluation' };
+export const LIBELLES_MODE: Record<Mode, string> = {
+  entrainement: 'Entraînement',
+  formative: 'Évaluation formative',
+  evaluation: 'Évaluation',
+};
 
 export const LIBELLES_NIVEAU: Record<Niveau, string> = { CFC1: 'CFC 1', CFC2: 'CFC 2', MP: 'MP' };
 

@@ -199,3 +199,35 @@ test('le bouclement guide l’élève étape par étape, avec une aide en deux n
   await expect(page.locator('#saisie-piece')).toHaveValue('B2');
   await expect(page.getByText('Bouclement, étape 2 sur 3 (B2).')).toBeVisible();
 });
+
+test("l'élève modifie une écriture fausse : solution dès la 1re erreur, double-clic ou clic dans l'énoncé", async ({ page }) => {
+  await commencer(page, 'cycles', /Cycles du Léman/);
+  await page.goto('./#journal');
+  const fermerVisite = page.getByRole('button', { name: /Passer|Fermer la visite|Terminer/ });
+  if (await fermerVisite.first().isVisible().catch(() => false)) await fermerVisite.first().click();
+  await saisir(page, 'Achat', '4200', '1000', '4800');
+  await expect(page.getByText('À revoir').first()).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Voir la solution' })).toBeVisible();
+  // Clic sur l'opération 1 dans l'énoncé : l'écriture revient dans la grille.
+  await page.locator('.enonce li').first().getByRole('button').click();
+  await expect(page.getByRole('button', { name: 'Enregistrer la modification' })).toBeVisible();
+  await expect(page.locator('#saisie-libelle')).toHaveValue('Achat');
+  await page.getByRole('button', { name: 'Annuler' }).click();
+  // Double-clic sur la ligne du journal : même résultat ; on corrige le compte au crédit.
+  await page.locator('.journal tbody tr.modifiable').first().dblclick();
+  const cre = page.getByLabel('Compte au crédit, ligne 1');
+  await cre.fill('2000');
+  await cre.press('Tab');
+  await page.getByRole('button', { name: 'Enregistrer la modification' }).click();
+  await expect(page.getByText('Juste').first()).toBeVisible();
+});
+
+test("l'accueil sépare l'entraînement et l'évaluation", async ({ page }) => {
+  await page.goto('./');
+  await page.getByRole('button', { name: 'Évaluation', exact: true }).click();
+  await expect(page.getByText("Aucune évaluation pour l'instant.")).toBeVisible();
+  await page.getByRole('button', { name: 'Entraînement', exact: true }).click();
+  await page.getByLabel('Rechercher un exercice').fill('cycles');
+  await page.getByText(/Cycles du Léman/).first().click();
+  await expect(page.locator('.choisi-texte')).toContainText('Cycles du Léman');
+});

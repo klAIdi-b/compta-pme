@@ -249,8 +249,8 @@
           <p>Débit et crédit inversés, bonne classe mais mauvais compte, montant erroné, TVA oubliée : l'élève sait quoi corriger, sans recevoir la réponse.</p>
         </article>
         <article>
-          <h3>La solution après deux essais</h3>
-          <p>Un lien mène au chapitre de théorie concerné. La solution ne s'affiche qu'après une deuxième tentative fausse.</p>
+          <h3>La solution après un essai</h3>
+          <p>Un lien mène au chapitre de théorie concerné. La solution ne s'affiche qu'après une première tentative : l'élève cherche avant de voir.</p>
         </article>
         <article>
           <h3>Les comptes par leur nom</h3>
@@ -431,7 +431,7 @@
     else if (d === ATTENDU.d && c === ATTENDU.c) indice = "Les comptes sont justes, mais le montant ne correspond pas à l'opération.";
     else if ([d, c].every((x, i) => x[0] === [ATTENDU.d, ATTENDU.c][i][0])) indice = "Bonne classe de comptes, mais un compte n'est pas le bon.";
     else indice = "Au moins un compte n'est pas le bon : demandez-vous quels comptes l'opération modifie.";
-    r.innerHTML = '<div class="retour indice">' + indice + (erreurs >= 2 ? ' <button type="button" id="voir">Voir la solution</button>' : '') + '</div>';
+    r.innerHTML = '<div class="retour indice">' + indice + ' <button type="button" id="voir">Voir la solution</button>' + '</div>';
     const b = $('voir');
     if (b) b.onclick = () => {
       b.insertAdjacentHTML('afterend', '<div class="solution">Débit ' + NOMS[ATTENDU.d] + ' (4200), crédit ' + NOMS[ATTENDU.c] + " (2000), 4'800.00.</div>");

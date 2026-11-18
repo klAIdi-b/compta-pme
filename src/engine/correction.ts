@@ -150,9 +150,9 @@ export function enregistrerTentative(suivi: Suivi, piece: string, d: Diagnostic)
   return { ...suivi, [piece]: { ...ancien, essais: ancien.essais + (faux ? 1 : 0), dernier: d } };
 }
 
-/** Le bouton « Voir la solution » n'apparaît qu'après une nouvelle tentative fausse. */
+/** « Voir la solution » apparaît dès la première tentative fausse (choix de l'enseignant le 18.11.2026). */
 export function solutionDisponible(s: SuiviOperation | undefined): boolean {
-  return !!s && s.essais >= 2 && s.dernier !== 'juste';
+  return !!s && s.essais >= 1 && s.dernier !== 'juste';
 }
 
 // ---------- Avancement de l'élève ----------

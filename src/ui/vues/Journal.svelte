@@ -33,7 +33,7 @@
   const corrigeParPiece = $derived(new Map((ex.corrige ?? []).map((c) => [c.piece, c])));
   const avecBouclement = $derived(bouclementCorrige(ex));
   const retour = $derived(
-    ex.mode === 'entrainement' &&
+    etat.retour &&
       vueEleve(etat.genre) &&
       (corrigeParPiece.size > 0 || avecBouclement) &&
       operations.length > 0,
@@ -45,7 +45,10 @@
   function solutionDe(k: string) {
     return k === PIECE_BOUCLEMENT ? corrigeBouclement(d, ex) : corrigeParPiece.get(k);
   }
-  const modifAutorisee = $derived(ex.mode === 'entrainement' && ex.parametres.modificationDirecte && vueEleve(etat.genre));
+  /** Modification d'une écriture validée : toujours possible pour l'élève (choix de l'enseignant le 18.11.2026). */
+  const modifAutorisee = $derived(vueEleve(etat.genre) && !etat.verrouille);
+  /** Une écriture liée à une extourne ne se modifie pas (le moteur le refuse). */
+  const modifiable = (e: Ecriture) => modifAutorisee && !e.extourneDe && !estExtournee(d, e.id);
   const suivi = $derived(etat.session!.suivi);
 
   // ---- Accompagnement des écritures de bouclement (B1, B2…) ----
@@ -56,6 +59,8 @@
   const etapesFaites = $derived(etapesSaisies(d));
   /** Aides seulement en entraînement, comme le retour gradué. */
   const aidesPermises = $derived(ex.mode === 'entrainement' && vueEleve(etat.genre));
+  /** Évaluation formative terminée : la solution de chaque opération fausse est consultable sans nouvel essai. */
+  const solutionsOuvertes = $derived(etat.verrouille);
   const niveauAide = $derived(etapeCourante ? (suivi[PIECE_BOUCLEMENT]?.aides?.[etapeCourante.piece] ?? 0) : 0);
   function demanderAide(niveau: number) {
     if (!etapeCourante) return;
@@ -149,6 +154,13 @@
         erreurs = [];
         tick().then(() => document.getElementById('saisie-libelle')?.focus());
       }
+      return;
+    }
+    // Opération déjà saisie : son écriture revient dans la grille pour être modifiée.
+    const existante = derniereParPiece.get(cle(o.numero));
+    const e = existante ? d.ecritures.find((x) => x.id === existante) : undefined;
+    if (e && modifiable(e)) {
+      modifier(e);
       return;
     }
     piece = o.numero;
@@ -320,16 +332,37 @@
 
 <div class="mise-en-page">
   <div class="colonne-principale">
+    {#if etat.verrouille}
+      <section class="carte formative-fin" aria-label="Évaluation formative terminée">
+        <h2>Évaluation formative terminée</h2>
+        <p class="corps-carte">
+          La saisie est fermée. Chaque opération indique ci-dessous si elle est juste ou à revoir ; pour une opération à
+          revoir, « Voir la solution » affiche l'écriture attendue. Votre note indicative figure sur le tableau de bord.
+        </p>
+      </section>
+    {:else}
     <section class="carte saisie" aria-label="Nouvelle écriture" data-visite="saisie">
       <h2>{editionId ? `Modification de la pièce ${piece}` : 'Nouvelle écriture'}</h2>
       {#if etapeCourante}
         {@const rang = etapes.indexOf(etapeCourante) + 1}
         <div class="operation-courante etape-bouclement">
           <div><b>Bouclement, étape {rang} sur {etapes.length} ({etapeCourante.piece}).</b> {etapeCourante.consigne}</div>
-          <ol class="etapes-b" aria-label="Étapes du bouclement">
+          <details class="sens-b">
+            <summary>À quoi sert cette écriture ?</summary>
+            <p>{etapeCourante.but}</p>
+          </details>
+          <ol class="etapes-b" aria-label="Étapes du bouclement : cliquez pour passer à une étape">
             {#each etapes as e (e.piece)}
-              <li class:faite={etapesFaites.has(e.piece)} class:active={e === etapeCourante}>
-                <span class="coche" aria-hidden="true">{etapesFaites.has(e.piece) ? '✓' : ''}</span>{e.piece} {e.titre}{#if etapesFaites.has(e.piece)}<span class="sr-only"> (saisie)</span>{/if}
+              <li>
+                <button
+                  type="button"
+                  class:faite={etapesFaites.has(e.piece)}
+                  class:active={e === etapeCourante}
+                  aria-current={e === etapeCourante ? 'step' : undefined}
+                  onclick={() => choisirOperation(e.piece)}
+                >
+                  <span class="coche" aria-hidden="true">{etapesFaites.has(e.piece) ? '✓' : ''}</span>{e.piece} {e.titre}{#if etapesFaites.has(e.piece)}<span class="sr-only"> (saisie)</span>{/if}
+                </button>
               </li>
             {/each}
           </ol>
@@ -452,6 +485,7 @@
       </div>
       </div>
     </section>
+    {/if}
 
     <section class="carte" style="margin-top:20px" aria-label="Écritures validées">
       <h2>Écritures validées</h2>
@@ -478,7 +512,13 @@
             {#each ecrituresTriees as e, k (e.id)}
               {@const extournee = estExtournee(d, e.id)}
               {#each e.lignes as l, j}
-                <tr class:zebre={k % 2 === 1} class:annulee={extournee || !!e.extourneDe}>
+                <tr
+                  class:zebre={k % 2 === 1}
+                  class:annulee={extournee || !!e.extourneDe}
+                  class:modifiable={modifiable(e)}
+                  title={modifiable(e) ? 'Double-cliquez pour modifier cette écriture' : undefined}
+                  ondblclick={() => modifiable(e) && modifier(e)}
+                >
                   {#if j === 0}
                     <td class="num">{dt(e.date)}</td>
                     <td class="num">{e.piece}</td>
@@ -501,13 +541,15 @@
                   {/if}
                   <td class="actions">
                     {#if j === 0}
+                      {#if !etat.verrouille}
                       <div class="boutons-ecriture">
                         {#if !extournee && !e.extourneDe}
-                          {#if modifAutorisee}<button class="action-ecr" onclick={() => modifier(e)}>Modifier</button>{/if}
+                          {#if modifAutorisee}<button class="action-ecr" aria-label={`Modifier la pièce ${e.piece}`} onclick={() => modifier(e)}>Modifier</button>{/if}
                           <button class="action-ecr" onclick={() => demanderExtourne(e.id)}>Extourner</button>
                         {/if}
                         <button class="action-ecr supprimer" aria-label={`Supprimer la pièce ${e.piece}${e.extourneDe ? ' (extourne)' : ''}`} onclick={() => demanderSuppression(e.id)}>Supprimer</button>
                       </div>
+                      {/if}
                     {/if}
                   </td>
                 </tr>
@@ -527,9 +569,9 @@
                         <b>Indice :</b> {INDICES[st]}
                         {kc === PIECE_BOUCLEMENT ? '(Écritures de bouclement prises ensemble.) ' : ''}
                         {modifAutorisee
-                          ? "Modifiez l'écriture, ou supprimez-la et saisissez à nouveau l'opération."
+                          ? "Modifiez l'écriture (bouton Modifier ou double-clic sur la ligne), ou supprimez-la."
                           : "Supprimez l'écriture (ou extournez-la), puis saisissez à nouveau l'opération."}
-                        {#if solutionDisponible(s) && !s?.solutionVue}
+                        {#if (solutionsOuvertes || solutionDisponible(s)) && !s?.solutionVue}
                           <button class="btn-lien solution" onclick={() => voirSolution(kc)}>Voir la solution</button>
                         {/if}
                         {#each [chapitreDe(kc)].filter((x) => x !== null) as ch (ch.id)}
@@ -602,9 +644,16 @@
   .operation-courante { padding: 12px 18px; background: #f3f8fd; border-bottom: 1px solid var(--c-bordure-3); line-height: 1.45; }
   .bascule-piece { margin-left: 10px; font-size: 13px; }
   .etapes-b { list-style: none; margin: 8px 0 0; padding: 0; display: flex; gap: 8px; flex-wrap: wrap; font-size: 13px; }
-  .etapes-b li { padding: 3px 10px; border-radius: 999px; background: #fff; border: 1px solid var(--c-bordure-2); color: var(--c-texte-2); }
-  .etapes-b li.active { border-color: var(--c-structure); color: var(--c-structure); font-weight: bold; }
-  .etapes-b li.faite { background: var(--c-ok-fond); border-color: transparent; color: var(--c-ok); }
+  .etapes-b button {
+    font: inherit; cursor: pointer; padding: 3px 10px; border-radius: 999px; background: #fff;
+    border: 1px solid var(--c-bordure-2); color: var(--c-texte-2);
+  }
+  .etapes-b button:hover { border-color: var(--c-structure); color: var(--c-structure); }
+  .etapes-b button.active { border-color: var(--c-structure); color: var(--c-structure); font-weight: bold; }
+  .etapes-b button.faite { background: var(--c-ok-fond); border-color: transparent; color: var(--c-ok); }
+  .sens-b { margin-top: 6px; font-size: 14px; }
+  .sens-b summary { cursor: pointer; color: var(--c-structure); font-weight: bold; font-size: 13.5px; }
+  .sens-b p { margin: 6px 0 0; padding: 8px 12px; background: #fff; border-left: 3px solid var(--c-accent); border-radius: 4px; }
   .coche { display: inline-block; min-width: 0; margin-right: 4px; }
   .coche:empty { margin-right: 0; }
   .aide-b { margin-top: 8px; padding: 8px 12px; background: #fff; border-left: 3px solid var(--c-structure); border-radius: 4px; font-size: 14px; }
@@ -659,6 +708,9 @@
   }
   .action-ecr:hover { background: var(--c-survol); border-color: var(--c-structure); }
   .action-ecr.supprimer { color: var(--c-negatif); border-color: #e9c3c9; }
+  tr.modifiable { cursor: pointer; }
+  .formative-fin { border-left: 4px solid var(--c-ok); }
+  .formative-fin p { margin: 0; }
   .action-ecr.supprimer:hover { background: #fdf2f4; border-color: var(--c-negatif); }
   /* Écran étroit : le tableau défile plutôt que de couper les colonnes. */
   .defilement { overflow-x: auto; }

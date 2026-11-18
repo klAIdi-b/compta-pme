@@ -12,7 +12,7 @@
   const boucle = $derived(d.ecritures.length > 0 && estBoucle(d));
   const cr = $derived(compteDeResultat(d));
   const correction = $derived(
-    etat.exercice.mode === 'entrainement' && vueEleve(etat.genre) && bouclementCorrige(etat.exercice)
+    etat.retour && vueEleve(etat.genre) && bouclementCorrige(etat.exercice)
       ? diagnostiquerBouclement(d, etat.exercice)
       : null,
   );

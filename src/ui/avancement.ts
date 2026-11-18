@@ -1,6 +1,7 @@
 // Avancement de l'élève dans la session en cours (accueil et en-tête).
 import { avancement, type Avancement } from '../engine/correction';
 import type { Session } from './etat.svelte';
+import { retourVisible } from '../engine/exercice';
 import { genreSession, vueEleve } from './modes';
 
 /** Avancement sur les opérations de l'énoncé, ou null si sans objet (saisie du corrigé, exercice sans opérations). */
@@ -11,7 +12,7 @@ export function avancementSession(s: Session): Avancement | null {
   return avancement(s.exercice.operations, d.ecritures, avecCorrection(s) ? s.exercice.corrige! : null);
 }
 
-/** Juste / à revoir ne s'affichent qu'en entraînement, quand le corrigé est disponible. */
+/** Juste / à revoir ne s'affichent qu'avec le retour (entraînement, formative terminée), quand le corrigé est disponible. */
 export function avecCorrection(s: Session): boolean {
-  return s.exercice.mode === 'entrainement' && (s.exercice.corrige?.length ?? 0) > 0;
+  return retourVisible(s.exercice.mode, !!s.formativeTerminee) && (s.exercice.corrige?.length ?? 0) > 0;
 }

@@ -4,7 +4,7 @@
   import { RATIOS, ratios, ratioJuste } from '../../engine/analyse';
 
   const attendus = $derived(ratios(etat.dossier));
-  const entrainement = $derived(etat.exercice.mode === 'entrainement');
+  const entrainement = $derived(etat.retour);
   // La fiche est enregistrée avec le travail de l'élève.
   const session = etat.session!;
   if (!session.fiches.analyse) session.fiches.analyse = {};

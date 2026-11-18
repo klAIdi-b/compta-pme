@@ -31,7 +31,7 @@
     lignes.map((l) => ({ libelle: l.libelle, taux: lireTaux(l.taux), base: null, montant: l.montant })),
   );
   const controle = $derived(brut !== null ? controlerDecompte(brut, retenues) : null);
-  const entrainement = $derived(etat.exercice.mode === 'entrainement');
+  const entrainement = $derived(etat.retour);
   const fausses = $derived(new Set(entrainement && controle ? controle.lignesFausses : []));
 </script>
 

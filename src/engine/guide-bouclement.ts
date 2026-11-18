@@ -1,6 +1,6 @@
 // Accompagnement des écritures de bouclement (validé par l'enseignant le 15.11.2026) : consigne de chaque étape,
 // aide en deux niveaux (la règle, puis les comptes concernés sans les montants). La solution reste réservée au
-// retour gradué habituel (après deux essais faux). Méthode du cours : voir closing.ts (B1, B2, B3).
+// retour gradué habituel (après un essai faux). Méthode du cours : voir closing.ts (B1, B2, B3).
 
 import type { Dossier } from './dossier';
 import { indexPlan } from './dossier';
@@ -16,6 +16,8 @@ export interface EtapeBouclement {
   consigne: string;
   /** Aide de niveau 1 : la règle. */
   regle: string;
+  /** À quoi sert l'écriture (sens de l'étape, toujours consultable). */
+  but: string;
 }
 
 const B1: EtapeBouclement = {
@@ -25,6 +27,9 @@ const B1: EtapeBouclement = {
   regle:
     'Un compte se solde en inscrivant son solde du côté opposé. Les charges ont un solde au débit : on les inscrit au ' +
     'crédit, et le compte de résultat au débit. Les produits font l’inverse.',
+  but:
+    'Le compte de résultat rassemble toutes les charges et tous les produits de l’exercice : sa différence donne le ' +
+    'bénéfice ou la perte. Les comptes de charges et de produits repartent ainsi à zéro pour l’exercice suivant.',
 };
 
 export function etapesBouclement(forme: Dossier['formeJuridique']): EtapeBouclement[] {
@@ -38,6 +43,9 @@ export function etapesBouclement(forme: Dossier['formeJuridique']): EtapeBouclem
         regle:
           'Après B1, la différence du compte de résultat est le résultat. Un bénéfice est un solde au crédit : on le ' +
           'solde en l’inscrivant au débit, contre le compte privé. Une perte fait l’inverse.',
+        but:
+          'Le résultat revient au propriétaire de l’entreprise : on le reporte au compte privé, où figurent déjà ses ' +
+          'prélèvements.',
       },
       {
         piece: 'B3',
@@ -46,6 +54,9 @@ export function etapesBouclement(forme: Dossier['formeJuridique']): EtapeBouclem
         regle:
           'Le compte privé réunit les prélèvements et le résultat. Calculez son solde, puis virez-le au capital pour ' +
           'solder le compte privé.',
+        but:
+          'Le compte privé est soldé à la fin de l’exercice : ce qui reste (le résultat moins les prélèvements) augmente ' +
+          'le capital, ou le diminue.',
       },
     ];
   }
@@ -58,6 +69,9 @@ export function etapesBouclement(forme: Dossier['formeJuridique']): EtapeBouclem
       regle:
         'Après B1, la différence du compte de résultat est le résultat. Un bénéfice est un solde au crédit : on le ' +
         'solde en l’inscrivant au débit, contre le bénéfice reporté. Une perte fait l’inverse.',
+      but:
+        'Le bénéfice d’une société est à la disposition de l’assemblée générale : on l’inscrit au bénéfice reporté, ' +
+        'd’où il sera réparti.',
     },
   ];
 }

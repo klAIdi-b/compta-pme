@@ -27,7 +27,7 @@ describe('accompagnement du bouclement', () => {
   it('les consignes et les règles ne contiennent ni numéro de compte ni montant', () => {
     for (const e of [...etapesBouclement('raison individuelle'), ...etapesBouclement('SA')]) {
       // Les numéros de pièce (B1, B2…) sont permis.
-      expect((e.consigne + e.regle).replace(/B\d/g, '')).not.toMatch(/\d/);
+      expect((e.consigne + e.regle + e.but).replace(/B\d/g, '')).not.toMatch(/\d/);
     }
   });
 

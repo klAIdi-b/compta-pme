@@ -105,7 +105,7 @@ describe('suivi des tentatives', () => {
     let suivi: Suivi = {};
     suivi = enregistrerTentative(suivi, '5', 'inversee');
     expect(suivi['5']!.essais).toBe(1);
-    expect(solutionDisponible(suivi['5'])).toBe(false);
+    expect(solutionDisponible(suivi['5'])).toBe(true);
     suivi = enregistrerTentative(suivi, '5', 'montant');
     expect(solutionDisponible(suivi['5'])).toBe(true);
     suivi = enregistrerTentative(suivi, '5', 'juste');

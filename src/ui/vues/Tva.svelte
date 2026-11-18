@@ -8,7 +8,7 @@
   const ex = $derived(etat.exercice);
   const dec = $derived(decompteTva(d));
   const intitules = $derived(new Map(d.plan.map((c) => [c.numero, c.intitule])));
-  const entrainement = $derived(ex.mode === 'entrainement');
+  const entrainement = $derived(etat.retour);
   const methode = $derived(ex.parametres.tvaMethode === 'brut' ? 'au brut' : 'au net');
 
   // Calculatrice (si activée par l'enseignant)

@@ -8,7 +8,7 @@
   const ex = $derived(etat.exercice);
   const donnees = $derived(ex.parametres.repartition);
   const attendu = $derived(donnees ? repartir(donnees) : null);
-  const entrainement = $derived(ex.mode === 'entrainement');
+  const entrainement = $derived(etat.retour);
   const capital = $derived(ex.formeJuridique === 'SA' ? 'capital-actions' : 'capital social');
 
   type Cle = keyof TableauRepartition;

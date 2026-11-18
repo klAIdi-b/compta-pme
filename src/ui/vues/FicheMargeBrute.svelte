@@ -5,7 +5,7 @@
   import FicheCalcul, { type SectionCalcul } from '../composants/FicheCalcul.svelte';
 
   const r = $derived(margeBrute(etat.dossier));
-  const entrainement = $derived(etat.exercice.mode === 'entrainement');
+  const entrainement = $derived(etat.retour);
   const session = etat.session!;
   if (!session.fiches.margeBrute) session.fiches.margeBrute = {};
   const saisies = session.fiches.margeBrute;

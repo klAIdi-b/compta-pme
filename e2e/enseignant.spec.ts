@@ -59,3 +59,35 @@ test("retirer une opération demande une confirmation, sauf si la ligne est enco
   await lignes.last().getByRole('button', { name: /^Confirmer/ }).click();
   await expect(lignes).toHaveCount(avant);
 });
+
+test("évaluation formative : aucun retour pendant la saisie, correction et note quand l'élève termine", async ({ page }) => {
+  await page.goto('./');
+  await page.getByRole('button', { name: 'Espace enseignant' }).click();
+  await page.getByLabel('Code', { exact: true }).fill(CODE_ESSAI);
+  await page.getByLabel('Confirmer le code').fill(CODE_ESSAI);
+  await page.getByRole('button', { name: 'Entrer' }).click();
+  await page.getByRole('button', { name: 'Dossiers', exact: true }).click();
+  await page.getByRole('button', { name: "Variante d'évaluation" }).first().click();
+  await page.locator('#ex-mode').selectOption('formative');
+  await page.getByRole('button', { name: 'Enregistrer', exact: true }).click();
+  await page.getByRole('button', { name: 'Fermer', exact: true }).click();
+  await page.getByRole('row', { name: /variante/i }).getByRole('button', { name: 'Aperçu' }).click();
+  await expect(page.getByRole('heading', { name: 'Évaluation formative' })).toBeVisible();
+  // Une écriture quelconque : aucun retour pendant la saisie.
+  await page.getByRole('link', { name: 'Journal' }).click();
+  await page.locator('#saisie-libelle').fill('Essai');
+  const deb = page.getByLabel('Compte au débit, ligne 1'); await deb.fill('1000'); await deb.press('Tab');
+  const cre = page.getByLabel('Compte au crédit, ligne 1'); await cre.fill('1020'); await cre.press('Tab');
+  await page.getByLabel('Montant, ligne 1').fill('100');
+  await page.getByRole('button', { name: "Valider l'écriture" }).click();
+  await expect(page.getByText('À revoir')).toHaveCount(0);
+  // Terminer : note indicative, correction visible, saisie fermée.
+  await page.getByRole('link', { name: 'Tableau de bord' }).click();
+  page.once('dialog', (d) => d.accept());
+  await page.getByRole('button', { name: 'Terminer et voir la correction' }).click();
+  await expect(page.getByText('Note indicative')).toBeVisible();
+  await page.getByRole('button', { name: 'Voir la correction dans le journal' }).click();
+  await expect(page.getByText('Évaluation formative terminée')).toBeVisible();
+  await expect(page.getByText('À revoir').first()).toBeVisible();
+  await expect(page.getByRole('button', { name: "Valider l'écriture" })).toHaveCount(0);
+});

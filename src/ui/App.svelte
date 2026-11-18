@@ -219,7 +219,7 @@
     <main class="principal" id="contenu-principal" tabindex="-1">
       {#if genre === 'apercu'}
         <div class="bandeau-apercu" role="status">
-          <span><b>Aperçu enseignant.</b> Vous voyez l'exercice comme vos élèves{s.exercice.mode === 'evaluation' ? ' (évaluation : aucun retour pendant la saisie)' : ''}. Ce que vous saisissez ici n'est ni enregistré dans l'exercice, ni dans une copie.</span>
+          <span><b>Aperçu enseignant.</b> Vous voyez l'exercice comme vos élèves{s.exercice.mode === 'evaluation' ? ' (évaluation : aucun retour pendant la saisie)' : s.exercice.mode === 'formative' ? ' (évaluation formative : correction quand l’élève termine)' : ''}. Ce que vous saisissez ici n'est ni enregistré dans l'exercice, ni dans une copie.</span>
           <button class="btn" onclick={fermerApercu}>Fermer l'aperçu</button>
         </div>
       {/if}

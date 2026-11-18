@@ -140,14 +140,17 @@ export const GUIDE: PartieGuide[] = [
       },
       {
         id: 'corriger',
-        titre: 'Corriger une erreur : l’extourne',
+        titre: 'Corriger une erreur',
         blocs: [
           {
-            type: 'p',
-            texte:
-              "Une écriture validée ne s'efface pas. Pour la corriger, cliquez sur « Extourner » : le logiciel passe l'écriture " +
-              "inverse, avec le même numéro de pièce. L'écriture fausse et son extourne restent visibles dans le journal. " +
-              "Saisissez ensuite l'écriture juste.",
+            type: 'liste',
+            items: [
+              "Modifier : cliquez sur « Modifier », double-cliquez sur la ligne du journal, ou cliquez sur l'opération dans " +
+                "l'énoncé. L'écriture revient dans la grille avec ce que vous aviez saisi ; corrigez-la, puis « Enregistrer la modification ».",
+              'Supprimer : « Supprimer » retire l’écriture ; la grille propose aussitôt la même pièce pour la saisir à nouveau.',
+              "Extourner : « Extourner » passe l'écriture inverse, avec le même numéro de pièce ; l'écriture fausse et son " +
+                'extourne restent visibles dans le journal, comme en comptabilité.',
+            ],
           },
         ],
       },
@@ -163,7 +166,7 @@ export const GUIDE: PartieGuide[] = [
               "« À revoir » avec un indice : l'indice dit quel type d'erreur vous avez fait (débit et crédit inversés, " +
                 'mauvais compte, montant erroné, TVA oubliée…), sans donner la réponse.',
               'Sous l’indice, le lien « Revoir la théorie » ouvre le chapitre du cours qui correspond à l’opération.',
-              'Après une deuxième tentative fausse, le bouton « Voir la solution » apparaît.',
+              'Dès la première erreur, le bouton « Voir la solution » apparaît à côté de l’indice.',
             ],
           },
           {
@@ -175,7 +178,11 @@ export const GUIDE: PartieGuide[] = [
           },
           {
             type: 'p',
-            texte: 'En mode évaluation, aucun retour n’est affiché pendant le travail : votre enseignant corrige votre copie.',
+            texte:
+              'En évaluation, aucun retour n’est affiché pendant le travail : votre enseignant corrige votre copie. En ' +
+              'évaluation formative, aucun retour non plus pendant la saisie ; quand vous avez fini, « Terminer et voir la ' +
+              'correction » (tableau de bord) ferme la saisie et affiche ce qui est juste ou à revoir, les solutions et une ' +
+              'note indicative. À l’accueil, l’onglet « Évaluation » regroupe les évaluations reçues de votre enseignant.',
           },
         ],
       },

@@ -8,7 +8,7 @@
 
   const b = $derived(bilanOuverture(etat.exercice.ouvertureActif, etat.exercice.ouverturePassif));
   const plan = $derived(indexPlan(etat.dossier.plan));
-  const entrainement = $derived(etat.exercice.mode === 'entrainement');
+  const entrainement = $derived(etat.retour);
   const session = etat.session!;
   if (!session.fiches.bilanOuverture) session.fiches.bilanOuverture = {};
   const saisies = session.fiches.bilanOuverture;

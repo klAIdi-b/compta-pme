@@ -2,7 +2,7 @@
 
 import type { Dossier } from '../engine/dossier';
 import type { Exercice } from '../engine/exercice';
-import { corrigeDepuisEcritures, creerDossier, fonctionsExercice, type EcritureCorrigee } from '../engine/exercice';
+import { corrigeDepuisEcritures, creerDossier, fonctionsExercice, retourVisible, type EcritureCorrigee } from '../engine/exercice';
 import { ajouterEcriture } from '../engine/journal';
 import { plan as planParDefaut } from '../data/plan';
 import { ecrire, lire } from '../io/stockage';
@@ -55,6 +55,8 @@ export interface Session {
   derniereActivite?: string | null;
   /** Aperçu enseignant : l'exercice vu comme un élève ; le travail de l'élève est mis de côté puis restauré. */
   apercu?: boolean;
+  /** Évaluation formative : l'élève a terminé ; la correction est affichée et la saisie verrouillée. */
+  formativeTerminee?: boolean;
 }
 
 export interface FicheSalaire {
@@ -152,6 +154,17 @@ class Etat {
     return this.session!.exercice;
   }
 
+  /** Retour visible pour la session active (entraînement, ou évaluation formative terminée). */
+  get retour(): boolean {
+    const s = this.session;
+    return !!s && retourVisible(s.exercice.mode, !!s.formativeTerminee);
+  }
+
+  /** Évaluation formative terminée : correction affichée, saisie verrouillée. */
+  get verrouille(): boolean {
+    return !!this.session && this.session.exercice.mode === 'formative' && !!this.session.formativeTerminee;
+  }
+
   get fonctions() {
     return fonctionsExercice(this.session!.exercice);
   }
@@ -231,6 +244,7 @@ class Etat {
 
   recommencer() {
     const s = this.session!;
+    s.formativeTerminee = false;
     s.dossier = creerDossier(s.exercice, s.dossier.plan);
     s.archives = [];
     s.suivi = {};

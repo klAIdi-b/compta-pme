@@ -7,7 +7,7 @@
 
   const donnees = $derived(etat.exercice.parametres.seuil!);
   const r = $derived(seuil(donnees));
-  const entrainement = $derived(etat.exercice.mode === 'entrainement');
+  const entrainement = $derived(etat.retour);
   const session = etat.session!;
   if (!session.fiches.seuil) session.fiches.seuil = {};
   const saisies = session.fiches.seuil;

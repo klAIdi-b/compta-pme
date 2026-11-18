@@ -36,6 +36,7 @@
       const ex = importerExercice(f.texte);
       importes = [ex, ...importes.filter((x) => x.id !== ex.id)];
       choix = ex.id;
+      typeListe = typeDe(ex);
     } catch (e) {
       erreurImport = e instanceof ErreurFichier ? e.message : "Le fichier n'a pas pu être lu.";
     }
@@ -46,6 +47,10 @@
     filiere = f;
     etat.prefs.filiere = f;
   }
+  /** Onglets de la liste (choix de l'enseignant le 18.11.2026) : l'évaluation regroupe formative et sommative. */
+  type TypeListe = 'entrainement' | 'evaluation';
+  const typeDe = (ex: Exercice): TypeListe => (ex.mode === 'entrainement' ? 'entrainement' : 'evaluation');
+  let typeListe = $state<TypeListe>(exLien ? typeDe(exLien) : 'entrainement');
   let recherche = $state('');
   let voirExercices = $state(true);
   let voirDossiers = $state(true);
@@ -55,7 +60,10 @@
     if (!r) return true;
     return normaliser([ex.titre, ex.raisonSociale, ...(ex.sujets ?? [])].join(' ')).includes(r);
   };
-  const visible = (ex: Exercice) => (estDossier(ex) ? voirDossiers : voirExercices) && correspond(ex);
+  const visible = (ex: Exercice) => typeDe(ex) === typeListe && (estDossier(ex) ? voirDossiers : voirExercices) && correspond(ex);
+  const importesVisibles = $derived(importes.filter((ex) => typeDe(ex) === typeListe));
+  /** Exercice choisi, rappelé dans la barre « Commencer » toujours visible en bas de la liste. */
+  const exChoisi = $derived(tous.find((x) => x.id === choix));
   const groupes = $derived(
     classerExercices(exercicesDemo)
       .filter((g) => g.filiere === filiere)
@@ -203,6 +211,10 @@
 
       <div class="separe corps-carte">
         <div class="filtres">
+          <div class="onglets" role="group" aria-label="Type d'exercice">
+            <button type="button" aria-pressed={typeListe === 'entrainement'} onclick={() => (typeListe = 'entrainement')}>Entraînement</button>
+            <button type="button" aria-pressed={typeListe === 'evaluation'} onclick={() => (typeListe = 'evaluation')}>Évaluation</button>
+          </div>
           <div class="onglets" role="group" aria-label="Formation">
             {#each ['CFC', 'MP'] as const as f}
               <button type="button" aria-pressed={filiere === f} onclick={() => choisirFiliere(f)}>{LIBELLES_FILIERE[f]}</button>
@@ -223,7 +235,7 @@
       {#snippet ligne(ex: Exercice)}
         {@const st = etatExercice(ex)}
         <label class="exercice" class:choisi={choix === ex.id}>
-          <input type="radio" name="exercice" value={ex.id} bind:group={choix} />
+          <input class="radio" type="radio" name="exercice" value={ex.id} bind:group={choix} />
           <span class="infos">
             <strong>{ex.titre}</strong>
             <span class={`type ${estDossier(ex) ? 'dossier' : 'exo'}`}>{estDossier(ex) ? 'Dossier de pièces' : 'Exercice'}</span>
@@ -236,10 +248,10 @@
         </label>
       {/snippet}
 
-      {#if importes.length}
+      {#if importesVisibles.length}
         <div class="bloc-niveaux">
-          <h3 class="recus">Exercices reçus de votre enseignant</h3>
-          <div class="cartes-exo">{#each importes as ex (ex.id)}{@render ligne(ex)}{/each}</div>
+          <h3 class="recus">{typeListe === 'evaluation' ? 'Évaluations reçues de votre enseignant' : 'Exercices reçus de votre enseignant'}</h3>
+          <div class="cartes-exo">{#each importesVisibles as ex (ex.id)}{@render ligne(ex)}{/each}</div>
         </div>
       {/if}
 
@@ -254,7 +266,14 @@
             <div class="cartes-exo">{#each g.visibles as ex (ex.id)}{@render ligne(ex)}{/each}</div>
           </details>
         {:else}
-          <p class="vide">Aucun exercice ne correspond à votre recherche.</p>
+          {#if typeListe === 'evaluation' && !importesVisibles.length}
+            <p class="vide">
+              Aucune évaluation pour l'instant. Votre enseignant vous remet un fichier d'évaluation : ouvrez-le avec
+              « Ouvrir un exercice reçu… » ci-dessous.
+            </p>
+          {:else if typeListe === 'entrainement' || rechercheActive}
+            <p class="vide">Aucun exercice ne correspond à votre recherche.</p>
+          {/if}
         {/each}
       </div>
 
@@ -281,6 +300,9 @@
         </div>
       {:else}
         <div class="actions">
+          <span class="choisi-texte">
+            {#if exChoisi}<span class="discret">Exercice choisi :</span> <b>{exChoisi.titre}</b>{:else}<span class="discret">Choisissez un exercice dans la liste.</span>{/if}
+          </span>
           <button type="submit" class="btn btn-principal">{etat.sessionDe(choix) ? 'Reprendre' : 'Commencer'}</button>
         </div>
       {/if}
@@ -319,7 +341,7 @@
   .onglets { display: inline-flex; background: #eef2f6; border-radius: 8px; padding: 3px; gap: 2px; }
   .onglets button { font: inherit; border: 0; background: transparent; color: var(--c-texte-2); padding: 6px 14px; cursor: pointer; border-radius: 6px; }
   .onglets button[aria-pressed='true'] { background: #fff; color: var(--c-structure); font-weight: bold; box-shadow: var(--ombre); }
-  .recherche { width: 260px; max-width: 100%; }
+  .recherche { width: 200px; max-width: 100%; }
   .case { display: inline-flex; gap: 6px; align-items: center; }
   .bloc-niveaux { border-top: 1px solid var(--c-bordure-2); }
   .recus { font-size: 14px; color: var(--c-structure); margin: 0; padding: 12px 18px 0; }
@@ -332,8 +354,14 @@
     cursor: pointer; background: #fff;
   }
   .exercice:hover { border-color: #b8c7d8; }
-  .exercice.choisi { border-color: var(--c-structure); box-shadow: 0 0 0 2px var(--c-selection); background: #fbfdff; }
-  .exercice input { margin-top: 3px; }
+  .exercice.choisi { border-color: var(--c-structure); box-shadow: 0 0 0 1px var(--c-structure); background: #f3f8fd; }
+  /* Indicateur de choix dessiné (le bouton radio natif reste au clavier et pour les lecteurs d'écran). */
+  .exercice .radio {
+    appearance: none; width: 18px; height: 18px; margin: 2px 0 0; flex: none; border-radius: 50%;
+    border: 2px solid var(--c-bordure); background: #fff; cursor: pointer;
+  }
+  .exercice .radio:checked { border-color: var(--c-structure); background: var(--c-structure); box-shadow: inset 0 0 0 3px #fff; }
+  .exercice .radio:focus-visible { outline: 2px solid var(--c-accent); outline-offset: 2px; }
   .infos { flex: 1; min-width: 0; }
   .type { display: inline-block; font-size: 11px; font-weight: bold; padding: 2px 8px; border-radius: 999px; margin-left: 6px; white-space: nowrap; }
   .type.dossier { background: var(--c-alerte-fond); color: var(--c-alerte-texte); border: 1px solid #f2c7ad; }
@@ -346,7 +374,13 @@
   .ouvrir { display: flex; align-items: center; gap: 12px; border-top: 1px solid var(--c-bordure-2); }
   .enseignant { text-align: right; margin-top: 16px; font-size: 13px; }
   .sep { margin: 0 8px; color: var(--c-texte-2); }
-  .actions { padding: 0 14px 14px; text-align: right; }
+  /* Barre « Commencer » collée au bas de l'écran pendant qu'on parcourt la liste. */
+  form.carte { overflow: visible; }
+  .actions {
+    position: sticky; bottom: 0; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 14px;
+    padding: 12px 18px; background: #fff; border-top: 1px solid var(--c-bordure-2); border-radius: 0 0 var(--rayon) var(--rayon);
+  }
+  .choisi-texte { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .autre { display: flex; gap: 16px; align-items: center; padding: 9px 14px; border-top: 1px solid var(--c-bordure-2); flex-wrap: wrap; }
   .tete-simple + .autre { border-top: 0; }
   .actions-confirmation { display: flex; gap: 8px; margin-top: 10px; }
