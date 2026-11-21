@@ -1,17 +1,12 @@
-// Simulateur : échange en ligne avec Supabase (phase S5, préparée le 21.11.2026, pas encore branchée à l'interface).
+// Simulateur : échange en ligne avec Supabase (phase S5 : préparé le 21.11.2026, branché à l'interface ensuite).
 // Seul fichier qui communique avec un service en ligne ; chargé à la demande. Sans dépendance : appels HTTP directs à
 // l'API REST de Supabase (PostgREST et Auth). Schéma de la base : `supabase/schema.sql`.
 // Données anonymes du jeu seulement (CLAUDE.md, accord du 20.11.2026) : jamais de nom d'élève ni de note.
 
 import type { Decisions } from '../engine/simulation/types';
 import type { DecisionsGroupe, SituationGroupe } from '../engine/simulation/situation';
-
-export interface ConfigEnLigne {
-  /** Adresse du projet Supabase, par exemple https://abcd.supabase.co */
-  url: string;
-  /** Clé publique (« anon ») du projet : elle ne donne accès qu'à ce que les règles de la base permettent. */
-  cleAnon: string;
-}
+import type { ConfigEnLigne, SessionEnLigne } from './simulation-session';
+export { erreurDepuisAdresse, lireLienGroupes, sessionDepuisAdresse, type ConfigEnLigne, type SessionEnLigne } from './simulation-session';
 
 export class ErreurEnLigne extends Error {}
 
@@ -39,7 +34,7 @@ export class ClientSimulation {
     this.jeton = jeton;
   }
 
-  private async appel<T>(chemin: string, corps: unknown, methode = 'POST', entetes: Record<string, string> = {}): Promise<T> {
+  async appel<T>(chemin: string, corps: unknown, methode = 'POST', entetes: Record<string, string> = {}): Promise<T> {
     let r: Response;
     try {
       r = await this.fetchFn(`${this.base}${chemin}`, {
@@ -131,5 +126,47 @@ export class ClientSimulation {
     await this.appel('/rest/v1/sim_resultats?on_conflict=partie_id,numero_tour', { partie_id: partieId, numero_tour: numeroTour, tableau }, 'POST', {
       Prefer: 'resolution=merge-duplicates,return=minimal',
     });
+  }
+}
+
+// ---------- Session de l'enseignant (connexion par lien e-mail) ----------
+// Lecture de l'adresse de retour : voir `simulation-session.ts` (sans réseau, appelé au démarrage).
+
+/** Renouvelle la session (le jeton dure environ une heure). */
+export async function renouvelerSession(config: ConfigEnLigne, s: SessionEnLigne, fetchFn: Fetch = (u, i) => fetch(u, i), maintenant = Date.now()): Promise<SessionEnLigne> {
+  const c = new ClientSimulation(config, fetchFn);
+  const r = await c.appel<{ access_token: string; refresh_token: string; expires_in: number }>(
+    '/auth/v1/token?grant_type=refresh_token',
+    { refresh_token: s.jetonRenouvellement },
+  );
+  return { jeton: r.access_token, jetonRenouvellement: r.refresh_token, expireLe: maintenant + r.expires_in * 1000 };
+}
+
+// ---------- Lien donné aux groupes ----------
+
+/** Lien à donner aux groupes : il contient le code de partie et l'adresse publique du service (jamais le code d'équipe). */
+export function lienGroupes(adresseSite: string, config: ConfigEnLigne, codePartie: string): string {
+  const u = new URL(adresseSite);
+  u.hash = '';
+  u.search = new URLSearchParams({ partie: codePartie, service: config.url, cle: config.cleAnon }).toString();
+  return u.toString();
+}
+
+/** Contrôle sommaire de la configuration saisie par l'enseignant. */
+export function controlerConfig(c: ConfigEnLigne): string[] {
+  const e: string[] = [];
+  if (!/^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/i.test(c.url.trim())) e.push("L'adresse du projet doit ressembler à https://abcdefgh.supabase.co");
+  if (c.cleAnon.trim().length < 20) e.push('La clé publique (anon) semble incomplète.');
+  if (/service_role/i.test(atobSur(c.cleAnon.split('.')[1] ?? ''))) {
+    e.push("Cette clé est la clé secrète (service_role) : ne l'utilisez jamais ici. Copiez la clé « anon public ».");
+  }
+  return e;
+}
+
+function atobSur(b64: string): string {
+  try {
+    return atob(b64.replace(/-/g, '+').replace(/_/g, '/'));
+  } catch {
+    return '';
   }
 }

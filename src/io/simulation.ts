@@ -27,6 +27,15 @@ export interface PartieEnregistree {
   imprevusParTour?: Imprevu[][];
   /** Imprévus prévus pour le tour en cours. */
   imprevus?: Imprevu[];
+  /** Partie jouée en ligne : identifiant en ligne, code de partie et codes d'équipe (gardés seulement ici). */
+  enLigne?: {
+    id: string;
+    code: string;
+    codesEquipes: Record<string, string>;
+    tourPublie: number;
+    /** Empreinte de ce qui a été publié (tour, imprévus, décisions validées) : republier dès qu'elle change. */
+    empreintePubliee?: string;
+  };
 }
 
 /** Recalcule la partie ; erreur si les données sont incohérentes (fichier modifié à la main, par exemple). */

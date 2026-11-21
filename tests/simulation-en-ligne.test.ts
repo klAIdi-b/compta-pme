@@ -153,3 +153,43 @@ describe('client en ligne (serveur simulé)', () => {
     expect(s.appels[0]!.url).toContain('sim_decisions?partie_id=eq.uuid-1&numero_tour=eq.2');
   });
 });
+
+describe('connexion, lien des groupes et configuration', () => {
+  it("lit le retour du lien de connexion et ses erreurs", async () => {
+    const { sessionDepuisAdresse, erreurDepuisAdresse } = await import('../src/io/simulation-session');
+    expect(sessionDepuisAdresse('#access_token=a&refresh_token=b&expires_in=3600&token_type=bearer', 1000)).toEqual({
+      jeton: 'a', jetonRenouvellement: 'b', expireLe: 1000 + 3600 * 1000,
+    });
+    expect(sessionDepuisAdresse('#journal')).toBeNull();
+    expect(erreurDepuisAdresse('#error=access_denied&error_description=Email+link+is+invalid')).toMatch(/expiré/);
+  });
+
+  it('le lien des groupes contient le code de partie et le service, jamais un code d’équipe', async () => {
+    const { lienGroupes, lireLienGroupes } = await import('../src/io/simulation-en-ligne');
+    const cfg = { url: 'https://abcd.supabase.co', cleAnon: 'cle-publique-tres-longue' };
+    const lien = lienGroupes('https://exemple.github.io/compta-pme/#journal', cfg, 'ABCDEF');
+    expect(lien).toBe('https://exemple.github.io/compta-pme/?partie=ABCDEF&service=https%3A%2F%2Fabcd.supabase.co&cle=cle-publique-tres-longue');
+    expect(lireLienGroupes(new URL(lien).search)).toEqual({ codePartie: 'ABCDEF', config: cfg });
+    expect(lireLienGroupes('?partie=ABC&service=http://pas-sur&cle=x')).toBeNull();
+  });
+
+  it('refuse une adresse fantaisiste et la clé secrète service_role', async () => {
+    const { controlerConfig } = await import('../src/io/simulation-en-ligne');
+    const jwt = (role: string) => `xx.${btoa(JSON.stringify({ role }))}.yy-signature-assez-longue`;
+    expect(controlerConfig({ url: 'https://abcd.supabase.co', cleAnon: jwt('anon') })).toEqual([]);
+    expect(controlerConfig({ url: 'https://exemple.com', cleAnon: jwt('anon') })).toHaveLength(1);
+    expect(controlerConfig({ url: 'https://abcd.supabase.co', cleAnon: jwt('service_role') }).join()).toMatch(/clé secrète/);
+  });
+
+  it('renouvelle la session avec le jeton de renouvellement', async () => {
+    const { renouvelerSession } = await import('../src/io/simulation-en-ligne');
+    let corps: unknown = null;
+    const fetchFn = async (_u: string, init: RequestInit) => {
+      corps = JSON.parse(init.body as string);
+      return new Response(JSON.stringify({ access_token: 'n', refresh_token: 'r2', expires_in: 3600 }), { status: 200 });
+    };
+    const s = await renouvelerSession({ url: 'https://abcd.supabase.co', cleAnon: 'k' }, { jeton: 'a', jetonRenouvellement: 'r1', expireLe: 0 }, fetchFn, 0);
+    expect(corps).toEqual({ refresh_token: 'r1' });
+    expect(s).toEqual({ jeton: 'n', jetonRenouvellement: 'r2', expireLe: 3600000 });
+  });
+});

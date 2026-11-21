@@ -146,6 +146,8 @@
   <Differe charger={() => import('./vues/Guide.svelte')} props={{ partie: etat.guide, onFermer: () => (etat.guide = null) }} />
 {:else if ecran === 'enseignant'}
   <Differe charger={() => import('./vues/EspaceEnseignant.svelte')} props={{}} />
+{:else if simulationEleve.enLigne}
+  <Differe charger={() => import('./vues/simulation/RejoindreEnLigne.svelte')} props={{}} />
 {:else if simulationEleve.situation}
   <Differe charger={() => import('./vues/simulation/SituationEleve.svelte')} props={{}} />
 {:else if ecran === 'accueil' || !etat.session}

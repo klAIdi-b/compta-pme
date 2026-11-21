@@ -4,6 +4,7 @@
   import { controlerDecisions, estCfc2, etatsCourants, imprevusEntreprise, libellePeriode, moisDuTour, partieTerminee } from '../../../engine/simulation/tour';
   import type { Imprevu } from '../../../engine/simulation/types';
   import { imprimerFichesAfp } from './impression';
+  import EnLigneCarte from './EnLigneCarte.svelte';
   import { libelleImprevu } from './libelles';
   import { exerciceEntreprise } from '../../../engine/simulation/exercice';
   import { formatMontant } from '../../../engine/money';
@@ -179,6 +180,8 @@
         <div class="d">{r.comptabilite === 'mixte' ? prochainASaisir : r.comptabilite === 'eleves' ? 'Exercice à exporter après chaque tour' : 'Comptabilité tenue par le simulateur'}</div>
       </div>
     </div>
+
+    <EnLigneCarte {id} {termine} />
 
     {#if !termine}
       <section class="carte">

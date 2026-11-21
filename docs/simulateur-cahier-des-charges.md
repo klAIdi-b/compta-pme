@@ -359,3 +359,16 @@ Le calcul des tours reste dans le navigateur de l'enseignant : la base ne fait q
    - la publication des situations et des résultats à chaque tour.
 
 Tests : `tests/simulation-en-ligne.test.ts` (situation, contrôle des décisions reçues, fichiers, codes, client contre un serveur simulé) et `e2e/simulateur.spec.ts` (échange par fichier complet).
+
+## 18. Phase S5 — interface en ligne (branchée le 21.11.2026, à valider sur le vrai service)
+
+L'accord de l'école a été obtenu le 21.11.2026.
+
+- **Enseignant**, avec la carte « Jouer en ligne » du tableau de la partie (`EnLigneCarte.svelte`, état `src/ui/simulation-en-ligne.svelte.ts`) :
+  - configuration (adresse et clé publique, la clé secrète est refusée) ;
+  - connexion par lien e-mail : les jetons, lus dans l'adresse au démarrage par `src/io/simulation-session.ts`, sont retirés de l'adresse aussitôt, et la session est renouvelée automatiquement ;
+  - « Mettre la partie en ligne » : codes, lien des groupes, tableau des codes d'équipe ;
+  - relève automatique des décisions toutes les 15 secondes, avec le même contrôle que pour les fichiers ;
+  - publication automatique des situations et des résultats dès que le tour, les imprévus ou les décisions validées changent.
+- **Groupe** : le lien de l'enseignant ouvre « Rejoindre la partie » (`RejoindreEnLigne.svelte`). Le groupe entre son code d'équipe, retrouve l'écran de décisions validé, envoie ses décisions (modifiables jusqu'au calcul), clique sur « Actualiser » au tour suivant et voit les résultats selon l'option d'affichage. Rien n'est conservé dans le navigateur du groupe.
+- **Tests** : `e2e/simulateur-en-ligne.spec.ts` joue une partie en ligne complète, l'enseignant et le groupe sur deux pages, contre un faux service qui reproduit les règles de `supabase/schema.sql` (mauvais code refusé, empreintes des codes, tour en cours). Il reste à faire **un essai avec le vrai projet Supabase de l'enseignant**.
