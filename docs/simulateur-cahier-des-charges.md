@@ -111,7 +111,7 @@ L'enseignant peut aussi déclencher un imprévu à la main pour un groupe ou pou
 - **Accès** : l'enseignant se connecte par un lien reçu par e-mail. Un groupe rejoint la partie avec le code de partie et un code d'équipe secret, sans compte élève. Des règles d'accès côté base empêchent un groupe de lire les décisions des autres avant la fin du tour.
 - **Le calcul se fait dans le navigateur de l'enseignant**, avec le moteur testé (`src/engine/`). La base sert seulement au stockage et à l'échange.
 - **Secours hors ligne** : échange par fichier (`.compta-decisions.json` / `.compta-tour.json`), ou décisions saisies au poste de l'enseignant.
-- ❓ À vérifier par l'enseignant : les règles de l'école ou du DIP (LIPAD) sur les services en ligne utilisés avec des élèves, même sans donnée nominative.
+- Accord de l'école obtenu par l'enseignant le 21.11.2026 pour l'usage d'un service en ligne avec des données de jeu anonymes. Rappel affiché à la création de la partie : aucun prénom ni nom d'élève dans le nom des entreprises.
 
 ## 9. Écrans
 

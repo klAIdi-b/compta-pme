@@ -217,7 +217,11 @@
           </div>
         {/each}
       </div>
-      <p class="aide">Les groupes choisissent le nom de leur entreprise. N'inscrivez aucun nom d'élève.</p>
+      <p class="rappel-noms" role="note">
+        <b>Rappel à donner aux groupes :</b> le nom de l'entreprise ne doit contenir ni prénom ni nom d'élève (par exemple
+        « Les Lémaniques », et non « Chez Léa et Hugo »). Ces noms apparaissent sur l'écran projeté, dans les fichiers remis aux
+        groupes et, pour une partie en ligne, sur le service en ligne.
+      </p>
     </div>
   </section>
 
@@ -248,6 +252,7 @@
   .court { width: 90px; }
   .cases { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13px; }
   .equipes { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; }
+  .rappel-noms { margin: 12px 0 0; padding: 10px 14px; border-left: 4px solid var(--c-accent); background: var(--c-alerte-fond); border-radius: 6px; font-size: 13px; }
   .fin { display: flex; justify-content: flex-end; gap: 10px; }
   .segments button[disabled] { color: #9aa5b3; cursor: not-allowed; }
   @media (max-width: 760px) {
