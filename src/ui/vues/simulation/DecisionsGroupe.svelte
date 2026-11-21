@@ -1,32 +1,43 @@
 <!-- Simulateur : décisions d'un groupe pour le tour en cours (écran 3 de la maquette validée le 21.11.2026). -->
 <script lang="ts">
-  import { simulations } from '../../simulation.svelte';
-  import { capacite, controlerDecisions, detailSorties, estCfc2, estMp, imprevusEntreprise, etatsCourants, exerciceComplet, fondsPropresMp, libellePeriode, moisDuTour, prixAchat, prixVehiculeTtc } from '../../../engine/simulation/tour';
+  // Même écran pour l'enseignant (décisions dictées, à son poste) et pour le groupe (situation reçue par fichier ou en
+  // ligne) : il ne dépend que de la « situation » du groupe (src/engine/simulation/situation.ts).
+  import { capacite, detailSorties, estCfc2, estMp, exerciceComplet, fondsPropresMp, libellePeriode, moisDuTour, prixAchat, prixVehiculeTtc } from '../../../engine/simulation/tour';
+  import { controlerDecisionsSituation, type SituationGroupe } from '../../../engine/simulation/situation';
   import { PARAMETRES_CFC2, PARAMETRES_MP } from '../../../engine/simulation/types';
   import type { ChoixFournisseur, Decisions } from '../../../engine/simulation/types';
   import { formatMontant } from '../../../engine/money';
   import ChampMontant from '../../composants/ChampMontant.svelte';
   import { libelleImprevu, pourMille } from './libelles';
 
-  let { id, entrepriseId }: { id: string; entrepriseId: string } = $props();
+  let {
+    situation,
+    onValider,
+    onRetirer,
+    onRetour,
+    libelleRetour = 'Retour au tableau de la partie',
+    libelleValider = 'Valider les décisions',
+  }: {
+    situation: SituationGroupe;
+    onValider: (d: Decisions) => void;
+    onRetirer?: () => void;
+    onRetour?: () => void;
+    libelleRetour?: string;
+    libelleValider?: string;
+  } = $props();
 
+  // L'écran est recréé pour chaque situation ({#key}) : la valeur initiale suffit.
   // svelte-ignore state_referenced_locally
-  const e = simulations.trouver(id)!;
-  // svelte-ignore state_referenced_locally
-  const p = simulations.calculee(id)!;
-  const r = e.reglages;
+  const sit = situation;
+  const r = sit.reglages;
   const s = r.secteur;
-  const x = e.entreprises.find((y) => y.id === entrepriseId)!;
-  const n = e.decisionsParTour.length + 1;
+  const x = sit.entreprise;
+  const n = sit.numeroTour;
   const mois = moisDuTour(r, n);
-  // L'écran est recréé pour chaque entreprise ({#key} dans Simulateur.svelte) : la valeur initiale suffit.
-  // svelte-ignore state_referenced_locally
-  const eid = entrepriseId;
-  const etat = etatsCourants(p).get(eid)!;
-  const imprevus = (e.imprevus ?? []).filter((i) => i.entrepriseId === null || i.entrepriseId === eid);
-  const imp = imprevusEntreprise(p, e.imprevus ?? [], eid);
-  const precedent = p.tours.at(-1);
-  const resPrec = precedent?.resultats.find((y) => y.entrepriseId === entrepriseId);
+  const etat = sit.etat;
+  const imprevus = sit.imprevus;
+  const imp = sit.effetImprevus;
+  const precedent = sit.precedent;
   const periode = libellePeriode(r, n);
   const afp = r.niveau === 'AFP';
   const cfc2 = estCfc2(r);
@@ -35,7 +46,7 @@
   const saison = Math.round(mois.reduce((t, m) => t + s.saison[m - 1]!, 0) / mois.length);
 
   // Décisions déjà validées, sinon celles du tour précédent, sinon des valeurs de départ neutres.
-  const depart: Decisions = e.brouillon[eid] ?? resPrec?.decisions ?? {
+  const depart: Decisions = sit.decisionsValidees ?? precedent?.decisions ?? {
     prixVente: s.prixVenteReference,
     quantiteAchetee: 0,
     publicite: 0,
@@ -43,13 +54,13 @@
     prelevementPrive: 0,
   };
   let prix = $state<number | null>(depart.prixVente);
-  let quantite = $state<number>(e.brouillon[eid] ? depart.quantiteAchetee : 0);
+  let quantite = $state<number>(sit.decisionsValidees ? depart.quantiteAchetee : 0);
   let publicite = $state<number | null>(depart.publicite || null);
   let fournisseur = $state<ChoixFournisseur>(depart.fournisseur);
   let prelevement = $state<number | null>(depart.prelevementPrive || null);
   let employes = $state<number>(depart.employes ?? etat.employes);
-  let vehicule = $state<boolean>(!!e.brouillon[eid]?.acheterVehicule);
-  let emprunt = $state<number | null>(e.brouillon[eid]?.emprunt || null);
+  let vehicule = $state<boolean>(!!sit.decisionsValidees?.acheterVehicule);
+  let emprunt = $state<number | null>(sit.decisionsValidees?.emprunt || null);
   let dividende = $state<number>(depart.dividendePourcent ?? 0);
   let tente = $state(false);
 
@@ -63,7 +74,7 @@
     ...(mp ? { emprunt: emprunt ?? 0, dividendePourcent: dernierTour ? (Number.isFinite(dividende) ? Math.trunc(dividende) : -1) : 0 } : {}),
   });
   const capaciteTour = $derived(cfc2 ? capacite(r, Math.max(0, decisions.employes ?? 0), !!etat.vehicule || vehicule, mois.length) : null);
-  const erreurs = $derived(controlerDecisions(r, etat, decisions, n, imp));
+  const erreurs = $derived(controlerDecisionsSituation(sit, decisions));
   const sorties = $derived(detailSorties(r, etat, decisions, n, imp));
   const part = $derived(sorties.disponible > 0 ? Math.min(100, Math.round((sorties.total * 100) / sorties.disponible)) : 100);
 
@@ -71,13 +82,7 @@
     ev.preventDefault();
     tente = true;
     if (erreurs.length) return;
-    simulations.validerDecisions(id, entrepriseId, $state.snapshot(decisions) as Decisions);
-    simulations.vue = { ecran: 'partie', id };
-  }
-
-  function retirer() {
-    simulations.retirerDecisions(id, entrepriseId);
-    simulations.vue = { ecran: 'partie', id };
+    onValider($state.snapshot(decisions) as Decisions);
   }
 </script>
 
@@ -87,21 +92,21 @@
       <h1>{x.nom}</h1>
       <div class="sous">Tour {n} sur {r.nbTours} · {periode} · {s.nom}</div>
     </div>
-    <button type="button" class="btn-lien" onclick={() => (simulations.vue = { ecran: 'partie', id })}>Retour au tableau de la partie</button>
+    {#if onRetour}<button type="button" class="btn-lien" onclick={onRetour}>{libelleRetour}</button>{/if}
   </div>
 
-  {#if resPrec && precedent}
+  {#if precedent}
     <div class="info">
-      <b>Le tour précédent ({libellePeriode(r, precedent.numero)}) :</b> vous avez vendu <b>{resPrec.vendues} {resPrec.vendues > 1 ? s.produits : s.produit}</b>
-      sur {resPrec.demande} clients attirés{#if resPrec.clientsPerdus > 0}&#32;; <b>{resPrec.clientsPerdus} client{resPrec.clientsPerdus > 1 ? 's sont repartis' : ' est reparti'}</b> faute de {cfc2 ? 'stock ou de personnel' : 'stock'}{/if}.
-      Prix moyen du marché : {formatMontant(precedent.prixMoyen)}. Part de marché : {pourMille(resPrec.partMarchePourMille)}. Résultat : <b class="num">{formatMontant(resPrec.resultat)}</b>.
+      <b>Le tour précédent ({libellePeriode(r, precedent.numero)}) :</b> vous avez vendu <b>{precedent.vendues} {precedent.vendues > 1 ? s.produits : s.produit}</b>
+      sur {precedent.demande} clients attirés{#if precedent.clientsPerdus > 0}&#32;; <b>{precedent.clientsPerdus} client{precedent.clientsPerdus > 1 ? 's sont repartis' : ' est reparti'}</b> faute de {cfc2 ? 'stock ou de personnel' : 'stock'}{/if}.
+      Prix moyen du marché : {formatMontant(precedent.prixMoyen)}. Part de marché : {pourMille(precedent.partMarchePourMille)}. Résultat : <b class="num">{formatMontant(precedent.resultat)}</b>.
     </div>
   {/if}
 
   {#if imprevus.length}
     <div class="alerte" role="status">
       <b>Imprévu{imprevus.length > 1 ? 's' : ''} de ce tour :</b>
-      {#each imprevus as i, k}{k ? ' ; ' : ' '}{libelleImprevu(i, e.entreprises, s)}{/each}.
+      {#each imprevus as i, k}{k ? ' ; ' : ' '}{libelleImprevu(i, [x], s)}{/each}.
     </div>
   {/if}
 
@@ -230,8 +235,8 @@
           <div class="alerte plein" role="alert"><ul>{#each erreurs as m}<li>{m}</li>{/each}</ul></div>
         {/if}
         <div class="plein fin">
-          {#if e.brouillon[entrepriseId]}<button type="button" class="btn-lien" onclick={retirer}>Retirer ces décisions</button>{/if}
-          <button type="submit" class="btn btn-principal">Valider les décisions</button>
+          {#if sit.decisionsValidees && onRetirer}<button type="button" class="btn-lien" onclick={onRetirer}>Retirer ces décisions</button>{/if}
+          <button type="submit" class="btn btn-principal">{libelleValider}</button>
         </div>
       </div>
     </section>

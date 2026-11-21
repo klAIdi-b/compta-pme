@@ -318,3 +318,44 @@ Pour l'AFP, le tableau de la partie propose, après chaque tour, « Imprimer les
 Les ajustements après le premier essai en classe.
 
 Fichiers : `controlerImprevu`, `imprevusEntreprise`, `montantDucroire` dans `tour.ts`, `fiche-afp.ts`, `src/ui/vues/simulation/impression.ts`, tests `tests/simulation-imprevus.test.ts` et `e2e/simulateur.spec.ts`.
+
+## 17. Phase S5 — préparation de la mise en ligne (faite et validée le 21.11.2026)
+
+Pendant que l'école ou le DIP répond, tout ce qui ne demande pas de compte en ligne est fait.
+
+### Échange par fichier : utilisable dès maintenant
+
+C'est le secours prévu au § 8, qui permet déjà aux groupes de décider sur leur propre poste.
+
+1. Dans le tableau de la partie, l'enseignant clique sur **Distribuer les situations du tour N (fichiers)**. Il obtient une archive ZIP avec un fichier `.compta-situation.json` par groupe. Ce fichier ne contient que les chiffres du groupe : sa situation, ses imprévus et le résumé de son tour précédent, jamais ceux des autres entreprises.
+2. Le groupe ouvre Compta PME, clique sur **Simulateur : ouvrir ma situation** dans l'accueil, puis choisit son fichier. Il retrouve l'écran de décisions validé, avec le même contrôle des liquidités, et clique sur « Valider et enregistrer le fichier de décisions ». Il obtient un fichier `.compta-decisions.json` à remettre à l'enseignant. Rien n'est conservé dans le navigateur du groupe.
+3. L'enseignant clique sur **Importer des décisions…** (plusieurs fichiers à la fois). Chaque fichier est contrôlé : même partie, tour en cours, entreprise connue, décisions acceptables compte tenu des imprévus du tour. Les décisions acceptées sont validées.
+
+L'écran de décisions est désormais le même pour l'enseignant et pour le groupe : il dépend seulement de la « situation » du groupe (`src/engine/simulation/situation.ts`).
+
+### Préparé pour la connexion, pas encore branché à l'interface
+
+- **`supabase/schema.sql`** : les tables `sim_parties`, `sim_equipes`, `sim_situations`, `sim_decisions` et `sim_resultats`, avec leurs règles d'accès (RLS).
+  - L'enseignant connecté ne voit que ses propres parties.
+  - Les groupes n'ont aucun accès direct aux tables. Ils passent seulement par trois fonctions (`rejoindre_partie`, `deposer_decisions`, `lire_resultats`) avec le code de partie et leur code d'équipe.
+  - Seule l'empreinte SHA-256 des codes d'équipe est enregistrée.
+- **`src/io/simulation-en-ligne.ts`** : le seul module qui communique avec le service. Il appelle directement l'API REST de Supabase, sans nouvelle dépendance. Il couvre :
+  - pour les groupes : rejoindre la partie, déposer ses décisions, lire les résultats ;
+  - pour l'enseignant : lien de connexion par e-mail, publication de la partie et des équipes, publication des situations du tour, lecture des décisions et publication des résultats.
+  - Ses messages d'erreur sont en français, et une panne réseau renvoie vers l'échange par fichier.
+- **Codes** (`genererCodes`) : 6 caractères pour la partie et 8 pour chaque équipe, sans caractère ambigu (pas de 0/O ni de 1/I/L).
+- **Résultats publics** (`resultatsPublics`) : le tableau envoyé aux groupes respecte l'option d'affichage de la partie (classement, sans rang, ou chiffres propres seulement).
+
+Le calcul des tours reste dans le navigateur de l'enseignant : la base ne fait que stocker et transmettre.
+
+### Reste à faire, une fois le compte créé
+
+1. **Votre part** : la réponse de l'école ou du DIP, puis la création du compte et du projet Supabase, et l'exécution de `supabase/schema.sql` (voir `docs/simulateur-mise-en-ligne.md`).
+2. **Le branchement de l'interface**, à tester avec le vrai service :
+   - la connexion de l'enseignant ;
+   - le bouton « Mettre la partie en ligne » et l'affichage des codes ;
+   - l'écran « Rejoindre une partie » pour les groupes ;
+   - le suivi des décisions reçues, actualisé régulièrement ;
+   - la publication des situations et des résultats à chaque tour.
+
+Tests : `tests/simulation-en-ligne.test.ts` (situation, contrôle des décisions reçues, fichiers, codes, client contre un serveur simulé) et `e2e/simulateur.spec.ts` (échange par fichier complet).

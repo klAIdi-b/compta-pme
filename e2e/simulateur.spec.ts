@@ -1,6 +1,8 @@
 // Simulateur d'entreprise (phase S3, sans connexion) : créer une partie, saisir les décisions, calculer, projeter.
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
+import { partieDe, exporterSituation } from '../src/io/simulation';
+import { situationGroupe } from '../src/engine/simulation/situation';
 
 const CODE_ESSAI = 'essai-e2e-4821';
 const CAPTURES = process.env.SIM_CAPTURES;
@@ -213,4 +215,58 @@ test('imprévu annoncé aux groupes et projeté ; fiches AFP à imprimer', async
   const fiches = await fenetre;
   await expect(fiches.getByRole('heading', { name: 'Les Lémaniques' })).toBeVisible();
   await expect(fiches.getByText("Coût d'achat des marchandises vendues").first()).toBeVisible();
+});
+
+test('échange par fichier : le groupe ouvre sa situation, enregistre ses décisions, l’enseignant les importe', async ({ page }) => {
+  await page.goto('./');
+  await page.getByRole('button', { name: 'Espace enseignant' }).click();
+  await page.getByLabel('Code', { exact: true }).fill(CODE_ESSAI);
+  await page.getByLabel('Confirmer le code').fill(CODE_ESSAI);
+  await page.getByRole('button', { name: 'Entrer' }).click();
+  await page.getByRole('button', { name: 'Simulateur', exact: true }).click();
+  await page.getByRole('button', { name: 'Nouvelle partie' }).click();
+  await page.getByLabel('Nom de la partie').fill('Fichiers essai');
+  await page.getByText('Éclair · 2 à 3 séances').click();
+  await page.getByLabel("Nom de l'entreprise 1").fill('Les Lémaniques');
+  await page.getByLabel("Nom de l'entreprise 2").fill('Rhône Express');
+  await page.getByRole('button', { name: 'Créer la partie' }).click();
+
+  // L'enseignant distribue les situations (archive ZIP).
+  const zip = page.waitForEvent('download');
+  await page.getByRole('button', { name: /Distribuer les situations du tour 1/ }).click();
+  expect((await zip).suggestedFilename()).toMatch(/situations-tour-1\.zip$/);
+
+  // Situation du premier groupe, reconstruite comme dans le logiciel à partir de la partie enregistrée.
+  const enregistree = await page.evaluate(() => JSON.parse(localStorage.getItem('compta-pme:simulateur:v1')!).parties[0]);
+  const partie = partieDe(enregistree);
+  const sit = situationGroupe(partie, { partieId: enregistree.id, partieNom: enregistree.nom }, [], 'e1')!;
+
+  // Le groupe : accueil, ouvrir sa situation, décider, enregistrer.
+  await page.getByRole('button', { name: "Fermer l'espace enseignant" }).click();
+  const choix = page.waitForEvent('filechooser');
+  await page.getByRole('button', { name: 'Simulateur : ouvrir ma situation' }).click();
+  await (await choix).setFiles({ name: 'situation.compta-situation.json', mimeType: 'application/json', buffer: Buffer.from(exporterSituation(sit)) });
+  await expect(page.getByRole('heading', { name: 'Les Lémaniques' })).toBeVisible();
+  await controler(page, '8-situation-eleve');
+  await page.getByLabel(/à commander/).fill('12');
+  const fichierDecisions = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Valider et enregistrer le fichier de décisions' }).click();
+  const telecharge = await fichierDecisions;
+  expect(telecharge.suggestedFilename()).toMatch(/Les-Lemaniques_tour-1_decisions\.compta-decisions\.json$/);
+  const contenu = await (await import('node:fs/promises')).readFile((await telecharge.path())!, 'utf8');
+  await expect(page.getByText('Décisions enregistrées')).toBeVisible();
+  await page.getByRole('button', { name: 'Terminer' }).click();
+
+  // L'enseignant importe le fichier : les décisions du groupe sont validées.
+  await page.getByRole('button', { name: 'Espace enseignant' }).click();
+  await page.getByLabel('Code', { exact: true }).fill(CODE_ESSAI);
+  await page.getByRole('button', { name: 'Entrer' }).click();
+  await page.getByRole('button', { name: 'Simulateur', exact: true }).click();
+  // L'onglet revient sur la partie ouverte avant (sinon, on l'ouvre depuis la liste).
+  if (!(await page.getByRole('heading', { name: 'Fichiers essai' }).isVisible())) await page.getByRole('button', { name: 'Ouvrir' }).first().click();
+  const choix2 = page.waitForEvent('filechooser');
+  await page.getByRole('button', { name: 'Importer des décisions…' }).click();
+  await (await choix2).setFiles({ name: 'decisions.compta-decisions.json', mimeType: 'application/json', buffer: Buffer.from(contenu) });
+  await expect(page.getByText('Décisions importées : Les Lémaniques.')).toBeVisible();
+  await expect(page.locator('tbody tr', { hasText: 'Les Lémaniques' }).getByText('Validées')).toBeVisible();
 });

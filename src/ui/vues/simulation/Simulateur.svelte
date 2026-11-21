@@ -1,6 +1,8 @@
 <!-- Espace enseignant, onglet « Simulateur » : liste des parties et aiguillage vers les écrans (maquette S2 validée). -->
 <script lang="ts">
   import { simulations } from '../../simulation.svelte';
+  import { situationGroupe } from '../../../engine/simulation/situation';
+  import type { Decisions, Imprevu } from '../../../engine/simulation/types';
   import { EXT_SIMULATION, exporterPartie, importerPartie } from '../../../io/simulation';
   import { ErreurFichier, nomFichier } from '../../../io/fichiers';
   import { choisirFichiers, telecharger } from '../../fichiers-navigateur';
@@ -12,6 +14,14 @@
   import ProjectionResultats from './ProjectionResultats.svelte';
 
   let message = $state('');
+
+  /** Situation d'un groupe pour l'écran de décisions saisies au poste de l'enseignant. */
+  function situationPour(id: string, entrepriseId: string) {
+    const e = simulations.trouver(id);
+    const p = simulations.calculee(id);
+    if (!e || !p) return null;
+    return situationGroupe(p, { partieId: e.id, partieNom: e.nom }, $state.snapshot(e.imprevus ?? []) as Imprevu[], entrepriseId, $state.snapshot(e.brouillon) as Record<string, Decisions>);
+  }
 
   async function importer() {
     message = '';
@@ -47,9 +57,24 @@
 {:else if simulations.vue.ecran === 'partie' && simulations.trouver(simulations.vue.id)}
   {#key simulations.vue.id}<TableauPartie id={simulations.vue.id} />{/key}
 {:else if simulations.vue.ecran === 'decisions' && simulations.trouver(simulations.vue.id)}
-  {#key `${simulations.vue.id}:${simulations.vue.entrepriseId}`}
-    <DecisionsGroupe id={simulations.vue.id} entrepriseId={simulations.vue.entrepriseId} />
-  {/key}
+  {@const v = simulations.vue}
+  {@const sit = situationPour(v.id, v.entrepriseId)}
+  {#if sit}
+    {#key `${v.id}:${v.entrepriseId}`}
+      <DecisionsGroupe
+        situation={sit}
+        onValider={(d) => {
+          simulations.validerDecisions(v.id, v.entrepriseId, d);
+          simulations.vue = { ecran: 'partie', id: v.id };
+        }}
+        onRetirer={() => {
+          simulations.retirerDecisions(v.id, v.entrepriseId);
+          simulations.vue = { ecran: 'partie', id: v.id };
+        }}
+        onRetour={() => (simulations.vue = { ecran: 'partie', id: v.id })}
+      />
+    {/key}
+  {/if}
 {:else if simulations.vue.ecran === 'projection' && simulations.trouver(simulations.vue.id)}
   <ProjectionResultats id={simulations.vue.id} />
 {:else}

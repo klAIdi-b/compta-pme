@@ -4,6 +4,8 @@
   import { classerExercices, etiquetteNiveau, filiereDe, LIBELLES_FILIERE, LIBELLES_MODE, type Exercice, type Filiere } from '../../engine/exercice';
   import { EXT_EXERCICE, ErreurFichier, importerExercice, statutExport } from '../../io/fichiers';
   import { choisirFichiers } from '../fichiers-navigateur';
+  import { EXT_SITUATION, importerSituation } from '../../io/simulation';
+  import { simulationEleve } from '../simulation-eleve.svelte';
   import { avancementSession, avecCorrection } from '../avancement';
   import { dateHeure, normaliser } from '../format';
   import BarreAvancement from '../composants/BarreAvancement.svelte';
@@ -28,10 +30,30 @@
   const tous = $derived([...importes, ...exercicesDemo]);
   let erreurImport = $state('');
 
+  /** Simulateur d'entreprise : un groupe ouvre le fichier de situation remis par l'enseignant. */
+  async function ouvrirSituation() {
+    erreurImport = '';
+    const [f] = await choisirFichiers(`${EXT_SITUATION},.json`);
+    if (!f) return;
+    try {
+      simulationEleve.ouvrir(importerSituation(f.texte));
+    } catch (e) {
+      erreurImport = e instanceof ErreurFichier ? e.message : "Le fichier n'a pas pu être lu.";
+    }
+  }
+
   async function ouvrirFichier() {
     erreurImport = '';
-    const [f] = await choisirFichiers(`${EXT_EXERCICE},.json`);
+    const [f] = await choisirFichiers(`${EXT_EXERCICE},${EXT_SITUATION},.json`);
     if (!f) return;
+    if (f.texte.includes('"compta-pme/simulation-situation"')) {
+      try {
+        simulationEleve.ouvrir(importerSituation(f.texte));
+      } catch (e) {
+        erreurImport = e instanceof ErreurFichier ? e.message : "Le fichier n'a pas pu être lu.";
+      }
+      return;
+    }
     try {
       const ex = importerExercice(f.texte);
       importes = [ex, ...importes.filter((x) => x.id !== ex.id)];
@@ -309,6 +331,8 @@
     </form>
     <p class="enseignant">
       <button class="btn-lien" onclick={() => (etat.guide = 'eleve')}>Guide d'utilisation</button>
+      <span class="sep">·</span>
+      <button class="btn-lien" onclick={ouvrirSituation}>Simulateur : ouvrir ma situation</button>
       <span class="sep">·</span>
       <button class="btn-lien" onclick={onEnseignant}>Espace enseignant</button>
     </p>

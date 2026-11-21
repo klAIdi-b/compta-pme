@@ -5,3 +5,4 @@ export * from './tour';
 export * from './exercice';
 export * from './classement';
 export * from './fiche-afp';
+export * from './situation';

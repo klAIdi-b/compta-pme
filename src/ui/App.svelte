@@ -5,6 +5,7 @@
   import { EXT_COPIE, empreinteTravail, exporterCopie, nomFichier, statutExport } from '../io/fichiers';
   import { telecharger, telechargerBlob } from './fichiers-navigateur';
   import Differe from './composants/Differe.svelte';
+  import { simulationEleve } from './simulation-eleve.svelte';
   import AvancementEntete from './composants/AvancementEntete.svelte';
   import Icone from './composants/Icone.svelte';
   import { vueEleve } from './modes';
@@ -145,6 +146,8 @@
   <Differe charger={() => import('./vues/Guide.svelte')} props={{ partie: etat.guide, onFermer: () => (etat.guide = null) }} />
 {:else if ecran === 'enseignant'}
   <Differe charger={() => import('./vues/EspaceEnseignant.svelte')} props={{}} />
+{:else if simulationEleve.situation}
+  <Differe charger={() => import('./vues/simulation/SituationEleve.svelte')} props={{}} />
 {:else if ecran === 'accueil' || !etat.session}
   <Accueil onEnseignant={() => (enseignant.ouvert = true)} />
 {:else}

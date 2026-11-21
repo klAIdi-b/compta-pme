@@ -10,8 +10,12 @@
   import { controlerExercice, type Exercice } from '../../../engine/exercice';
   import { plan } from '../../../data/plan';
   import { EXT_EXERCICE, exporterExercice, exporterExerciceEnseignant, nomFichier } from '../../../io/fichiers';
-  import { EXT_SIMULATION, exporterPartie } from '../../../io/simulation';
-  import { telecharger } from '../../fichiers-navigateur';
+  import { EXT_DECISIONS, EXT_SIMULATION, EXT_SITUATION, exporterPartie, exporterSituation, importerDecisions } from '../../../io/simulation';
+  import { choisirFichiers, telecharger, telechargerBlob } from '../../fichiers-navigateur';
+  import { controlerDecisionsRecues, situationGroupe } from '../../../engine/simulation/situation';
+  import { creerZip } from '../../../io/zip';
+  import { ErreurFichier } from '../../../io/fichiers';
+  import type { Decisions } from '../../../engine/simulation/types';
   import { etat } from '../../etat.svelte';
   import { enseignant } from '../../enseignant.svelte';
   import { LIBELLE_AFFICHAGE, LIBELLE_COMPTABILITE, LIBELLE_NIVEAU } from './libelles';
@@ -54,6 +58,43 @@
         ? { type: 'hausseFournisseur', entrepriseId: cibleImprevu || null, pourcent: Number(pourcentImprevu) }
         : { type: 'clientInsolvable', entrepriseId: cibleImprevu || e.entreprises[0]!.id };
     erreursImprevu = simulations.ajouterImprevu(id, imp);
+  }
+
+  // Échange par fichier avec les groupes (phase S5, sans connexion).
+  function distribuer() {
+    if (!p) return;
+    const imprevus = $state.snapshot(e.imprevus ?? []) as Imprevu[];
+    const brouillon = $state.snapshot(e.brouillon) as Record<string, Decisions>;
+    const fichiers = e.entreprises.map((x) => {
+      const sit = situationGroupe(p!, { partieId: e.id, partieNom: e.nom }, imprevus, x.id, brouillon)!;
+      return { nom: nomFichier([x.nom, `tour-${n}`], EXT_SITUATION), donnees: new TextEncoder().encode(exporterSituation(sit)) };
+    });
+    telechargerBlob(nomFichier([e.nom, `situations-tour-${n}`], '.zip'), new Blob([creerZip(fichiers)], { type: 'application/zip' }));
+    message = `Un fichier de situation par groupe a été téléchargé (archive ZIP). Remettez à chaque groupe le sien : il l'ouvre dans Compta PME (accueil, « Simulateur : ouvrir ma situation »), décide, puis vous renvoie son fichier de décisions.`;
+  }
+
+  async function importerLesDecisions() {
+    if (!p) return;
+    message = '';
+    erreurs = [];
+    const fichiers = await choisirFichiers(`${EXT_DECISIONS},.json`, true);
+    const ok: string[] = [];
+    const ko: string[] = [];
+    for (const f of fichiers) {
+      try {
+        const d = importerDecisions(f.texte);
+        const err = controlerDecisionsRecues(p, { partieId: e.id }, $state.snapshot(e.imprevus ?? []) as Imprevu[], d);
+        if (err.length) ko.push(...err);
+        else {
+          simulations.validerDecisions(id, d.entrepriseId, d.decisions);
+          ok.push(e.entreprises.find((x) => x.id === d.entrepriseId)!.nom);
+        }
+      } catch (err) {
+        ko.push(`${f.nom} : ${err instanceof ErreurFichier ? err.message : 'fichier illisible.'}`);
+      }
+    }
+    if (ok.length) message = `Décisions importées : ${ok.join(', ')}.`;
+    erreurs = ko;
   }
 
   function imprimer(corrige: boolean) {
@@ -211,7 +252,14 @@
           </table>
         </div>
       </section>
-      <p class="aide">Sans connexion, vous saisissez ici les décisions dictées par chaque groupe ou recopiées de sa fiche.</p>
+      <div class="ligne">
+        <button class="btn" onclick={distribuer}>Distribuer les situations du tour {n} (fichiers)</button>
+        <button class="btn" onclick={importerLesDecisions}>Importer des décisions…</button>
+      </div>
+      <p class="aide">
+        Sans connexion, deux façons de recueillir les décisions : les saisir ici, ou distribuer à chaque groupe le fichier de sa
+        situation et importer les fichiers de décisions qu'il vous renvoie. Les décisions importées sont contrôlées comme celles saisies ici.
+      </p>
     {:else}
       <p class="info">Tous les tours ont été joués. Affichez les résultats finaux, puis exportez les exercices pour la comptabilité des élèves.</p>
     {/if}
