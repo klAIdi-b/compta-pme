@@ -2,7 +2,7 @@
 
 import type { Dossier } from '../engine/dossier';
 import type { Exercice } from '../engine/exercice';
-import { corrigeDepuisEcritures, creerDossier, fonctionsExercice, retourVisible, type EcritureCorrigee } from '../engine/exercice';
+import { actualiserDossier, corrigeDepuisEcritures, creerDossier, estNouvelleVersionSimulation, fonctionsExercice, retourVisible, type EcritureCorrigee } from '../engine/exercice';
 import { ajouterEcriture } from '../engine/journal';
 import { plan as planParDefaut } from '../data/plan';
 import { ecrire, lire } from '../io/stockage';
@@ -214,6 +214,10 @@ class Etat {
     if (actif && this.genre === 'travail') {
       if (actif.exercice.id === exercice.id) {
         actif.eleve = eleve;
+        if (estNouvelleVersionSimulation(actif.exercice, exercice)) {
+          actif.exercice = exercice;
+          actif.dossier = actualiserDossier(actif.dossier, exercice);
+        }
         return this.reprendre();
       }
       this.autres[actif.exercice.id] = actif;
@@ -221,7 +225,9 @@ class Etat {
     const existante = this.autres[exercice.id];
     if (existante) {
       delete this.autres[exercice.id];
-      this.session = { ...existante, eleve };
+      this.session = estNouvelleVersionSimulation(existante.exercice, exercice)
+        ? { ...existante, eleve, exercice, dossier: actualiserDossier(existante.dossier, exercice) }
+        : { ...existante, eleve };
       this.accueilOuvert = false;
       this.aller('tableau');
       return;

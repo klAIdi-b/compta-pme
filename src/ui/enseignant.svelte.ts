@@ -23,7 +23,7 @@ class Enseignant {
   ouvert = $state(false);
   deverrouille = $state(false);
   /** Onglet affiché ; gardé en mémoire pour revenir au même endroit après un aperçu. */
-  onglet = $state<'exercices' | 'dossiers' | 'copies' | 'relecture' | 'parametres'>('exercices');
+  onglet = $state<'exercices' | 'dossiers' | 'copies' | 'simulateur' | 'relecture' | 'parametres'>('exercices');
   /** Exercice en cours d'édition (identifiant). */
   edition = $state<string | null>(null);
 

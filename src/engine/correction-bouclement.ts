@@ -19,9 +19,9 @@ export function bouclementCorrige(ex: Exercice): boolean {
   return ex.parametres.modeBouclement === 'compteDeResultat' && !!ex.parametres.corrigerBouclement && !ex.parametres.bouclementAutomatique;
 }
 
-/** Une écriture appartient au bouclement si sa pièce n'est pas une opération de l'énoncé. */
+/** Une écriture appartient au bouclement si sa pièce n'est pas une opération de l'énoncé (ni une écriture automatique). */
 export function estEcritureBouclement(e: Ecriture, ex: Exercice): boolean {
-  return !ex.operations.some((o) => o.numero === e.piece);
+  return !e.automatique && !ex.operations.some((o) => o.numero === e.piece);
 }
 
 /** Écritures de bouclement attendues, d'après les comptes de l'élève avant son bouclement. */

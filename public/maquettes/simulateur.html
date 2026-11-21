@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="fr-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maquette — simulateur d'entreprise</title>
+<style>
+  /* Maquette statique (20.11.2026), phase S2 du simulateur : à valider avant l'interface.
+     Charte du design moderne validé le 07.11.2026 (bleu nuit, orange pour l'action principale, Arial, sans émoji). */
+  :root {
+    --bleu: #1F4E78; --bleu-nuit: #11304D; --selection: #D6E4F0; --zebre: #F7FAFD;
+    --action: #C4501A; --action-fonce: #A8420F; --accent: #E8601C; --alerte: #B34A12; --ok: #1D6B3A; --negatif: #B00020;
+    --fond: #F4F6FA; --carte: #FFFFFF; --texte: #1B2430; --texte-2: #5B6675; --bordure: #E3E8EF; --bordure-2: #EEF2F6;
+    --ombre: 0 1px 2px rgba(16, 24, 40, 0.06), 0 1px 3px rgba(16, 24, 40, 0.08);
+    --rayon: 8px;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: var(--texte); background: #E9EDF3; padding-bottom: 48px; }
+  .intro { max-width: 1280px; margin: 28px auto 0; padding: 0 16px; }
+  .intro h1 { font-size: 24px; margin: 0 0 6px; }
+  .etiquette { max-width: 1280px; margin: 36px auto 8px; padding: 0 16px; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--texte-2); }
+  .note { max-width: 1280px; margin: 10px auto 0; padding: 0 16px; font-size: 13px; color: var(--texte-2); line-height: 1.5; }
+  .ecran { max-width: 1280px; margin: 0 auto; border-radius: 10px; overflow: hidden; box-shadow: 0 8px 30px rgba(16,24,40,.12); background: var(--fond); }
+  .num, .mt { font-variant-numeric: tabular-nums; }
+  .mt { text-align: right; white-space: nowrap; }
+  .neg { color: var(--negatif); }
+  .sous { color: var(--texte-2); margin-top: 4px; }
+
+  .app { display: grid; grid-template-columns: 232px 1fr; min-height: 600px; }
+  .lateral { background: var(--bleu-nuit); color: #fff; display: flex; flex-direction: column; padding: 16px 12px; gap: 2px; }
+  .marque { display: flex; align-items: center; gap: 10px; padding: 4px 8px 18px; font-weight: bold; font-size: 15px; }
+  .logo { width: 28px; height: 28px; border-radius: 7px; background: var(--action); display: grid; place-items: center; font-size: 13px; color: #fff; }
+  .rubrique { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #8FA9C4; padding: 14px 10px 6px; }
+  .nav { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 6px; color: #DCE6F0; text-decoration: none; }
+  .nav svg { width: 17px; height: 17px; stroke: currentColor; fill: none; stroke-width: 1.8; opacity: .85; }
+  .nav.actif { background: rgba(255,255,255,.12); color: #fff; font-weight: bold; box-shadow: inset 3px 0 0 var(--accent); }
+  .bas { margin-top: auto; display: grid; gap: 8px; padding-top: 16px; }
+  .rappel { font-size: 12px; color: #fff; border-left: 3px solid var(--accent); padding-left: 8px; line-height: 1.35; }
+
+  .btn { font: inherit; border-radius: 6px; padding: 8px 14px; border: 1px solid var(--bordure); background: #fff; color: var(--texte); cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
+  .btn-principal { background: var(--action); border-color: var(--action); color: #fff; font-weight: bold; }
+  .btn-principal[disabled] { background: #E7C9BA; border-color: #E7C9BA; cursor: not-allowed; }
+  .btn-sombre { background: transparent; border-color: rgba(255,255,255,.25); color: #fff; justify-content: center; }
+  .btn-petit { padding: 5px 10px; font-size: 13px; }
+
+  .principal { display: flex; flex-direction: column; min-width: 0; }
+  .barre-haut { height: 60px; background: #fff; border-bottom: 1px solid var(--bordure); display: flex; align-items: center; gap: 14px; padding: 0 24px; }
+  .fil { color: var(--texte-2); } .fil b { color: var(--texte); }
+  .puce { font-size: 12px; font-weight: bold; padding: 3px 9px; border-radius: 999px; background: var(--selection); color: var(--bleu); white-space: nowrap; }
+  .puce.bleu { background: var(--bleu); color: #fff; }
+  .droite { margin-left: auto; display: flex; gap: 10px; align-items: center; }
+  .contenu { padding: 24px; display: grid; gap: 20px; }
+  .titre-page { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  h1.p { margin: 0; font-size: 22px; }
+  .carte { background: var(--carte); border: 1px solid var(--bordure); border-radius: var(--rayon); box-shadow: var(--ombre); }
+  .carte-tete { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 18px; border-bottom: 1px solid var(--bordure-2); }
+  .carte-tete h2 { margin: 0; font-size: 15px; }
+  .carte-corps { padding: 16px 18px; }
+
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; font-size: 12px; font-weight: bold; color: var(--texte-2); text-transform: uppercase; letter-spacing: .04em; background: #F8FAFC; padding: 10px 14px; border-bottom: 1px solid var(--bordure); }
+  th.mt { text-align: right; }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--bordure-2); }
+  tbody tr:nth-child(even) td { background: var(--zebre); }
+  .statut { font-size: 12px; font-weight: bold; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+  .statut.ok { background: #E3F2E8; color: var(--ok); }
+  .statut.att { background: #FCEBE2; color: var(--alerte); }
+
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .kpi { padding: 14px 18px; }
+  .kpi .l { font-size: 12px; color: var(--texte-2); text-transform: uppercase; letter-spacing: .05em; }
+  .kpi .v { font-size: 22px; font-weight: bold; margin-top: 6px; font-variant-numeric: tabular-nums; }
+  .kpi .d { font-size: 12px; margin-top: 4px; color: var(--texte-2); }
+
+  /* Formulaires */
+  .champ { display: grid; gap: 6px; }
+  .champ > label, .champ > .lib { font-size: 12px; color: var(--texte-2); font-weight: bold; }
+  .entree { height: 40px; border: 1px solid #CBD5E1; border-radius: 6px; padding: 0 12px; display: flex; align-items: center; gap: 8px; background: #fff; }
+  .entree .unite { color: var(--texte-2); font-size: 13px; }
+  .entree .val { margin-left: auto; font-variant-numeric: tabular-nums; font-weight: bold; }
+  .entree.focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(232,96,28,.18); }
+  .aide { font-size: 12px; color: var(--texte-2); }
+  .segments { display: inline-flex; background: #EEF2F6; border-radius: 8px; padding: 3px; flex-wrap: wrap; justify-self: start; align-self: start; }
+  .segments span { padding: 7px 14px; border-radius: 6px; color: var(--texte-2); }
+  .segments .on { background: #fff; color: var(--bleu); font-weight: bold; box-shadow: var(--ombre); }
+  .segments .off { color: #A5AFBC; }
+  .choix { display: grid; gap: 12px; }
+  .choix.trois { grid-template-columns: repeat(3, 1fr); }
+  .choix.deux { grid-template-columns: repeat(2, 1fr); }
+  .option { border: 1px solid var(--bordure); border-radius: 8px; padding: 12px 14px; background: #fff; display: grid; gap: 4px; }
+  .option.on { border-color: var(--bleu); box-shadow: 0 0 0 3px rgba(31,78,120,.12); }
+  .option b { display: flex; align-items: center; gap: 8px; }
+  .rond { width: 16px; height: 16px; border-radius: 50%; border: 2px solid #94A0B0; flex: none; }
+  .option.on .rond { border: 5px solid var(--bleu); }
+  .case { width: 16px; height: 16px; border-radius: 4px; border: 2px solid #94A0B0; flex: none; display: inline-block; vertical-align: -3px; }
+  .case.on { background: var(--bleu); border-color: var(--bleu); }
+  .ligne-cases { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 8px; font-size: 13px; }
+  .formulaire { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 24px; }
+  .formulaire .plein { grid-column: 1 / -1; }
+  .liste-equipes { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px 16px; }
+
+  /* Décisions */
+  .deux-col { display: grid; grid-template-columns: 340px 1fr; gap: 20px; align-items: start; }
+  .situation td { padding: 7px 0; background: none !important; border-bottom: 1px solid var(--bordure-2); }
+  .situation tr:last-child td { border-bottom: 0; }
+  .jauge { height: 12px; border-radius: 6px; background: var(--bordure-2); overflow: hidden; margin: 8px 0 6px; }
+  .jauge span { display: block; height: 100%; background: var(--bleu); }
+  .message { border-left: 4px solid var(--accent); background: #FDF3EE; color: var(--alerte); padding: 10px 14px; border-radius: 4px; }
+  .rappel-tour { border-left: 4px solid var(--bleu); }
+
+  /* Projection */
+  .projection { background: #fff; padding: 36px 44px 40px; }
+  .projection .entete { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; border-bottom: 3px solid var(--bleu-nuit); padding-bottom: 16px; }
+  .projection h1 { font-size: 34px; margin: 0; color: var(--bleu-nuit); }
+  .projection .sous { font-size: 18px; }
+  .marche { display: flex; gap: 40px; font-size: 18px; }
+  .marche b { display: block; font-size: 30px; color: var(--bleu-nuit); font-variant-numeric: tabular-nums; }
+  .classement { margin-top: 26px; }
+  .classement th { font-size: 14px; background: none; border-bottom: 2px solid var(--bordure); }
+  .classement td { font-size: 22px; padding: 16px 14px; }
+  .classement tbody tr:nth-child(even) td { background: #F7FAFD; }
+  .rang { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; font-weight: bold; font-size: 24px; background: var(--selection); color: var(--bleu); }
+  .rang.premier { background: var(--bleu-nuit); color: #fff; }
+  .part { display: flex; align-items: center; gap: 10px; justify-content: flex-end; }
+  .part .b { width: 140px; height: 14px; background: var(--bordure-2); border-radius: 7px; overflow: hidden; }
+  .part .b span { display: block; height: 100%; background: var(--bleu); }
+  .pied { margin-top: 18px; font-size: 15px; color: var(--texte-2); }
+
+  @media (max-width: 900px) {
+    .app { grid-template-columns: 1fr; } .lateral { display: none; }
+    .kpis, .choix.trois, .choix.deux, .formulaire, .deux-col, .liste-equipes { grid-template-columns: 1fr; }
+    .projection { padding: 20px; } .classement td { font-size: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="intro">
+  <h1>Simulateur d'entreprise — maquettes des écrans (phase S2)</h1>
+  <p class="sous">Maquettes statiques, à valider avant l'interface : les boutons ne fonctionnent pas. Exemple : partie CFC 1, secteur « Vélos et trottinettes », 12 tours d'un mois, 4 entreprises. Montants en CHF.</p>
+</div>
+
+<!-- ─────────────────────────── Écran 1 ─────────────────────────── -->
+<div class="etiquette">Écran 1 — Créer une partie (enseignant)</div>
+<div class="ecran">
+  <div class="app">
+    <nav class="lateral">
+      <div class="marque"><span class="logo">CP</span> Compta PME</div>
+      <div class="rubrique">Espace enseignant</div>
+      <a class="nav" href="#"><svg viewBox="0 0 24 24"><path d="M5 4h11l3 3v13H5zM8 9h8M8 13h8"/></svg>Exercices</a>
+      <a class="nav" href="#"><svg viewBox="0 0 24 24"><path d="M4 5h16v14H4zM4 10h16"/></svg>Copies</a>
+      <a class="nav" href="#"><svg viewBox="0 0 24 24"><path d="M6 4h12v16H6zM9 8h6M9 12h6"/></svg>Dossiers</a>
+      <a class="nav actif" href="#"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Simulateur</a>
+    </nav>
+    <div class="principal">
+      <div class="barre-haut"><span class="fil">Espace enseignant / Simulateur / <b>Nouvelle partie</b></span></div>
+      <div class="contenu">
+        <div class="titre-page"><div><h1 class="p">Nouvelle partie</h1><div class="sous">Ces réglages ne pourront plus être modifiés une fois le premier tour joué.</div></div></div>
+
+        <div class="carte">
+          <div class="carte-tete"><h2>1. Classe et secteur</h2></div>
+          <div class="carte-corps formulaire">
+            <div class="champ"><span class="lib">Niveau</span>
+              <div class="segments"><span>AFP</span><span class="on">CFC 1</span><span class="off" title="Bientôt">CFC 2 — bientôt</span><span class="off">MP — bientôt</span></div>
+              <span class="aide">CFC 1 : achats, ventes, banque, caisse, prélèvement privé, sans TVA.</span>
+            </div>
+            <div class="champ"><label>Nom de la partie</label><div class="entree">2CA — printemps 2027</div><span class="aide">Pour vous retrouver ; jamais montré comme nom d'élève.</span></div>
+            <div class="champ plein"><span class="lib">Secteur</span>
+              <div class="choix trois">
+                <div class="option on"><b><span class="rond"></span>Vélos et trottinettes</b><span class="aide">Vélos de ville · saison forte au printemps et en été · 10 % de ventes sur facture</span></div>
+                <div class="option"><b><span class="rond"></span>Épicerie fine</b><span class="aide">Coffrets gourmands · saison forte en décembre · petits montants</span></div>
+                <div class="option"><b><span class="rond"></span>Matériel informatique</b><span class="aide">Ordinateurs portables · rentrée scolaire · 40 % sur facture, prix d'achat en baisse</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="carte">
+          <div class="carte-tete"><h2>2. Durée</h2><span class="aide">Année fictive 2027</span></div>
+          <div class="carte-corps formulaire">
+            <div class="champ plein"><span class="lib">Format</span>
+              <div class="choix trois">
+                <div class="option"><b><span class="rond"></span>Éclair · 2 à 3 séances</b><span class="aide">3 tours d'un mois, sans bouclement</span></div>
+                <div class="option"><b><span class="rond"></span>Court · 4 à 6 séances</b><span class="aide">4 tours d'un trimestre, année complète</span></div>
+                <div class="option on"><b><span class="rond"></span>Long · un semestre</b><span class="aide">12 tours d'un mois, année complète</span></div>
+              </div>
+            </div>
+            <div class="champ"><span class="lib">Un tour dure</span><div class="segments"><span class="on">un mois</span><span>un trimestre</span></div></div>
+            <div class="champ"><label>Nombre de tours</label><div class="entree" style="max-width:140px"><span class="val" style="margin-left:0">12</span><span class="unite">sur 12</span></div></div>
+          </div>
+        </div>
+
+        <div class="carte">
+          <div class="carte-tete"><h2>3. Comptabilité et résultats</h2></div>
+          <div class="carte-corps formulaire">
+            <div class="champ"><span class="lib">Comptabilité</span>
+              <div class="segments"><span>automatique</span><span>saisie par les élèves</span><span class="on">mixte</span></div>
+              <span class="aide">Tours saisis par les élèves dans Compta PME :</span>
+              <div class="ligne-cases"><span><span class="case on"></span> 1</span><span><span class="case"></span> 2</span><span><span class="case"></span> 3</span><span><span class="case"></span> 4</span><span><span class="case"></span> 5</span><span><span class="case"></span> 6</span><span><span class="case on"></span> 7</span><span><span class="case"></span> 8</span><span><span class="case"></span> 9</span><span><span class="case"></span> 10</span><span><span class="case"></span> 11</span><span><span class="case on"></span> 12</span></div>
+            </div>
+            <div class="champ"><span class="lib">Mode de la saisie</span><div class="segments"><span class="on">entraînement</span><span>formative</span><span>évaluation</span></div></div>
+            <div class="champ"><span class="lib">Résultats montrés aux groupes</span>
+              <div class="segments"><span class="on">classement</span><span>tableau sans rang</span><span>chaque groupe ses chiffres</span></div>
+              <span class="aide">Classement : résultat cumulé ×2, trésorerie ×1, part de marché ×1.</span>
+            </div>
+            <div class="champ"><span class="lib">Clôture</span><span><span class="case on"></span> Inventaire au 31.12 puis bouclement par les élèves</span><span class="aide">Possible seulement si la partie couvre l'année entière.</span></div>
+          </div>
+        </div>
+
+        <div class="carte">
+          <div class="carte-tete"><h2>4. Entreprises (2 à 8)</h2><button class="btn btn-petit">Ajouter une entreprise</button></div>
+          <div class="carte-corps">
+            <div class="liste-equipes">
+              <div class="entree">Les Lémaniques</div>
+              <div class="entree">Rhône Express</div>
+              <div class="entree">Salève Commerce</div>
+              <div class="entree">Jet d'Eau &amp; Cie</div>
+            </div>
+            <p class="aide" style="margin:12px 0 0">Les groupes choisissent le nom de leur entreprise. N'inscrivez aucun nom d'élève : ces noms seront visibles en ligne quand les groupes pourront se connecter (phase S5).</p>
+          </div>
+        </div>
+
+        <div style="display:flex;justify-content:flex-end;gap:10px"><button class="btn">Annuler</button><button class="btn btn-principal">Créer la partie</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+<p class="note">Un seul écran, quatre blocs dans l'ordre des décisions. Le choix d'un format remplit la durée et le nombre de tours, qui restent modifiables. Les niveaux CFC 2 et MP apparaissent grisés tant qu'ils ne sont pas programmés. En AFP, la comptabilité passe d'elle-même sur « automatique ».</p>
+
+<!-- ─────────────────────────── Écran 2 ─────────────────────────── -->
+<div class="etiquette">Écran 2 — Tableau de la partie (enseignant)</div>
+<div class="ecran">
+  <div class="app">
+    <nav class="lateral">
+      <div class="marque"><span class="logo">CP</span> Compta PME</div>
+      <div class="rubrique">Partie en cours</div>
+      <a class="nav actif" href="#"><svg viewBox="0 0 24 24"><path d="M3 12l9-8 9 8M5 10v10h14V10"/></svg>Tableau de la partie</a>
+      <a class="nav" href="#"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Résultats à projeter</a>
+      <a class="nav" href="#"><svg viewBox="0 0 24 24"><path d="M5 4h11l3 3v13H5zM8 9h8M8 13h8M8 17h5"/></svg>Pièces et exercices</a>
+      <a class="nav" href="#"><svg viewBox="0 0 24 24"><path d="M12 8v4l3 2M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z"/></svg>Historique des tours</a>
+      <div class="bas">
+        <button class="btn btn-sombre">Exporter la partie</button>
+        <div class="rappel">Partie enregistrée dans ce navigateur. Exportez-la pour la reprendre sur un autre poste.</div>
+      </div>
+    </nav>
+    <div class="principal">
+      <div class="barre-haut">
+        <span class="fil">Simulateur / <b>2CA — printemps 2027</b></span>
+        <span class="puce bleu">CFC 1</span><span class="puce">Vélos et trottinettes</span><span class="puce">Mixte</span>
+        <span class="droite"><span class="num" style="font-weight:bold">Tour 5 sur 12 · mai 2027</span></span>
+      </div>
+      <div class="contenu">
+        <div class="kpis">
+          <div class="carte kpi"><div class="l">Tour en cours</div><div class="v">mai 2027</div><div class="d">Saison : 150 % d'un mois moyen</div></div>
+          <div class="carte kpi"><div class="l">Décisions reçues</div><div class="v">3 / 4</div><div class="d">Il manque Jet d'Eau &amp; Cie</div></div>
+          <div class="carte kpi"><div class="l">Tour précédent</div><div class="v">130 clients</div><div class="d">Prix moyen du marché 905.00</div></div>
+          <div class="carte kpi"><div class="l">Saisie des élèves</div><div class="v">tour 7</div><div class="d">Prochain tour à comptabiliser</div></div>
+        </div>
+
+        <div class="carte">
+          <div class="carte-tete"><h2>Décisions du tour 5</h2>
+            <div style="display:flex;gap:10px;align-items:center"><span class="aide">Le calcul est possible quand les 4 groupes ont validé.</span><button class="btn btn-principal" disabled>Calculer le tour 5</button></div>
+          </div>
+          <table>
+            <thead><tr><th>Entreprise</th><th>Décisions</th><th class="mt">Prix de vente</th><th class="mt">Commande</th><th class="mt">Publicité</th><th class="mt">Banque</th><th class="mt">Stock</th><th></th></tr></thead>
+            <tbody>
+              <tr><td><b>Les Lémaniques</b></td><td><span class="statut ok">Validées</span></td><td class="mt">899.00</td><td class="mt">40 · grossiste</td><td class="mt">1'000.00</td><td class="mt">41'250.00</td><td class="mt">9</td><td class="mt"><button class="btn btn-petit">Modifier</button></td></tr>
+              <tr><td><b>Rhône Express</b></td><td><span class="statut ok">Validées</span></td><td class="mt">829.00</td><td class="mt">45 · importateur</td><td class="mt">500.00</td><td class="mt">36'880.40</td><td class="mt">4</td><td class="mt"><button class="btn btn-petit">Modifier</button></td></tr>
+              <tr><td><b>Salève Commerce</b></td><td><span class="statut ok">Validées</span></td><td class="mt">989.00</td><td class="mt">35 · grossiste</td><td class="mt">2'000.00</td><td class="mt">39'115.80</td><td class="mt">7</td><td class="mt"><button class="btn btn-petit">Modifier</button></td></tr>
+              <tr><td><b>Jet d'Eau &amp; Cie</b></td><td><span class="statut att">En attente</span></td><td class="mt">—</td><td class="mt">—</td><td class="mt">—</td><td class="mt">33'402.00</td><td class="mt">12</td><td class="mt"><button class="btn btn-petit btn-principal" style="padding:5px 10px">Saisir</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="aide" style="margin:-8px 0 0">Sans connexion (phase S3), vous saisissez ici les décisions dictées par chaque groupe ou recopiées de sa fiche. Avec la connexion (phase S5), les groupes valideront depuis leur poste et cette colonne se mettra à jour toute seule.</p>
+      </div>
+    </div>
+  </div>
+</div>
+<p class="note">L'enseignant voit en un coup d'œil où en est le tour. Le bouton « Calculer le tour » reste inactif tant qu'il manque des décisions ; une décision refusée (liquidités insuffisantes, prix hors limites) est signalée dans la ligne du groupe. Après le calcul, l'écran passe au tour suivant et propose d'afficher les résultats.</p>
+
+<!-- ─────────────────────────── Écran 3 ─────────────────────────── -->
+<div class="etiquette">Écran 3 — Décisions d'un groupe</div>
+<div class="ecran">
+  <div class="app" style="grid-template-columns: 1fr">
+    <div class="principal">
+      <div class="barre-haut">
+        <span class="logo">CP</span>
+        <span class="fil">Simulateur / <b>Les Lémaniques</b></span>
+        <span class="puce bleu">Tour 5 sur 12 · mai 2027</span>
+        <span class="droite"><span class="puce">Vélos et trottinettes</span></span>
+      </div>
+      <div class="contenu">
+        <div class="carte carte-corps rappel-tour">
+          <b>Le tour d'avril :</b> vous avez vendu <b>32 vélos</b> sur 34 clients attirés ; <b>2 clients sont repartis</b> faute de stock. Prix moyen du marché : 905.00. Résultat du mois : <b class="num">4'811.00</b>.
+        </div>
+        <div class="deux-col">
+          <div class="carte">
+            <div class="carte-tete"><h2>Votre situation au 1er mai</h2></div>
+            <div class="carte-corps">
+              <table class="situation">
+                <tr><td>Avoir en banque</td><td class="mt"><b>41'250.00</b></td></tr>
+                <tr><td>Caisse</td><td class="mt">2'000.00</td></tr>
+                <tr><td>Factures clients à encaisser</td><td class="mt">3'596.00</td></tr>
+                <tr><td>Facture du grossiste à payer</td><td class="mt">13'520.00</td></tr>
+                <tr><td>Stock</td><td class="mt">9 vélos</td></tr>
+                <tr><td>Résultat depuis janvier</td><td class="mt">11'206.00</td></tr>
+              </table>
+              <p class="aide" style="margin:12px 0 0">Mai est un mois fort : 150 % d'un mois moyen. Loyer du mois : 3'200.00.</p>
+            </div>
+          </div>
+          <div class="carte">
+            <div class="carte-tete"><h2>Vos décisions pour mai</h2></div>
+            <div class="carte-corps formulaire">
+              <div class="champ"><label>Prix de vente d'un vélo</label><div class="entree focus"><span class="unite">CHF</span><span class="val">899.00</span></div><span class="aide">Prix de référence du marché : 899.00 · autorisé de 449.50 à 2'697.00</span></div>
+              <div class="champ"><label>Vélos à commander</label><div class="entree"><span class="val" style="margin-left:0">40</span><span class="unite">vélos</span></div><span class="aide">Livrés au début du mois, avant les ventes.</span></div>
+              <div class="champ plein"><span class="lib">Fournisseur</span>
+                <div class="choix deux">
+                  <div class="option on"><b><span class="rond"></span>Cyclo-Distribution Romandie SA</b><span class="aide">520.00 le vélo · payable à 30 jours (au début du tour suivant)</span></div>
+                  <div class="option"><b><span class="rond"></span>Velimport Sàrl</b><span class="aide">478.40 le vélo (−8 %) · payable à la commande</span></div>
+                </div>
+              </div>
+              <div class="champ"><label>Budget de publicité</label><div class="entree"><span class="unite">CHF</span><span class="val">1'000.00</span></div><span class="aide">Chaque franc rapporte un peu moins que le précédent.</span></div>
+              <div class="champ"><label>Prélèvement privé du propriétaire</label><div class="entree"><span class="unite">CHF</span><span class="val">500.00</span></div><span class="aide">Viré sur votre compte personnel le 20 mai.</span></div>
+              <div class="plein">
+                <div style="display:flex;justify-content:space-between"><b>Paiements prévus en mai</b><span class="num"><b>18'220.00</b> sur 44'846.00 disponibles</span></div>
+                <div class="jauge"><span style="width:41%"></span></div>
+                <div class="aide">Facture du grossiste 13'520.00 · loyer 3'200.00 · publicité 1'000.00 · prélèvement 500.00. La commande de mai (20'800.00) sera payée en juin.</div>
+              </div>
+              <div class="plein" style="display:flex;justify-content:flex-end;gap:10px"><button class="btn btn-principal">Valider nos décisions</button></div>
+            </div>
+          </div>
+        </div>
+        <div class="message"><b>Exemple de refus :</b> « Liquidités insuffisantes : les paiements prévus dépassent l'avoir en banque de 7'944.70. Achetez moins, réduisez la publicité ou le prélèvement privé. »</div>
+      </div>
+    </div>
+  </div>
+</div>
+<p class="note">À gauche, ce que le groupe doit savoir pour décider ; à droite, uniquement les décisions de son niveau (en AFP : prix, quantité, publicité). La jauge des paiements se met à jour pendant la saisie, pour que le groupe voie lui-même s'il dépasse ses liquidités. Sans connexion, cet écran s'ouvre au poste de l'enseignant ou sert de modèle pour une fiche papier.</p>
+
+<!-- ─────────────────────────── Écran 4 ─────────────────────────── -->
+<div class="etiquette">Écran 4 — Résultats du tour, à projeter</div>
+<div class="ecran projection">
+  <div class="entete">
+    <div><h1>Résultats d'avril 2027</h1><div class="sous">Tour 4 sur 12 · Vélos et trottinettes</div></div>
+    <div class="marche">
+      <div>Clients du mois<b>130</b></div>
+      <div>Prix moyen<b>905.00</b></div>
+      <div>Repartis sans acheter<b>5</b></div>
+    </div>
+  </div>
+  <table class="classement">
+    <thead><tr><th style="width:80px">Rang</th><th>Entreprise</th><th class="mt">Résultat depuis janvier</th><th class="mt">Trésorerie</th><th class="mt">Part de marché</th><th class="mt">Score</th></tr></thead>
+    <tbody>
+      <tr><td><span class="rang premier">1</span></td><td><b>Rhône Express</b></td><td class="mt"><b>12'480.60</b></td><td class="mt">38'995.40</td><td class="mt"><span class="part">29.4 % <span class="b"><span style="width:59%"></span></span></span></td><td class="mt">14</td></tr>
+      <tr><td><span class="rang">2</span></td><td><b>Les Lémaniques</b></td><td class="mt"><b>11'206.00</b></td><td class="mt">43'250.00</td><td class="mt"><span class="part">26.8 % <span class="b"><span style="width:54%"></span></span></span></td><td class="mt">13</td></tr>
+      <tr><td><span class="rang">3</span></td><td><b>Salève Commerce</b></td><td class="mt"><b>10'954.20</b></td><td class="mt">41'115.80</td><td class="mt"><span class="part">23.9 % <span class="b"><span style="width:48%"></span></span></span></td><td class="mt">8</td></tr>
+      <tr><td><span class="rang">4</span></td><td><b>Jet d'Eau &amp; Cie</b></td><td class="mt"><b>7'930.00</b></td><td class="mt">35'402.00</td><td class="mt"><span class="part">19.9 % <span class="b"><span style="width:40%"></span></span></span></td><td class="mt">5</td></tr>
+    </tbody>
+  </table>
+  <div class="pied">Score : rang du résultat ×2, rang de la trésorerie ×1, rang de la part de marché ×1 (1er sur 4 = 4 points). Les autres options de la partie affichent le même tableau sans la colonne Rang, ou seulement les chiffres de chaque groupe.</div>
+</div>
+<p class="note">Écran plein, sans barre latérale, en grands caractères lisibles au fond de la classe. Les trois chiffres du marché servent à la discussion (pourquoi des clients sont-ils repartis ? qui a fixé le prix le plus bas ?). Un bouton discret, hors projection, permet de revenir au tableau de la partie.</p>
+
+</body>
+</html>

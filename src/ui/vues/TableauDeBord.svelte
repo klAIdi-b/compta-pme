@@ -79,7 +79,7 @@
     {/if}
     <div class="actions">
       <button class="btn btn-principal" onclick={() => etat.commencerSaisie()}>
-        {s.dossier.ecritures.length ? 'Continuer la saisie' : 'Commencer la saisie'}
+        {s.dossier.ecritures.some((e) => !e.automatique) ? 'Continuer la saisie' : 'Commencer la saisie'}
       </button>
       <button class="btn" onclick={() => (etat.visiteOuverte = true)}>Revoir la visite guidée</button>
       <button class="btn" onclick={recommencer}>Recommencer l'exercice</button>

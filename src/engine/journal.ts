@@ -79,6 +79,8 @@ export function estExtournee(d: Dossier, id: string): boolean {
   return d.ecritures.some((e) => e.extourneDe === id);
 }
 
+const AUTOMATIQUE = 'Cette écriture a été passée par le logiciel : elle ne peut être ni modifiée, ni extournée, ni supprimée.';
+
 /**
  * Corrige une écriture validée par extourne : nouvelle écriture, même pièce,
  * débit et crédit inversés. L'écriture d'origine reste visible dans le journal.
@@ -86,6 +88,7 @@ export function estExtournee(d: Dossier, id: string): boolean {
 export function extourner(d: Dossier, id: string, date: string): Resultat<Dossier> {
   const origine = d.ecritures.find((e) => e.id === id);
   if (!origine) return echec(`Écriture ${id} introuvable.`);
+  if (origine.automatique) return echec(AUTOMATIQUE);
   if (origine.extourneDe) return echec('Une extourne ne peut pas elle-même être extournée.');
   if (estExtournee(d, id)) return echec(`La pièce ${origine.piece} a déjà été extournée.`);
   const inverse: Ecriture = {
@@ -105,7 +108,9 @@ export function extourner(d: Dossier, id: string, date: string): Resultat<Dossie
  * supprimer une extourne rend son effet à l'écriture d'origine.
  */
 export function supprimerEcriture(d: Dossier, id: string): Resultat<Dossier> {
-  if (!d.ecritures.some((e) => e.id === id)) return echec(`Écriture ${id} introuvable.`);
+  const e = d.ecritures.find((x) => x.id === id);
+  if (!e) return echec(`Écriture ${id} introuvable.`);
+  if (e.automatique) return echec(AUTOMATIQUE);
   return ok({ ...d, ecritures: d.ecritures.filter((e) => e.id !== id && e.extourneDe !== id) });
 }
 
@@ -114,6 +119,7 @@ export function modifierEcriture(d: Dossier, id: string, nouvelle: Omit<Ecriture
   const i = d.ecritures.findIndex((e) => e.id === id);
   if (i < 0) return echec(`Écriture ${id} introuvable.`);
   const ancienne = d.ecritures[i]!;
+  if (ancienne.automatique) return echec(AUTOMATIQUE);
   if (ancienne.extourneDe || estExtournee(d, id)) {
     return echec('Une écriture liée à une extourne ne peut plus être modifiée.');
   }

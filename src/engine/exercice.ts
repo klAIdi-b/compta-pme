@@ -111,6 +111,11 @@ export interface Exercice {
     echellePrix?: DonneesEchelle;
   };
   corrige?: EcritureCorrigee[];
+  /**
+   * Écritures déjà passées par le logiciel (simulateur en comptabilité mixte : tours non saisis par les élèves). Elles
+   * figurent dans le journal dès l'ouverture, sans être des opérations de l'énoncé.
+   */
+  ecrituresAutomatiques?: { date: DateISO; piece: string; libelle: string; lignes: LigneEcriture[] }[];
   /** Points par opération (numéro → points) ; 1 point par défaut. */
   bareme?: Record<string, number>;
   /** Points partiels pour les écritures multiples (oui par défaut). */
@@ -169,7 +174,7 @@ export function creerDossier(ex: Exercice, plan: Compte[]): Dossier {
     comptesAjoutes: ajoutes,
     comptesMasques: [...ex.parametres.comptesMasques],
     ouverture: ouvertureDepuisBilan(ex.ouvertureActif, ex.ouverturePassif),
-    ecritures: [],
+    ecritures: (ex.ecrituresAutomatiques ?? []).map((e, i) => ({ id: `A${i + 1}`, ...e, automatique: true })),
   };
 }
 
@@ -210,7 +215,28 @@ export function basculerCompte(
 /** Numéros d'opérations ayant au moins une écriture non extournée dans le journal. */
 export function operationsSaisies(d: Dossier): Set<string> {
   const extournees = new Set(d.ecritures.filter((e) => e.extourneDe).map((e) => e.extourneDe!));
-  return new Set(d.ecritures.filter((e) => !e.extourneDe && !extournees.has(e.id)).map((e) => e.piece));
+  return new Set(d.ecritures.filter((e) => !e.automatique && !e.extourneDe && !extournees.has(e.id)).map((e) => e.piece));
+}
+
+/**
+ * Simulateur : l'enseignant distribue après chaque tour une nouvelle version du même exercice (mêmes identifiant et
+ * entreprise, pièces des nouveaux tours en plus). L'élève garde ses écritures ; les écritures automatiques sont
+ * remplacées par celles de la nouvelle version.
+ */
+export function actualiserDossier(d: Dossier, ex: Exercice): Dossier {
+  const automatiques = (ex.ecrituresAutomatiques ?? []).map((e, i) => ({ id: `A${i + 1}`, ...e, automatique: true }));
+  return { ...d, ecritures: [...automatiques, ...d.ecritures.filter((e) => !e.automatique)] };
+}
+
+/** Nouvelle version d'un exercice du simulateur, à reprendre dans la session de l'élève. */
+export function estNouvelleVersionSimulation(ancien: Exercice, nouveau: Exercice): boolean {
+  return (
+    ancien.id === nouveau.id &&
+    nouveau.id.startsWith('simulation-') &&
+    (ancien.operations.length !== nouveau.operations.length ||
+      (ancien.ecrituresAutomatiques ?? []).length !== (nouveau.ecrituresAutomatiques ?? []).length ||
+      ancien.titre !== nouveau.titre)
+  );
 }
 
 /** Contrôle d'un exercice avant distribution : erreurs bloquantes et avertissements. */
@@ -230,7 +256,14 @@ export function controlerExercice(ex: Exercice, plan: Compte[]): { erreurs: stri
     if (!dispo.has(n)) erreurs.push(`Bilan d'ouverture : le compte ${n} n'est pas disponible au niveau choisi.`);
   }
 
-  if (ex.operations.length === 0) erreurs.push("Ajoutez au moins une opération à l'énoncé.");
+  if (ex.operations.length === 0 && !(ex.ecrituresAutomatiques ?? []).length) erreurs.push("Ajoutez au moins une opération à l'énoncé.");
+  for (const a of ex.ecrituresAutomatiques ?? []) {
+    if (ex.operations.some((o) => o.numero === a.piece)) erreurs.push(`La pièce automatique ${a.piece} porte le numéro d'une opération.`);
+    const debit = a.lignes.reduce((t, l) => t + (l.debit ? l.montant : 0), 0);
+    const credit = a.lignes.reduce((t, l) => t + (l.credit ? l.montant : 0), 0);
+    if (debit !== credit) erreurs.push(`La pièce automatique ${a.piece} n'est pas équilibrée.`);
+    for (const l of a.lignes) for (const n of [l.debit, l.credit]) if (n && !dispo.has(n)) erreurs.push(`Pièce automatique ${a.piece} : le compte ${n} n'est pas disponible.`);
+  }
   const vus = new Set<string>();
   ex.operations.forEach((o) => {
     if (vus.has(o.numero)) erreurs.push(`Le numéro d'opération ${o.numero} figure deux fois.`);
@@ -287,7 +320,7 @@ export function corrigeDepuisEcritures(d: Dossier): EcritureCorrigee[] {
   const extournees = new Set(d.ecritures.filter((e) => e.extourneDe).map((e) => e.extourneDe!));
   const parPiece = new Map<string, LigneEcriture[]>();
   for (const e of d.ecritures) {
-    if (e.extourneDe || extournees.has(e.id)) continue;
+    if (e.extourneDe || extournees.has(e.id) || e.automatique) continue;
     parPiece.set(e.piece, [...(parPiece.get(e.piece) ?? []), ...e.lignes]);
   }
   return [...parPiece].map(([piece, lignes]) => ({ piece, lignes }));

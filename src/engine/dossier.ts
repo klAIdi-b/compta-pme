@@ -27,6 +27,11 @@ export interface Ecriture {
   lignes: LigneEcriture[];
   /** Renseigné si cette écriture est l'extourne d'une autre. */
   extourneDe?: string;
+  /**
+   * Écriture passée par le logiciel (simulateur, comptabilité mixte) : visible dans le journal, jamais corrigée ni
+   * notée, ni modifiable, ni extournable, ni supprimable.
+   */
+  automatique?: boolean;
 }
 
 export interface Dossier {

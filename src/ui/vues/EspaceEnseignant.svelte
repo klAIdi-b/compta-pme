@@ -24,6 +24,7 @@
   import DossiersEnseignant from './DossiersEnseignant.svelte';
   import Relecture from './Relecture.svelte';
   import BoutonLien from '../composants/BoutonLien.svelte';
+  import Differe from '../composants/Differe.svelte';
 
   let code = $state('');
   let confirmation = $state('');
@@ -176,11 +177,12 @@
   {:else}
     <main class="contenu">
       <div class="titre">
-        <h1>{enseignant.onglet === 'copies' ? 'Copies des élèves' : enseignant.onglet === 'dossiers' ? 'Dossiers de pièces comptables' : enseignant.onglet === 'parametres' ? 'Paramètres' : enseignant.onglet === 'relecture' ? 'Relecture du contenu' : 'Exercices'}</h1>
+        <h1>{enseignant.onglet === 'copies' ? 'Copies des élèves' : enseignant.onglet === 'dossiers' ? 'Dossiers de pièces comptables' : enseignant.onglet === 'simulateur' ? "Simulateur d'entreprise" : enseignant.onglet === 'parametres' ? 'Paramètres' : enseignant.onglet === 'relecture' ? 'Relecture du contenu' : 'Exercices'}</h1>
         <div class="segments" role="group" aria-label="Rubrique">
           <button aria-pressed={enseignant.onglet === 'exercices'} onclick={() => (enseignant.onglet = 'exercices')}>Exercices</button>
           <button aria-pressed={enseignant.onglet === 'dossiers'} onclick={() => (enseignant.onglet = 'dossiers')}>Dossiers</button>
           <button aria-pressed={enseignant.onglet === 'copies'} onclick={() => (enseignant.onglet = 'copies')}>Copies</button>
+          <button aria-pressed={enseignant.onglet === 'simulateur'} onclick={() => (enseignant.onglet = 'simulateur')}>Simulateur</button>
           <button aria-pressed={enseignant.onglet === 'relecture'} onclick={() => (enseignant.onglet = 'relecture')}>Relecture</button>
           <button aria-pressed={enseignant.onglet === 'parametres'} onclick={() => (enseignant.onglet = 'parametres')}>Paramètres</button>
         </div>
@@ -284,6 +286,8 @@
         <Relecture />
       {:else if enseignant.onglet === 'copies'}
         <SyntheseCopies />
+      {:else if enseignant.onglet === 'simulateur'}
+        <Differe charger={() => import('./simulation/Simulateur.svelte')} props={{}} />
       {:else}
         <form class="carte etroit" onsubmit={changerCode}>
           <h2>Code d'accès</h2>

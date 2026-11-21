@@ -38,9 +38,12 @@
       (corrigeParPiece.size > 0 || avecBouclement) &&
       operations.length > 0,
   );
+  /** Pièces passées par le logiciel (simulateur, comptabilité mixte) : ni corrigées ni modifiables. */
+  const nbValidees = $derived(d.ecritures.filter((e) => !e.automatique).length);
+  const piecesAutomatiques = $derived(new Set((ex.ecrituresAutomatiques ?? []).map((a) => a.piece)));
   /** Clé de suivi : le numéro d'opération, ou « Bouclement » pour les écritures de bouclement. */
   function cle(piece: string): string {
-    return avecBouclement && !operations.some((o) => o.numero === piece) ? PIECE_BOUCLEMENT : piece;
+    return avecBouclement && !operations.some((o) => o.numero === piece) && !piecesAutomatiques.has(piece) ? PIECE_BOUCLEMENT : piece;
   }
   function solutionDe(k: string) {
     return k === PIECE_BOUCLEMENT ? corrigeBouclement(d, ex) : corrigeParPiece.get(k);
@@ -48,7 +51,7 @@
   /** Modification d'une écriture validée : toujours possible pour l'élève (choix de l'enseignant le 18.11.2026). */
   const modifAutorisee = $derived(vueEleve(etat.genre) && !etat.verrouille);
   /** Une écriture liée à une extourne ne se modifie pas (le moteur le refuse). */
-  const modifiable = (e: Ecriture) => modifAutorisee && !e.extourneDe && !estExtournee(d, e.id);
+  const modifiable = (e: Ecriture) => modifAutorisee && !e.automatique && !e.extourneDe && !estExtournee(d, e.id);
   const suivi = $derived(etat.session!.suivi);
 
   // ---- Accompagnement des écritures de bouclement (B1, B2…) ----
@@ -325,7 +328,7 @@
 <div class="titre">
   <h1>Journal</h1>
   <span class="sous">
-    {d.ecritures.length} écriture{d.ecritures.length > 1 ? 's' : ''} validée{d.ecritures.length > 1 ? 's' : ''}
+    {nbValidees} écriture{nbValidees > 1 ? 's' : ''} validée{nbValidees > 1 ? 's' : ''}
     {#if operations.length}· {saisies.size} opération{saisies.size > 1 ? 's' : ''} sur {operations.length} saisie{saisies.size > 1 ? 's' : ''}{/if}
   </span>
 </div>
@@ -525,6 +528,7 @@
                     <td>
                       <span class:barre={extournee}>{e.libelle}</span>
                       {#if extournee}<span class="mention">extournée</span>{/if}
+                      {#if e.automatique}<span class="mention" title="Écriture passée par le logiciel : elle n'est ni corrigée ni modifiable.">automatique</span>{/if}
                     </td>
                   {:else}
                     <td></td><td></td><td></td>
@@ -534,14 +538,14 @@
                   <td class="montant">{m(l.montant)}</td>
                   {#if retour}
                     <td>
-                      {#if j === 0 && !extournee && !e.extourneDe}
+                      {#if j === 0 && !extournee && !e.extourneDe && !e.automatique}
                         <span class={`statut ${classeStatut(statut(cle(e.piece)))}`}>{libelleStatut(statut(cle(e.piece)))}</span>
                       {/if}
                     </td>
                   {/if}
                   <td class="actions">
                     {#if j === 0}
-                      {#if !etat.verrouille}
+                      {#if !etat.verrouille && !e.automatique}
                       <div class="boutons-ecriture">
                         {#if !extournee && !e.extourneDe}
                           {#if modifAutorisee}<button class="action-ecr" aria-label={`Modifier la pièce ${e.piece}`} onclick={() => modifier(e)}>Modifier</button>{/if}

@@ -148,7 +148,7 @@ export type StatutExport = 'vide' | 'jamais' | 'modifie' | 'a-jour';
 
 /** Où en est l'export de la copie : rien à exporter, jamais exportée, modifiée depuis, ou à jour. */
 export function statutExport(dossier: Pick<Dossier, 'ecritures'>, fiches: unknown, dernier?: DernierExport | null): StatutExport {
-  if (!dernier) return dossier.ecritures.length === 0 ? 'vide' : 'jamais';
+  if (!dernier) return dossier.ecritures.every((e) => e.automatique) ? 'vide' : 'jamais';
   return empreinteTravail(dossier, fiches) === dernier.empreinte ? 'a-jour' : 'modifie';
 }
 
