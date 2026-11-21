@@ -28,8 +28,8 @@
         <h2>Décisions enregistrées</h2>
         <div class="corps-carte">
           <p>
-            Le fichier <b>{simulationEleve.fichierEnregistre}</b> se trouve dans vos téléchargements. Remettez-le à votre enseignant
-            (messagerie de l'école, clé USB ou dépôt de fichiers) : il l'importera avant de calculer le tour.
+            Le fichier <b>{simulationEleve.fichierEnregistre}</b> se trouve dans vos téléchargements. Déposez-le dans le devoir
+            Google Classroom prévu par votre enseignant : il l'importera avant de calculer le tour.
           </p>
           <div class="ligne">
             <button class="btn" onclick={() => (simulationEleve.fichierEnregistre = null)}>Modifier les décisions</button>

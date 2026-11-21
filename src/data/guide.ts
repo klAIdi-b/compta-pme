@@ -232,7 +232,7 @@ export const GUIDE: PartieGuide[] = [
             type: 'etapes',
             items: [
               'Cliquez sur « Exporter ma copie » (en bas à gauche) : un fichier .compta-copie.json est enregistré dans vos téléchargements.',
-              'Remettez ce fichier à votre enseignant (par la plateforme de l’école, par courriel ou sur une clé USB).',
+              'Déposez ce fichier dans le devoir Google Classroom prévu par votre enseignant.',
               'Pour garder une trace imprimable, « Exporter en PDF » produit un document avec le journal, la balance et les états.',
             ],
           },
@@ -379,7 +379,7 @@ export const GUIDE: PartieGuide[] = [
             type: 'etapes',
             items: [
               '« Exporter pour les élèves » enregistre un fichier .compta-exercice.json dans vos téléchargements.',
-              'Déposez ce fichier sur la plateforme de la classe (ou envoyez-le par courriel, sur une clé USB…).',
+              'Déposez ce fichier dans un devoir Google Classroom de la classe.',
               "L'élève ouvre le site, clique sur « Ouvrir un exercice reçu… » et choisit le fichier.",
             ],
           },

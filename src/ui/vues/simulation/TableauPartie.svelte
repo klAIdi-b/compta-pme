@@ -71,7 +71,7 @@
       return { nom: nomFichier([x.nom, `tour-${n}`], EXT_SITUATION), donnees: new TextEncoder().encode(exporterSituation(sit)) };
     });
     telechargerBlob(nomFichier([e.nom, `situations-tour-${n}`], '.zip'), new Blob([creerZip(fichiers)], { type: 'application/zip' }));
-    message = `Un fichier de situation par groupe a été téléchargé (archive ZIP). Remettez à chaque groupe le sien : il l'ouvre dans Compta PME (accueil, « Simulateur : ouvrir ma situation »), décide, puis vous renvoie son fichier de décisions.`;
+    message = `Un fichier de situation par groupe a été téléchargé (archive ZIP). Remettez à chaque groupe le sien (par exemple dans un devoir Google Classroom) : il l'ouvre dans Compta PME (accueil, « Simulateur : ouvrir ma situation »), décide, puis dépose son fichier de décisions dans le devoir Classroom.`;
   }
 
   async function importerLesDecisions() {
