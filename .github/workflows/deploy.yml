@@ -36,10 +36,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: npx playwright install --with-deps chromium
 
       # Site principal (main)
       - run: npm ci
+        working-directory: _principal
+      # Navigateur de test installé après npm ci : il doit correspondre à la version de Playwright du projet.
+      - run: npx playwright install --with-deps chromium
         working-directory: _principal
       - run: npm test
         working-directory: _principal
@@ -53,6 +55,9 @@ jobs:
 
       # Version d'essai (essai), publiée dans essai/
       - run: npm ci
+        if: env.ESSAI == '1'
+        working-directory: _essai
+      - run: npx playwright install chromium
         if: env.ESSAI == '1'
         working-directory: _essai
       - run: npm test
