@@ -1,9 +1,13 @@
-# Tests, compilation et publication sur GitHub Pages à chaque envoi sur la branche main.
+# Tests, compilation et publication sur GitHub Pages à chaque envoi sur la branche main ou sur la branche essai.
+# Le site publié contient toujours les deux versions :
+#   - la branche main à la racine (site des élèves) ;
+#   - la branche essai, si elle existe, dans le sous-dossier essai/ (version d'essai pour les collègues, phase P4).
+# Chaque version est testée avant la publication. Le service hors ligne garde un cache séparé pour chacune.
 name: Tests et publication
 
 on:
   push:
-    branches: [main]
+    branches: [main, essai]
   workflow_dispatch:
 
 permissions:
@@ -20,20 +24,56 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Versions à publier (main, et essai si la branche existe)
+        run: |
+          git worktree add _principal origin/main
+          if git ls-remote --exit-code --heads origin essai > /dev/null; then
+            git worktree add _essai origin/essai
+            echo "ESSAI=1" >> "$GITHUB_ENV"
+          fi
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-      - run: npm ci
-      - run: npm test
-      - run: npm run check
-      - run: npm run build
-      # Tests des écrans et de l'accessibilité dans un vrai navigateur, sur le site compilé.
       - run: npx playwright install --with-deps chromium
+
+      # Site principal (main)
+      - run: npm ci
+        working-directory: _principal
+      - run: npm test
+        working-directory: _principal
+      - run: npm run check
+        working-directory: _principal
+      - run: npm run build
+        working-directory: _principal
+      # Tests des écrans et de l'accessibilité dans un vrai navigateur, sur le site compilé.
       - run: npm run test:ecrans
+        working-directory: _principal
+
+      # Version d'essai (essai), publiée dans essai/
+      - run: npm ci
+        if: env.ESSAI == '1'
+        working-directory: _essai
+      - run: npm test
+        if: env.ESSAI == '1'
+        working-directory: _essai
+      - run: npm run check
+        if: env.ESSAI == '1'
+        working-directory: _essai
+      - run: npm run build
+        if: env.ESSAI == '1'
+        working-directory: _essai
+      - run: npm run test:ecrans
+        if: env.ESSAI == '1'
+        working-directory: _essai
+      - name: Version d'essai dans le sous-dossier essai/
+        if: env.ESSAI == '1'
+        run: cp -r _essai/dist _principal/dist/essai
+
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: dist
+          path: _principal/dist
 
   deploy:
     needs: build

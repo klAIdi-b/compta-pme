@@ -116,11 +116,19 @@
     oublierLien();
     etat.commencer({ prenom: prenom.trim(), nom: nom.trim(), classe: classe.trim() }, ex);
   }
+  /** Version d'essai publiée dans le sous-dossier essai/ (phase P4 de la version publique). */
+  const versionEssai = typeof location !== 'undefined' && /\/essai\/(index\.html)?$/.test(location.pathname);
 </script>
 
 <div class="page">
   <header class="bandeau-haut"><span class="logo">Compta PME</span></header>
   <main class="contenu">
+    {#if versionEssai}
+      <p class="info" role="note">
+        <strong>Version d'essai.</strong> Cette version sert à l'essai par des enseignant·e·s avant sa publication ; elle peut
+        changer sans préavis. Les données restent dans ce navigateur, comme dans la version habituelle.
+      </p>
+    {/if}
     <h1>{eleveConnu ? `Bon retour, ${eleveConnu.prenom}` : 'Bienvenue'}</h1>
     <p class="discret">
       Logiciel de comptabilité en partie double, plan comptable suisse. Vos données restent dans ce navigateur :

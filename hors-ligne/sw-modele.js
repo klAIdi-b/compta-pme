@@ -3,7 +3,14 @@
 // Seuls les fichiers du site sont mis en cache ; aucune donnée d'élève ne transite ici.
 const VERSION = '__VERSION__';
 const FICHIERS = __FICHIERS__;
-const CACHE = `compta-pme-${VERSION}`;
+// Le nom du cache contient le dossier du site : la version publiée et la version d'essai (sous-dossier essai/) ont
+// chacune leur cache, et aucune n'efface celui de l'autre.
+const PREFIXE = `compta-pme-${new URL(self.registration.scope).pathname}-`;
+const CACHE = `${PREFIXE}${VERSION}`;
+/** La version d'essai ne touche jamais aux caches de l'ancien format, qui appartiennent au site principal. */
+const ESSAI = new URL(self.registration.scope).pathname.endsWith('/essai/');
+/** Caches des versions précédentes de ce même site (et ancien format sans dossier, pour le site principal). */
+const ancien = (n) => n !== CACHE && (n.startsWith(PREFIXE) || (!ESSAI && /^compta-pme-[0-9a-f]{12}$/.test(n)));
 
 // Installation : tout le site est mis en cache d'un coup (y compris les modules chargés à la demande, PDF compris).
 self.addEventListener('install', (e) => {
@@ -20,7 +27,7 @@ self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches
       .keys()
-      .then((noms) => Promise.all(noms.filter((n) => n.startsWith('compta-pme') && n !== CACHE).map((n) => caches.delete(n))))
+      .then((noms) => Promise.all(noms.filter(ancien).map((n) => caches.delete(n))))
       .then(() => self.clients.claim()),
   );
 });

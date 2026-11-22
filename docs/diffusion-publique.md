@@ -73,6 +73,8 @@ L'accord de l'enseignant est demandé à la fin de chaque phase.
 - Essai avec un ou deux collègues d'autres écoles ; retours par le fichier « Exporter mes remarques » ; corrections.
 - Fusion sur `main` et publication (GitHub Pages), avec l'accord de l'enseignant.
 
+- *Préparé le 22.11.2026* : `docs/essai-collegues.md` (adresse d'essai `…/compta-pme/essai/` depuis la branche `essai`, publication des deux versions par `deploy.yml`, cache hors ligne séparé, fiche d'essai `public/fiche-essai.html`, message aux collègues, questions pour le DIP). Bandeau « Version d'essai » sur l'accueil quand le site est servi depuis `essai/`. En attente de l'accord de l'enseignant pour autoriser la branche `essai` à publier et l'envoyer.
+
 ### Plus tard — Suisse romande
 
 Vocabulaire et usages cantonaux (Vaud, Fribourg, Neuchâtel, Valais, Jura, Berne francophone), plans de cours différents, porteur institutionnel éventuel, canal de contact et contributions.
