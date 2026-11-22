@@ -3,7 +3,7 @@
   import { simulations } from '../../simulation.svelte';
   import { controlerDecisions, estCfc2, etatsCourants, imprevusEntreprise, libellePeriode, moisDuTour, partieTerminee } from '../../../engine/simulation/tour';
   import type { Imprevu } from '../../../engine/simulation/types';
-  import { imprimerFichesAfp } from './impression';
+  import { imprimerFichesAfp, imprimerFichesDecisions, imprimerRegles } from './impression';
   import { libelleImprevu } from './libelles';
   import { exerciceEntreprise } from '../../../engine/simulation/exercice';
   import { formatMontant } from '../../../engine/money';
@@ -54,6 +54,13 @@
         ? { type: 'hausseFournisseur', entrepriseId: cibleImprevu || null, pourcent: Number(pourcentImprevu) }
         : { type: 'clientInsolvable', entrepriseId: cibleImprevu || e.entreprises[0]!.id };
     erreursImprevu = simulations.ajouterImprevu(id, imp);
+  }
+
+  const bloquee = "La fenêtre d'impression a été bloquée par le navigateur : autorisez les fenêtres pour ce site, puis réessayez.";
+  function imprimerPourGroupes(quoi: 'regles' | 'decisions') {
+    if (!p) return;
+    const ok = quoi === 'regles' ? imprimerRegles(p) : imprimerFichesDecisions(p, $state.snapshot(e.imprevus ?? []));
+    if (!ok) message = bloquee;
   }
 
   function imprimer(corrige: boolean) {
@@ -169,6 +176,12 @@
           {#if erreursImprevu.length}<p class="alerte" role="alert">{erreursImprevu.join(' ')}</p>{/if}
         </div>
       </section>
+
+      <div class="ligne">
+        <button class="btn" onclick={() => imprimerPourGroupes('regles')}>Imprimer les règles du jeu</button>
+        <button class="btn" onclick={() => imprimerPourGroupes('decisions')}>Imprimer les fiches de décisions du tour {n}</button>
+        <span class="aide">Une page par groupe, avec sa situation et les imprévus annoncés : ajoutez les imprévus avant d'imprimer.</span>
+      </div>
 
       <section class="carte">
         <header class="tete">

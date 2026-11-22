@@ -318,3 +318,12 @@ Pour l'AFP, le tableau de la partie propose, après chaque tour, « Imprimer les
 Les ajustements après le premier essai en classe.
 
 Fichiers : `controlerImprevu`, `imprevusEntreprise`, `montantDucroire` dans `tour.ts`, `fiche-afp.ts`, `src/ui/vues/simulation/impression.ts`, tests `tests/simulation-imprevus.test.ts` et `e2e/simulateur.spec.ts`.
+
+## 17. Fiches pour les groupes et guide (22.11.2026, à valider par l'enseignant)
+
+Demande de l'enseignant (22.11.2026) : rendre le simulateur compréhensible pour les élèves et utilisable en classe sans connexion. Aucune règle nouvelle : les fiches reprennent les règles et les données validées (§ 4, 5, 13 à 16).
+
+- **Règles du jeu** (`reglesDuJeu`, `src/engine/simulation/fiches-groupes.ts`) : bouton « Imprimer les règles du jeu » du tableau de la partie. Une à deux pages adaptées au niveau, au secteur, à la durée des tours et à l'affichage : le jeu, les décisions du niveau, la règle des ventes (clients de base et saison mois par mois, effet du prix, publicité jusqu'à +60 % avec la moitié de l'effet au budget de référence, stock et capacité, ventes sur facture), argent et paiements (contrôle des liquidités, TVA, salaires, véhicule, découvert, emprunt, dividende), résultats et pondération du classement.
+- **Fiches de décisions** (`ficheDecisions`) : bouton « Imprimer les fiches de décisions du tour n ». Une page par groupe : résumé du tour précédent, imprévus qui le touchent, situation au début du tour (comme l'écran « Décisions »), rappels (saison, loyer, prix d'achat du tour, capacité), cases à remplir pour les décisions du niveau. Le groupe remet la fiche, l'enseignant la recopie à l'écran.
+- **Guide** : section « Le simulateur d'entreprise pas à pas » dans la partie enseignant.
+- Tests `tests/simulation-fiches-groupes.test.ts`, `e2e/simulateur.spec.ts` (ouverture des deux impressions).

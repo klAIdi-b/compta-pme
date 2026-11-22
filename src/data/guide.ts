@@ -357,7 +357,7 @@ export const GUIDE: PartieGuide[] = [
               'Exercices : vos exercices (création, modification, import, export).',
               'Dossiers : les dossiers de pièces comptables prêts à distribuer (PDF élève, corrigé PDF, fichiers d’exercice).',
               'Copies : correction automatique des copies rendues par les élèves, notes et statistiques de la classe.',
-              'Simulateur : simulateur d’entreprise, des groupes d’élèves en concurrence sur un marché commun.',
+              'Simulateur : simulateur d’entreprise, des groupes d’élèves en concurrence sur un marché commun (voir « Le simulateur d’entreprise pas à pas »).',
               'Relecture : liste de tout le contenu proposé (théorie, exercices, dossiers, niveaux des comptes) à valider ou à commenter.',
               'Paramètres : réglages de l’établissement (plan comptable, niveaux) et code d’accès.',
             ],
@@ -541,6 +541,56 @@ export const GUIDE: PartieGuide[] = [
               'Fichier entraînement et fichier évaluation : à distribuer comme un exercice ordinaire. Dans le journal, la pièce ' +
                 's’affiche au-dessus de la grille de saisie.',
               'Les dossiers figurent aussi dans la liste de la page d’accueil, en entraînement.',
+            ],
+          },
+        ],
+      },
+      {
+        id: 'simulateur',
+        titre: 'Le simulateur d’entreprise pas à pas',
+        blocs: [
+          {
+            type: 'p',
+            texte:
+              'Des groupes d’élèves dirigent chacun un commerce sur un même marché. À chaque tour, ils décident (prix, commande, ' +
+              'publicité, puis selon le niveau fournisseur, prélèvement privé, employés, véhicule, emprunt, dividende) ; le ' +
+              'simulateur calcule les ventes de tous les groupes et produit les pièces comptables du tour. Il fonctionne sans ' +
+              'connexion : c’est vous qui saisissez les décisions des groupes à votre poste.',
+          },
+          {
+            type: 'etapes',
+            items: [
+              'Préparer (5 minutes) : onglet « Simulateur », « Nouvelle partie ». Choisissez le niveau (AFP, CFC 1, CFC 2, MP), le ' +
+                'secteur, le nombre de tours et leur durée (mois ou trimestre), la comptabilité (automatique, saisie par les élèves ' +
+                'ou mixte) et l’affichage des résultats. Ajoutez une entreprise par groupe, avec le nom choisi par le groupe.',
+              'Présenter le jeu : « Imprimer les règles du jeu » donne une ou deux pages adaptées au niveau et au secteur (décisions, ' +
+                'règle des ventes, paiements, classement). Lisez-les avec la classe avant le premier tour.',
+              'À chaque tour : ajoutez d’abord les imprévus éventuels, puis « Imprimer les fiches de décisions du tour » (une page ' +
+                'par groupe, avec sa situation et les imprévus qui le touchent). Les groupes décident en 15 à 20 minutes et ' +
+                'remplissent leur fiche.',
+              'Saisir : pour chaque groupe, « Saisir », recopiez la fiche, puis « Valider les décisions ». Une décision impossible ' +
+                '(par exemple des paiements supérieurs à l’argent disponible) est refusée avec un message : rendez la fiche au ' +
+                'groupe pour qu’il la corrige.',
+              'Calculer et projeter : quand tous les groupes ont validé, « Calculer le tour », puis la projection plein écran ' +
+                '(Échap pour la fermer). Commentez avec la classe : clients perdus faute de stock, prix moyen du marché, résultat.',
+              'Comptabilité : selon le mode, exportez pour chaque entreprise l’exercice du tour (« Pièces et exercices ») et ' +
+                'distribuez-le au groupe, qui passe les écritures au journal ; en AFP, imprimez les fiches de calcul et leur corrigé.',
+              'Fin de partie : au dernier tour d’une année complète, inventaire, bouclement et, en MP, répartition du bénéfice ' +
+                'd’après le dividende proposé.',
+            ],
+          },
+          {
+            type: 'retenir',
+            texte:
+              'La partie est enregistrée dans ce navigateur. Exportez-la (fichier .compta-simulation.json) pour la continuer sur un ' +
+              'autre ordinateur. Un tour calculé par erreur peut être annulé (« Annuler le dernier tour »).',
+          },
+          {
+            type: 'liste',
+            items: [
+              'Durée indicative : 15 à 20 minutes de décisions par tour, puis 0 à 45 minutes de saisie selon le niveau et le mode.',
+              'Avec beaucoup de groupes, ramassez les fiches pendant la discussion pour saisir au fur et à mesure.',
+              'Les noms des élèves ne sont jamais demandés : seul le nom d’équipe figure dans la partie.',
             ],
           },
         ],

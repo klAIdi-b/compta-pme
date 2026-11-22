@@ -65,6 +65,18 @@ test("l'enseignant crée une partie, saisit les décisions, calcule un tour et p
   await page.keyboard.press('Escape');
   await expect(page.getByRole('button', { name: 'Calculer le tour 2' })).toBeVisible();
 
+  // Fiches pour les groupes (22.11.2026) : règles du jeu et fiches de décisions du tour 2, une page par groupe.
+  const [regles] = await Promise.all([page.waitForEvent('popup'), page.getByRole('button', { name: 'Imprimer les règles du jeu' }).click()]);
+  await expect(regles.getByRole('heading', { name: 'Règles du jeu' })).toBeVisible();
+  await expect(regles.getByRole('heading', { name: 'Comment se font les ventes' })).toBeVisible();
+  if (CAPTURES) await regles.screenshot({ path: `${CAPTURES}/sim-5-regles.png`, fullPage: true });
+  await regles.close();
+  const [fiches] = await Promise.all([page.waitForEvent('popup'), page.getByRole('button', { name: 'Imprimer les fiches de décisions du tour 2' }).click()]);
+  await expect(fiches.locator('section.page')).toHaveCount(2);
+  await expect(fiches.getByText(/^Tour précédent \(janvier/).first()).toBeVisible();
+  if (CAPTURES) await fiches.screenshot({ path: `${CAPTURES}/sim-6-fiches.png`, fullPage: true });
+  await fiches.close();
+
   // Pièces : aperçu de l'exercice d'une entreprise, retour au simulateur.
   await page.getByRole('button', { name: 'Aperçu' }).first().click();
   await expect(page.getByText('Aperçu enseignant.')).toBeVisible();
