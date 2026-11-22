@@ -311,6 +311,8 @@
     <p class="enseignant">
       <button class="btn-lien" onclick={() => (etat.guide = 'eleve')}>Guide d'utilisation</button>
       <span class="sep">·</span>
+      <button class="btn-lien" onclick={() => (etat.guide = 'apropos')}>À propos</button>
+      <span class="sep">·</span>
       <button class="btn-lien" onclick={onEnseignant}>Espace enseignant</button>
     </p>
   </main>

@@ -663,7 +663,8 @@
   .aide-b { margin-top: 8px; padding: 8px 12px; background: #fff; border-left: 3px solid var(--c-structure); border-radius: 4px; font-size: 14px; }
   .aide-lien { display: inline-block; margin-top: 8px; font-size: 13.5px; font-weight: bold; }
   .zone-piece { padding: 14px 18px; background: var(--c-fond-2); border-bottom: 1px solid var(--c-bordure-3); max-height: 420px; overflow-y: auto; }
-  .grille-saisie { min-width: 0; }
+  /* Zoom à 200 % ou fenêtre étroite : la grille défile dans sa carte au lieu d'être coupée (audit P3, 22.11.2026). */
+  .grille-saisie { min-width: 0; overflow-x: auto; position: relative; }
   .ajout-ligne { display: flex; align-items: center; gap: 14px; padding: 2px 14px 12px; flex-wrap: wrap; font-size: 13px; }
   .btn-ajout {
     font: inherit; font-weight: bold; font-size: 13.5px; color: var(--c-structure); background: #fff; cursor: pointer;

@@ -306,4 +306,11 @@
     .logo { width: 156px; }
     .principal { padding: 16px; }
   }
+  /* Zoom à 200 % (fenêtre d'environ 680 px) : l'en-tête passe sur plusieurs lignes au lieu de se chevaucher (audit P3). */
+  @media (max-width: 760px) {
+    .app { grid-template-rows: auto minmax(0, 1fr); }
+    .entete { flex-wrap: wrap; row-gap: 8px; padding: 8px 12px; }
+    .logo { width: auto; }
+    .dossier { flex-wrap: wrap; row-gap: 6px; flex-basis: 100%; order: 3; }
+  }
 </style>

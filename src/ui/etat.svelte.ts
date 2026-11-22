@@ -113,7 +113,7 @@ class Etat {
   vue = $state<Vue>(vueDepuisAdresse());
   visiteOuverte = $state(false);
   /** Guide d'utilisation ouvert (partie affichée), ou null. */
-  guide = $state<null | 'eleve' | 'enseignant'>(null);
+  guide = $state<null | 'eleve' | 'enseignant' | 'apropos'>(null);
   stockageIndisponible = $state(false);
   /** Accueil affiché par-dessus une session en cours (reprise ou choix d'un autre exercice). */
   accueilOuvert = $state(false);

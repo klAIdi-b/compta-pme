@@ -57,12 +57,15 @@ L'accord de l'enseignant est demandé à la fin de chaque phase.
 - Écarts par rapport à la maquette : les comptes verrouillés ne changent pas non plus de **niveau** (sinon une fonction du logiciel pourrait disparaître d'un niveau) ; les niveaux de difficulté se renomment, s'ajoutent et le dernier se retire s'il ne contient aucun exercice fourni, mais **ne se réordonnent pas** (le numéro est enregistré dans chaque exercice).
 - Point 5 (masquer la filière MP pour une école sans maturité) : sans réponse, non fait.
 
-### Phase P3 — Documentation et accessibilité
+### Phase P3 — Documentation et accessibilité (*faite le 22.11.2026 sur la branche*)
 
 - Guide « Démarrer avec Compta PME dans votre école » (pour un enseignant qui découvre l'outil) : installer sur les postes, préparer un exercice, distribuer, ramasser les copies, données des élèves (LPD, LIPAD).
 - Page « À propos » dans l'application : version, licences, contact (canal à décider), ce que fait et ne fait pas l'application avec les données.
 - Audit d'accessibilité de tous les écrans (axe, clavier seul, contraste, zoom 200 %, lecteur d'écran) et déclaration d'accessibilité.
 - README public ; décision sur les documents internes (`CLAUDE.md` et autres) : les garder, les déplacer dans `docs/developpement/` ou les retirer.
+
+- *Fait* : guide, partie enseignant, sections « Utiliser Compta PME dans votre école » et « Adapter le plan comptable et les niveaux », onglets à jour (Simulateur, Paramètres) ; nouvelle partie « À propos » (licences, données, déclaration d'accessibilité avec ses limites), lien « À propos » sur l'accueil ; `public/guide.html` régénéré ; README pour les enseignants. Documents internes : nom de l'école et chemins retirés, gardés dans `CLAUDE.local.md` (non versionné). Pas de numéro de version affiché ni de canal de contact (non décidé).
+- *Audit d'accessibilité* (`e2e/accessibilite.spec.ts`) : axe sur les 19 écrans de l'élève pour un exercice CFC 2 et un exercice MP, les trois parties du guide, les six onglets de l'espace enseignant et l'éditeur ; aucun défaut grave. Zoom à 200 % (683 px) : deux défauts trouvés et corrigés — la grille de saisie du journal débordait de la page et était coupée (elle défile maintenant dans sa carte) ; l'en-tête se chevauchait (il passe sur deux lignes). Limites déclarées : PDF non balisés, comptes en T graphiques (mêmes informations dans le grand livre et la balance). Non vérifié : lecteur d'écran réel (NVDA, VoiceOver).
 
 ### Phase P4 — Diffusion genevoise
 

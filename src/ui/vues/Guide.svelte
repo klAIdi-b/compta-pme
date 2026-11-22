@@ -1,11 +1,11 @@
 <!-- Guide d'utilisation : accessible depuis l'accueil, la barre latérale et l'espace enseignant. -->
 <script lang="ts">
   import { etat } from '../etat.svelte';
-  import { GUIDE } from '../../data/guide';
+  import { GUIDE, type PartieGuide } from '../../data/guide';
 
-  let { onFermer, partie = 'eleve' }: { onFermer: () => void; partie?: 'eleve' | 'enseignant' } = $props();
+  let { onFermer, partie = 'eleve' }: { onFermer: () => void; partie?: PartieGuide['id'] } = $props();
   // svelte-ignore state_referenced_locally
-  let active = $state<'eleve' | 'enseignant'>(partie);
+  let active = $state<PartieGuide['id']>(partie);
   const p = $derived(GUIDE.find((x) => x.id === active)!);
 </script>
 

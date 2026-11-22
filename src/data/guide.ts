@@ -13,7 +13,7 @@ export interface SectionGuide {
 }
 
 export interface PartieGuide {
-  id: 'eleve' | 'enseignant';
+  id: 'eleve' | 'enseignant' | 'apropos';
   titre: string;
   intro: string;
   sections: SectionGuide[];
@@ -287,6 +287,46 @@ export const GUIDE: PartieGuide[] = [
         ],
       },
       {
+        id: 'autre-ecole',
+        titre: 'Utiliser Compta PME dans votre école',
+        blocs: [
+          {
+            type: 'p',
+            texte:
+              'Compta PME est un site web gratuit : rien à installer, aucun compte à créer, ni pour vous ni pour les élèves. ' +
+              'Après une première visite, il fonctionne aussi sans connexion internet. Il suit la numérotation du plan ' +
+              'comptable PME suisse et les niveaux CFC (1re et 2e année) et maturité professionnelle.',
+          },
+          {
+            type: 'etapes',
+            items: [
+              'Ouvrez le site sur votre ordinateur, puis l’espace enseignant, et choisissez votre code.',
+              'Si votre cours utilise d’autres intitulés de comptes ou un autre découpage en niveaux, adaptez-les dans ' +
+                'l’onglet « Paramètres » (voir « Adapter le plan comptable et les niveaux »). Sinon, ne changez rien.',
+              'Essayez un exercice fourni comme un élève, avec le mode entraînement, avant de le proposer en classe.',
+              'Transmettez aux élèves le lien du site ou d’un exercice (« Copier le lien pour les élèves »).',
+              'Si plusieurs collègues de l’école utilisent le logiciel, l’un exporte les réglages et les exercices, les ' +
+                'autres les importent : tout le monde travaille alors avec le même plan et les mêmes niveaux.',
+            ],
+          },
+          {
+            type: 'retenir',
+            texte:
+              'Le travail des élèves est enregistré dans le navigateur de l’ordinateur qu’ils utilisent. Sur des postes ' +
+              'dont les données sont effacées à la fin de chaque session, demandez-leur d’exporter leur copie avant de ' +
+              'fermer le navigateur.',
+          },
+          {
+            type: 'p',
+            texte:
+              'Aucune donnée d’élève n’est envoyée sur internet. Avant de l’utiliser avec une classe, vérifiez tout de même ' +
+              'les règles de votre établissement sur les outils numériques. Les contenus fournis (exercices, dossiers, ' +
+              'théorie, guide) sont sous licence Creative Commons BY-NC-SA 4.0 : vous pouvez les utiliser et les adapter ' +
+              'pour vos classes en citant « Compta PME » (voir « À propos »).',
+          },
+        ],
+      },
+      {
         id: 'acces',
         titre: "Accéder à l'espace enseignant",
         blocs: [
@@ -317,9 +357,45 @@ export const GUIDE: PartieGuide[] = [
               'Exercices : vos exercices (création, modification, import, export).',
               'Dossiers : les dossiers de pièces comptables prêts à distribuer (PDF élève, corrigé PDF, fichiers d’exercice).',
               'Copies : correction automatique des copies rendues par les élèves, notes et statistiques de la classe.',
+              'Simulateur : simulateur d’entreprise, des groupes d’élèves en concurrence sur un marché commun.',
               'Relecture : liste de tout le contenu proposé (théorie, exercices, dossiers, niveaux des comptes) à valider ou à commenter.',
-              'Paramètres : changement du code d’accès.',
+              'Paramètres : réglages de l’établissement (plan comptable, niveaux) et code d’accès.',
             ],
+          },
+        ],
+      },
+      {
+        id: 'reglages',
+        titre: 'Adapter le plan comptable et les niveaux',
+        blocs: [
+          {
+            type: 'p',
+            texte:
+              'L’onglet « Paramètres » contient les réglages de l’établissement. Par défaut, le logiciel utilise le plan ' +
+              'comptable PME du cours et ses niveaux ; vous n’avez rien à régler si votre cours les suit.',
+          },
+          {
+            type: 'liste',
+            items: [
+              'Plan comptable : « Modifier le plan » permet de changer l’intitulé d’un compte, le niveau à partir duquel il ' +
+                'est visible (CFC 1, CFC 2, MP ou « non utilisé ») et d’ajouter un compte. « Importer un plan (CSV)… » ' +
+                'remplace le plan par un fichier au même format que « Exporter le plan (CSV) » ; le fichier est contrôlé ' +
+                'et les différences sont affichées avant le remplacement.',
+              'Comptes « utilisés par le logiciel » : la numérotation est fixe, et les comptes dont le logiciel a besoin ' +
+                '(bouclement, TVA, ducroire, salaires, répartition du bénéfice, titres, analyse, simulateur) ne peuvent ' +
+                'être ni retirés ni changés de niveau. Leur intitulé reste modifiable, sauf celui du compte 2800, qui suit ' +
+                'la forme juridique.',
+              'Niveaux : « Modifier les niveaux » permet de renommer les niveaux de difficulté de l’accueil, d’en ajouter, ' +
+                'et de renommer les niveaux « Comptes et fonctions » (par exemple « 1re année ») sans changer ce qu’ils activent.',
+              'Partage : « Exporter les réglages » produit un fichier .compta-reglages.json à transmettre à vos collègues.',
+            ],
+          },
+          {
+            type: 'retenir',
+            texte:
+              'Le plan s’applique aux exercices que vous créez ensuite : chacun emporte son plan dans le fichier distribué, ' +
+              'les élèves n’ont rien à régler. Les exercices fournis avec le logiciel gardent toujours le plan par défaut, ' +
+              'et un exercice déjà créé garde le plan avec lequel il a été créé.',
           },
         ],
       },
@@ -535,6 +611,69 @@ export const GUIDE: PartieGuide[] = [
               'échanges se font uniquement par fichiers. Les copies importées dans l’onglet « Copies » ne sont pas ' +
               'enregistrées : conservez les fichiers reçus. Vider les données du navigateur efface vos exercices : gardez ' +
               'toujours la version enseignant de chacun.',
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'apropos',
+    titre: 'À propos',
+    intro:
+      'Compta PME est un logiciel pédagogique de comptabilité en partie double pour les formations commerciales ' +
+      '(CFC employé·e de commerce, maturité professionnelle), selon la numérotation du plan comptable PME suisse.',
+    sections: [
+      {
+        id: 'licences',
+        titre: 'Licences',
+        blocs: [
+          {
+            type: 'liste',
+            items: [
+              'Le code du logiciel est publié sous licence MIT : il peut être réutilisé et modifié librement.',
+              'Les contenus pédagogiques (exercices, dossiers de pièces, théorie, guide, données du simulateur) sont publiés ' +
+                'sous licence Creative Commons BY-NC-SA 4.0 : vous pouvez les utiliser, les copier et les adapter en citant ' +
+                '« Compta PME », sans usage commercial, et en partageant vos adaptations sous la même licence.',
+              'Les entreprises, les personnes et les montants des exercices sont fictifs.',
+            ],
+          },
+        ],
+      },
+      {
+        id: 'donnees-apropos',
+        titre: 'Données',
+        blocs: [
+          {
+            type: 'p',
+            texte:
+              'Le logiciel fonctionne entièrement dans le navigateur. Le travail des élèves, les exercices et les réglages ' +
+              'de l’enseignant sont enregistrés dans le navigateur de l’ordinateur utilisé ; rien n’est envoyé sur ' +
+              'internet. Les échanges entre l’enseignant et les élèves se font par fichiers. Le site ne dépose aucun ' +
+              'cookie publicitaire et ne mesure pas l’audience.',
+          },
+        ],
+      },
+      {
+        id: 'accessibilite',
+        titre: 'Accessibilité',
+        blocs: [
+          {
+            type: 'p',
+            texte:
+              'Compta PME vise le niveau AA des règles d’accessibilité WCAG 2.1. Les écrans de l’élève et de l’enseignant ' +
+              'sont contrôlés automatiquement (outil axe) à chaque modification du logiciel. Ils se manient entièrement ' +
+              'au clavier (Tab entre les champs, Entrée pour valider une ligne), les contrastes respectent le niveau AA et ' +
+              'les montants restent lisibles au projecteur et avec un zoom à 200 %.',
+          },
+          {
+            type: 'liste',
+            items: [
+              'Limite connue : les documents PDF produits par le logiciel (dossiers de pièces, corrigés, copies) ne sont pas ' +
+                'balisés pour les lecteurs d’écran. Les mêmes informations sont disponibles à l’écran.',
+              'Limite connue : les comptes en T reproduisent une présentation graphique ; le grand livre et la balance ' +
+                'donnent les mêmes informations sous forme de tableaux.',
+              'Pour signaler une difficulté, adressez-vous à l’enseignant qui vous a transmis le lien du logiciel.',
+            ],
           },
         ],
       },
