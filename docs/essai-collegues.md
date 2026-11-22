@@ -5,6 +5,8 @@ fichier de remarques** (onglet « Relecture », « Exporter mes remarques »).
 
 ## 1. Adresse d'essai
 
+**En ligne depuis le 22.11.2026** (accord de l'enseignant) : branche `essai` autorisée à publier, envoyée, publication réussie ; vérifié dans Chromium : bandeau sur `essai/` seulement, deux caches hors ligne distincts, site des élèves inchangé.
+
 - Site des élèves (inchangé) : `https://klaidi-b.github.io/compta-pme/` — branche `main`.
 - Version d'essai : `https://klaidi-b.github.io/compta-pme/essai/` — branche `essai`, avec un bandeau « Version d'essai »
   sur la page d'accueil.
