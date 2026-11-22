@@ -51,7 +51,7 @@ L'accord de l'enseignant est demandé à la fin de chaque phase.
 
 - **Plan comptable importable** : dans l'espace enseignant, importer un plan au format CSV du projet (`numero;intitule;classe;type;niveau_min`), contrôlé par le moteur (`lirePlanCsv`), enregistré dans le navigateur et joint aux fichiers d'exercice qui l'utilisent ; le plan du cours reste celui par défaut. Aucun compte ni intitulé n'est ajouté par Claude.
 - **Niveaux et classement** : titres des niveaux de difficulté et formations (CFC / MP) modifiables par l'enseignant ; références aux chapitres du manuel E&S rendues facultatives.
-- Maquette de l'écran de réglage avant le code, puis validation.
+- Maquette de l'écran de réglage avant le code, puis validation. *Maquette faite le 22.11.2026* : `public/maquettes/reglages-etablissement.html` (quatre écrans, cinq points à valider).
 
 ### Phase P3 — Documentation et accessibilité
 

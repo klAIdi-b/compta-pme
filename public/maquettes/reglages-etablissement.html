@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="fr-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maquette — réglages de l'établissement</title>
+<style>
+  /* Maquette statique (22.11.2026), phase P2 de la version publique : à valider avant l'interface.
+     Charte du design moderne validé le 07.11.2026 (bleu nuit, orange pour l'action principale, Arial, sans émoji). */
+  :root {
+    --bleu: #1F4E78; --bleu-nuit: #11304D; --selection: #D6E4F0; --zebre: #F7FAFD;
+    --action: #C4501A; --accent: #E8601C; --alerte: #B34A12; --ok: #1D6B3A; --negatif: #B00020;
+    --fond: #F4F6FA; --carte: #FFFFFF; --texte: #1B2430; --texte-2: #5B6675; --bordure: #E3E8EF; --bordure-2: #EEF2F6;
+    --ombre: 0 1px 2px rgba(16, 24, 40, 0.06), 0 1px 3px rgba(16, 24, 40, 0.08);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: var(--texte); background: #E9EDF3; padding-bottom: 48px; }
+  .intro, .etiquette, .note { max-width: 1200px; margin-left: auto; margin-right: auto; padding: 0 16px; }
+  .intro { margin-top: 28px; }
+  .intro h1 { font-size: 24px; margin: 0 0 6px; }
+  .intro p { margin: 6px 0; line-height: 1.5; color: var(--texte-2); max-width: 900px; }
+  .etiquette { margin-top: 36px; margin-bottom: 8px; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--texte-2); }
+  .note { margin-top: 10px; font-size: 13px; color: var(--texte-2); line-height: 1.5; }
+  .ecran { max-width: 1200px; margin: 0 auto; border-radius: 10px; overflow: hidden; box-shadow: 0 8px 30px rgba(16,24,40,.12); background: var(--fond); }
+
+  .bandeau { background: #fff; border-bottom: 1px solid var(--bordure-2); height: 60px; padding: 0 28px; display: flex; align-items: center; gap: 18px; }
+  .logo { font-weight: bold; font-size: 15px; display: flex; align-items: center; gap: 10px; }
+  .logo::before { content: 'CP'; width: 28px; height: 28px; border-radius: 7px; background: var(--action); color: #fff; display: grid; place-items: center; font-size: 12px; }
+  .titre-espace { color: var(--texte-2); flex: 1; }
+  .fermer { color: var(--bleu); }
+  .contenu { padding: 24px 28px 32px; }
+  .contenu h1 { font-size: 22px; margin: 0 0 12px; }
+  .onglets { display: flex; gap: 4px; border-bottom: 1px solid var(--bordure); margin-bottom: 20px; flex-wrap: wrap; }
+  .onglets span { padding: 9px 14px; color: var(--texte-2); border-bottom: 3px solid transparent; }
+  .onglets .actif { color: var(--texte); font-weight: bold; border-bottom-color: var(--accent); }
+
+  .grille { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 860px) { .grille { grid-template-columns: 1fr; } }
+  .carte { background: var(--carte); border: 1px solid var(--bordure); border-radius: 8px; box-shadow: var(--ombre); }
+  .carte h2 { font-size: 16px; margin: 0; padding: 14px 18px; border-bottom: 1px solid var(--bordure-2); }
+  .corps { padding: 14px 18px; line-height: 1.5; }
+  .corps p { margin: 0 0 10px; }
+  .discret { color: var(--texte-2); }
+  .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+  .btn { font: inherit; border-radius: 6px; padding: 8px 14px; border: 1px solid var(--bordure); background: #fff; color: var(--texte); }
+  .btn.principal { background: var(--action); border-color: var(--action); color: #fff; font-weight: bold; }
+  .btn.lien { border: none; background: none; color: var(--bleu); text-decoration: underline; padding: 8px 4px; }
+  .pastille { display: inline-block; font-size: 12px; padding: 2px 8px; border-radius: 10px; background: var(--selection); color: var(--bleu); font-weight: bold; }
+  .pastille.modif { background: #FDEBDD; color: var(--alerte); }
+  .resume { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; margin: 0 0 6px; }
+  .resume dt { color: var(--texte-2); }
+  .resume dd { margin: 0; }
+
+  table { border-collapse: collapse; width: 100%; }
+  th { text-align: left; font-size: 12px; color: var(--texte-2); font-weight: bold; padding: 8px 10px; border-bottom: 1px solid var(--bordure); background: #FAFBFD; }
+  td { padding: 6px 10px; border-bottom: 1px solid var(--bordure-2); vertical-align: middle; }
+  tbody tr:nth-child(even) td { background: var(--zebre); }
+  tr.classe td { background: #fff !important; font-weight: bold; color: var(--bleu); padding-top: 14px; }
+  td.num { font-variant-numeric: tabular-nums; width: 70px; }
+  .champ { font: inherit; border: 1px solid var(--bordure); border-radius: 5px; padding: 5px 8px; width: 100%; background: #fff; }
+  .champ.modifie { border-color: var(--accent); background: #FFF8F3; }
+  select.champ { width: auto; }
+  .verrou { font-size: 12px; color: var(--texte-2); white-space: nowrap; }
+  .verrou::before { content: ''; display: inline-block; width: 9px; height: 7px; border: 1.5px solid currentColor; border-radius: 2px; margin-right: 5px; vertical-align: -1px; box-shadow: 0 -4px 0 -2.5px #fff, 0 -4px 0 -1px currentColor; }
+  .barre { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
+  .barre .champ { width: 260px; }
+  .message { border-left: 4px solid var(--accent); background: #FFF8F3; padding: 10px 14px; border-radius: 0 6px 6px 0; margin-bottom: 14px; line-height: 1.5; }
+  .message.ok { border-left-color: var(--ok); background: #F1F8F3; }
+  .message ul { margin: 6px 0 0 18px; padding: 0; }
+  .niveaux td .champ { max-width: 520px; }
+  .poignee { color: var(--texte-2); width: 24px; }
+  .questions { max-width: 1200px; margin: 36px auto 0; padding: 0 16px; }
+  .questions ol { background: #fff; border: 1px solid var(--bordure); border-radius: 8px; padding: 16px 16px 16px 36px; line-height: 1.6; }
+  .questions li { margin-bottom: 8px; }
+</style>
+</head>
+<body>
+
+<div class="intro">
+  <h1>Réglages de l'établissement — maquette</h1>
+  <p>Phase P2 de la version publique (plan validé le 22.11.2026). Une autre école doit pouvoir adapter à son cours
+    le <strong>plan comptable</strong> et les <strong>niveaux de classement des exercices</strong>, sans toucher au code.
+    Vos choix actuels restent les valeurs par défaut. Les réglages sont rangés dans l'onglet « Paramètres » de l'espace
+    enseignant, qui ne contient aujourd'hui que le code d'accès.</p>
+  <p>Les intitulés modifiés dans les écrans 2 et 4 (« PostFinance », « 1re année »…) sont des <strong>exemples de ce
+    qu'une autre école pourrait saisir</strong>, pas des propositions de contenu.</p>
+</div>
+
+<!-- ───────────────────────── Écran 1 ───────────────────────── -->
+<p class="etiquette">Écran 1 — Paramètres : vue d'ensemble</p>
+<div class="ecran">
+  <div class="bandeau"><span class="logo">Compta PME</span><span class="titre-espace">Espace enseignant</span><span class="fermer">Fermer l'espace enseignant</span></div>
+  <div class="contenu">
+    <h1>Paramètres</h1>
+    <div class="onglets"><span>Exercices</span><span>Dossiers</span><span>Copies</span><span>Simulateur</span><span>Relecture</span><span class="actif">Paramètres</span></div>
+    <div class="grille">
+      <section class="carte">
+        <h2>Plan comptable</h2>
+        <div class="corps">
+          <dl class="resume">
+            <dt>Plan utilisé</dt><dd>Plan PME du cours <span class="pastille">par défaut</span></dd>
+            <dt>Comptes</dt><dd>101, dont 88 visibles selon le niveau</dd>
+          </dl>
+          <p class="discret">Le plan s'applique aux exercices que vous créez. Les exercices fournis avec le logiciel gardent toujours le plan par défaut.</p>
+          <div class="actions">
+            <button class="btn principal">Modifier le plan</button>
+            <button class="btn">Importer un plan (CSV)…</button>
+            <button class="btn">Exporter le plan (CSV)</button>
+          </div>
+        </div>
+      </section>
+      <section class="carte">
+        <h2>Niveaux et classement des exercices</h2>
+        <div class="corps">
+          <dl class="resume">
+            <dt>CFC</dt><dd>4 niveaux (Bases, TVA, Opérations de clôture, Synthèse)</dd>
+            <dt>MP</dt><dd>6 niveaux</dd>
+            <dt>Comptes et fonctions</dt><dd>CFC 1, CFC 2, MP</dd>
+          </dl>
+          <p class="discret">Les titres apparaissent à l'accueil, dans l'en-tête de l'exercice et dans l'éditeur.</p>
+          <div class="actions"><button class="btn principal">Modifier les niveaux</button></div>
+        </div>
+      </section>
+      <section class="carte">
+        <h2>Partager ces réglages</h2>
+        <div class="corps">
+          <p>Un fichier <code>.compta-reglages.json</code> contient le plan et les niveaux. Les collègues de votre école l'importent pour travailler avec les mêmes réglages.</p>
+          <p class="discret">Les élèves n'ont rien à faire : chaque exercice que vous distribuez emporte son plan comptable et le titre de son niveau.</p>
+          <div class="actions"><button class="btn">Exporter les réglages</button><button class="btn">Importer des réglages…</button><button class="btn lien">Revenir aux réglages par défaut</button></div>
+        </div>
+      </section>
+      <section class="carte">
+        <h2>Code d'accès</h2>
+        <div class="corps">
+          <p class="discret">Inchangé.</p>
+          <div class="actions"><button class="btn">Modifier le code</button></div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+<p class="note">Ordre des cartes : les deux réglages nouveaux en premier, le code d'accès en dernier. « Revenir aux réglages par défaut » demande une confirmation en deux temps (comme le bouton « × » de l'éditeur).</p>
+
+<!-- ───────────────────────── Écran 2 ───────────────────────── -->
+<p class="etiquette">Écran 2 — Modifier le plan comptable</p>
+<div class="ecran">
+  <div class="bandeau"><span class="logo">Compta PME</span><span class="titre-espace">Espace enseignant · Paramètres</span><span class="fermer">Retour aux paramètres</span></div>
+  <div class="contenu">
+    <h1>Plan comptable de l'établissement <span class="pastille modif">2 modifications</span></h1>
+    <div class="barre">
+      <input class="champ" value="" placeholder="Rechercher un compte par nom ou numéro">
+      <label><input type="checkbox"> Afficher seulement les comptes modifiés</label>
+      <span style="flex:1"></span>
+      <button class="btn">Ajouter un compte</button>
+      <button class="btn principal">Enregistrer</button>
+    </div>
+    <section class="carte">
+      <table>
+        <thead><tr><th>N°</th><th>Intitulé</th><th>Type</th><th>Visible dès</th><th>Logiciel</th></tr></thead>
+        <tbody>
+          <tr class="classe"><td colspan="5">Classe 1 : Actifs</td></tr>
+          <tr><td class="num">1000</td><td><input class="champ" value="Caisse"></td><td>actif</td><td><select class="champ"><option>CFC 1</option></select></td><td></td></tr>
+          <tr><td class="num">1010</td><td><input class="champ modifie" value="PostFinance"></td><td>actif</td><td><select class="champ"><option>CFC 1</option></select></td><td><span class="discret">Plan par défaut : Poste (CP)</span></td></tr>
+          <tr><td class="num">1020</td><td><input class="champ" value="Banque (n/avoir)"></td><td>actif</td><td><select class="champ"><option>CFC 1</option></select></td><td></td></tr>
+          <tr><td class="num">1100</td><td><input class="champ" value="Créances clients"></td><td>actif</td><td><select class="champ"><option>CFC 1</option></select></td><td><span class="verrou">ducroire, pertes s/créances</span></td></tr>
+          <tr><td class="num">1170</td><td><input class="champ" value="IP s/marchandises et services"></td><td>actif</td><td><select class="champ"><option>CFC 2</option></select></td><td><span class="verrou">TVA</span></td></tr>
+          <tr><td class="num">1540</td><td><input class="champ" value="Instruments et outillage"></td><td>actif</td><td><select class="champ modifie"><option>CFC 2</option></select></td><td><span class="discret">Plan par défaut : non utilisé</span></td></tr>
+          <tr class="classe"><td colspan="5">Classe 2 : Passifs</td></tr>
+          <tr><td class="num">2000</td><td><input class="champ" value="Dettes fournisseurs"></td><td>passif</td><td><select class="champ"><option>CFC 1</option></select></td><td></td></tr>
+          <tr><td class="num">2800</td><td><input class="champ" value="Capital" disabled></td><td>passif</td><td><select class="champ" disabled><option>CFC 1</option></select></td><td><span class="verrou">bouclement ; intitulé selon la forme juridique</span></td></tr>
+          <tr><td class="num">2850</td><td><input class="champ" value="Privé"></td><td>passif</td><td><select class="champ" disabled><option>CFC 1</option></select></td><td><span class="verrou">bouclement</span></td></tr>
+          <tr><td colspan="5" class="discret">… 92 autres comptes, classes 2 à 9</td></tr>
+        </tbody>
+      </table>
+    </section>
+  </div>
+</div>
+<p class="note"><strong>Ce que l'école peut changer</strong> : l'intitulé d'un compte, le niveau à partir duquel il est visible (CFC 1, CFC 2, MP ou « non utilisé »), et ajouter un compte (numéro à 4 chiffres, la classe et le type suivent les règles de lecture du plan actuelles).
+  <strong>Ce qu'elle ne peut pas changer</strong> : la numérotation, et le retrait des comptes marqués d'un cadenas, utilisés par une fonction du logiciel (bouclement, TVA, ducroire, salaires, répartition du bénéfice, titres, analyse). Ils restent dans le plan ; leur intitulé reste modifiable, sauf 2800 dont l'intitulé suit déjà la forme juridique. La liste exacte des comptes verrouillés sera tirée du moteur et soumise avec le code. La recherche et l'affichage par nom suivent les règles validées du champ compte.</p>
+
+<!-- ───────────────────────── Écran 3 ───────────────────────── -->
+<p class="etiquette">Écran 3 — Importer un plan (CSV) : contrôle avant remplacement</p>
+<div class="ecran">
+  <div class="bandeau"><span class="logo">Compta PME</span><span class="titre-espace">Espace enseignant · Paramètres</span><span class="fermer">Retour aux paramètres</span></div>
+  <div class="contenu">
+    <h1>Importer un plan comptable</h1>
+    <div class="grille">
+      <section class="carte">
+        <h2>Fichier refusé</h2>
+        <div class="corps">
+          <div class="message">
+            <strong>plan-ecole.csv n'a pas été importé.</strong>
+            <ul>
+              <li>Ligne 14 : la classe 2 ne correspond pas au premier chiffre du compte 1300.</li>
+              <li>Le compte 9000 Compte de résultat manque : il est nécessaire au bouclement.</li>
+            </ul>
+          </div>
+          <p class="discret">Format attendu (le même que l'export) : <code>numero;intitule;classe;type;niveau_min</code>, une ligne par compte.</p>
+          <div class="actions"><button class="btn">Choisir un autre fichier…</button><button class="btn lien">Télécharger le plan actuel comme modèle</button></div>
+        </div>
+      </section>
+      <section class="carte">
+        <h2>Fichier accepté</h2>
+        <div class="corps">
+          <div class="message ok"><strong>plan-ecole.csv est valable.</strong> Par rapport au plan actuel :
+            <ul>
+              <li>12 intitulés modifiés</li>
+              <li>3 comptes ajoutés</li>
+              <li>5 comptes passés à « non utilisé »</li>
+            </ul>
+          </div>
+          <p class="discret">Les exercices déjà distribués ne changent pas : chacun garde le plan avec lequel il a été créé.</p>
+          <div class="actions"><button class="btn principal">Remplacer le plan</button><button class="btn">Voir le détail</button><button class="btn lien">Annuler</button></div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+<p class="note">Les messages de refus sont ceux du contrôle existant (<code>lirePlanCsv</code>), complétés par le contrôle des comptes verrouillés.</p>
+
+<!-- ───────────────────────── Écran 4 ───────────────────────── -->
+<p class="etiquette">Écran 4 — Modifier les niveaux et le classement</p>
+<div class="ecran">
+  <div class="bandeau"><span class="logo">Compta PME</span><span class="titre-espace">Espace enseignant · Paramètres</span><span class="fermer">Retour aux paramètres</span></div>
+  <div class="contenu">
+    <h1>Niveaux et classement des exercices</h1>
+    <div class="grille">
+      <section class="carte niveaux">
+        <h2>Niveaux de difficulté — CFC</h2>
+        <table>
+          <thead><tr><th></th><th>Niveau</th><th>Titre affiché</th><th></th></tr></thead>
+          <tbody>
+            <tr><td class="poignee">↕</td><td class="num">1</td><td><input class="champ" value="Bases : bilan, comptes, journal, bouclement"></td><td></td></tr>
+            <tr><td class="poignee">↕</td><td class="num">2</td><td><input class="champ" value="TVA"></td><td></td></tr>
+            <tr><td class="poignee">↕</td><td class="num">3</td><td><input class="champ modifie" value="Clôture : amortissements, transitoires, créances"></td><td></td></tr>
+            <tr><td class="poignee">↕</td><td class="num">4</td><td><input class="champ modifie" value="Salaires"></td><td><span class="discret">ajouté</span></td></tr>
+            <tr><td class="poignee">↕</td><td class="num">5</td><td><input class="champ" value="Synthèse de plusieurs chapitres"></td><td></td></tr>
+          </tbody>
+        </table>
+        <div class="corps"><div class="actions"><button class="btn">Ajouter un niveau</button></div>
+          <p class="discret">Un niveau qui contient des exercices fournis ne peut pas être retiré, seulement renommé.</p></div>
+      </section>
+      <section class="carte niveaux">
+        <h2>Comptes et fonctions</h2>
+        <table>
+          <thead><tr><th>Contenu</th><th>Nom affiché</th></tr></thead>
+          <tbody>
+            <tr><td>CFC 1</td><td><input class="champ modifie" value="1re année"></td></tr>
+            <tr><td>CFC 2</td><td><input class="champ modifie" value="2e et 3e années"></td></tr>
+            <tr><td>MP</td><td><input class="champ" value="MP"></td></tr>
+          </tbody>
+        </table>
+        <div class="corps">
+          <p class="discret">Seul le nom change : ce que chaque niveau active (comptes, TVA, salaires, sociétés…) reste celui des niveaux validés.</p>
+        </div>
+      </section>
+    </div>
+    <p class="discret" style="margin-top:14px">Le tableau MP (6 niveaux) se présente de la même façon, sous le tableau CFC. <span style="float:right"><button class="btn principal">Enregistrer</button></span></p>
+  </div>
+</div>
+<p class="note">Les titres ne citent plus aucun chapitre du manuel ; une école peut y mettre ses propres références. Les exercices fournis sont rangés dans le niveau qu'ils ont aujourd'hui (son numéro), sous le titre choisi par l'école.</p>
+
+<!-- ───────────────────────── Questions ───────────────────────── -->
+<div class="questions">
+  <p class="etiquette" style="padding:0;margin-left:0">Points à valider</p>
+  <ol>
+    <li><strong>Portée</strong> : un seul jeu de réglages par navigateur d'enseignant (partagé entre collègues par fichier), et non un plan différent pour chaque exercice. D'accord ?</li>
+    <li><strong>Comptes verrouillés</strong> : numérotation fixe ; les comptes utilisés par les fonctions du logiciel ne peuvent pas être retirés, mais leur intitulé reste modifiable (sauf 2800). D'accord ?</li>
+    <li><strong>Exercices fournis</strong> : ils gardent toujours le plan par défaut, même si l'école a modifié le sien (leurs corrigés sont construits sur ce plan). D'accord ?</li>
+    <li><strong>Élèves</strong> : aucune manipulation ; le plan et le titre du niveau voyagent dans le fichier d'exercice. Pour les exercices fournis, l'accueil des élèves affiche les titres par défaut (le navigateur des élèves ne connaît pas les réglages de l'école). Suffisant pour commencer ?</li>
+    <li><strong>Niveaux</strong> : l'école peut renommer, ajouter et réordonner les niveaux de difficulté, et renommer les trois niveaux « Comptes et fonctions » sans en changer le contenu. Faut-il aussi pouvoir masquer la filière MP pour une école sans maturité ?</li>
+  </ol>
+</div>
+
+</body>
+</html>
