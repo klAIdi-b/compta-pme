@@ -27,7 +27,7 @@ Proposition du 21.11.2026, **validée par l'enseignant le 22.11.2026**. Branche 
    - tests `tests/exercices-manuel.test.ts`, `tests/manuel-tva.test.ts`.
    - Les autres exercices et dossiers sont des créations originales ; certains reprennent seulement des **règles** du cours (commentaires « F&C ch. 36 », etc.), ce qui ne pose pas de problème de droits. La théorie est rédigée en nos propres mots (lot B du 09.11.2026 : notions reformulées, à relire une dernière fois par l'enseignant pour s'assurer qu'aucun cas du manuel n'y figure).
 2. **Aucune licence** : légalement, personne ne peut réutiliser le code ni les contenus.
-3. **Nom de l'école** : `public/guide.html` et `scripts/generer-guide.ts` (« École de commerce Aimée-Stitelmann · Comptabilité »), `README.md`. `public/presentation.html` indique « Genève ».
+3. **Nom de l'école** : `public/guide.html` et `scripts/generer-guide.ts` (sur-titre avec le nom de l'école), `README.md`. `public/presentation.html` indique « Genève ».
 4. **Réglages propres au cours** : le plan comptable est fixé dans le code (`src/data/plan-pme.csv`, avec les niveaux CFC1/CFC2/MP du cours) ; les niveaux de difficulté et leurs titres (`TITRES_DIFFICULTE`, `src/engine/exercice.ts`) suivent le découpage du manuel E&S.
 5. **Documents internes** dans le dépôt public : `CLAUDE.md`, `TRAVAIL_EN_COURS.md`, `PROMPT_EQUIPE.md` (chemins locaux, nom de l'école, historique des décisions). Sans danger pour les élèves, mais à décider (phase 3).
 6. **Guide** écrit pour les collègues de l'école ; il manque une page « À propos » (licence, version, contact), un guide de prise en main pour un enseignant qui ne connaît pas le projet et une déclaration d'accessibilité.
@@ -39,7 +39,7 @@ L'accord de l'enseignant est demandé à la fin de chaque phase.
 
 ### Phase P1 — Version publique sans contenu protégé, licences, interface neutre (*faite le 22.11.2026 sur la branche*)
 
-- **Mise de côté des contenus tirés des manuels** : un script exporte les 9 exercices et les 4 dossiers en fichiers « version enseignant » (`.compta-exercice.json`, corrigé en clair, importables dans l'espace enseignant) dans un dossier **hors du dépôt** (`C:\Users\41789\Documents\compta-pme-contenus-ecole\`), avec une copie des fichiers sources et des tests. Puis ils sont retirés de l'application et du dépôt.
+- **Mise de côté des contenus tirés des manuels** : un script exporte les 9 exercices et les 4 dossiers en fichiers « version enseignant » (`.compta-exercice.json`, corrigé en clair, importables dans l'espace enseignant) dans un dossier **hors du dépôt** (emplacement dans `CLAUDE.local.md`, non versionné), avec une copie des fichiers sources et des tests. Puis ils sont retirés de l'application et du dépôt.
   - Conséquence pour l'école : une fois la branche publiée, ces exercices ne figurent plus dans la liste de l'accueil ni dans les liens `?exercice=…` ; l'enseignant les importe dans son espace enseignant et les distribue par fichier (comme ses propres exercices).
 - **Licences** : `LICENSE` (MIT) et `LICENCE-CONTENUS.md` (CC BY-NC-SA 4.0 : ce que couvre chaque licence). Titulaire : « Les auteurs de Compta PME » (aucun nom, selon la décision « aucune mention »).
 - **Interface neutre** : nom de l'école retiré du guide à partager, du générateur du guide et du README ; « Genève » remplacé par « Suisse » dans la page de présentation ; mention de la licence au bas du guide et de la présentation.

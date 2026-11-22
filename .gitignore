@@ -9,3 +9,6 @@ dist/
 # Résultats des tests des écrans
 test-results/
 playwright-report/
+
+# Informations propres à l'enseignant (école, chemins de ses disques) : jamais dans le dépôt public
+CLAUDE.local.md
