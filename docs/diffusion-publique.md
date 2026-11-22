@@ -72,7 +72,7 @@ Vocabulaire et usages cantonaux (Vaud, Fribourg, Neuchâtel, Valais, Jura, Berne
 
 ## 4. Points ouverts
 
-- **Théorie, chapitres enrichis le 15.11.2026** (commit « Contenu du manuel (droits obtenus) », ch. 1 et 12, environ 560 lignes de `src/data/theorie.ts`) : certains exemples semblent repris des cas du manuel (ex. « Mme Favre ouvre une agence d'événements », même entreprise que l'exercice Favre Événements retiré ; exemple de la Librairie du Molard). À vérifier par l'enseignant : garder, ou remplacer ces exemples par des exemples originaux (phase P3 ou avant).
+- **Théorie, chapitres enrichis le 15.11.2026** (ch. 1 et 12) : noms des entreprises des exemples repris du manuel remplacés le 22.11.2026 à la demande de l'enseignant (Mme Favre → Mme Monnier, Librairie du Molard → Librairie des Tranchées), montants conservés.
 
 - Canal de contact (e-mail ou Issues GitHub) : à décider avant la phase P3.
 - Autorisation écrite de l'éditeur (CREME-CIIP / auteurs) : si elle est obtenue un jour, les contenus mis de côté pourront revenir avec une mention de source.

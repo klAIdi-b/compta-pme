@@ -15,7 +15,7 @@ describe("fiche « Bilan d'ouverture »", () => {
   });
 
   it("calcule les totaux et la fortune nette ; le capital n'est pas donné à classer", () => {
-    // Exemple de la théorie : agence de Mme Favre
+    // Exemple de la théorie : agence de Mme Monnier
     const b = bilanOuverture(
       { '1000': chf(3000), '1010': chf(15000), '1510': chf(40000), '1521': chf(22000), '1530': chf(20000) },
       { '2010': chf(5000), '2400': chf(35000), '2800': chf(60000) },
@@ -35,7 +35,7 @@ describe("fiche « Bilan d'ouverture »", () => {
 });
 
 describe('fiche « Marge brute »', () => {
-  it('reprend l\'exemple de la théorie (Librairie du Molard)', () => {
+  it('reprend l\'exemple de la théorie (Librairie des Tranchées)', () => {
     let d: Dossier = { ...dossierVide(), niveau: 'CFC2' }; // stock initial 8'000 ; 3805 dès CFC2
     d = passer(
       d,

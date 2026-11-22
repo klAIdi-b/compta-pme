@@ -181,7 +181,7 @@ export const CHAPITRES: Chapitre[] = [
           {
             type: 'p',
             texte:
-              "Exemple : Mme Favre ouvre une agence d'événements à Genève. Elle apporte 60'000.00 de fonds propres, " +
+              "Exemple : Mme Monnier ouvre une agence d'événements à Genève. Elle apporte 60'000.00 de fonds propres, " +
               "emprunte 35'000.00 à sa banque pour cinq ans et obtient 5'000.00 de crédit d'un fournisseur. Avec ces " +
               "100'000.00, elle achète du mobilier (40'000.00), du matériel informatique (22'000.00) et un véhicule " +
               "(20'000.00) ; elle dépose 15'000.00 sur son compte postal et garde 3'000.00 en caisse.",
@@ -403,7 +403,7 @@ export const CHAPITRES: Chapitre[] = [
           {
             type: 'p',
             texte:
-              "Exemple : Mme Favre achète un scooter de 5'000.00, payable à 30 jours. Le compte Véhicules (actif) augmente : " +
+              "Exemple : Mme Monnier achète un scooter de 5'000.00, payable à 30 jours. Le compte Véhicules (actif) augmente : " +
               "débit. Le compte Autres dettes (passif) augmente : crédit.",
           },
           { type: 'ecritures', exemples: [{ cas: "Achat d'un scooter à crédit, 5'000.00", lignes: s('1530', '2010', 5000) }] },
@@ -828,7 +828,7 @@ export const CHAPITRES: Chapitre[] = [
           {
             type: 'p',
             texte:
-              "Exemple (Librairie du Molard) : ventes 80'000.00, prestations propres 600.00, déductions accordées 2'500.00, " +
+              "Exemple (Librairie des Tranchées) : ventes 80'000.00, prestations propres 600.00, déductions accordées 2'500.00, " +
               "frais de ventes 1'200.00, pertes sur créances 400.00 ; achats 50'000.00, frais d'achats 1'500.00, déductions " +
               "obtenues 1'800.00 ; stock initial 12'000.00, stock final 14'500.00.",
           },
