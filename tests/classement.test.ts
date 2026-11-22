@@ -13,10 +13,18 @@ describe('classement des exercices par formation et niveau', () => {
     }
   });
 
+  it('version publique : aucun contenu tiré des manuels E&S et F&C (mis de côté le 22.11.2026)', () => {
+    const retires = ['garage-pont-rouge', 'hifi-plainpalais', 'electromenager-du-rhone', 'confiserie-bourg-de-four'];
+    for (const ex of exercicesDemo) {
+      expect(ex.id).not.toMatch(/^manuel-/);
+      for (const r of retires) expect(ex.id).not.toContain(r);
+    }
+  });
+
   it('CFC avant MP, niveaux croissants', () => {
     const g = classerExercices(exercicesDemo);
     expect(g.map((x) => `${x.filiere}${x.difficulte}`)).toEqual(['CFC1', 'CFC2', 'CFC3', 'CFC4', 'MP1', 'MP2', 'MP3', 'MP4', 'MP5', 'MP6']);
-    expect(g[0]!.exercices).toHaveLength(9); // 5 exercices + 4 dossiers de pièces
+    expect(g[0]!.exercices).toHaveLength(5); // 3 exercices + 2 dossiers de pièces
     expect(g[0]!.titre).toMatch(/^Bases/);
   });
 
