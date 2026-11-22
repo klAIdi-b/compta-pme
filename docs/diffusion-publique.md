@@ -47,11 +47,15 @@ L'accord de l'enseignant est demandé à la fin de chaque phase.
 - Tests, vérification des types, construction.
 - *Fait* : 17 fichiers « version enseignant » exportés et relus par `importerExercice` (9 exercices, 4 dossiers et leurs versions d'évaluation), PDF élève et corrigé des dossiers, sources et tests copiés dans `sources/`, mode d'emploi `LISEZMOI.md` ; test de garde « aucun contenu tiré des manuels » (`tests/classement.test.ts`). Les élèves qui avaient commencé un de ces exercices gardent leur travail (la session enregistrée contient l'exercice complet).
 
-### Phase P2 — Réglages par établissement
+### Phase P2 — Réglages par établissement (*maquette validée et codée le 22.11.2026 sur la branche*)
 
 - **Plan comptable importable** : dans l'espace enseignant, importer un plan au format CSV du projet (`numero;intitule;classe;type;niveau_min`), contrôlé par le moteur (`lirePlanCsv`), enregistré dans le navigateur et joint aux fichiers d'exercice qui l'utilisent ; le plan du cours reste celui par défaut. Aucun compte ni intitulé n'est ajouté par Claude.
 - **Niveaux et classement** : titres des niveaux de difficulté et formations (CFC / MP) modifiables par l'enseignant ; références aux chapitres du manuel E&S rendues facultatives.
 - Maquette de l'écran de réglage avant le code, puis validation. *Maquette faite le 22.11.2026* : `public/maquettes/reglages-etablissement.html` (quatre écrans, cinq points à valider).
+
+- *Fait* (points 1 à 4 de la maquette validés le 22.11.2026) : onglet « Paramètres » de l'espace enseignant (`src/ui/vues/ParametresEtablissement.svelte`), réglages gardés dans le navigateur (`compta-pme:reglages:v1`, `src/ui/reglages.svelte.ts`) et partagés par fichier `.compta-reglages.json` (`src/io/reglages.ts`) ; moteur `src/engine/reglages.ts` (45 comptes verrouillés = tous les numéros du plan cités par le moteur, test de cohérence ; contrôle du plan ; différences ; titres). Un exercice créé par l'enseignant emporte le plan de l'établissement (`Exercice.plan`) et le titre de son niveau (`Exercice.titreNiveau`) ; les exercices fournis et leurs copies gardent le plan par défaut. Tests `tests/reglages.test.ts`, `e2e/reglages.spec.ts` (avec contrôle d'accessibilité).
+- Écarts par rapport à la maquette : les comptes verrouillés ne changent pas non plus de **niveau** (sinon une fonction du logiciel pourrait disparaître d'un niveau) ; les niveaux de difficulté se renomment, s'ajoutent et le dernier se retire s'il ne contient aucun exercice fourni, mais **ne se réordonnent pas** (le numéro est enregistré dans chaque exercice).
+- Point 5 (masquer la filière MP pour une école sans maturité) : sans réponse, non fait.
 
 ### Phase P3 — Documentation et accessibilité
 

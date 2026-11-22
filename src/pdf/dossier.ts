@@ -155,7 +155,7 @@ function texteBilanOuverture(ex: Exercice, plan: Compte[]): { actif: string[][];
 
 /** Dossier de l'élève : à imprimer ou à déposer sur la plateforme de l'école. */
 export async function genererPdfDossier(ex: Exercice, planCours: Compte[], nomDocument: string): Promise<Blob> {
-  const plan = planSelonForme(planCours, ex.formeJuridique);
+  const plan = planSelonForme(ex.plan ?? planCours, ex.formeJuridique);
   const { doc, autoTable } = await outils();
   let y = MARGE + 4;
   doc.setFont('helvetica', 'bold').setFontSize(16).setTextColor(...BLEU).text(ex.raisonSociale, MARGE, y + 4);
@@ -241,7 +241,7 @@ export async function genererPdfCorrige(
   nomDocument: string,
   complements: TableauComplement[] = [],
 ): Promise<Blob> {
-  const plan = planSelonForme(planCours, ex.formeJuridique);
+  const plan = planSelonForme(ex.plan ?? planCours, ex.formeJuridique);
   const { doc, autoTable } = await outils();
   const nom = new Map(plan.map((c) => [c.numero, c.intitule]));
   const compte = (n: string | null) => (n ? `${nom.get(n) ?? ''} (${n})` : '');

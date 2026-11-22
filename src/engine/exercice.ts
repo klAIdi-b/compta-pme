@@ -64,6 +64,13 @@ export interface Exercice {
   filiere?: Filiere;
   /** Niveau de difficulté dans la formation : 1 = le plus simple. */
   difficulte?: number;
+  /** Titre du niveau de difficulté selon les réglages de l'établissement qui a créé l'exercice. */
+  titreNiveau?: string;
+  /**
+   * Plan comptable de l'établissement avec lequel l'exercice a été créé ; absent = plan par défaut. Il voyage dans le
+   * fichier d'exercice : les élèves n'ont rien à régler.
+   */
+  plan?: Compte[];
   /** Sujets traités, affichés aux élèves (par exemple « TVA », « Amortissements »). */
   sujets?: string[];
   raisonSociale: string;
@@ -170,7 +177,7 @@ export function creerDossier(ex: Exercice, plan: Compte[]): Dossier {
     debut: ex.debut,
     fin: ex.fin,
     niveau: ex.niveau,
-    plan: planSelonForme(plan, ex.formeJuridique),
+    plan: planSelonForme(ex.plan ?? plan, ex.formeJuridique),
     comptesAjoutes: ajoutes,
     comptesMasques: [...ex.parametres.comptesMasques],
     ouverture: ouvertureDepuisBilan(ex.ouvertureActif, ex.ouverturePassif),
@@ -382,16 +389,25 @@ export interface GroupeExercices {
 }
 
 /** Exercices classés par formation (CFC puis MP), puis par niveau de difficulté croissant. */
-export function classerExercices(exercices: readonly Exercice[]): GroupeExercices[] {
+/**
+ * Titres : ceux de l'établissement s'ils sont donnés ; sinon le titre porté par un exercice du groupe (fichier d'un
+ * autre établissement), puis le titre par défaut.
+ */
+export function classerExercices(exercices: readonly Exercice[], titres?: Record<Filiere, Record<number, string>> | null): GroupeExercices[] {
   const groupes = new Map<string, GroupeExercices>();
   for (const ex of exercices) {
     const filiere = filiereDe(ex);
     const difficulte = difficulteDe(ex);
     const cle = `${filiere}|${difficulte}`;
-    if (!groupes.has(cle)) {
-      groupes.set(cle, { filiere, difficulte, titre: TITRES_DIFFICULTE[filiere][difficulte] ?? '', exercices: [] });
-    }
+    if (!groupes.has(cle)) groupes.set(cle, { filiere, difficulte, titre: '', exercices: [] });
     groupes.get(cle)!.exercices.push(ex);
+  }
+  for (const g of groupes.values()) {
+    g.titre =
+      titres?.[g.filiere][g.difficulte] ??
+      g.exercices.find((e) => e.titreNiveau?.trim())?.titreNiveau ??
+      TITRES_DIFFICULTE[g.filiere][g.difficulte] ??
+      '';
   }
   const ordre = (f: Filiere) => (f === 'CFC' ? 0 : 1);
   return [...groupes.values()].sort((a, b) => ordre(a.filiere) - ordre(b.filiere) || a.difficulte - b.difficulte);

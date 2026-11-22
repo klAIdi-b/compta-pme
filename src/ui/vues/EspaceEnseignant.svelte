@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { reglages } from '../reglages.svelte';
+  import ParametresEtablissement from './ParametresEtablissement.svelte';
   import { enseignant, nouvelIdentifiant } from '../enseignant.svelte';
   import { etat } from '../etat.svelte';
   import { exercicesDemo } from '../../data/demos';
@@ -53,7 +55,9 @@
   }
 
   function nouveau() {
-    const ex = exerciceVierge(nouvelIdentifiant(), new Date().getFullYear());
+    const ex: Exercice = exerciceVierge(nouvelIdentifiant(), new Date().getFullYear());
+    // Le plan de l'établissement (s'il est modifié) accompagne l'exercice jusque chez les élèves.
+    if (reglages.planModifie) ex.plan = $state.snapshot(reglages.plan);
     enseignant.enregistrer(ex);
     enseignant.edition = ex.id;
   }
@@ -289,7 +293,8 @@
       {:else if enseignant.onglet === 'simulateur'}
         <Differe charger={() => import('./simulation/Simulateur.svelte')} props={{}} />
       {:else}
-        <form class="carte etroit" onsubmit={changerCode}>
+        <ParametresEtablissement />
+        <form class="carte etroit code-acces" onsubmit={changerCode}>
           <h2>Code d'accès</h2>
           <div class="corps-carte">
             <label class="bloc" for="nouveau-code">Nouveau code</label>
@@ -313,6 +318,7 @@
   .fermer { color: var(--c-structure); }
   .contenu { max-width: 1200px; margin: 0 auto; padding: 24px 16px; }
   .etroit { max-width: 460px; }
+  .code-acces { margin-top: 16px; }
   .actions { text-align: right; margin-top: 12px; display: flex; gap: 12px; justify-content: flex-end; flex-wrap: wrap; }
   td.actions { margin: 0; }
   .barre { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; align-items: center; }

@@ -1,5 +1,6 @@
 <!-- Espace enseignant, onglet « Dossiers » : dossiers de pièces comptables à distribuer (PDF et fichiers d'exercice). -->
 <script lang="ts">
+  import { reglages } from '../reglages.svelte';
   import { COMPLEMENTS_CORRIGE, DOSSIERS, versionEvaluation } from '../../data/dossiers';
   import { plan } from '../../data/plan';
   import { classerExercices, etiquetteNiveau, LIBELLES_FILIERE, type Exercice } from '../../engine/exercice';
@@ -9,7 +10,7 @@
   import { enseignant } from '../enseignant.svelte';
   import BoutonLien from '../composants/BoutonLien.svelte';
 
-  const groupes = classerExercices(DOSSIERS);
+  const groupes = classerExercices(DOSSIERS, reglages.titresPropres);
   let enCours = $state<string | null>(null);
   let erreur = $state('');
 

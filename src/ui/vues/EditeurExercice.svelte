@@ -2,14 +2,13 @@
   import { onDestroy } from 'svelte';
   import { enseignant } from '../enseignant.svelte';
   import { etat } from '../etat.svelte';
-  import { plan } from '../../data/plan';
+  import { plan as planDefaut } from '../../data/plan';
+  import { reglages } from '../reglages.svelte';
   import {
     basculerCompte,
     comptesChoisis,
     controlerExercice,
     LIBELLES_NIVEAU,
-    LIBELLES_CONTENU,
-    TITRES_DIFFICULTE,
     filiereDe,
     difficulteDe,
     type Filiere,
@@ -37,6 +36,9 @@
   // Brouillon initialisé une seule fois : le parent recrée l'éditeur quand l'exercice change ({#key}).
   // svelte-ignore state_referenced_locally
   const source = enseignant.trouver(id)!;
+  // Plan avec lequel l'exercice a été créé (établissement ou défaut) : il ne change plus ensuite.
+  // svelte-ignore state_referenced_locally
+  const plan = source.plan ?? planDefaut;
   const versLignes = (r: Record<string, Centimes>): LigneBilan[] =>
     Object.entries(r).map(([compte, montant]) => ({ cle: ++n, compte, montant }));
 
@@ -45,6 +47,10 @@
   const SAUT = String.fromCharCode(10); // saut de ligne entre les sujets
   let filiere = $state<Filiere>(filiereDe(source));
   let difficulte = $state<number>(difficulteDe(source));
+  /** Niveaux proposés : ceux des réglages, au moins 1 à 5, et le niveau actuel. */
+  const niveauxDifficulte = $derived(
+    [...new Set([1, 2, 3, 4, 5, ...Object.keys(reglages.titres[filiere]).map(Number), difficulte])].sort((a, b) => a - b),
+  );
   let sujets = $state((source.sujets ?? []).join(SAUT));
   let raisonSociale = $state(source.raisonSociale);
   let formeJuridique = $state<FormeJuridique>(source.formeJuridique);
@@ -153,6 +159,7 @@
       niveau,
       filiere,
       difficulte: Math.max(1, Math.floor(Number(difficulte) || 1)),
+      titreNiveau: reglages.titre(filiere, Math.max(1, Math.floor(Number(difficulte) || 1))) || undefined,
       sujets: sujets.split(SAUT).map((c) => c.trim()).filter(Boolean),
       raisonSociale: raisonSociale.trim(),
       formeJuridique,
@@ -294,7 +301,7 @@
     <div>
       <label class="bloc" for="ex-niveau">Comptes et fonctions</label>
       <select id="ex-niveau" class="champ" bind:value={niveau}>
-        {#each NIVEAUX as nv}<option value={nv}>{LIBELLES_CONTENU[nv]}</option>{/each}
+        {#each NIVEAUX as nv}<option value={nv}>{reglages.libelleContenu(nv)}</option>{/each}
       </select>
     </div>
     <div>
@@ -307,8 +314,8 @@
     <div>
       <label class="bloc" for="ex-difficulte">Niveau de difficulté</label>
       <select id="ex-difficulte" class="champ" bind:value={difficulte}>
-        {#each [1, 2, 3, 4, 5] as n}
-          <option value={n}>Niveau {n}{TITRES_DIFFICULTE[filiere][n] ? ` · ${TITRES_DIFFICULTE[filiere][n]}` : ''}</option>
+        {#each niveauxDifficulte as n}
+          <option value={n}>Niveau {n}{reglages.titre(filiere, n) ? ` · ${reglages.titre(filiere, n)}` : ''}</option>
         {/each}
       </select>
     </div>

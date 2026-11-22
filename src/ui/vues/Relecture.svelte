@@ -1,5 +1,6 @@
 <!-- Espace enseignant, onglet « Relecture » : valider le contenu proposé (exercices, dossiers, théorie) et noter des remarques. -->
 <script lang="ts">
+  import { reglages } from '../reglages.svelte';
   import { enseignant } from '../enseignant.svelte';
   import { etat } from '../etat.svelte';
   import { estDossier, exercicesDemo } from '../../data/demos';
@@ -26,7 +27,7 @@
         precision: `À partir de ${LIBELLES_NIVEAU[c.niveau]}`,
       })),
     },
-    ...classerExercices(exercicesDemo).map((g) => ({
+    ...classerExercices(exercicesDemo, reglages.titresPropres).map((g) => ({
       titre: `${LIBELLES_FILIERE[g.filiere]} · niveau ${g.difficulte}${g.titre ? ` · ${g.titre}` : ''}`,
       lignes: g.exercices.map((ex) => ({
         cle: `ex:${ex.id}`,

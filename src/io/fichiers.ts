@@ -8,6 +8,7 @@ import type { Dossier } from '../engine/dossier';
 import type { EcritureCorrigee, Exercice } from '../engine/exercice';
 import type { Suivi } from '../engine/correction';
 import type { Relecture } from './relecture';
+import { ecrirePlanCsv, ErreurPlan, lirePlanCsv } from '../engine/plan';
 
 /**
  * Version du format des fichiers. Quand le format change : augmenter VERSION et ajouter dans MIGRATIONS la fonction
@@ -234,6 +235,15 @@ function verifierExercice(ex: unknown): Exercice {
     e.ouverturePassif &&
     e.parametres;
   if (!ok) throw new ErreurFichier("Le fichier d'exercice est incomplet ou endommagé.");
+  // Plan de l'établissement joint à l'exercice : même contrôle que l'import d'un plan CSV.
+  if (e.plan !== undefined) {
+    try {
+      if (!Array.isArray(e.plan)) throw new ErreurPlan('');
+      e.plan = lirePlanCsv(ecrirePlanCsv(e.plan));
+    } catch (err) {
+      throw new ErreurFichier(`Le plan comptable joint à l'exercice est endommagé.${err instanceof ErreurPlan && err.message ? ' ' + err.message : ''}`);
+    }
+  }
   // Paramètres ajoutés au fil des versions : valeurs par défaut pour les fichiers plus anciens ou incomplets.
   const parametres = { ...PARAMETRES_PAR_DEFAUT, ...e.parametres } as Exercice['parametres'];
   return { mode: 'entrainement', ...e, parametres } as Exercice;

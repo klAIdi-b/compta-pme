@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { reglages } from '../reglages.svelte';
   import { etat } from '../etat.svelte';
   import { estDossier, exercicesDemo } from '../../data/demos';
   import { classerExercices, etiquetteNiveau, filiereDe, LIBELLES_FILIERE, LIBELLES_MODE, type Exercice, type Filiere } from '../../engine/exercice';
@@ -65,7 +66,7 @@
   /** Exercice choisi, rappelé dans la barre « Commencer » toujours visible en bas de la liste. */
   const exChoisi = $derived(tous.find((x) => x.id === choix));
   const groupes = $derived(
-    classerExercices(exercicesDemo)
+    classerExercices(exercicesDemo, reglages.titresPropres)
       .filter((g) => g.filiere === filiere)
       .map((g) => ({ ...g, visibles: g.exercices.filter(visible) }))
       .filter((g) => g.visibles.length > 0),
