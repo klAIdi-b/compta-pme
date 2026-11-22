@@ -128,10 +128,10 @@ export const dossierElectromenager = construireDossier(
   },
   [
     { date: '2026-01-12', piece: e1.piece, lignes: [D('4200', e1.ht), D('1170', e1.tva), C('2000', e1.ttc)] },
-    { date: '2026-01-19', piece: e2.piece, lignes: [D('1520', e2.ht), D('1171', e2.tva), C('2000', e2.ttc)] },
+    { date: '2026-01-19', piece: e2.piece, lignes: [D('1520', e2.ht), D('1171', e2.tva), C('2010', e2.ttc)] },
     { date: '2026-01-20', piece: e3.piece, lignes: [D('2000', e1.ttc), C('1020', e3.total), C('4209', escompteAchatHT), C('1170', escompteAchatTVA)] },
-    { date: '2026-01-24', piece: e4.piece, lignes: [D('2000', e4.montant), C('1520', f(190)), C('1171', f(15.4))] },
-    { date: '2026-01-26', piece: e5.piece, lignes: S('2000', '1020', e5.total) },
+    { date: '2026-01-24', piece: e4.piece, lignes: [D('2010', e4.montant), C('1520', f(190)), C('1171', f(15.4))] },
+    { date: '2026-01-26', piece: e5.piece, lignes: S('2010', '1020', e5.total) },
     { date: '2026-03-12', piece: e6.piece, lignes: [D('1100', e6.ttc), C('3200', e6.ht), C('2200', e6.tva)] },
     { date: '2026-03-15', piece: e7.piece, lignes: [D('1020', e7.total), D('3209', escompteVenteHT), D('2200', escompteVenteTVA), C('1100', e6.ttc)] },
     { date: '2026-03-18', piece: e8.piece, lignes: S('1100', '3200', e8.ttc) },

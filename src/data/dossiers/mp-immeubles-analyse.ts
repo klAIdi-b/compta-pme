@@ -84,10 +84,10 @@ export const dossierCarrosserie = construireDossier(
   [
     { date: '2026-01-01', piece: i1.piece, lignes: S('2300', '7510', interetsCourusOuverture) },
     { date: '2026-02-15', piece: i5.piece, lignes: S('7510', '1020', i5.total) },
-    { date: '2026-04-14', piece: i3.piece, lignes: S('7510', '2000', i3.ttc) },
+    { date: '2026-04-14', piece: i3.piece, lignes: S('7510', '2010', i3.ttc) },
     { date: '2026-06-30', piece: i2.piece, lignes: [D('7510', interetAnnuite), D('2401', remboursement), C('1020', i2.total)] },
-    { date: '2026-08-31', piece: i6.piece, lignes: S('1600', '2000', i6.ttc) },
-    { date: '2026-10-20', piece: i4.piece, lignes: S('7510', '2000', i4.ttc) },
+    { date: '2026-08-31', piece: i6.piece, lignes: S('1600', '2010', i6.ttc) },
+    { date: '2026-10-20', piece: i4.piece, lignes: S('7510', '2010', i4.ttc) },
     { date: '2026-12-20', piece: i7.piece, lignes: S('1020', '7500', i7.total) },
     { date: '2026-12-31', piece: i8.piece, lignes: S('6000', '7500', f(30000)) },
     { date: '2026-12-31', piece: i9.piece, lignes: S('2850', '7500', f(21600)) },

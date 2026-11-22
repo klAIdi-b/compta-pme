@@ -101,6 +101,7 @@ Trois exercices de démonstration (un par niveau, ~15 opérations, entreprise fi
 ## Règles comptables validées
 
 - Écritures composées acceptées ; débit = crédit obligatoire avant validation.
+- **Achat à crédit (règle de l'école, 22.11.2026)** : 2000 Dettes fournisseurs seulement pour les marchandises achetées pour être revendues ; 2010 Autres dettes pour les investissements (véhicule, mobilier, machines, ordinateurs) et les autres factures (services, frais). Tous les corrigés et la théorie suivent cette règle ; une session déjà commencée sur un exercice fourni reprend le corrigé à jour si l'énoncé est inchangé (`avecCorrigeAJour`, `exercice.ts`).
 - Correction d'une écriture validée par **extourne** (terme suisse romand, choisi par l'enseignant de préférence à « contre-passation »), historique visible ; modification directe possible en entraînement si l'enseignant l'autorise.
 - États financiers **en forme de compte** (deux colonnes), selon art. 959a / 959b CO adaptés au niveau.
 - Bilan avant bouclement : bénéfice dans les capitaux propres ; **perte de l'exercice du côté de l'actif**, sur une ligne séparée (choix de l'enseignant).

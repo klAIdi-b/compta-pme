@@ -2,9 +2,10 @@
 
 import type { Dossier } from '../engine/dossier';
 import type { Exercice } from '../engine/exercice';
-import { actualiserDossier, corrigeDepuisEcritures, creerDossier, estNouvelleVersionSimulation, fonctionsExercice, retourVisible, type EcritureCorrigee } from '../engine/exercice';
+import { actualiserDossier, avecCorrigeAJour, corrigeDepuisEcritures, creerDossier, estNouvelleVersionSimulation, fonctionsExercice, retourVisible, type EcritureCorrigee } from '../engine/exercice';
 import { ajouterEcriture } from '../engine/journal';
 import { plan as planParDefaut } from '../data/plan';
+import { exercicesDemo } from '../data/demos';
 import { ecrire, lire } from '../io/stockage';
 import type { DernierExport } from '../io/fichiers';
 import type { Suivi } from '../engine/correction';
@@ -93,7 +94,10 @@ interface Sauvegarde {
 
 /** Sessions enregistrées avant l'ajout du suivi, du rôle et des fiches : valeurs par défaut. */
 function completer(s: (Partial<Session> & Omit<Session, 'suivi' | 'role' | 'fiches'>) | null | undefined): Session | null {
-  return s ? { ...s, suivi: s.suivi ?? {}, role: s.role ?? 'eleve', fiches: s.fiches ?? {} } : null;
+  // Un exercice fourni dont le corrigé a changé reprend le corrigé à jour (le travail de l'élève est conservé).
+  return s
+    ? { ...s, exercice: avecCorrigeAJour(s.exercice, exercicesDemo), suivi: s.suivi ?? {}, role: s.role ?? 'eleve', fiches: s.fiches ?? {} }
+    : null;
 }
 
 const VUES: Vue[] = ['tableau', 'journal', 'comptes', 'grandlivre', 'balance', 'bilan', 'resultat', 'tva', 'salaire', 'repartition', 'analyse', 'degres', 'flux', 'seuil', 'bilanOuverture', 'margeBrute', 'echelle', 'bouclement', 'theorie'];

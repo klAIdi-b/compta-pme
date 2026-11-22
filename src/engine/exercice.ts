@@ -239,6 +239,21 @@ export function estNouvelleVersionSimulation(ancien: Exercice, nouveau: Exercice
   );
 }
 
+/**
+ * Exercice fourni dont le corrigé a été corrigé depuis que l'élève l'a commencé (la session garde une copie de
+ * l'exercice) : on reprend le corrigé du catalogue si l'énoncé est resté identique. Les écritures de l'élève ne
+ * changent pas ; seule la correction est recalculée. Sans effet pour un exercice sans corrigé (évaluation).
+ */
+export function avecCorrigeAJour(enregistre: Exercice, catalogue: readonly Exercice[]): Exercice {
+  const c = catalogue.find((x) => x.id === enregistre.id);
+  if (!c || !c.corrige || !enregistre.corrige || c.mode !== enregistre.mode) return enregistre;
+  const memeEnonce =
+    c.operations.length === enregistre.operations.length &&
+    c.operations.every((o, i) => o.numero === enregistre.operations[i]!.numero && o.texte === enregistre.operations[i]!.texte);
+  if (!memeEnonce || JSON.stringify(c.corrige) === JSON.stringify(enregistre.corrige)) return enregistre;
+  return { ...enregistre, corrige: c.corrige };
+}
+
 /** Contrôle d'un exercice avant distribution : erreurs bloquantes et avertissements. */
 export function controlerExercice(ex: Exercice, plan: Compte[]): { erreurs: string[]; avertissements: string[] } {
   const erreurs: string[] = [];

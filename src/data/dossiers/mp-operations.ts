@@ -207,7 +207,7 @@ export const dossierZufferey = construireDossier(
   },
   [
     { date: '2026-09-30', piece: m2p6.piece, lignes: S('2850', '1020', m2p6.total) },
-    { date: '2026-10-05', piece: m2p7.piece, lignes: S('1520', '2000', m2p7.ttc) },
+    { date: '2026-10-05', piece: m2p7.piece, lignes: S('1520', '2010', m2p7.ttc) },
     { date: '2026-11-30', piece: m2p1.piece, lignes: S('1100', '3400', f(142000)) },
     { date: '2026-12-15', piece: m2p2.piece, lignes: S('1100', '3400', m2p2.ttc) },
     { date: '2026-12-20', piece: m2p3.piece, lignes: S('1020', '1100', m2p3.total) },
