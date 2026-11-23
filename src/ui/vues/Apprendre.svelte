@@ -1,7 +1,8 @@
 <!-- Parcours « Apprendre » : modules par notion (découvrir, exemple travaillé, série d'exercices courts, maîtrise). -->
 <script lang="ts">
   import { etat } from '../etat.svelte';
-  import { MODULES, modeleParId, type ModuleApprendre } from '../../data/apprendre';
+  import { LIBELLES_NIVEAU_APPRENDRE, MODULES, modeleParId, type ModuleApprendre, type NiveauApprendre } from '../../data/apprendre';
+  import { champJuste, genererCalcul, valeurLisible, type QuestionGeneree } from '../../engine/calculs';
   import { CHAPITRES } from '../../data/theorie';
   import { plan } from '../../data/plan';
   import {
@@ -38,16 +39,20 @@
   let credit = $state('');
   let montantSaisi = $state('');
   let cote = $state<'debiteur' | 'crediteur' | null>(null);
+  let valeurs = $state<string[]>([]);
 
   const q = $derived(questions[rang] ?? null);
   const chapitre = $derived(module ? CHAPITRES.find((c) => c.id === module!.chapitre) ?? null : null);
   const exemple = $derived.by(() => {
-    if (!module) return null;
+    if (!module || !module.exemple) return null;
     const mo = modeleParId(module.exemple);
     const montant = montantModele(hasard(7), mo);
     return { texte: texteOperation(mo, montant), debit: mo.debit, credit: mo.credit, montant, etapes: raisonnement(plan, mo.debit, mo.credit) };
   });
   const comptesTries = $derived(q && q.format === 'ecriture' ? [...q.comptes].sort((a, b) => nom(a).localeCompare(nom(b), 'fr')) : []);
+  /** Exemple travaillé d'un module de calcul : une question générée avec ses réponses et son explication. */
+  const exempleCalcul = $derived<QuestionGeneree | null>(module?.calculs?.length ? genererCalcul(module.calculs[0]!, hasard(7), { plan }) : null);
+  const NIVEAUX: NiveauApprendre[] = ['CFC1', 'CFC2', 'MP'];
   const indexModule = $derived(module ? MODULES.indexOf(module) : -1);
   const suivant = $derived(indexModule >= 0 && indexModule < MODULES.length - 1 ? MODULES[indexModule + 1]! : null);
 
@@ -65,16 +70,19 @@
 
   function reinitialiserReponse() {
     choix = null; type = null; debit = ''; credit = ''; montantSaisi = ''; cote = null;
+    valeurs = q && q.format === 'calcul' ? q.champs.map(() => '') : [];
     corrigee = false; juste = false;
   }
 
   function commencerSerie() {
     if (!module) return;
-    const x = { plan, modeles: module.modeles.map(modeleParId), comptes: module.comptes, types: module.types };
+    const x = { plan, modeles: module.modeles.map(modeleParId), comptes: module.comptes, types: module.types, calculs: module.calculs };
     questions = genererSerie(x, module.formats, NB, Math.floor(Math.random() * 2 ** 31));
     rang = 0;
     justes = 0;
     reinitialiserReponse();
+    const q0 = questions[0];
+    valeurs = q0 && q0.format === 'calcul' ? q0.champs.map(() => '') : [];
     etape = 'serie';
     haut();
   }
@@ -82,6 +90,8 @@
   function reponse(): Reponse | null {
     if (!q) return null;
     switch (q.format) {
+      case 'calcul': return valeurs.every((v) => (v ?? '').trim() !== '') ? { format: 'calcul', valeurs: [...valeurs] } : null;
+      case 'qcm': return choix === null ? null : { format: 'qcm', choix };
       case 'classer': return type ? { format: 'classer', type } : null;
       case 'variation': case 'operation': case 'erreur': return choix === null ? null : { format: q.format, choix };
       case 'ecriture': return debit && credit ? { format: 'ecriture', debit, credit } : null;
@@ -105,6 +115,8 @@
     if (rang < questions.length - 1) {
       rang++;
       reinitialiserReponse();
+      const qs = questions[rang];
+      valeurs = qs && qs.format === 'calcul' ? qs.champs.map(() => '') : [];
       return;
     }
     progression = enregistrerSerie(progression, module!.id, justes, questions.length, justes >= seuilMaitrise(questions.length));
@@ -133,14 +145,16 @@
 
   <main class="contenu contenu-apprendre">
     {#if !module}
-      <div class="titre"><h1>Apprendre pas à pas</h1><span class="sous">CFC · 1re année</span></div>
+      <div class="titre"><h1>Apprendre pas à pas</h1><span class="sous">CFC et maturité professionnelle</span></div>
       <p class="intro">
         Une notion à la fois, dans l'ordre du cours : vous lisez l'essentiel, vous suivez un exemple, puis vous vous
         entraînez sur une série de {NB} questions courtes. Avec {seuilMaitrise(NB)} réponses justes sur {NB}, la notion est
         maîtrisée. Chaque série est nouvelle : vous pouvez recommencer autant de fois que nécessaire.
       </p>
+      {#each NIVEAUX as niv (niv)}
+      <h2 class="niveau">{LIBELLES_NIVEAU_APPRENDRE[niv]}</h2>
       <ol class="modules">
-        {#each MODULES as mod, i}
+        {#each MODULES.filter((x) => x.niveau === niv) as mod, i (mod.id)}
           {@const p = progression[mod.id]}
           <li class="carte module">
             <span class="rang" aria-hidden="true">{i + 1}</span>
@@ -154,6 +168,7 @@
           </li>
         {/each}
       </ol>
+      {/each}
       <p class="discret petit">
         Votre progression reste dans ce navigateur. Les exercices complets (journal, bilan, bouclement) se trouvent sur
         la page d'accueil.
@@ -163,7 +178,10 @@
       <div class="titre"><h1>{module.titre}</h1></div>
       <section class="carte">
         <h2>Objectif</h2>
-        <div class="corps-carte"><p>{module.objectif}</p></div>
+        <div class="corps-carte">
+          <p>{module.objectif}</p>
+          {#if module.plan?.length}<p class="discret petit">Plan d'études : {module.plan.join(' · ')}</p>{/if}
+        </div>
       </section>
       <section class="carte">
         <h2>L'essentiel</h2>
@@ -190,6 +208,25 @@
           </div>
         </section>
       {/if}
+      {#if exempleCalcul}
+        <section class="carte">
+          <h2>Exemple travaillé</h2>
+          <div class="corps-carte">
+            {#if exempleCalcul.format === 'calcul'}
+              {#each exempleCalcul.enonce as e}<p class="operation">{e}</p>{/each}
+              {#if exempleCalcul.tableau}
+                <table class="donnees"><thead><tr>{#each exempleCalcul.tableau.entetes as t}<th>{t}</th>{/each}</tr></thead>
+                  <tbody>{#each exempleCalcul.tableau.lignes as l}<tr>{#each l as c, j}<td class:montant={j > 0}>{c}</td>{/each}</tr>{/each}</tbody></table>
+              {/if}
+              <table class="donnees"><tbody>{#each exempleCalcul.champs as c}<tr><td>{c.libelle}</td><td class="montant num"><b>{valeurLisible(c)}</b></td></tr>{/each}</tbody></table>
+              <ol class="raisonnement">{#each exempleCalcul.explication as e}<li>{e}</li>{/each}</ol>
+            {:else}
+              <p class="operation">{exempleCalcul.question}</p>
+              <p><b>Réponse :</b> {exempleCalcul.choix[exempleCalcul.reponse]}. {exempleCalcul.explication}</p>
+            {/if}
+          </div>
+        </section>
+      {/if}
       <div class="actions-bas">
         <button class="btn btn-principal" onclick={commencerSerie}>Commencer la série de {NB} questions</button>
       </div>
@@ -202,7 +239,43 @@
 
       <section class="carte question">
         <div class="corps-carte">
-          {#if q.format === 'classer'}
+          {#if q.format === 'calcul'}
+            <p class="consigne">{q.sujet}</p>
+            {#each q.enonce as e}<p class="enonce-calcul">{e}</p>{/each}
+            {#if q.tableau}
+              <table class="donnees"><thead><tr>{#each q.tableau.entetes as t}<th>{t}</th>{/each}</tr></thead>
+                <tbody>{#each q.tableau.lignes as l}<tr>{#each l as c, j}<td class:montant={j > 0}>{c}</td>{/each}</tr>{/each}</tbody></table>
+            {/if}
+            <table class="donnees reponses">
+              <tbody>
+                {#each q.champs as c, i}
+                  <tr class:faux-ligne={corrigee && !champJuste(c, valeurs[i])}>
+                    <td>{c.libelle}</td>
+                    <td class="montant">
+                      {#if c.type === 'choix'}
+                        <select bind:value={valeurs[i]} disabled={corrigee} aria-label={c.libelle}>
+                          <option value="">Choisir…</option>
+                          {#each c.choix ?? [] as o, k}<option value={String(k)}>{o}</option>{/each}
+                        </select>
+                      {:else}
+                        <input class="num champ-calcul" inputmode="decimal" placeholder={c.type === 'chf' ? '0.00' : c.type === 'pc' ? '0.0' : '0'} aria-label={c.libelle} bind:value={valeurs[i]} disabled={corrigee} />
+                        <span class="unite">{c.type === 'chf' ? 'CHF' : c.type === 'pc' ? '%' : ''}</span>
+                      {/if}
+                    </td>
+                    {#if corrigee}<td class="attendu">{champJuste(c, valeurs[i]) ? 'Juste' : valeurLisible(c)}</td>{/if}
+                  </tr>
+                {/each}
+              </tbody>
+            </table>
+          {:else if q.format === 'qcm'}
+            <p class="consigne">{q.sujet}</p>
+            <p class="enonce">{q.question}</p>
+            <div class="choix-colonne" role="radiogroup" aria-label={q.question}>
+              {#each q.choix as c, i}
+                <label class="option"><input type="radio" name="qcm" value={i} bind:group={choix} disabled={corrigee} /> {c}</label>
+              {/each}
+            </div>
+          {:else if q.format === 'classer'}
             <p class="consigne">Dans quelle catégorie se trouve ce compte ?</p>
             <p class="enonce">{nom(q.compte)}</p>
             <div class="choix-ligne" role="group" aria-label="Catégorie">
@@ -287,9 +360,14 @@
             <div class="retour" class:ok={juste} role="status">
               {#if juste}
                 <b>Juste.</b>
+                {#if q.format === 'calcul'}<ol class="raisonnement">{#each q.explication as e}<li>{e}</li>{/each}</ol>{/if}
               {:else}
                 <b>Pas tout à fait.</b>
-                {#if q.format === 'classer'}La bonne réponse : {LIBELLE_TYPE[q.reponse]}.
+                {#if q.format === 'calcul'}
+                  Les valeurs attendues figurent à droite des réponses fausses.
+                  <ol class="raisonnement">{#each q.explication as e}<li>{e}</li>{/each}</ol>
+                {:else if q.format === 'qcm'}La bonne réponse : {q.choix[q.reponse]}. {q.explication}
+                {:else if q.format === 'classer'}La bonne réponse : {LIBELLE_TYPE[q.reponse]}.
                 {:else if q.format === 'variation'}La bonne réponse : {VARIATIONS[q.reponse]}.
                 {:else if q.format === 'operation'}La bonne réponse : {q.choix[q.reponse]}
                 {:else if q.format === 'erreur'}
@@ -354,6 +432,16 @@
   section { margin-bottom: 14px; }
   .petit { font-size: 13px; }
   .fil { display: flex; gap: 16px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
+  h2.niveau { font-size: 15px; color: var(--c-structure); margin: 18px 0 8px; }
+  .donnees { width: 100%; margin: 6px 0 12px; }
+  .donnees td, .donnees th { padding: 6px 8px; }
+  .reponses td:first-child { width: 55%; }
+  .champ-calcul { width: 140px; text-align: right; font-size: 15px; padding: 5px 8px; }
+  .reponses select { min-width: 260px; font-size: 14px; padding: 5px; }
+  .unite { color: var(--c-texte-2); font-size: 12px; margin-left: 4px; }
+  .attendu { color: var(--c-alerte-texte); font-weight: bold; white-space: nowrap; }
+  .faux-ligne { background: var(--c-alerte-fond); }
+  .enonce-calcul { margin: 4px 0; font-weight: bold; }
   .modules { list-style: none; margin: 0 0 14px; padding: 0; display: grid; gap: 10px; }
   .module { display: flex; align-items: center; gap: 14px; padding: 12px 16px; margin: 0; }
   .rang { width: 30px; height: 30px; border-radius: 50%; background: var(--c-selection); color: var(--c-structure); display: grid; place-items: center; font-weight: bold; flex: none; }

@@ -71,7 +71,10 @@ export const GUIDE: PartieGuide[] = [
             type: 'p',
             texte:
               "Avant les exercices complets, « Apprendre pas à pas » (page d'accueil ou barre latérale) reprend les notions " +
-              'de la 1re année une à une, dans l’ordre du cours.',
+              'une à une, dans l’ordre du cours : écritures de la 1re année CFC, puis calculs de la 2e année et de l’option ' +
+              'Finances (livres auxiliaires, déclaration de salaire, marge contributive, répartition des coûts) et de la ' +
+              'maturité (intérêts, compte courant, devises, calcul des prix à rebours, cession, perte de capital, titres et ' +
+              'immeubles, point mort, flux de trésorerie, comptabilité analytique, normes).',
           },
           {
             type: 'etapes',

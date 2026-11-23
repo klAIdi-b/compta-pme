@@ -5,6 +5,7 @@
 
 import { formatMontant, type Centimes } from './money';
 import type { Compte, TypeCompte } from './plan';
+import { champJuste, genererCalcul, type QuestionCalcul, type QuestionQcm } from './calculs';
 
 /** Modèle d'opération : texte avec le montant, écriture simple attendue (comptes du corrigé d'un exercice validé). */
 export interface ModeleOperation {
@@ -19,9 +20,11 @@ export interface ModeleOperation {
   pas: number;
 }
 
-export type FormatQuestion = 'classer' | 'variation' | 'ecriture' | 'operation' | 'erreur' | 'solde';
+export type FormatQuestion = 'classer' | 'variation' | 'ecriture' | 'operation' | 'erreur' | 'solde' | 'calcul';
 
 export type Question =
+  | QuestionCalcul
+  | QuestionQcm
   | { format: 'classer'; compte: string; choix: TypeCompte[]; reponse: TypeCompte }
   | { format: 'variation'; texte: string; choix: string[]; reponse: number }
   | { format: 'ecriture'; texte: string; montant: Centimes; comptes: string[]; reponse: { debit: string; credit: string } }
@@ -114,6 +117,8 @@ export interface ContexteSerie {
   comptes: readonly string[];
   /** Types proposés pour « classer » (par exemple actif et passif seulement au début). */
   types: readonly TypeCompte[];
+  /** Générateurs de calculs (src/engine/calculs.ts) utilisés par le format « calcul ». */
+  calculs?: readonly string[];
 }
 
 function questionClasser(h: Hasard, x: ContexteSerie): Question {
@@ -205,6 +210,13 @@ function questionSolde(h: Hasard, x: ContexteSerie): Question {
   };
 }
 
+let rangCalcul = 0;
+function questionCalcul(h: Hasard, x: ContexteSerie): Question | null {
+  if (!x.calculs?.length) return null;
+  const id = x.calculs[rangCalcul++ % x.calculs.length]!;
+  return genererCalcul(id, h, { plan: x.plan });
+}
+
 const FABRIQUES: Record<FormatQuestion, (h: Hasard, x: ContexteSerie) => Question | null> = {
   classer: questionClasser,
   variation: questionVariation,
@@ -212,6 +224,7 @@ const FABRIQUES: Record<FormatQuestion, (h: Hasard, x: ContexteSerie) => Questio
   operation: questionOperation,
   erreur: questionErreur,
   solde: questionSolde,
+  calcul: questionCalcul,
 };
 
 /**
@@ -220,10 +233,11 @@ const FABRIQUES: Record<FormatQuestion, (h: Hasard, x: ContexteSerie) => Questio
  */
 export function genererSerie(x: ContexteSerie, formats: readonly FormatQuestion[], n: number, graine: number): Question[] {
   const h = hasard(graine);
+  rangCalcul = Math.floor(h() * 100);
   const r: Question[] = [];
   for (let i = 0; i < n; i++) {
     const f = formats[i % formats.length]!;
-    r.push(FABRIQUES[f](h, x) ?? questionEcriture(h, x));
+    r.push(FABRIQUES[f](h, x) ?? (x.modeles.length ? questionEcriture(h, x) : questionCalcul(h, x)!));
   }
   return melanger(h, r);
 }
@@ -231,6 +245,8 @@ export function genererSerie(x: ContexteSerie, formats: readonly FormatQuestion[
 // ---------- Correction ----------
 
 export type Reponse =
+  | { format: 'calcul'; valeurs: string[] }
+  | { format: 'qcm'; choix: number }
   | { format: 'classer'; type: TypeCompte }
   | { format: 'variation' | 'operation' | 'erreur'; choix: number }
   | { format: 'ecriture'; debit: string; credit: string }
@@ -238,6 +254,10 @@ export type Reponse =
 
 export function estJuste(q: Question, r: Reponse): boolean {
   switch (q.format) {
+    case 'calcul':
+      return r.format === 'calcul' && q.champs.every((c, i) => champJuste(c, r.valeurs[i]));
+    case 'qcm':
+      return r.format === 'qcm' && r.choix === q.reponse;
     case 'classer':
       return r.format === 'classer' && r.type === q.reponse;
     case 'variation':
