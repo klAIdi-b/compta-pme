@@ -16,6 +16,7 @@
   import ChampCompte from '../composants/ChampCompte.svelte';
   import ChampMontant from '../composants/ChampMontant.svelte';
   import PieceVue from '../composants/PieceVue.svelte';
+  import BilanVivant from '../composants/BilanVivant.svelte';
   import { chapitrePourComptes } from '../../data/theorie-index';
   import { comptesDeLEtape, etapesBouclement, etapesSaisies } from '../../engine/guide-bouclement';
 
@@ -348,6 +349,7 @@
   </span>
 </div>
 
+{#if vueEleve(etat.genre)}<BilanVivant />{/if}
 <div class="mise-en-page">
   <div class="colonne-principale">
     {#if etat.verrouille}

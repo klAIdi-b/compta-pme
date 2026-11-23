@@ -2,6 +2,7 @@
 
 import { ESPACE } from './espace';
 import { ecrire, lire } from './stockage';
+import { apresRevision, premiereRevision, type EtatRevision } from '../engine/revision';
 
 export const CLE_APPRENDRE = `${ESPACE}:apprendre:v1`;
 
@@ -14,6 +15,8 @@ export interface ProgressionModule {
   series: number;
   /** Date ISO de la dernière série terminée. */
   le: string;
+  /** Révision espacée : prochaine échéance, dès que la notion est maîtrisée. */
+  revision?: EtatRevision;
 }
 
 export type Progression = Record<string, ProgressionModule>;
@@ -34,8 +37,18 @@ export function enregistrerSerie(p: Progression, module: string, justes: number,
       maitrise: maitrise || !!a?.maitrise,
       series: (a?.series ?? 0) + 1,
       le: new Date().toISOString(),
+      revision: a?.revision ?? (maitrise ? premiereRevision(new Date().toISOString().slice(0, 10)) : undefined),
     },
   };
+  ecrire(r, CLE_APPRENDRE);
+  return r;
+}
+
+/** Enregistre le résultat d'une question de révision espacée pour une notion. */
+export function enregistrerRevision(p: Progression, module: string, reussie: boolean): Progression {
+  const a = p[module];
+  if (!a?.revision) return p;
+  const r: Progression = { ...p, [module]: { ...a, revision: apresRevision(a.revision, reussie, new Date().toISOString().slice(0, 10)) } };
   ecrire(r, CLE_APPRENDRE);
   return r;
 }
