@@ -305,7 +305,7 @@ function MODULES_CALCUL(): ModuleApprendre[] {
       ['cession', 'changement-methode'], ['MP 5.2'], 'amortissements'),
     calcul('perte-capital', 'MP', 'Perte de capital et surendettement',
       'Reconnaître une perte de capital et un surendettement d’après le bilan d’une SA.',
-      ['Perte de capital (art. 725 CO) : actifs − dettes couvrent moins de la moitié du capital-actions et des réserves légales.', 'Surendettement (art. 725b CO) : les dettes ne sont plus couvertes par les actifs.'],
+      ['Perte de capital (art. 725a CO) : actifs − dettes couvrent moins de la moitié du capital-actions et des réserves légales.', 'Surendettement (art. 725b CO) : les dettes ne sont plus couvertes par les actifs.'],
       ['perte-capital'], ['MP 5.6'], 'societes', 30),
     calcul('titres-immeubles', 'MP', 'Bordereaux et rendements',
       'Établir un bordereau d’achat d’obligations et calculer le rendement d’un titre ou d’un immeuble.',

@@ -389,7 +389,7 @@ function changementMethode(h: Hasard): QuestionCalcul {
 
 // ---------- MP, semestre 4 : SA, titres, immeubles ----------
 
-/** Perte de capital et surendettement (art. 725 et 725b CO révisés). */
+/** Perte de capital et surendettement (art. 725a et 725b CO révisés). */
 function perteCapital(h: Hasard): QuestionCalcul {
   const capital = entier(h, 10, 50) * 1000000;
   const reserves = Math.round((capital * entier(h, 5, 20)) / 100);
@@ -409,7 +409,7 @@ function perteCapital(h: Hasard): QuestionCalcul {
     champs: [
       chf('Fonds propres (actifs − dettes)', fp),
       chf('Moitié du capital-actions et des réserves légales', seuil),
-      { libelle: 'Situation de la société', type: 'choix', attendu: situation, choix: ['Pas de perte de capital', 'Perte de capital (art. 725 CO)', 'Surendettement (art. 725b CO)'] },
+      { libelle: 'Situation de la société', type: 'choix', attendu: situation, choix: ['Pas de perte de capital', 'Perte de capital (art. 725a CO)', 'Surendettement (art. 725b CO)'] },
     ],
     explication: [
       `Fonds propres = ${m(actifs)} − ${m(dettes)} = ${m(fp)} ; moitié = (${m(capital)} + ${m(reserves)}) ÷ 2 = ${m(seuil)}.`,
@@ -425,7 +425,8 @@ function bordereau(h: Hasard): QuestionCalcul {
   const taux = tirer(h, [1.5, 2, 2.25, 2.5, 3]);
   const jours = entier(h, 1, 11) * 30;
   const courtage = tirer(h, [0.5, 0.6, 0.8, 1]);
-  const timbre = 0.15;
+  // Droit de timbre de négociation sur titres suisses : 1,5 pour mille, dont la moitié à la charge du client.
+  const timbre = 0.075;
   const prix = Math.round((nominal * cours) / 100);
   const ic = Math.round((nominal * taux * jours) / 36000);
   const fc = Math.round((prix * courtage) / 100);
@@ -435,12 +436,12 @@ function bordereau(h: Hasard): QuestionCalcul {
     sujet: "Bordereau d'achat d'obligations",
     enonce: [
       `Achat d'obligations ${fr(taux, 2)} %, valeur nominale ${m(nominal)}, au cours de ${fr(cours)} %.`,
-      `Dernier coupon payé il y a ${jours} jours (intérêt couru 30/360). Courtage ${fr(courtage, 1)} % et droit de timbre ${fr(timbre, 2)} % du prix.`,
+      `Dernier coupon payé il y a ${jours} jours (intérêt couru 30/360). Courtage ${fr(courtage, 1)} % et droit de timbre ${fr(timbre, 3)} % du prix.`,
     ],
     champs: [chf('Prix (valeur cotée)', prix), chf('Intérêt couru', ic), chf('Courtage', fc), chf('Droit de timbre', ft), chf('Montant débité', prix + ic + fc + ft)],
     explication: [
       `Prix = ${m(nominal)} × ${fr(cours)} % = ${m(prix)} ; intérêt couru = ${m(nominal)} × ${fr(taux, 2)} × ${jours} ÷ 36 000 = ${m(ic)}.`,
-      `Courtage = ${m(prix)} × ${fr(courtage, 1)} % = ${m(fc)} ; timbre = ${m(prix)} × ${fr(timbre, 2)} % = ${m(ft)} ; total = ${m(prix + ic + fc + ft)}.`,
+      `Courtage = ${m(prix)} × ${fr(courtage, 1)} % = ${m(fc)} ; timbre = ${m(prix)} × ${fr(timbre, 3)} % = ${m(ft)} ; total = ${m(prix + ic + fc + ft)}.`,
     ],
   };
 }
