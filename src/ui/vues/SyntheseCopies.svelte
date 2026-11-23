@@ -10,6 +10,7 @@
   import type { Exercice } from '../../engine/exercice';
   import { analyseClasse, comparaisonOperation, corrigerCopie, type CorrectionCopie } from '../../engine/notation';
   import { analyseParNotion } from '../../engine/notions';
+  import type { FicheFacturation } from '../../engine/facturation';
   import { formatMontant } from '../../engine/money';
   import type { LigneEcriture } from '../../engine/dossier';
   import { LIBELLES_DIAGNOSTIC } from '../../engine/correction';
@@ -30,7 +31,7 @@
   const lignes = $derived<Ligne[]>(
     exercice
       ? copies
-          .map((c) => ({ cle: `${c.eleve.nom}|${c.eleve.prenom}|${c.exporteLe}`, copie: c, correction: corrigerCopie(exercice, c.dossier) }))
+          .map((c) => ({ cle: `${c.eleve.nom}|${c.eleve.prenom}|${c.exporteLe}`, copie: c, correction: corrigerCopie(exercice, c.dossier, c.fiches as { facturation?: FicheFacturation } | undefined) }))
           .sort((a, b) => `${a.copie.eleve.nom} ${a.copie.eleve.prenom}`.localeCompare(`${b.copie.eleve.nom} ${b.copie.eleve.prenom}`, 'fr'))
       : [],
   );
@@ -49,7 +50,7 @@
   const copieRef = $derived(lignes[0]?.copie);
   const moyenne = $derived(lignes.length ? lignes.reduce((s, l) => s + l.correction.note, 0) / lignes.length : 0);
   const texteOp = (piece: string) =>
-    piece === PIECE_BOUCLEMENT ? 'Écritures de bouclement' : (exercice?.operations.find((o) => o.numero === piece)?.texte ?? '');
+    piece === PIECE_BOUCLEMENT ? 'Écritures de bouclement' : (exercice?.operations.find((o) => o.numero === piece)?.texte ?? piece);
 
   async function importer() {
     messages = [];

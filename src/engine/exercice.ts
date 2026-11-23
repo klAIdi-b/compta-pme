@@ -1,6 +1,7 @@
 // Exercice fourni par l'enseignant : énoncé, opérations, bilan d'ouverture, paramètres.
 // Le corrigé et le barème seront formalisés en phase 3.
 
+import type { DonneesFacturation } from './facturation';
 import type { Centimes } from './money';
 import type { DateISO } from './dates';
 import type { Dossier, FormeJuridique, LigneEcriture } from './dossier';
@@ -38,7 +39,8 @@ export type Fonction =
   | 'seuil'
   | 'bilanOuverture'
   | 'margeBrute'
-  | 'echelle';
+  | 'echelle'
+  | 'facturation';
 
 export interface Operation {
   numero: string;
@@ -109,6 +111,8 @@ export interface Exercice {
     ficheMargeBrute?: boolean;
     /** Tous niveaux : données de la fiche « Échelle des prix ». */
     echellePrix?: DonneesEchelle;
+    /** CFC 2 et MP : facturation et paiements (factures à établir, ordres de paiement, contrôle des paiements). */
+    facturation?: DonneesFacturation;
   };
   corrige?: EcritureCorrigee[];
   /**
@@ -149,6 +153,7 @@ export function fonctionsExercice(ex: Exercice): Set<Fonction> {
   const cfc2 = NIVEAUX.indexOf(ex.niveau) >= NIVEAUX.indexOf('CFC2');
   if (cfc2 && ex.parametres.ficheSalaire) f.add('salaire');
   if (cfc2 && ex.parametres.calculatriceTva) f.add('calculatriceTva');
+  if (cfc2 && ex.parametres.facturation) f.add('facturation');
   if (ex.niveau === 'MP') {
     f.add('analyse');
     f.add('degres');

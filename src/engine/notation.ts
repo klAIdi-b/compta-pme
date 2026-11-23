@@ -18,6 +18,7 @@ import {
   PIECE_BOUCLEMENT,
   POINTS_BOUCLEMENT_PAR_DEFAUT,
 } from './correction-bouclement';
+import { noterFacturation, type FicheFacturation } from './facturation';
 
 export const POINTS_PAR_DEFAUT = 1;
 
@@ -84,7 +85,11 @@ export interface CorrectionCopie {
   note: number;
 }
 
-export function corrigerCopie(ex: Exercice, d: Dossier): CorrectionCopie {
+/**
+ * Correction d'une copie. Les fiches de la copie (facultatives) ajoutent les points de la facturation : chaque document
+ * (facture établie, ordre de paiement, contrôle des paiements) vaut ses points au prorata des champs justes.
+ */
+export function corrigerCopie(ex: Exercice, d: Dossier, fiches?: { facturation?: FicheFacturation }): CorrectionCopie {
   const bareme = ex.bareme ?? {};
   const partiels = ex.pointsPartiels ?? true;
   const ecritures = ecrituresPourNotation(d, ex);
@@ -95,6 +100,12 @@ export function corrigerCopie(ex: Exercice, d: Dossier): CorrectionCopie {
     const max = bareme[PIECE_BOUCLEMENT] ?? POINTS_BOUCLEMENT_PAR_DEFAUT;
     const c = corrigeBouclement(d, ex);
     if (c && max > 0) operations.push(pointsOperation(ecritures, c, max, partiels));
+  }
+  if (fiches && ex.parametres.facturation) {
+    for (const r of noterFacturation(ex.parametres.facturation, fiches.facturation, bareme)) {
+      const diagnostic: Diagnostic = r.justes === r.total ? 'juste' : r.justes === 0 ? 'manquante' : 'erronee';
+      operations.push({ piece: r.cle, diagnostic, points: r.points, max: r.max });
+    }
   }
   const points = operations.reduce((s, o) => s + o.points, 0);
   const max = operations.reduce((s, o) => s + o.max, 0);

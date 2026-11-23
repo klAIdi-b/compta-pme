@@ -245,6 +245,10 @@ export const GUIDE: PartieGuide[] = [
                 'en entraînement, chaque résultat est contrôlé.',
               'Résultat par degrés, Flux de trésorerie et Seuil de rentabilité (maturité) : calculez chaque degré ou chaque ' +
                 'flux d’après vos comptes avant bouclement ; en entraînement, chaque résultat est contrôlé.',
+              'Facturation (CFC 2 et maturité, si l’enseignant la propose) : établissez les factures d’après les bons de ' +
+                'commande (rabais, TVA et escompte arrondis aux 5 centimes, échéance), remplissez les ordres de paiement des ' +
+                'factures reçues (escompte seulement dans le délai) et contrôlez les paiements des clients sur le relevé bancaire. ' +
+                'Comptabilisez ensuite chaque pièce au journal. En évaluation, ces documents rapportent des points.',
               "Bouclement : depuis l'écran Bouclement, « Saisir les écritures de bouclement » ouvre le journal sur la pièce B1. " +
                 "Chaque étape affiche sa consigne ; en entraînement, « Besoin d'aide ? » rappelle la règle, puis les comptes " +
                 "concernés (sans les montants). Selon l'exercice, ces écritures sont corrigées comme les opérations.",
@@ -561,7 +565,10 @@ export const GUIDE: PartieGuide[] = [
           },
           {
             type: 'retenir',
-            texte: 'Note = 1 + points obtenus / points maximum × 5, arrondie au demi-point.',
+            texte:
+              'Note = 1 + points obtenus / points maximum × 5, arrondie au demi-point. Avec la rubrique Facturation, chaque ' +
+              'facture établie vaut 3 points, chaque ordre de paiement 2 points et le contrôle des paiements 3 points, au ' +
+              'prorata des champs justes (au demi-point inférieur).',
           },
         ],
       },

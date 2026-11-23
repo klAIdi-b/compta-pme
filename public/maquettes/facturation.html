@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="fr-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maquette — facturation et paiements</title>
+<style>
+  /* Maquette statique (23.11.2026) : facturation et paiements, d'après le plan d'études CFC (c5.ep3a, c5.ep5a)
+     et les compléments CFC de la MP. À valider avant l'interface. Charte du design moderne validé le 07.11.2026. */
+  :root {
+    --bleu: #1F4E78; --bleu-nuit: #11304D; --selection: #D6E4F0; --zebre: #F7FAFD;
+    --action: #C4501A; --accent: #E8601C; --alerte: #B34A12; --alerte-fond: #FDF3EE; --ok: #1D6B3A; --ok-fond: #E3F2E8; --negatif: #B00020;
+    --fond: #F4F6FA; --carte: #FFFFFF; --texte: #1B2430; --texte-2: #5B6675; --bordure: #E3E8EF; --bordure-2: #EEF2F6;
+    --ombre: 0 1px 2px rgba(16, 24, 40, 0.06), 0 1px 3px rgba(16, 24, 40, 0.08); --rayon: 8px;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: var(--texte); background: #E9EDF3; padding-bottom: 48px; }
+  .intro, .etiquette, .note, .questions { max-width: 1280px; margin-left: auto; margin-right: auto; padding: 0 16px; }
+  .intro { margin-top: 28px; }
+  .intro h1 { font-size: 24px; margin: 0 0 6px; }
+  .etiquette { margin-top: 36px; margin-bottom: 8px; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--texte-2); }
+  .note { margin-top: 10px; font-size: 13px; color: var(--texte-2); line-height: 1.5; }
+  .ecran { max-width: 1280px; margin: 0 auto; border-radius: 10px; overflow: hidden; box-shadow: 0 8px 30px rgba(16,24,40,.12); background: var(--fond); }
+  .mt { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .sous { color: var(--texte-2); margin-top: 4px; line-height: 1.5; }
+
+  .app { display: grid; grid-template-columns: 232px 1fr; min-height: 560px; }
+  .lateral { background: var(--bleu-nuit); color: #fff; padding: 16px 12px; display: flex; flex-direction: column; gap: 2px; }
+  .marque { display: flex; align-items: center; gap: 10px; padding: 4px 8px 18px; font-weight: bold; font-size: 15px; }
+  .logo { width: 28px; height: 28px; border-radius: 7px; background: var(--action); display: grid; place-items: center; font-size: 12px; }
+  .rubrique { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #8FA9C4; padding: 14px 10px 6px; }
+  .nav { padding: 8px 10px; border-radius: 6px; color: #DCE6F0; }
+  .nav.actif { background: rgba(255,255,255,.12); color: #fff; font-weight: bold; box-shadow: inset 3px 0 0 var(--accent); }
+  .nav.nouveau::after { content: 'nouveau'; font-size: 10px; margin-left: 8px; padding: 1px 6px; border-radius: 999px; background: var(--accent); color: #fff; font-weight: bold; }
+
+  .principal { display: flex; flex-direction: column; min-width: 0; }
+  .barre-haut { height: 60px; background: #fff; border-bottom: 1px solid var(--bordure); display: flex; align-items: center; gap: 14px; padding: 0 24px; }
+  .fil { color: var(--texte-2); } .fil b { color: var(--texte); }
+  .puce { font-size: 12px; font-weight: bold; padding: 3px 9px; border-radius: 999px; background: var(--selection); color: var(--bleu); }
+  .contenu { padding: 24px; display: grid; gap: 18px; }
+  h1.p { margin: 0; font-size: 22px; }
+  .carte { background: var(--carte); border: 1px solid var(--bordure); border-radius: var(--rayon); box-shadow: var(--ombre); }
+  .carte-tete { padding: 12px 16px; border-bottom: 1px solid var(--bordure-2); display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+  .carte-tete h2 { margin: 0; font-size: 15px; }
+  .carte-corps { padding: 14px 16px; }
+  .deux { display: grid; grid-template-columns: minmax(0, 380px) minmax(0, 1fr); gap: 18px; align-items: start; }
+  .carte { overflow-x: auto; }
+
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; font-size: 12px; font-weight: bold; color: var(--texte-2); background: #F8FAFC; padding: 8px 10px; border-bottom: 1px solid var(--bordure); }
+  th.mt { text-align: right; }
+  td { padding: 8px 10px; border-bottom: 1px solid var(--bordure-2); vertical-align: middle; }
+  tbody tr:nth-child(even) td { background: var(--zebre); }
+
+  .btn { font: inherit; border-radius: 6px; padding: 8px 14px; border: 1px solid var(--bordure); background: #fff; color: var(--texte); }
+  .btn-principal { background: var(--action); border-color: var(--action); color: #fff; font-weight: bold; }
+  .actions { display: flex; gap: 10px; justify-content: flex-end; }
+
+  /* Pièce (document papier) */
+  .piece { background: #fff; border: 1px solid #D5DCE5; padding: 16px 18px; font-size: 13px; line-height: 1.45; box-shadow: 0 2px 6px rgba(16,24,40,.08); }
+  .piece h3 { margin: 0 0 8px; font-size: 14px; letter-spacing: .04em; }
+  .piece .emet { font-weight: bold; }
+  .piece table td, .piece table th { padding: 4px 6px; background: none !important; font-size: 12.5px; }
+  .piece .pied { margin-top: 8px; font-size: 12px; color: var(--texte-2); }
+
+  /* Champs à remplir par l'élève */
+  .entree { display: inline-flex; align-items: center; justify-content: flex-end; min-width: 110px; height: 32px; border: 1px solid #CBD5E1; border-radius: 6px; padding: 0 10px; background: #fff; font-variant-numeric: tabular-nums; }
+  .entree.large { min-width: 260px; justify-content: flex-start; }
+  .entree.ok { border-color: var(--ok); background: var(--ok-fond); }
+  .entree.faux { border-color: var(--accent); background: var(--alerte-fond); }
+  .entree.vide { color: #A5AFBC; }
+  .champs { display: grid; grid-template-columns: 220px 1fr; gap: 10px 14px; align-items: center; }
+  .champs .lib { font-size: 13px; color: var(--texte-2); font-weight: bold; }
+  .retour { border-left: 4px solid var(--accent); background: var(--alerte-fond); padding: 8px 12px; border-radius: 4px; font-size: 13px; }
+  .retour.ok { border-left-color: var(--ok); background: var(--ok-fond); }
+  .select { display: inline-flex; align-items: center; justify-content: space-between; gap: 10px; min-width: 230px; height: 32px; border: 1px solid #CBD5E1; border-radius: 6px; padding: 0 10px; background: #fff; }
+  .select::after { content: '▾'; color: var(--texte-2); }
+  .statut { font-size: 12px; font-weight: bold; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+  .statut.ok { background: var(--ok-fond); color: var(--ok); }
+  .statut.att { background: #FCEBE2; color: var(--alerte); }
+
+  /* Bulletin QR simplifié */
+  .qr { display: grid; grid-template-columns: 150px 1fr; gap: 14px; border-top: 2px dashed #9AA6B5; margin-top: 12px; padding-top: 10px; font-size: 12px; }
+  .qr .code { width: 130px; height: 130px; background: repeating-linear-gradient(45deg, #DDE3EA 0 6px, #EEF2F6 6px 12px); display: grid; place-items: center; color: var(--texte-2); font-size: 11px; text-align: center; }
+  .qr b { display: block; font-size: 11px; color: var(--texte-2); margin-top: 4px; }
+
+  .questions { margin-top: 36px; }
+  .questions .carte-corps ol { margin: 0; padding-left: 22px; line-height: 1.6; }
+  .questions li { margin-bottom: 8px; }
+  @media (max-width: 1000px) { .app { grid-template-columns: 1fr; } .lateral { display: none; } .deux { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<div class="intro">
+  <h1>Facturation et paiements : maquettes des écrans</h1>
+  <p class="sous">
+    Maquettes statiques, à valider avant l'interface : les boutons ne fonctionnent pas. Elles répondent au plan d'études
+    CFC (2e année, champ « Finance » : c5.ep3a créer des documents de facturation et des ordres de paiement, c5.ep5a
+    vérifier les processus de paiement) et aux compléments CFC de la maturité. Exemple : Cycles du Léman, mars 2026.
+    Entreprises, IBAN et références sont fictifs.
+  </p>
+</div>
+
+<!-- ========================= Écran 1 : établir une facture ========================= -->
+<div class="etiquette">Écran 1 · Établir une facture</div>
+<div class="ecran">
+  <div class="app">
+    <aside class="lateral">
+      <div class="marque"><span class="logo">CP</span> Compta PME</div>
+      <div class="nav">Tableau de bord</div>
+      <div class="rubrique">Saisie</div>
+      <div class="nav">Journal</div>
+      <div class="nav actif nouveau">Facturation</div>
+      <div class="rubrique">Consultation</div>
+      <div class="nav">Comptes</div><div class="nav">Balance</div>
+      <div class="rubrique">États financiers</div>
+      <div class="nav">Bilan</div><div class="nav">Compte de résultat</div>
+    </aside>
+    <div class="principal">
+      <div class="barre-haut"><span class="fil">Cycles du Léman / <b>Facturation</b></span><span class="puce">CFC · niveau 2</span><span class="puce">Entraînement</span></div>
+      <div class="contenu">
+        <div>
+          <h1 class="p">Facturation</h1>
+          <div class="sous">Onglets : <b>Établir une facture</b> · Payer des factures · Contrôler les paiements</div>
+        </div>
+        <div class="deux">
+          <div class="piece">
+            <h3>BON DE COMMANDE</h3>
+            <div class="emet">Vélo-Club des Eaux-Vives</div>
+            <div>Rue des Vollandes 12, 1207 Genève</div>
+            <div style="margin-top:6px">Commande du 02.03.2026, livrée le 03.03.2026</div>
+            <table style="margin-top:8px">
+              <thead><tr><th>Article</th><th class="mt">Quantité</th><th class="mt">Prix catalogue HT</th></tr></thead>
+              <tbody>
+                <tr><td>Vélo de ville « Rhône »</td><td class="mt">4</td><td class="mt">890.00</td></tr>
+                <tr><td>Antivol à arceau</td><td class="mt">4</td><td class="mt">45.00</td></tr>
+              </tbody>
+            </table>
+            <div class="pied">
+              Note de M. Rochat : « Rabais de 10 % pour le club. Facture datée du jour de la livraison.
+              Conditions habituelles : 30 jours net, 2 % d'escompte à 10 jours. TVA 8,1 %. »
+            </div>
+          </div>
+
+          <div class="carte">
+            <div class="carte-tete"><h2>Votre facture n° F-301</h2><span class="sous" style="margin:0">Les montants arrondis aux 5 centimes</span></div>
+            <div class="carte-corps" style="display:grid;gap:14px">
+              <table>
+                <thead><tr><th>Désignation</th><th class="mt">Quantité</th><th class="mt">Prix unitaire</th><th class="mt">Montant</th></tr></thead>
+                <tbody>
+                  <tr><td>Vélo de ville « Rhône »</td><td class="mt">4</td><td class="mt">890.00</td><td class="mt"><span class="entree ok">3'560.00</span></td></tr>
+                  <tr><td>Antivol à arceau</td><td class="mt">4</td><td class="mt">45.00</td><td class="mt"><span class="entree ok">180.00</span></td></tr>
+                </tbody>
+              </table>
+              <div class="champs">
+                <span class="lib">Total brut</span><span><span class="entree ok">3'740.00</span></span>
+                <span class="lib">Rabais 10 %</span><span><span class="entree ok">374.00</span></span>
+                <span class="lib">Total hors TVA</span><span><span class="entree ok">3'366.00</span></span>
+                <span class="lib">TVA 8,1 %</span><span><span class="entree faux">272.60</span></span>
+                <span class="lib">Total à payer</span><span><span class="entree vide">0.00</span></span>
+                <span class="lib">Échéance (30 jours net)</span><span><span class="entree vide">JJ.MM.AAAA</span></span>
+                <span class="lib">Escompte 2 % jusqu'au</span><span><span class="entree vide">JJ.MM.AAAA</span> &nbsp; montant à payer <span class="entree vide">0.00</span></span>
+              </div>
+              <div class="retour"><b>TVA :</b> 8,1 % de 3'366.00 = 272.646, arrondi aux 5 centimes : 272.65.</div>
+              <div>
+                <div class="lib" style="font-size:13px;color:var(--texte-2);font-weight:bold;margin-bottom:6px">Mentions obligatoires : cochez celles que votre facture contient</div>
+                <div style="display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px">
+                  <span>☑ Nom, adresse et n° TVA du fournisseur</span><span>☑ Nom et adresse du client</span>
+                  <span>☑ Date de la livraison</span><span>☑ Nature et quantité des marchandises</span>
+                  <span>☐ Taux et montant de la TVA</span><span>☐ Montant à payer</span>
+                </div>
+              </div>
+              <div class="actions"><button class="btn">Aperçu de la facture</button><button class="btn btn-principal">Vérifier</button></div>
+            </div>
+          </div>
+        </div>
+        <p class="sous" style="margin:0">
+          Ensuite, comme toujours, l'élève passe l'écriture de la facture au journal (pièce F-301). La facture terminée
+          rejoint la liste des « Factures ouvertes » de l'écran 3.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+<p class="note">
+  En entraînement, chaque montant est contrôlé comme dans les autres fiches (vert juste, orange à revoir, avec le calcul
+  attendu). En évaluation, aucun retour : la fiche est enregistrée dans la copie.
+</p>
+
+<!-- ========================= Écran 2 : payer des factures ========================= -->
+<div class="etiquette">Écran 2 · Payer des factures (ordre de paiement)</div>
+<div class="ecran">
+  <div class="app">
+    <aside class="lateral">
+      <div class="marque"><span class="logo">CP</span> Compta PME</div>
+      <div class="nav">Tableau de bord</div>
+      <div class="rubrique">Saisie</div>
+      <div class="nav">Journal</div>
+      <div class="nav actif">Facturation</div>
+    </aside>
+    <div class="principal">
+      <div class="barre-haut"><span class="fil">Cycles du Léman / Facturation / <b>Payer des factures</b></span><span class="puce">CFC · niveau 2</span></div>
+      <div class="contenu">
+        <div class="deux">
+          <div class="piece">
+            <h3>FACTURE</h3>
+            <div class="emet">Grossiste Cycles Romandie SA</div>
+            <div>Route de Lausanne 40, 1196 Gland · CHE-000.000.000 TVA (fictif)</div>
+            <div style="margin-top:6px">Facture n° GCR-118 du 05.03.2026 · Client : Cycles du Léman</div>
+            <table style="margin-top:8px">
+              <tbody>
+                <tr><td>6 vélos électriques « Salève », livrés le 05.03.2026</td><td class="mt">4'500.00</td></tr>
+                <tr><td>TVA 8,1 %</td><td class="mt">364.50</td></tr>
+                <tr><td><b>Total à payer</b></td><td class="mt"><b>4'864.50</b></td></tr>
+              </tbody>
+            </table>
+            <div class="pied">Conditions : 30 jours net, 2 % d'escompte en cas de paiement dans les 10 jours.</div>
+            <div class="qr">
+              <div class="code">code QR<br>(simplifié)</div>
+              <div>
+                <b>Compte / Payable à</b>CH00 0000 0000 0000 0000 0 (IBAN fictif)<br>Grossiste Cycles Romandie SA, 1196 Gland
+                <b>Référence</b>00 00000 00000 00000 00011 82026
+                <b>Monnaie · Montant</b>CHF · 4'864.50
+              </div>
+            </div>
+          </div>
+
+          <div class="carte">
+            <div class="carte-tete"><h2>Ordre de paiement (e-banking)</h2><span class="sous" style="margin:0">Consigne : payez le 12.03.2026</span></div>
+            <div class="carte-corps" style="display:grid;gap:14px">
+              <div class="champs">
+                <span class="lib">Bénéficiaire</span><span><span class="entree large ok">Grossiste Cycles Romandie SA</span></span>
+                <span class="lib">IBAN</span><span><span class="entree large ok">CH00 0000 0000 0000 0000 0</span></span>
+                <span class="lib">Référence</span><span><span class="entree large ok">00 00000 00000 00000 00011 82026</span></span>
+                <span class="lib">Date d'exécution</span><span><span class="entree ok">12.03.2026</span></span>
+                <span class="lib">Escompte déduit ?</span><span><span class="select">Oui, payé dans les 10 jours</span></span>
+                <span class="lib">Montant</span><span><span class="entree faux">4'864.50</span></span>
+              </div>
+              <div class="retour"><b>Montant :</b> payé le 12.03, soit dans les 10 jours (jusqu'au 15.03) : 4'864.50 − 2 % (97.29, arrondi 97.30) = 4'767.20.</div>
+              <div class="actions"><button class="btn btn-principal">Vérifier</button></div>
+            </div>
+          </div>
+        </div>
+        <p class="sous" style="margin:0">
+          Puis l'écriture au journal : paiement de la dette et escompte obtenu avec correction de la TVA (règle validée :
+          Déductions obtenues + Impôt préalable au crédit).
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================= Écran 3 : contrôler les paiements ========================= -->
+<div class="etiquette">Écran 3 · Contrôler les paiements des clients</div>
+<div class="ecran">
+  <div class="app">
+    <aside class="lateral">
+      <div class="marque"><span class="logo">CP</span> Compta PME</div>
+      <div class="nav">Tableau de bord</div>
+      <div class="rubrique">Saisie</div>
+      <div class="nav">Journal</div>
+      <div class="nav actif">Facturation</div>
+    </aside>
+    <div class="principal">
+      <div class="barre-haut"><span class="fil">Cycles du Léman / Facturation / <b>Contrôler les paiements</b></span><span class="puce">CFC · niveau 2</span></div>
+      <div class="contenu">
+        <div class="sous" style="margin:0">Consigne : nous sommes le 31.03.2026. Rapprochez le relevé bancaire des factures ouvertes, puis indiquez la suite à donner.</div>
+        <div class="carte">
+          <div class="carte-tete"><h2>Relevé bancaire de mars : crédits</h2></div>
+          <table>
+            <thead><tr><th>Date</th><th>Donneur d'ordre</th><th class="mt">Montant</th><th>Facture payée</th></tr></thead>
+            <tbody>
+              <tr><td>12.03.2026</td><td>Vélo-Club des Eaux-Vives</td><td class="mt">3'565.90</td><td><span class="select">F-301</span></td></tr>
+              <tr><td>20.03.2026</td><td>École de Plainpalais</td><td class="mt">1'250.40</td><td><span class="select">F-302</span></td></tr>
+              <tr><td>27.03.2026</td><td>Camping des Rives</td><td class="mt">2'361.80</td><td><span class="select">F-304</span></td></tr>
+              <tr><td>28.03.2026</td><td>Atelier mécanique du Rhône</td><td class="mt">500.00</td><td><span class="select">Choisir…</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="carte">
+          <div class="carte-tete"><h2>Factures ouvertes au 31.03.2026</h2></div>
+          <table>
+            <thead><tr><th>N°</th><th>Client</th><th>Date</th><th>Conditions</th><th class="mt">Montant</th><th>Situation</th><th class="mt">Reste à encaisser</th></tr></thead>
+            <tbody>
+              <tr><td>F-301</td><td>Vélo-Club des Eaux-Vives</td><td>03.03</td><td>2 % à 10 jours</td><td class="mt">3'638.65</td><td><span class="select">Payée, escompte justifié</span></td><td class="mt"><span class="entree ok">0.00</span></td></tr>
+              <tr><td>F-302</td><td>École de Plainpalais</td><td>06.03</td><td>30 jours net</td><td class="mt">1'250.40</td><td><span class="select">Payée</span></td><td class="mt"><span class="entree ok">0.00</span></td></tr>
+              <tr><td>F-303</td><td>Atelier mécanique du Rhône</td><td>10.03</td><td>30 jours net</td><td class="mt">860.00</td><td><span class="select">Choisir…</span></td><td class="mt"><span class="entree vide">0.00</span></td></tr>
+              <tr><td>F-304</td><td>Camping des Rives</td><td>12.03</td><td>2 % à 10 jours</td><td class="mt">2'410.00</td><td><span class="select">Escompte déduit hors délai</span></td><td class="mt"><span class="entree ok">48.20</span></td></tr>
+              <tr><td>F-298</td><td>Hôtel du Parc</td><td>15.02</td><td>30 jours net</td><td class="mt">1'180.00</td><td><span class="select">Choisir…</span></td><td class="mt"><span class="entree vide">0.00</span></td></tr>
+            </tbody>
+          </table>
+          <div class="carte-corps" style="display:grid;gap:10px">
+            <div class="sous" style="margin:0">Situations proposées : Payée · Payée, escompte justifié · Escompte déduit hors délai (à réclamer) · Paiement partiel (solde à relancer) · Non payée, échue (à relancer) · Non payée, pas encore échue.</div>
+            <div class="champs">
+              <span class="lib">Mesure proposée (texte libre, non corrigé)</span>
+              <span><span class="entree large vide" style="min-width:520px">Par exemple : rappeler les conditions d'escompte sur la facture…</span></span>
+            </div>
+            <div class="actions"><button class="btn btn-principal">Vérifier</button></div>
+          </div>
+        </div>
+        <p class="sous" style="margin:0">
+          Puis les écritures au journal pour chaque encaissement (avec l'escompte accordé et la correction de la TVA quand
+          il est justifié : Déductions accordées + TVA due au débit, règle validée).
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================= Questions ========================= -->
+<div class="questions">
+  <div class="carte">
+    <div class="carte-tete"><h2>Questions à valider avant de programmer</h2></div>
+    <div class="carte-corps">
+      <ol>
+        <li><b>Niveau et place.</b> Rubrique « Facturation » dans le groupe Saisie, à activer par exercice (comme les fiches), à partir de CFC 2 et en MP. Est-ce le bon niveau, ou faut-il l'ouvrir dès CFC 1 ?</li>
+        <li><b>Mentions obligatoires de la facture.</b> Je propose la liste de la loi sur la TVA (art. 26 al. 2 LTVA) : fournisseur avec n° TVA, client, date ou période de la livraison, nature et quantité, montant, taux et montant de la TVA. Est-ce la liste du cours, ou faut-il ajouter le n° de facture, les conditions de paiement, l'IBAN ?</li>
+        <li><b>Ordre de calcul.</b> Prix × quantité → total brut → rabais → total hors TVA → TVA (arrondie aux 5 centimes) → total à payer. L'escompte se calcule-t-il sur le total TVA comprise, et s'arrondit-il aussi aux 5 centimes (ici 2 % de 3'638.65 = 72.75) ?</li>
+        <li><b>Délais.</b> Échéance = date de la facture + 30 jours (03.03 → 02.04) ; escompte valable jusqu'à la date de la facture + 10 jours, ce jour compris (03.03 → 13.03). Est-ce la convention du cours ?</li>
+        <li><b>Bulletin de versement.</b> Une section de paiement QR simplifiée (IBAN, référence, montant, sans vrai code QR) suffit-elle, ou voulez-vous imiter le récépissé officiel ?</li>
+        <li><b>Contrôle des paiements.</b> Les six situations proposées vous conviennent-elles ? Faut-il aussi faire établir un rappel (lettre de relance) pour les factures échues ?</li>
+        <li><b>Correction.</b> Comme les autres fiches : contrôle de chaque champ en entraînement, rien en évaluation. Faut-il en plus des points dans le barème d'évaluation ?</li>
+        <li><b>Exercices.</b> Je propose de commencer par un dossier CFC 2 complet (Cycles du Léman, mars : 3 factures à établir, 3 factures à payer, un relevé à contrôler, puis les écritures). D'accord ?</li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -14,7 +14,7 @@
 
   /** Évaluation formative : correction à la fin, note indicative (barème de l'exercice). */
   const formative = $derived(s.exercice.mode === 'formative' && vueEleve(etat.genre) && (s.exercice.corrige?.length ?? 0) > 0);
-  const resultat = $derived(formative && s.formativeTerminee ? corrigerCopie(s.exercice, s.dossier) : null);
+  const resultat = $derived(formative && s.formativeTerminee ? corrigerCopie(s.exercice, s.dossier, s.fiches) : null);
   const fmt = (x: number) => (Number.isInteger(x) ? String(x) : x.toFixed(1));
   function terminer() {
     if (!confirm("Terminer l'évaluation formative ?\n\nLa saisie sera fermée et la correction s'affichera. Vous ne pourrez plus modifier vos écritures.")) return;
