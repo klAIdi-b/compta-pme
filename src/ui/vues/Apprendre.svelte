@@ -13,7 +13,9 @@
   import { erreurTypique } from '../../engine/erreurs-typiques';
   import { formatMontant, lireMontant } from '../../engine/money';
   import type { TypeCompte } from '../../engine/plan';
-  import { enregistrerSerie, lireProgression, type Progression } from '../../io/apprendre';
+  import { enregistrerRevision, enregistrerSerie, lireProgression, type Progression } from '../../io/apprendre';
+  import { aRevoir } from '../../engine/revision';
+  import { dt } from '../format';
   import ChapitreTheorie from '../composants/ChapitreTheorie.svelte';
 
   const NB = 10;
@@ -81,18 +83,71 @@
     corrigee = false; juste = false;
   }
 
-  function commencerSerie() {
-    if (!module) return;
-    const x = { plan, modeles: module.modeles.map(modeleParId), comptes: module.comptes, types: module.types, calculs: module.calculs, ecritures: module.ecritures };
-    questions = genererSerie(x, module.formats, NB, Math.floor(Math.random() * 2 ** 31));
+  const contexte = (mod: ModuleApprendre) => ({
+    plan, modeles: mod.modeles.map(modeleParId), comptes: mod.comptes, types: mod.types, calculs: mod.calculs, ecritures: mod.ecritures,
+  });
+  const graine = () => Math.floor(Math.random() * 2 ** 31);
+
+  /**
+   * Trois sortes de séries : la série notée du module ; l'entraînement guidé (exemples estompés : une partie de
+   * l'écriture est déjà donnée, de moins en moins) ; la révision du jour (une question par notion à confirmer).
+   */
+  let mode = $state<'serie' | 'guide' | 'revision'>('serie');
+  let modulesRevision = $state.raw<ModuleApprendre[]>([]);
+  /** Parties de la réponse déjà données dans l'entraînement guidé. */
+  let donne = $state<{ debit: boolean; credit: boolean; lignes: boolean[] }>({ debit: false, credit: false, lignes: [] });
+
+  const aujourdhui = () => new Date().toISOString().slice(0, 10);
+  const dus = $derived(aRevoir(progression, aujourdhui()).map((id) => MODULES.find((x) => x.id === id)).filter((x): x is ModuleApprendre => !!x));
+  const guidePossible = $derived(!!module && (module.formats.includes('ecriture') || module.formats.includes('composee')));
+
+  function preparerQuestion() {
+    reinitialiserReponse();
+    const qs = questions[rang];
+    valeurs = qs && qs.format === 'calcul' ? qs.champs.map(() => '') : [];
+    comptesLignes = qs && qs.format === 'composee' ? qs.lignes.map(() => '') : [];
+    donne = { debit: false, credit: false, lignes: [] };
+    if (mode !== 'guide' || !qs) return;
+    // Aide qui s'estompe : question 1 presque résolue, question 2 à moitié, question 3 sans aide.
+    if (qs.format === 'ecriture') {
+      if (rang === 0) { debit = qs.reponse.debit; donne.debit = true; }
+      if (rang === 1) { credit = qs.reponse.credit; donne.credit = true; }
+    } else if (qs.format === 'composee') {
+      const n = rang === 0 ? qs.lignes.length - 1 : rang === 1 ? Math.floor(qs.lignes.length / 2) : 0;
+      donne.lignes = qs.lignes.map((_, i) => i < n);
+      comptesLignes = qs.lignes.map((l, i) => (i < n ? l.compte : ''));
+    }
+  }
+
+  function lancer(m2: 'serie' | 'guide' | 'revision') {
+    mode = m2;
     rang = 0;
     justes = 0;
-    reinitialiserReponse();
-    const q0 = questions[0];
-    valeurs = q0 && q0.format === 'calcul' ? q0.champs.map(() => '') : [];
-    comptesLignes = q0 && q0.format === 'composee' ? q0.lignes.map(() => '') : [];
+    preparerQuestion();
     etape = 'serie';
     haut();
+  }
+
+  function commencerSerie() {
+    if (!module) return;
+    questions = genererSerie(contexte(module), module.formats, NB, graine());
+    lancer('serie');
+  }
+
+  function commencerGuide() {
+    if (!module) return;
+    const format = module.formats.includes('composee') ? 'composee' : 'ecriture';
+    questions = genererSerie(contexte(module), [format], 3, graine());
+    lancer('guide');
+  }
+
+  /** Révision du jour : une question par notion à confirmer (cinq au plus), notions mélangées. */
+  function commencerRevision() {
+    modulesRevision = dus.slice(0, 5);
+    if (!modulesRevision.length) return;
+    questions = modulesRevision.map((mod) => genererSerie(contexte(mod), mod.formats, 1, graine())[0]!);
+    module = modulesRevision[0]!;
+    lancer('revision');
   }
 
   function reponse(): Reponse | null {
@@ -116,20 +171,20 @@
     const r = reponse();
     if (!q || !r || corrigee) return;
     juste = estJuste(q, r);
-    justes += partReussie(q, r);
+    const part = partReussie(q, r);
+    justes += part;
     corrigee = true;
+    if (mode === 'revision') progression = enregistrerRevision(progression, module!.id, part >= 0.75);
   }
 
   function continuer() {
     if (rang < questions.length - 1) {
       rang++;
-      reinitialiserReponse();
-      const qs = questions[rang];
-      valeurs = qs && qs.format === 'calcul' ? qs.champs.map(() => '') : [];
-      comptesLignes = qs && qs.format === 'composee' ? qs.lignes.map(() => '') : [];
+      if (mode === 'revision') module = modulesRevision[rang]!;
+      preparerQuestion();
       return;
     }
-    progression = enregistrerSerie(progression, module!.id, justes, questions.length, justes >= seuilMaitrise(questions.length));
+    if (mode === 'serie') progression = enregistrerSerie(progression, module!.id, justes, questions.length, justes >= seuilMaitrise(questions.length));
     etape = 'bilan';
     haut();
   }
@@ -161,6 +216,17 @@
         entraînez sur une série de {NB} questions courtes. Avec {seuilMaitrise(NB)} points sur {NB}, la notion est
         maîtrisée. Chaque série est nouvelle : vous pouvez recommencer autant de fois que nécessaire.
       </p>
+      {#if dus.length}
+        <section class="carte revision-jour">
+          <div class="corps-carte ligne-revision">
+            <div>
+              <h2>Révision du jour</h2>
+              <p>{dus.length} notion{dus.length > 1 ? 's' : ''} à confirmer : {Math.min(dus.length, 5)} question{Math.min(dus.length, 5) > 1 ? 's' : ''}, quelques minutes. Se souvenir quelques jours plus tard, c'est ce qui fait retenir.</p>
+            </div>
+            <button class="btn btn-principal" onclick={commencerRevision}>Commencer la révision</button>
+          </div>
+        </section>
+      {/if}
       {#each NIVEAUX as niv (niv)}
       <h2 class="niveau">{LIBELLES_NIVEAU_APPRENDRE[niv]}</h2>
       <ol class="modules">
@@ -173,7 +239,7 @@
               <span class="discret">{mod.objectif}</span>
             </div>
             <span class="etat" class:maitrise={p?.maitrise}>
-              {#if p?.maitrise}Maîtrisé{:else if p}Meilleur score {pts(p.meilleur)} / {p.sur}{:else}À faire{/if}
+              {#if p?.maitrise}Maîtrisé{#if p.revision}<span class="echeance">&nbsp;· à confirmer le {dt(p.revision.prochaine).slice(0, 5)}</span>{/if}{:else if p}Meilleur score {pts(p.meilleur)} / {p.sur}{:else}À faire{/if}
             </span>
           </li>
         {/each}
@@ -255,12 +321,15 @@
         </section>
       {/if}
       <div class="actions-bas">
+        {#if guidePossible}<button class="btn" onclick={commencerGuide}>S'entraîner avec aide (3 questions)</button>{/if}
         <button class="btn btn-principal" onclick={commencerSerie}>Commencer la série de {NB} questions</button>
       </div>
     {:else if etape === 'serie' && q}
       <nav class="fil">
         <button class="btn-lien" onclick={() => ouvrir(module)}>{module.titre}</button>
-        <span class="discret">Question {rang + 1} sur {questions.length} · {pts(justes)} point{justes >= 2 ? 's' : ''}</span>
+        <span class="discret">
+          {mode === 'guide' ? 'Entraînement guidé · ' : mode === 'revision' ? 'Révision du jour · ' : ''}Question {rang + 1} sur {questions.length}{#if mode === 'serie'} · {pts(justes)} point{justes >= 2 ? 's' : ''}{/if}
+        </span>
       </nav>
       <div class="barre" aria-hidden="true"><span style:width={`${(rang / questions.length) * 100}%`}></span></div>
 
@@ -276,7 +345,7 @@
                   <tr class:faux-ligne={corrigee && comptesLignes[i] !== l.compte}>
                     <td>{l.cote === 'debit' ? 'Débit' : 'Crédit'}</td>
                     <td>
-                      <select bind:value={comptesLignes[i]} disabled={corrigee} aria-label={`Compte de la ligne ${i + 1} (${l.cote === 'debit' ? 'débit' : 'crédit'})`}>
+                      <select bind:value={comptesLignes[i]} disabled={corrigee || !!donne.lignes[i]} aria-label={`Compte de la ligne ${i + 1} (${l.cote === 'debit' ? 'débit' : 'crédit'})`}>
                         <option value="">Choisir…</option>
                         {#each comptesModule as n}<option value={n}>{nom(n)}</option>{/each}
                       </select>
@@ -344,13 +413,13 @@
             <p class="enonce">{q.texte}</p>
             <div class="grille-ecriture">
               <label>Compte au débit
-                <select bind:value={debit} disabled={corrigee}>
+                <select bind:value={debit} disabled={corrigee || donne.debit}>
                   <option value="">Choisir…</option>
                   {#each comptesTries as n}<option value={n}>{nom(n)}</option>{/each}
                 </select>
               </label>
               <label>Compte au crédit
-                <select bind:value={credit} disabled={corrigee}>
+                <select bind:value={credit} disabled={corrigee || donne.credit}>
                   <option value="">Choisir…</option>
                   {#each comptesTries as n}<option value={n}>{nom(n)}</option>{/each}
                 </select>
@@ -443,6 +512,25 @@
       </div>
     {:else if etape === 'bilan'}
       <nav class="fil"><button class="btn-lien" onclick={() => ouvrir(null)}>Tous les modules</button></nav>
+      {#if mode === 'revision'}
+        <div class="titre"><h1>Révision du jour</h1></div>
+        <section class="carte">
+          <div class="corps-carte">
+            <p class="score"><b>{pts(justes)} points sur {questions.length}.</b></p>
+            <p>Les notions réussies vous seront redemandées plus tard ; les autres reviennent dès demain.</p>
+          </div>
+        </section>
+        <div class="actions-bas"><button class="btn btn-principal" onclick={() => ouvrir(null)}>Retour aux modules</button></div>
+      {:else if mode === 'guide'}
+        <div class="titre"><h1>{module.titre}</h1></div>
+        <section class="carte">
+          <div class="corps-carte"><p>Entraînement guidé terminé. À vous maintenant, sans aide : la série compte pour la maîtrise.</p></div>
+        </section>
+        <div class="actions-bas">
+          <button class="btn btn-principal" onclick={commencerSerie}>Commencer la série de {NB} questions</button>
+          <button class="btn" onclick={commencerGuide}>Refaire l'entraînement guidé</button>
+        </div>
+      {:else}
       <div class="titre"><h1>{module.titre}</h1></div>
       <section class="carte">
         <div class="corps-carte">
@@ -466,6 +554,7 @@
           <button class="btn" onclick={() => ouvrir(module)}>Revoir l'essentiel et l'exemple</button>
         {/if}
       </div>
+      {/if}
     {/if}
   </main>
 </div>
@@ -482,6 +571,10 @@
   section { margin-bottom: 14px; }
   .petit { font-size: 13px; }
   .fil { display: flex; gap: 16px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
+  .revision-jour { border: 1px solid #f1c9b3; background: linear-gradient(135deg, #fff 0%, var(--c-orange-doux) 100%); margin-bottom: 8px; }
+  .ligne-revision { display: flex; gap: 20px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+  .ligne-revision p { margin: 4px 0 0; max-width: 60ch; }
+  .echeance { font-weight: normal; color: var(--c-texte-2); }
   h2.niveau { font-size: 15px; color: var(--c-structure); margin: 18px 0 8px; }
   .donnees { width: 100%; margin: 6px 0 12px; }
   .donnees td, .donnees th { padding: 6px 8px; }

@@ -118,7 +118,7 @@
           ...etapesApres.map((e, i) => ({
             vue: e.vue,
             libelle: e.libelle,
-            fait: e.vue === 'bouclement' ? boucleFait : journalTermine && rangAtteint > i + 1,
+            fait: journalTermine && (e.vue === 'bouclement' ? boucleFait : rangAtteint > i + 1),
           })),
         ]
     ).map((e, i) => ({ ...e, etape: i + 1 }));
