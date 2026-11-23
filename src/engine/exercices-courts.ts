@@ -6,6 +6,7 @@
 import { formatMontant, type Centimes } from './money';
 import type { Compte, TypeCompte } from './plan';
 import { champJuste, genererCalcul, type QuestionCalcul, type QuestionQcm } from './calculs';
+import { genererEcriture, type QuestionComposee } from './ecritures-generees';
 
 /** Modèle d'opération : texte avec le montant, écriture simple attendue (comptes du corrigé d'un exercice validé). */
 export interface ModeleOperation {
@@ -20,9 +21,10 @@ export interface ModeleOperation {
   pas: number;
 }
 
-export type FormatQuestion = 'classer' | 'variation' | 'ecriture' | 'operation' | 'erreur' | 'solde' | 'calcul';
+export type FormatQuestion = 'classer' | 'variation' | 'ecriture' | 'operation' | 'erreur' | 'solde' | 'calcul' | 'composee';
 
 export type Question =
+  | QuestionComposee
   | QuestionCalcul
   | QuestionQcm
   | { format: 'classer'; compte: string; choix: TypeCompte[]; reponse: TypeCompte }
@@ -119,6 +121,8 @@ export interface ContexteSerie {
   types: readonly TypeCompte[];
   /** Générateurs de calculs (src/engine/calculs.ts) utilisés par le format « calcul ». */
   calculs?: readonly string[];
+  /** Familles d'écritures générées (src/engine/ecritures-generees.ts) pour le format « composee ». */
+  ecritures?: readonly string[];
 }
 
 function questionClasser(h: Hasard, x: ContexteSerie): Question {
@@ -217,6 +221,11 @@ function questionCalcul(h: Hasard, x: ContexteSerie): Question | null {
   return genererCalcul(id, h, { plan: x.plan });
 }
 
+function questionComposee(h: Hasard, x: ContexteSerie): Question | null {
+  if (!x.ecritures?.length) return null;
+  return genererEcriture(x.ecritures[rangCalcul++ % x.ecritures.length]!, h);
+}
+
 const FABRIQUES: Record<FormatQuestion, (h: Hasard, x: ContexteSerie) => Question | null> = {
   classer: questionClasser,
   variation: questionVariation,
@@ -225,6 +234,7 @@ const FABRIQUES: Record<FormatQuestion, (h: Hasard, x: ContexteSerie) => Questio
   erreur: questionErreur,
   solde: questionSolde,
   calcul: questionCalcul,
+  composee: questionComposee,
 };
 
 /**
@@ -237,7 +247,7 @@ export function genererSerie(x: ContexteSerie, formats: readonly FormatQuestion[
   const r: Question[] = [];
   for (let i = 0; i < n; i++) {
     const f = formats[i % formats.length]!;
-    r.push(FABRIQUES[f](h, x) ?? (x.modeles.length ? questionEcriture(h, x) : questionCalcul(h, x)!));
+    r.push(FABRIQUES[f](h, x) ?? (x.modeles.length ? questionEcriture(h, x) : (questionCalcul(h, x) ?? questionComposee(h, x))!));
   }
   return melanger(h, r);
 }
@@ -245,6 +255,7 @@ export function genererSerie(x: ContexteSerie, formats: readonly FormatQuestion[
 // ---------- Correction ----------
 
 export type Reponse =
+  | { format: 'composee'; comptes: string[] }
   | { format: 'calcul'; valeurs: string[] }
   | { format: 'qcm'; choix: number }
   | { format: 'classer'; type: TypeCompte }
@@ -254,6 +265,8 @@ export type Reponse =
 
 export function estJuste(q: Question, r: Reponse): boolean {
   switch (q.format) {
+    case 'composee':
+      return r.format === 'composee' && q.lignes.every((l, i) => r.comptes[i] === l.compte);
     case 'calcul':
       return r.format === 'calcul' && q.champs.every((c, i) => champJuste(c, r.valeurs[i]));
     case 'qcm':

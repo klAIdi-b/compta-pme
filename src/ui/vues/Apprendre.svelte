@@ -3,6 +3,7 @@
   import { etat } from '../etat.svelte';
   import { LIBELLES_NIVEAU_APPRENDRE, MODULES, modeleParId, type ModuleApprendre, type NiveauApprendre } from '../../data/apprendre';
   import { champJuste, genererCalcul, valeurLisible, type QuestionGeneree } from '../../engine/calculs';
+  import { genererEcriture } from '../../engine/ecritures-generees';
   import { CHAPITRES } from '../../data/theorie';
   import { plan } from '../../data/plan';
   import {
@@ -40,6 +41,7 @@
   let montantSaisi = $state('');
   let cote = $state<'debiteur' | 'crediteur' | null>(null);
   let valeurs = $state<string[]>([]);
+  let comptesLignes = $state<string[]>([]);
 
   const q = $derived(questions[rang] ?? null);
   const chapitre = $derived(module ? CHAPITRES.find((c) => c.id === module!.chapitre) ?? null : null);
@@ -52,6 +54,8 @@
   const comptesTries = $derived(q && q.format === 'ecriture' ? [...q.comptes].sort((a, b) => nom(a).localeCompare(nom(b), 'fr')) : []);
   /** Exemple travaillé d'un module de calcul : une question générée avec ses réponses et son explication. */
   const exempleCalcul = $derived<QuestionGeneree | null>(module?.calculs?.length ? genererCalcul(module.calculs[0]!, hasard(7), { plan }) : null);
+  const exempleComposee = $derived(module?.ecritures?.length ? genererEcriture(module.ecritures[0]!, hasard(7)) : null);
+  const comptesModule = $derived(module ? [...module.comptes].sort((a, b) => nom(a).localeCompare(nom(b), 'fr')) : []);
   const NIVEAUX: NiveauApprendre[] = ['CFC1', 'CFC2', 'MP'];
   const indexModule = $derived(module ? MODULES.indexOf(module) : -1);
   const suivant = $derived(indexModule >= 0 && indexModule < MODULES.length - 1 ? MODULES[indexModule + 1]! : null);
@@ -71,18 +75,20 @@
   function reinitialiserReponse() {
     choix = null; type = null; debit = ''; credit = ''; montantSaisi = ''; cote = null;
     valeurs = q && q.format === 'calcul' ? q.champs.map(() => '') : [];
+    comptesLignes = q && q.format === 'composee' ? q.lignes.map(() => '') : [];
     corrigee = false; juste = false;
   }
 
   function commencerSerie() {
     if (!module) return;
-    const x = { plan, modeles: module.modeles.map(modeleParId), comptes: module.comptes, types: module.types, calculs: module.calculs };
+    const x = { plan, modeles: module.modeles.map(modeleParId), comptes: module.comptes, types: module.types, calculs: module.calculs, ecritures: module.ecritures };
     questions = genererSerie(x, module.formats, NB, Math.floor(Math.random() * 2 ** 31));
     rang = 0;
     justes = 0;
     reinitialiserReponse();
     const q0 = questions[0];
     valeurs = q0 && q0.format === 'calcul' ? q0.champs.map(() => '') : [];
+    comptesLignes = q0 && q0.format === 'composee' ? q0.lignes.map(() => '') : [];
     etape = 'serie';
     haut();
   }
@@ -90,6 +96,7 @@
   function reponse(): Reponse | null {
     if (!q) return null;
     switch (q.format) {
+      case 'composee': return comptesLignes.every((c) => c) ? { format: 'composee', comptes: [...comptesLignes] } : null;
       case 'calcul': return valeurs.every((v) => (v ?? '').trim() !== '') ? { format: 'calcul', valeurs: [...valeurs] } : null;
       case 'qcm': return choix === null ? null : { format: 'qcm', choix };
       case 'classer': return type ? { format: 'classer', type } : null;
@@ -117,6 +124,7 @@
       reinitialiserReponse();
       const qs = questions[rang];
       valeurs = qs && qs.format === 'calcul' ? qs.champs.map(() => '') : [];
+      comptesLignes = qs && qs.format === 'composee' ? qs.lignes.map(() => '') : [];
       return;
     }
     progression = enregistrerSerie(progression, module!.id, justes, questions.length, justes >= seuilMaitrise(questions.length));
@@ -208,6 +216,23 @@
           </div>
         </section>
       {/if}
+      {#if exempleComposee}
+        <section class="carte">
+          <h2>Exemple travaillé</h2>
+          <div class="corps-carte">
+            <p class="operation">{exempleComposee.texte}</p>
+            <table class="ecriture-ex">
+              <thead><tr><th>Débit</th><th>Crédit</th><th class="montant">Montant</th></tr></thead>
+              <tbody>
+                {#each exempleComposee.lignes as l}
+                  <tr><td>{l.cote === 'debit' ? nom(l.compte) : ''}</td><td>{l.cote === 'credit' ? nom(l.compte) : ''}</td><td class="montant num">{m(l.montant)}</td></tr>
+                {/each}
+              </tbody>
+            </table>
+            <p class="discret petit">Le total des débits est égal au total des crédits.</p>
+          </div>
+        </section>
+      {/if}
       {#if exempleCalcul}
         <section class="carte">
           <h2>Exemple travaillé</h2>
@@ -239,7 +264,28 @@
 
       <section class="carte question">
         <div class="corps-carte">
-          {#if q.format === 'calcul'}
+          {#if q.format === 'composee'}
+            <p class="consigne">{q.sujet} · choisissez le compte de chaque ligne</p>
+            <p class="enonce">{q.texte}</p>
+            <table class="donnees composee">
+              <thead><tr><th>Côté</th><th>Compte</th><th class="montant">Montant</th>{#if corrigee}<th></th>{/if}</tr></thead>
+              <tbody>
+                {#each q.lignes as l, i}
+                  <tr class:faux-ligne={corrigee && comptesLignes[i] !== l.compte}>
+                    <td>{l.cote === 'debit' ? 'Débit' : 'Crédit'}</td>
+                    <td>
+                      <select bind:value={comptesLignes[i]} disabled={corrigee} aria-label={`Compte de la ligne ${i + 1} (${l.cote === 'debit' ? 'débit' : 'crédit'})`}>
+                        <option value="">Choisir…</option>
+                        {#each comptesModule as n}<option value={n}>{nom(n)}</option>{/each}
+                      </select>
+                    </td>
+                    <td class="montant num">{m(l.montant)}</td>
+                    {#if corrigee}<td class="attendu">{comptesLignes[i] === l.compte ? 'Juste' : nom(l.compte)}</td>{/if}
+                  </tr>
+                {/each}
+              </tbody>
+            </table>
+          {:else if q.format === 'calcul'}
             <p class="consigne">{q.sujet}</p>
             {#each q.enonce as e}<p class="enonce-calcul">{e}</p>{/each}
             {#if q.tableau}
@@ -363,7 +409,9 @@
                 {#if q.format === 'calcul'}<ol class="raisonnement">{#each q.explication as e}<li>{e}</li>{/each}</ol>{/if}
               {:else}
                 <b>Pas tout à fait.</b>
-                {#if q.format === 'calcul'}
+                {#if q.format === 'composee'}
+                  Le compte attendu figure à droite des lignes fausses.
+                {:else if q.format === 'calcul'}
                   Les valeurs attendues figurent à droite des réponses fausses.
                   <ol class="raisonnement">{#each q.explication as e}<li>{e}</li>{/each}</ol>
                 {:else if q.format === 'qcm'}La bonne réponse : {q.choix[q.reponse]}. {q.explication}
@@ -437,6 +485,7 @@
   .donnees td, .donnees th { padding: 6px 8px; }
   .reponses td:first-child { width: 55%; }
   .champ-calcul { width: 140px; text-align: right; font-size: 15px; padding: 5px 8px; }
+  .composee select { min-width: 300px; font-size: 14px; padding: 5px; }
   .reponses select { min-width: 260px; font-size: 14px; padding: 5px; }
   .unite { color: var(--c-texte-2); font-size: 12px; margin-left: 4px; }
   .attendu { color: var(--c-alerte-texte); font-weight: bold; white-space: nowrap; }
