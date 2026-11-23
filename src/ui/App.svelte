@@ -22,18 +22,6 @@
   import Bilan from './vues/Bilan.svelte';
   import CompteResultat from './vues/CompteResultat.svelte';
   import Bouclement from './vues/Bouclement.svelte';
-  import Tva from './vues/Tva.svelte';
-  import Salaire from './vues/Salaire.svelte';
-  import Repartition from './vues/Repartition.svelte';
-  import FicheDegres from './vues/FicheDegres.svelte';
-  import FicheFlux from './vues/FicheFlux.svelte';
-  import FicheSeuil from './vues/FicheSeuil.svelte';
-  import FicheBilanOuverture from './vues/FicheBilanOuverture.svelte';
-  import FicheMargeBrute from './vues/FicheMargeBrute.svelte';
-  import FicheEchelle from './vues/FicheEchelle.svelte';
-  import Facturation from './vues/Facturation.svelte';
-  import Budget from './vues/Budget.svelte';
-  import Analyse from './vues/Analyse.svelte';
   import Visite from './composants/Visite.svelte';
   import EtapeSuivante from './composants/EtapeSuivante.svelte';
 
@@ -116,15 +104,25 @@
   const rubriques = $derived.by((): Rubrique[] => {
     const f = etat.session ? etat.fonctions : new Set();
     const saisies = (etat.session?.dossier.ecritures.length ?? 0) > 0;
-    const parcours: Entree[] = [
-      { vue: 'tableau' as Vue, libelle: 'Votre mission', fait: saisies },
-      { vue: 'journal' as Vue, libelle: 'Journal', fait: journalTermine },
-      ...etapesApres.map((e, i) => ({
-        vue: e.vue,
-        libelle: e.libelle,
-        fait: e.vue === 'bouclement' ? boucleFait : journalTermine && rangAtteint > i + 1,
-      })),
-    ].map((e, i) => ({ ...e, etape: i + 1 }));
+    // Exercice sans journal (fiche seule : budget, facturation) : le parcours ne contient que la mission et les fiches.
+    const sansJournal = !!etat.session && etat.exercice.operations.length === 0;
+    const fiches: Entree[] = [
+      ...(f.has('facturation') ? [{ vue: 'facturation' as Vue, libelle: 'Facturation' }] : []),
+      ...(f.has('budget') ? [{ vue: 'budget' as Vue, libelle: 'Budget' }] : []),
+    ];
+    const parcours: Entree[] = (sansJournal
+      ? [{ vue: 'tableau' as Vue, libelle: 'Votre mission', fait: false }, ...fiches]
+      : [
+          { vue: 'tableau' as Vue, libelle: 'Votre mission', fait: saisies },
+          { vue: 'journal' as Vue, libelle: 'Journal', fait: journalTermine },
+          ...etapesApres.map((e, i) => ({
+            vue: e.vue,
+            libelle: e.libelle,
+            fait: e.vue === 'bouclement' ? boucleFait : journalTermine && rangAtteint > i + 1,
+          })),
+        ]
+    ).map((e, i) => ({ ...e, etape: i + 1 }));
+    if (sansJournal) return [{ titre: 'Votre parcours', entrees: parcours }, { titre: 'Outils', entrees: [{ vue: 'theorie', libelle: 'Théorie' }] }];
     return [
       { titre: 'Votre parcours', entrees: parcours },
       {
@@ -265,18 +263,18 @@
       {:else if etat.vue === 'bilan'}<Bilan />
       {:else if etat.vue === 'resultat'}<CompteResultat />
       {:else if etat.vue === 'bouclement'}<Bouclement />
-      {:else if etat.vue === 'tva' && etat.fonctions.has('tva')}<Tva />
-      {:else if etat.vue === 'salaire' && etat.fonctions.has('salaire')}<Salaire />
-      {:else if etat.vue === 'repartition' && etat.fonctions.has('repartition')}<Repartition />
-      {:else if etat.vue === 'analyse' && etat.fonctions.has('analyse')}<Analyse />
-      {:else if etat.vue === 'degres' && etat.fonctions.has('degres')}<FicheDegres />
-      {:else if etat.vue === 'flux' && etat.fonctions.has('flux')}<FicheFlux />
-      {:else if etat.vue === 'seuil' && etat.fonctions.has('seuil')}<FicheSeuil />
-      {:else if etat.vue === 'bilanOuverture' && etat.fonctions.has('bilanOuverture')}<FicheBilanOuverture />
-      {:else if etat.vue === 'margeBrute' && etat.fonctions.has('margeBrute')}<FicheMargeBrute />
-      {:else if etat.vue === 'echelle' && etat.fonctions.has('echelle')}<FicheEchelle />
-      {:else if etat.vue === 'facturation' && etat.fonctions.has('facturation')}<Facturation />
-      {:else if etat.vue === 'budget' && etat.fonctions.has('budget')}<Budget />
+      {:else if etat.vue === 'tva' && etat.fonctions.has('tva')}<Differe charger={() => import('./vues/Tva.svelte')} props={{}} />
+      {:else if etat.vue === 'salaire' && etat.fonctions.has('salaire')}<Differe charger={() => import('./vues/Salaire.svelte')} props={{}} />
+      {:else if etat.vue === 'repartition' && etat.fonctions.has('repartition')}<Differe charger={() => import('./vues/Repartition.svelte')} props={{}} />
+      {:else if etat.vue === 'analyse' && etat.fonctions.has('analyse')}<Differe charger={() => import('./vues/Analyse.svelte')} props={{}} />
+      {:else if etat.vue === 'degres' && etat.fonctions.has('degres')}<Differe charger={() => import('./vues/FicheDegres.svelte')} props={{}} />
+      {:else if etat.vue === 'flux' && etat.fonctions.has('flux')}<Differe charger={() => import('./vues/FicheFlux.svelte')} props={{}} />
+      {:else if etat.vue === 'seuil' && etat.fonctions.has('seuil')}<Differe charger={() => import('./vues/FicheSeuil.svelte')} props={{}} />
+      {:else if etat.vue === 'bilanOuverture' && etat.fonctions.has('bilanOuverture')}<Differe charger={() => import('./vues/FicheBilanOuverture.svelte')} props={{}} />
+      {:else if etat.vue === 'margeBrute' && etat.fonctions.has('margeBrute')}<Differe charger={() => import('./vues/FicheMargeBrute.svelte')} props={{}} />
+      {:else if etat.vue === 'echelle' && etat.fonctions.has('echelle')}<Differe charger={() => import('./vues/FicheEchelle.svelte')} props={{}} />
+      {:else if etat.vue === 'facturation' && etat.fonctions.has('facturation')}<Differe charger={() => import('./vues/Facturation.svelte')} props={{}} />
+      {:else if etat.vue === 'budget' && etat.fonctions.has('budget')}<Differe charger={() => import('./vues/Budget.svelte')} props={{}} />
       {:else if etat.vue === 'theorie'}<Differe charger={() => import('./vues/Theorie.svelte')} props={{}} />
       {:else}<TableauDeBord />
       {/if}

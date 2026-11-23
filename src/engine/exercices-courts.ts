@@ -214,19 +214,21 @@ function questionSolde(h: Hasard, x: ContexteSerie): Question {
   };
 }
 
-let rangCalcul = 0;
-function questionCalcul(h: Hasard, x: ContexteSerie): Question | null {
+/** Rang du prochain générateur à utiliser, propre à chaque série (aucun état partagé entre deux séries). */
+interface Tour { rang: number }
+
+function questionCalcul(h: Hasard, x: ContexteSerie, t: Tour): Question | null {
   if (!x.calculs?.length) return null;
-  const id = x.calculs[rangCalcul++ % x.calculs.length]!;
+  const id = x.calculs[t.rang++ % x.calculs.length]!;
   return genererCalcul(id, h, { plan: x.plan });
 }
 
-function questionComposee(h: Hasard, x: ContexteSerie): Question | null {
+function questionComposee(h: Hasard, x: ContexteSerie, t: Tour): Question | null {
   if (!x.ecritures?.length) return null;
-  return genererEcriture(x.ecritures[rangCalcul++ % x.ecritures.length]!, h);
+  return genererEcriture(x.ecritures[t.rang++ % x.ecritures.length]!, h);
 }
 
-const FABRIQUES: Record<FormatQuestion, (h: Hasard, x: ContexteSerie) => Question | null> = {
+const FABRIQUES: Record<FormatQuestion, (h: Hasard, x: ContexteSerie, t: Tour) => Question | null> = {
   classer: questionClasser,
   variation: questionVariation,
   ecriture: questionEcriture,
@@ -243,11 +245,11 @@ const FABRIQUES: Record<FormatQuestion, (h: Hasard, x: ContexteSerie) => Questio
  */
 export function genererSerie(x: ContexteSerie, formats: readonly FormatQuestion[], n: number, graine: number): Question[] {
   const h = hasard(graine);
-  rangCalcul = Math.floor(h() * 100);
+  const tour: Tour = { rang: Math.floor(h() * 100) };
   const r: Question[] = [];
   for (let i = 0; i < n; i++) {
     const f = formats[i % formats.length]!;
-    r.push(FABRIQUES[f](h, x) ?? (x.modeles.length ? questionEcriture(h, x) : (questionCalcul(h, x) ?? questionComposee(h, x))!));
+    r.push(FABRIQUES[f](h, x, tour) ?? (x.modeles.length ? questionEcriture(h, x) : (questionCalcul(h, x, tour) ?? questionComposee(h, x, tour))!));
   }
   return melanger(h, r);
 }
@@ -282,6 +284,16 @@ export function estJuste(q: Question, r: Reponse): boolean {
     case 'solde':
       return r.format === 'solde' && r.montant === q.reponse.montant && (q.reponse.montant === 0 || r.cote === q.reponse.cote);
   }
+}
+
+/**
+ * Part de la question réussie, de 0 à 1. Une question à plusieurs réponses (calcul en plusieurs étapes, écriture
+ * composée) compte au prorata des réponses justes : une seule étape fausse ne fait pas perdre toute la question.
+ */
+export function credit(q: Question, r: Reponse): number {
+  if (q.format === 'calcul' && r.format === 'calcul') return q.champs.filter((c, i) => champJuste(c, r.valeurs[i])).length / q.champs.length;
+  if (q.format === 'composee' && r.format === 'composee') return q.lignes.filter((l, i) => r.comptes[i] === l.compte).length / q.lignes.length;
+  return estJuste(q, r) ? 1 : 0;
 }
 
 /** Seuil de maîtrise d'une série : 8 réponses justes sur 10 (arrondi au supérieur pour une autre longueur). */

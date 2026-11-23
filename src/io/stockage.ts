@@ -2,8 +2,10 @@
 // Toutes les lectures et écritures sont protégées : navigation privée ou stockage bloqué
 // ne doivent jamais empêcher l'application de fonctionner.
 
-export const CLE_ELEVE = 'compta-pme:v1';
-export const CLE_ENSEIGNANT = 'compta-pme:enseignant:v1';
+import { ESPACE } from './espace';
+
+export const CLE_ELEVE = `${ESPACE}:v1`;
+export const CLE_ENSEIGNANT = `${ESPACE}:enseignant:v1`;
 
 export function lire<T>(cle = CLE_ELEVE): T | null {
   try {

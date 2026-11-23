@@ -3,6 +3,7 @@
 // - lien donné aux groupes (?partie=…&service=…&cle=…).
 // Aucune donnée d'élève : la session est celle de l'enseignant, le lien ne contient que des informations publiques.
 
+import { ESPACE } from './espace';
 import { ecrire } from './stockage';
 
 export interface ConfigEnLigne {
@@ -12,7 +13,7 @@ export interface ConfigEnLigne {
   cleAnon: string;
 }
 
-export const CLE_RETOUR_CONNEXION = 'compta-pme:simulateur-connexion:v1';
+export const CLE_RETOUR_CONNEXION = `${ESPACE}:simulateur-connexion:v1`;
 
 // ---------- Session de l'enseignant (connexion par lien e-mail) ----------
 

@@ -2,13 +2,14 @@
 // Seuls les réglages, les entreprises et les décisions sont enregistrés ; la partie est recalculée à la lecture
 // (calcul déterministe). Aucun nom d'élève : seulement les noms d'entreprise choisis par les groupes.
 
+import { ESPACE } from './espace';
 import type { Decisions, Entreprise, Imprevu, Partie, ReglagesPartie } from '../engine/simulation/types';
 import { rejouer } from '../engine/simulation/tour';
 import type { DecisionsGroupe, SituationGroupe } from '../engine/simulation/situation';
 import { ErreurFichier, migrer } from './fichiers';
 
 export const EXT_SIMULATION = '.compta-simulation.json';
-export const CLE_SIMULATEUR = 'compta-pme:simulateur:v1';
+export const CLE_SIMULATEUR = `${ESPACE}:simulateur:v1`;
 const FORMAT = 'compta-pme/simulation';
 const VERSION_SIMULATION = 1;
 
