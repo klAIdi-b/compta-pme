@@ -29,6 +29,7 @@
   import FicheMargeBrute from './vues/FicheMargeBrute.svelte';
   import FicheEchelle from './vues/FicheEchelle.svelte';
   import Facturation from './vues/Facturation.svelte';
+  import Budget from './vues/Budget.svelte';
   import Analyse from './vues/Analyse.svelte';
   import Visite from './composants/Visite.svelte';
   import EtapeSuivante from './composants/EtapeSuivante.svelte';
@@ -106,6 +107,7 @@
           ...(f.has('bilanOuverture') ? [{ vue: 'bilanOuverture' as Vue, libelle: "Bilan d'ouverture" }] : []),
           { vue: 'journal', libelle: 'Journal' },
           ...(f.has('facturation') ? [{ vue: 'facturation' as Vue, libelle: 'Facturation' }] : []),
+          ...(f.has('budget') ? [{ vue: 'budget' as Vue, libelle: 'Budget' }] : []),
           ...(f.has('salaire') ? [{ vue: 'salaire' as Vue, libelle: 'Décompte de salaire' }] : []),
         ],
       },
@@ -259,6 +261,7 @@
       {:else if etat.vue === 'margeBrute' && etat.fonctions.has('margeBrute')}<FicheMargeBrute />
       {:else if etat.vue === 'echelle' && etat.fonctions.has('echelle')}<FicheEchelle />
       {:else if etat.vue === 'facturation' && etat.fonctions.has('facturation')}<Facturation />
+      {:else if etat.vue === 'budget' && etat.fonctions.has('budget')}<Budget />
       {:else if etat.vue === 'theorie'}<Differe charger={() => import('./vues/Theorie.svelte')} props={{}} />
       {:else}<TableauDeBord />
       {/if}

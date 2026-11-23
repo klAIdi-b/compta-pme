@@ -2,6 +2,7 @@
 
 import type { Dossier } from '../engine/dossier';
 import type { FicheFacturation } from '../engine/facturation';
+import type { FicheBudget } from '../engine/budget';
 import type { Exercice } from '../engine/exercice';
 import { actualiserDossier, avecCorrigeAJour, corrigeDepuisEcritures, creerDossier, estNouvelleVersionSimulation, fonctionsExercice, retourVisible, type EcritureCorrigee } from '../engine/exercice';
 import { ajouterEcriture } from '../engine/journal';
@@ -31,6 +32,7 @@ export type Vue =
   | 'margeBrute'
   | 'echelle'
   | 'facturation'
+  | 'budget'
   | 'bouclement'
   | 'theorie';
 
@@ -77,6 +79,7 @@ export interface Fiches {
   bilanOuverture?: Record<string, string>;
   margeBrute?: Record<string, string>;
   facturation?: FicheFacturation;
+  budget?: FicheBudget;
   echelle?: Record<string, string>;
 }
 
@@ -103,7 +106,7 @@ function completer(s: (Partial<Session> & Omit<Session, 'suivi' | 'role' | 'fich
     : null;
 }
 
-const VUES: Vue[] = ['tableau', 'journal', 'comptes', 'grandlivre', 'balance', 'bilan', 'resultat', 'tva', 'salaire', 'repartition', 'analyse', 'degres', 'flux', 'seuil', 'bilanOuverture', 'margeBrute', 'echelle', 'facturation', 'bouclement', 'theorie'];
+const VUES: Vue[] = ['tableau', 'journal', 'comptes', 'grandlivre', 'balance', 'bilan', 'resultat', 'tva', 'salaire', 'repartition', 'analyse', 'degres', 'flux', 'seuil', 'bilanOuverture', 'margeBrute', 'echelle', 'facturation', 'budget', 'bouclement', 'theorie'];
 
 function vueDepuisAdresse(): Vue {
   const h = location.hash.replace('#', '') as Vue;

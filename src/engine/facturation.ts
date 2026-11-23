@@ -8,8 +8,9 @@
 // - points en évaluation.
 // Les saisies de l'élève sont des textes (comme les autres fiches) ; montants comparés au centime près.
 
-import { formatDate, jourSuivant, lireDate, type DateISO } from './dates';
-import { arrondi5, lireMontant, type Centimes } from './money';
+import { controlerChamp, resultatDocument, type ChampAttendu, type ResultatDocument } from './champs';
+import { formatDate, jourSuivant, type DateISO } from './dates';
+import { arrondi5, type Centimes } from './money';
 import type { PieceComptable } from './pieces';
 import { tvaSurHT } from './tva';
 
@@ -161,13 +162,6 @@ export const MENTIONS_FACTURE: { id: string; libelle: string; obligatoire: boole
   { id: 'signature', libelle: 'Signature du fournisseur', obligatoire: false },
 ];
 
-export interface ChampAttendu {
-  cle: string;
-  libelle: string;
-  type: 'chf' | 'date' | 'texte' | 'compte' | 'choix';
-  attendu: string | Centimes;
-}
-
 /** Champs d'une facture à établir, dans l'ordre de l'écran. */
 export function champsFacture(f: FactureAEtablir): ChampAttendu[] {
   const c = calculFacture(f);
@@ -270,28 +264,9 @@ export function champsControle(c: ControlePaiements): ChampAttendu[] {
   ];
 }
 
-// ---------- Contrôle des saisies ----------
+// ---------- Contrôle des saisies (src/engine/champs.ts) ----------
 
-const normaliser = (s: string) => s.trim().replace(/\s+/g, ' ').toLocaleLowerCase('fr');
-const sansEspaces = (s: string) => s.replace(/\s+/g, '').toUpperCase();
-
-/** null : champ vide (pas encore rempli). */
-export function controlerChamp(ch: ChampAttendu, saisie: string | undefined, annee?: number): boolean | null {
-  const brut = (saisie ?? '').trim();
-  if (brut === '') return null;
-  switch (ch.type) {
-    case 'chf':
-      return lireMontant(brut) === ch.attendu;
-    case 'date':
-      return lireDate(brut, annee) === ch.attendu;
-    case 'texte':
-      return normaliser(brut) === normaliser(String(ch.attendu));
-    case 'compte':
-      return sansEspaces(brut) === sansEspaces(String(ch.attendu));
-    case 'choix':
-      return brut === ch.attendu;
-  }
-}
+export { controlerChamp, type ChampAttendu, type ResultatDocument };
 
 /** Valeur attendue lisible (retour en entraînement). */
 export function attenduLisible(ch: ChampAttendu): string {
@@ -313,35 +288,20 @@ export const cleBaremeFacture = (numero: string) => `Facture ${numero}`;
 export const cleBaremePaiement = (id: string) => `Paiement ${id}`;
 export const CLE_BAREME_CONTROLE = 'Contrôle des paiements';
 
-export interface ResultatDocument {
-  cle: string;
-  justes: number;
-  total: number;
-  points: number;
-  max: number;
-}
-
-const auDemiPointInferieur = (x: number) => Math.floor(x * 2 + 1e-9) / 2;
-
-function resultat(cle: string, champs: ChampAttendu[], saisies: Record<string, string> | undefined, max: number, annee: number): ResultatDocument {
-  const justes = champs.filter((ch) => controlerChamp(ch, saisies?.[ch.cle], annee) === true).length;
-  return { cle, justes, total: champs.length, points: auDemiPointInferieur((justes / champs.length) * max), max };
-}
-
 /** Points de chaque document de facturation : barème × champs justes / champs, au demi-point inférieur. */
 export function noterFacturation(d: DonneesFacturation, fiche: FicheFacturation | undefined, bareme: Record<string, number> = {}): ResultatDocument[] {
   const annee = Number((d.factures[0]?.date ?? d.paiements[0]?.dateFacture ?? '2026').slice(0, 4));
   const r: ResultatDocument[] = [];
   for (const f of d.factures) {
     const cle = cleBaremeFacture(f.numero);
-    r.push(resultat(cle, champsFacture(f), fiche?.factures[f.numero], bareme[cle] ?? POINTS_FACTURE, annee));
+    r.push(resultatDocument(cle, champsFacture(f), fiche?.factures[f.numero], bareme[cle] ?? POINTS_FACTURE, annee));
   }
   for (const p of d.paiements) {
     const cle = cleBaremePaiement(p.id);
-    r.push(resultat(cle, champsPaiement(p), fiche?.paiements[p.id], bareme[cle] ?? POINTS_PAIEMENT, annee));
+    r.push(resultatDocument(cle, champsPaiement(p), fiche?.paiements[p.id], bareme[cle] ?? POINTS_PAIEMENT, annee));
   }
   if (d.controle) {
-    r.push(resultat(CLE_BAREME_CONTROLE, champsControle(d.controle), fiche?.controle, bareme[CLE_BAREME_CONTROLE] ?? POINTS_CONTROLE, annee));
+    r.push(resultatDocument(CLE_BAREME_CONTROLE, champsControle(d.controle), fiche?.controle, bareme[CLE_BAREME_CONTROLE] ?? POINTS_CONTROLE, annee));
   }
   return r.filter((x) => x.max > 0);
 }

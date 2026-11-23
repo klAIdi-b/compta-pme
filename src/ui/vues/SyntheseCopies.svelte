@@ -11,6 +11,7 @@
   import { analyseClasse, comparaisonOperation, corrigerCopie, type CorrectionCopie } from '../../engine/notation';
   import { analyseParNotion } from '../../engine/notions';
   import type { FicheFacturation } from '../../engine/facturation';
+  import type { FicheBudget } from '../../engine/budget';
   import { formatMontant } from '../../engine/money';
   import type { LigneEcriture } from '../../engine/dossier';
   import { LIBELLES_DIAGNOSTIC } from '../../engine/correction';
@@ -31,7 +32,7 @@
   const lignes = $derived<Ligne[]>(
     exercice
       ? copies
-          .map((c) => ({ cle: `${c.eleve.nom}|${c.eleve.prenom}|${c.exporteLe}`, copie: c, correction: corrigerCopie(exercice, c.dossier, c.fiches as { facturation?: FicheFacturation } | undefined) }))
+          .map((c) => ({ cle: `${c.eleve.nom}|${c.eleve.prenom}|${c.exporteLe}`, copie: c, correction: corrigerCopie(exercice, c.dossier, c.fiches as { facturation?: FicheFacturation; budget?: FicheBudget } | undefined) }))
           .sort((a, b) => `${a.copie.eleve.nom} ${a.copie.eleve.prenom}`.localeCompare(`${b.copie.eleve.nom} ${b.copie.eleve.prenom}`, 'fr'))
       : [],
   );
