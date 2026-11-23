@@ -242,7 +242,8 @@ export const GUIDE: PartieGuide[] = [
             type: 'liste',
             items: [
               'Décompte de salaire : calculez les retenues et le salaire net avant de passer l’écriture.',
-              'TVA : le décompte TVA due moins impôt préalable, d’après vos comptes.',
+              'TVA : le décompte TVA due moins impôt préalable, d’après vos comptes. Si l’enseignant l’active, remplissez aussi le ' +
+                'formulaire officiel de décompte (chiffres 200 à 510) d’après vos écritures, avant de passer le décompte au journal.',
               'Répartition du bénéfice et Analyse (maturité) : calculez les montants et les ratios demandés.',
               "Bilan d'ouverture, Marge brute et Échelle des prix (si l'enseignant les propose) : classez les comptes dans " +
                 'les masses du bilan, calculez la marge brute d’après vos comptes avant bouclement, ou le prix de vente d’un article ; ' +

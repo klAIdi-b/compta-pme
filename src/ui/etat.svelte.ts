@@ -80,6 +80,7 @@ export interface Fiches {
   margeBrute?: Record<string, string>;
   facturation?: FicheFacturation;
   budget?: FicheBudget;
+  formulaireTva?: Record<string, string>;
   echelle?: Record<string, string>;
 }
 

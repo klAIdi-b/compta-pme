@@ -93,6 +93,7 @@ export const demoCfc2: Exercice = {
     tvaMethode: 'net',
     ficheSalaire: true,
     calculatriceTva: false,
+    formulaireTva: true,
   },
   corrige: [
     { piece: '1', lignes: [D('4200', 10000), D('1170', 810), C('2000', 10810)] },

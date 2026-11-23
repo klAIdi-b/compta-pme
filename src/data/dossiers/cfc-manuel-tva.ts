@@ -124,7 +124,7 @@ export const dossierElectromenager = construireDossier(
       '31 mars et d’enregistrer son paiement.',
     ouvertureActif: { '1000': f(2000), '1020': f(45000), '1100': f(3000), '1200': f(30000), '1510': f(15000), '1520': f(4000) },
     ouverturePassif: { '2000': f(5000), '2800': f(94000) },
-    parametres: { corrigerBouclement: false },
+    parametres: { corrigerBouclement: false, formulaireTva: true },
   },
   [
     { date: '2026-01-12', piece: e1.piece, lignes: [D('4200', e1.ht), D('1170', e1.tva), C('2000', e1.ttc)] },

@@ -3,6 +3,8 @@
   import { decompteTva, tvaSurHT, tvaSurTTC, TAUX_TVA, LIBELLES_TAUX } from '../../engine/tva';
   import { lireMontant, type Centimes } from '../../engine/money';
   import { m } from '../format';
+  import { champsFormulaireTva, formulaireTva } from '../../engine/formulaire-tva';
+  import { controlerChamp } from '../../engine/champs';
 
   const d = $derived(etat.dossier);
   const ex = $derived(etat.exercice);
@@ -10,6 +12,19 @@
   const intitules = $derived(new Map(d.plan.map((c) => [c.numero, c.intitule])));
   const entrainement = $derived(etat.retour);
   const methode = $derived(ex.parametres.tvaMethode === 'brut' ? 'au brut' : 'au net');
+
+  // Formulaire officiel (option d'exercice) : chiffres calculés d'après les écritures, avant le décompte.
+  const avecFormulaire = $derived(!!ex.parametres.formulaireTva && ex.parametres.tvaMethode !== 'brut');
+  const session = etat.session!;
+  if (etat.exercice.parametres.formulaireTva && !session.fiches.formulaireTva) session.fiches.formulaireTva = {};
+  const saisiesF = session.fiches.formulaireTva ?? {};
+  const champsF = $derived(avecFormulaire ? champsFormulaireTva(formulaireTva(d)) : []);
+  function etatF(cle: string): 'juste' | 'faux' | null {
+    const ch = champsF.find((c) => c.cle === cle);
+    if (!ch || !entrainement) return null;
+    const r = controlerChamp(ch, saisiesF[cle]);
+    return r === null ? null : r ? 'juste' : 'faux';
+  }
 
   // Calculatrice (si activée par l'enseignant)
   let saisie = $state('');
@@ -46,6 +61,30 @@
     Solde actuel du compte 2205 {intitules.get('2205')} : <b class="num">{m(dec.detteAfc)}</b>.
   </p>
 </section>
+
+{#if avecFormulaire}
+  <section class="carte formulaire-tva">
+    <h2>Formulaire officiel de décompte (méthode effective)</h2>
+    <p class="discret consigne-f">
+      Remplissez le formulaire de l'AFC d'après vos écritures de la période, avant de passer le décompte au journal.
+      Montants en CHF ; l'impôt est celui de vos comptes (arrondi aux 5 centimes).
+    </p>
+    <table>
+      <thead><tr><th style="width:70px">Chiffre</th><th>Libellé</th><th class="montant" style="width:170px">Montant</th>{#if entrainement}<th style="width:90px">Contrôle</th>{/if}</tr></thead>
+      <tbody>
+        {#each champsF as c, i (c.cle)}
+          {@const e = etatF(c.cle)}
+          <tr class:zebre={i % 2 === 1} class:total={['299', '399', '479', '500', '510'].includes(c.cle)}>
+            <td class="num">{c.cle.replace(/[bi]$/, '')}</td>
+            <td>{c.libelle}</td>
+            <td><input class="champ montant num" inputmode="decimal" placeholder="0.00" aria-label={`Chiffre ${c.cle.replace(/[bi]$/, '')}, ${c.libelle}`} disabled={etat.verrouille} bind:value={saisiesF[c.cle]} /></td>
+            {#if entrainement}<td class:juste={e === 'juste'} class:faux={e === 'faux'}>{e === 'juste' ? 'Juste' : e === 'faux' ? 'À revoir' : ''}</td>{/if}
+          </tr>
+        {/each}
+      </tbody>
+    </table>
+  </section>
+{/if}
 
 {#if entrainement}
   <div class="info rappel">
@@ -104,4 +143,9 @@
   .calc { display: flex; gap: 12px; align-items: flex-end; padding: 12px 14px 0; flex-wrap: wrap; }
   .calc label { display: flex; flex-direction: column; gap: 4px; width: 160px; }
   .calc select { width: 110px; }
+  .formulaire-tva input { width: 150px; text-align: right; }
+  .formulaire-tva .total td { font-weight: bold; }
+  .formulaire-tva .juste { color: var(--c-ok); font-weight: bold; }
+  .formulaire-tva .faux { color: var(--c-alerte-texte); font-weight: bold; }
+  .consigne-f { padding: 0 14px; }
 </style>
