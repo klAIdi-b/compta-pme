@@ -56,3 +56,15 @@ describe('calculs générés', () => {
     }
   });
 });
+
+describe('crédit au prorata', () => {
+  it('une étape fausse sur plusieurs ne fait perdre que sa part', async () => {
+    const { credit } = await import('../src/engine/exercices-courts');
+    const q = genererCalcul('analytique', hasard(5), { plan });
+    if (q.format !== 'calcul') throw new Error('calcul attendu');
+    const valeurs = q.champs.map(saisie);
+    expect(credit(q, { format: 'calcul', valeurs })).toBe(1);
+    valeurs[0] = '1';
+    expect(credit(q, { format: 'calcul', valeurs })).toBeCloseTo((q.champs.length - 1) / q.champs.length);
+  });
+});

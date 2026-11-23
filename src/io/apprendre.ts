@@ -1,8 +1,9 @@
 // Progression du parcours « Apprendre », gardée dans ce navigateur seulement (aucune donnée en ligne).
 
+import { ESPACE } from './espace';
 import { ecrire, lire } from './stockage';
 
-export const CLE_APPRENDRE = 'compta-pme:apprendre:v1';
+export const CLE_APPRENDRE = `${ESPACE}:apprendre:v1`;
 
 export interface ProgressionModule {
   /** Meilleur score obtenu sur une série (réponses justes). */

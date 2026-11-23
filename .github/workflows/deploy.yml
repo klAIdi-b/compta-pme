@@ -1,4 +1,5 @@
 # Tests, compilation et publication sur GitHub Pages à chaque envoi sur la branche main.
+# Pour publier la prévisualisation après un envoi sur la branche apercu : lancer ce workflow à la main (workflow_dispatch) sur main.
 name: Tests et publication
 
 on:
@@ -31,6 +32,24 @@ jobs:
       # Tests des écrans et de l'accessibilité dans un vrai navigateur, sur le site compilé.
       - run: npx playwright install --with-deps chromium
       - run: npm run test:ecrans
+      # Site de prévisualisation : la branche « apercu », si elle existe, est compilée dans le sous-dossier apercu/.
+      # L'enseignant y valide les nouveautés avant qu'elles soient fusionnées dans main. Un échec ici ne bloque pas
+      # la publication du site des élèves.
+      - name: Prévisualisation (branche apercu)
+        continue-on-error: true
+        run: |
+          set -e
+          if ! git ls-remote --exit-code --heads origin apercu > /dev/null; then echo "Pas de branche apercu."; exit 0; fi
+          git fetch --depth 1 origin apercu
+          git worktree add ../apercu-src FETCH_HEAD
+          cd ../apercu-src
+          npm ci
+          npm test
+          npm run check
+          VITE_APERCU=1 npm run build
+          rm -f dist/sw.js
+          mkdir -p "$GITHUB_WORKSPACE/dist/apercu"
+          cp -r dist/. "$GITHUB_WORKSPACE/dist/apercu/"
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

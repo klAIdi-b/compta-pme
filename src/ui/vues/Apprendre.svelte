@@ -7,7 +7,7 @@
   import { CHAPITRES } from '../../data/theorie';
   import { plan } from '../../data/plan';
   import {
-    estJuste, genererSerie, montantModele, hasard, raisonnement, seuilMaitrise, texteOperation, VARIATIONS,
+    credit as partReussie, estJuste, genererSerie, montantModele, hasard, raisonnement, seuilMaitrise, texteOperation, VARIATIONS,
     type Question, type Reponse,
   } from '../../engine/exercices-courts';
   import { erreurTypique } from '../../engine/erreurs-typiques';
@@ -17,6 +17,8 @@
   import ChapitreTheorie from '../composants/ChapitreTheorie.svelte';
 
   const NB = 10;
+  /** Points d'une série : un chiffre après la virgule seulement s'il est utile. */
+  const pts = (x: number) => (Number.isInteger(x) ? String(x) : x.toFixed(1).replace('.', ','));
   const intitules = new Map(plan.map((c) => [c.numero, c.intitule]));
   const nom = (n: string) => intitules.get(n) ?? n;
   const m = (c: number) => formatMontant(c);
@@ -114,7 +116,7 @@
     const r = reponse();
     if (!q || !r || corrigee) return;
     juste = estJuste(q, r);
-    if (juste) justes++;
+    justes += partReussie(q, r);
     corrigee = true;
   }
 
@@ -156,7 +158,7 @@
       <div class="titre"><h1>Apprendre pas à pas</h1><span class="sous">CFC et maturité professionnelle</span></div>
       <p class="intro">
         Une notion à la fois, dans l'ordre du cours : vous lisez l'essentiel, vous suivez un exemple, puis vous vous
-        entraînez sur une série de {NB} questions courtes. Avec {seuilMaitrise(NB)} réponses justes sur {NB}, la notion est
+        entraînez sur une série de {NB} questions courtes. Avec {seuilMaitrise(NB)} points sur {NB}, la notion est
         maîtrisée. Chaque série est nouvelle : vous pouvez recommencer autant de fois que nécessaire.
       </p>
       {#each NIVEAUX as niv (niv)}
@@ -171,7 +173,7 @@
               <span class="discret">{mod.objectif}</span>
             </div>
             <span class="etat" class:maitrise={p?.maitrise}>
-              {#if p?.maitrise}Maîtrisé{:else if p}Meilleur score {p.meilleur} / {p.sur}{:else}À faire{/if}
+              {#if p?.maitrise}Maîtrisé{:else if p}Meilleur score {pts(p.meilleur)} / {p.sur}{:else}À faire{/if}
             </span>
           </li>
         {/each}
@@ -258,7 +260,7 @@
     {:else if etape === 'serie' && q}
       <nav class="fil">
         <button class="btn-lien" onclick={() => ouvrir(module)}>{module.titre}</button>
-        <span class="discret">Question {rang + 1} sur {questions.length} · {justes} juste{justes > 1 ? 's' : ''}</span>
+        <span class="discret">Question {rang + 1} sur {questions.length} · {pts(justes)} point{justes >= 2 ? 's' : ''}</span>
       </nav>
       <div class="barre" aria-hidden="true"><span style:width={`${(rang / questions.length) * 100}%`}></span></div>
 
@@ -444,11 +446,11 @@
       <div class="titre"><h1>{module.titre}</h1></div>
       <section class="carte">
         <div class="corps-carte">
-          <p class="score"><b>{justes} réponses justes sur {questions.length}.</b></p>
+          <p class="score"><b>{pts(justes)} points sur {questions.length}.</b></p>
           {#if reussi}
             <p class="ok">Notion maîtrisée. Vous pouvez passer à la suivante.</p>
           {:else}
-            <p>Il faut {seuilMaitrise(questions.length)} réponses justes pour maîtriser la notion. Relisez l'essentiel et l'exemple, puis faites une nouvelle série : les questions et les montants changent.</p>
+            <p>Il faut {seuilMaitrise(questions.length)} points pour maîtriser la notion (une question en plusieurs étapes compte au prorata des étapes justes). Relisez l'essentiel et l'exemple, puis faites une nouvelle série : les questions et les montants changent.</p>
           {/if}
         </div>
       </section>

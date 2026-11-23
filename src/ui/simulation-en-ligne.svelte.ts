@@ -2,6 +2,7 @@
 // publication des situations et des résultats, relève des décisions des groupes.
 // Le calcul reste dans ce navigateur ; le service ne fait que stocker et transmettre des données de jeu anonymes.
 
+import { ESPACE } from '../io/espace';
 import { simulations } from './simulation.svelte';
 import { lire, ecrire, effacer } from '../io/stockage';
 import { ClientSimulation, controlerConfig, ErreurEnLigne, renouvelerSession } from '../io/simulation-en-ligne';
@@ -10,7 +11,7 @@ import type { PartieEnregistree } from '../io/simulation';
 import { controlerDecisionsRecues, genererCodes, resultatsPublics, situationGroupe } from '../engine/simulation/situation';
 import type { Decisions, Imprevu } from '../engine/simulation/types';
 
-const CLE = 'compta-pme:simulateur-en-ligne:v1';
+const CLE = `${ESPACE}:simulateur-en-ligne:v1`;
 
 interface Donnees {
   config: ConfigEnLigne | null;
