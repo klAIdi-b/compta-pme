@@ -361,8 +361,8 @@ export const manuelMontBlanc: Exercice = {
   mode: 'entrainement',
   parametres: { ...parametresBase, corrigerBouclement: false, comptesAjoutes: ['1540', '1549'] },
   corrige: [
-    { piece: '1', lignes: s('1500', '2000', 48000) },
-    { piece: '2', lignes: s('2000', '1020', 48000) },
+    { piece: '1', lignes: s('1500', '2010', 48000) },
+    { piece: '2', lignes: s('2010', '1020', 48000) },
     { piece: '3', lignes: s('6800', '1509', 37500) },
     { piece: '4', lignes: s('6800', '1509', 6000) }, // 48'000 × 25 % × 6/12
     { piece: '5', lignes: s('6800', '1549', 3200) },

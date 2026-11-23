@@ -9,6 +9,9 @@
   import { DOSSIERS_EVALUATION } from '../../data/dossiers';
   import type { Exercice } from '../../engine/exercice';
   import { analyseClasse, comparaisonOperation, corrigerCopie, type CorrectionCopie } from '../../engine/notation';
+  import { analyseParNotion } from '../../engine/notions';
+  import type { FicheFacturation } from '../../engine/facturation';
+  import type { FicheBudget } from '../../engine/budget';
   import { formatMontant } from '../../engine/money';
   import type { LigneEcriture } from '../../engine/dossier';
   import { LIBELLES_DIAGNOSTIC } from '../../engine/correction';
@@ -29,12 +32,16 @@
   const lignes = $derived<Ligne[]>(
     exercice
       ? copies
-          .map((c) => ({ cle: `${c.eleve.nom}|${c.eleve.prenom}|${c.exporteLe}`, copie: c, correction: corrigerCopie(exercice, c.dossier) }))
+          .map((c) => ({ cle: `${c.eleve.nom}|${c.eleve.prenom}|${c.exporteLe}`, copie: c, correction: corrigerCopie(exercice, c.dossier, c.fiches as { facturation?: FicheFacturation; budget?: FicheBudget } | undefined) }))
           .sort((a, b) => `${a.copie.eleve.nom} ${a.copie.eleve.prenom}`.localeCompare(`${b.copie.eleve.nom} ${b.copie.eleve.prenom}`, 'fr'))
       : [],
   );
   /** Bilan de la classe par opération ; « à reprendre d'abord » trie par taux de réussite croissant. */
   let ordre = $state<'enonce' | 'reprendre'>('reprendre');
+  /** Bilan de la classe par notion du cours : réussite, élèves à reprendre, erreur typique la plus fréquente. */
+  const parNotion = $derived(
+    exercice ? analyseParNotion(exercice, lignes.map((l) => ({ nom: `${l.copie.eleve.nom} ${l.copie.eleve.prenom}`, dossier: l.copie.dossier }))) : [],
+  );
   const analyse = $derived(
     exercice ? analyseClasse(exercice, lignes.map((l) => ({ nom: `${l.copie.eleve.nom} ${l.copie.eleve.prenom}`, dossier: l.copie.dossier }))) : [],
   );
@@ -44,7 +51,7 @@
   const copieRef = $derived(lignes[0]?.copie);
   const moyenne = $derived(lignes.length ? lignes.reduce((s, l) => s + l.correction.note, 0) / lignes.length : 0);
   const texteOp = (piece: string) =>
-    piece === PIECE_BOUCLEMENT ? 'Écritures de bouclement' : (exercice?.operations.find((o) => o.numero === piece)?.texte ?? '');
+    piece === PIECE_BOUCLEMENT ? 'Écritures de bouclement' : (exercice?.operations.find((o) => o.numero === piece)?.texte ?? piece);
 
   async function importer() {
     messages = [];
@@ -223,6 +230,45 @@
               </td>
             </tr>
           {/if}
+        {/each}
+      </tbody>
+    </table>
+  </section>
+
+  <section class="carte">
+    <h2>Bilan de la classe par notion</h2>
+    <p class="discret petit aide-bilan">
+      Chaque opération est rattachée à une notion du cours d'après les comptes du corrigé. « À reprendre » : élèves sous
+      50 % de réussite sur la notion. L'erreur typique la plus fréquente dit ce que les élèves ont confondu.
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th>Notion</th>
+          <th style="width:170px">Réussite</th>
+          <th style="width:260px">À reprendre</th>
+          <th style="width:320px">Erreur typique la plus fréquente</th>
+        </tr>
+      </thead>
+      <tbody>
+        {#each parNotion as n, i (n.notion.id)}
+          {@const pc = Math.round((n.reussites / n.total) * 100)}
+          <tr class:zebre={i % 2 === 1}>
+            <td><b>{n.notion.titre}</b><div class="discret petit">Opérations {n.pieces.join(', ')}</div></td>
+            <td>
+              <div class="reussite"><span class="num">{n.reussites} / {n.total}</span> <span class="discret">({pc} %)</span></div>
+              <span class="jauge" aria-hidden="true"><i class:faible={pc < 50} style:width={`${pc}%`}></i></span>
+            </td>
+            <td>{#if n.aReprendre.length === 0}<span class="ok">Personne</span>{:else}{n.aReprendre.join(', ')}{/if}</td>
+            <td>
+              {#if n.erreurFrequente}
+                <details class="erreur">
+                  <summary>{n.erreurFrequente.explication} <span class="discret">({n.erreurFrequente.eleves.length})</span></summary>
+                  <div class="eleves">{n.erreurFrequente.eleves.join(', ')}</div>
+                </details>
+              {:else}<span class="discret">Aucune</span>{/if}
+            </td>
+          </tr>
         {/each}
       </tbody>
     </table>

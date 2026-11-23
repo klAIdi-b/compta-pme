@@ -118,7 +118,8 @@ export const dossierTerroirs = construireDossier(
   },
   [
     { date: '2026-03-10', piece: m1p1.piece, lignes: S('4200', '2000', m1achat) },
-    { date: '2026-03-12', piece: m1p2.piece, lignes: S('4270', '2000', m1p2.ttc) },
+    // Facture d'un transporteur (service, pas des marchandises à revendre) : Autres dettes.
+    { date: '2026-03-12', piece: m1p2.piece, lignes: S('4270', '2010', m1p2.ttc) },
     { date: '2026-04-08', piece: m1p3.piece, lignes: [D('2000', m1achat), C('1020', m1p3.total), C('4200', m1achat - m1p3.total)] },
     { date: '2026-04-15', piece: m1p4.piece, lignes: S('1100', '3200', m1vente) },
     { date: '2026-05-12', piece: m1p5.piece, lignes: [D('1020', m1p5.total), C('1100', m1vente), C('3200', m1p5.total - m1vente)] },
@@ -207,7 +208,7 @@ export const dossierZufferey = construireDossier(
   },
   [
     { date: '2026-09-30', piece: m2p6.piece, lignes: S('2850', '1020', m2p6.total) },
-    { date: '2026-10-05', piece: m2p7.piece, lignes: S('1520', '2000', m2p7.ttc) },
+    { date: '2026-10-05', piece: m2p7.piece, lignes: S('1520', '2010', m2p7.ttc) },
     { date: '2026-11-30', piece: m2p1.piece, lignes: S('1100', '3400', f(142000)) },
     { date: '2026-12-15', piece: m2p2.piece, lignes: S('1100', '3400', m2p2.ttc) },
     { date: '2026-12-20', piece: m2p3.piece, lignes: S('1020', '1100', m2p3.total) },

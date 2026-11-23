@@ -4,6 +4,7 @@ import type { TableauComplement } from './outils';
 import { dossierPolyglotte, dossierSaveurs } from './cfc-bases';
 import { dossierGarage, dossierHifi } from './cfc-manuel';
 import { dossierElectromenager } from './cfc-manuel-tva';
+import { complementFacturationLeman, dossierFacturationLeman } from './cfc-facturation';
 import { dossierConfiserie } from './cfc-manuel-salaires';
 import { dossierBabel, dossierMenuiserie, dossierOutils } from './cfc-tva-cloture';
 import { dossierBoulangerie, dossierFleurs, dossierMeubles } from './cfc-creances-salaires';
@@ -16,7 +17,7 @@ import { dossierRhoneMobilite } from './mp-tableaux';
 import { complementCartonnages, dossierCartonnages } from './mp-dissolution';
 
 export const DOSSIERS: Exercice[] = [
-  dossierSaveurs, dossierPolyglotte, dossierGarage, dossierHifi, dossierOutils, dossierElectromenager, dossierMenuiserie, dossierBabel,
+  dossierSaveurs, dossierPolyglotte, dossierGarage, dossierHifi, dossierOutils, dossierElectromenager, dossierFacturationLeman, dossierMenuiserie, dossierBabel,
   dossierMeubles, dossierBoulangerie, dossierConfiserie, dossierFleurs, dossierTerroirs, dossierZufferey, dossierBrasserie, dossierLemanbio, dossierAteliers, dossierCartonnages, dossierOptique, dossierPrecimeca, dossierCarrosserie, dossierSports, dossierRhoneMobilite,
 ];
 
@@ -31,6 +32,7 @@ export const DOSSIERS_EVALUATION: Exercice[] = DOSSIERS.map(versionEvaluation);
 /** Tableaux complémentaires du corrigé PDF, par identifiant de dossier. */
 export const COMPLEMENTS_CORRIGE: Record<string, TableauComplement[]> = {
   [dossierAteliers.id]: complementAteliers,
+  [dossierFacturationLeman.id]: complementFacturationLeman,
   [dossierCartonnages.id]: complementCartonnages,
   [dossierZufferey.id]: complementZufferey,
   [dossierCarrosserie.id]: complementCarrosserie,

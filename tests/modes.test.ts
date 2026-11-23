@@ -57,3 +57,11 @@ describe('écran affiché', () => {
     expect(ecranAffiche({ ...base, session: corrige, accueilOuvert: true })).toBe('logiciel');
   });
 });
+
+describe('écran du parcours Apprendre', () => {
+  it('passe après le guide et avant tout le reste', () => {
+    const s = { role: 'eleve' as const };
+    expect(ecranAffiche({ guide: false, apprendre: true, enseignantOuvert: true, session: s, accueilOuvert: true })).toBe('apprendre');
+    expect(ecranAffiche({ guide: true, apprendre: true, enseignantOuvert: false, session: null, accueilOuvert: false })).toBe('guide');
+  });
+});

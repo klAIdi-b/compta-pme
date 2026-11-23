@@ -1,6 +1,8 @@
 // Exercice fourni par l'enseignant : énoncé, opérations, bilan d'ouverture, paramètres.
 // Le corrigé et le barème seront formalisés en phase 3.
 
+import type { DonneesFacturation } from './facturation';
+import type { DonneesBudget } from './budget';
 import type { Centimes } from './money';
 import type { DateISO } from './dates';
 import type { Dossier, FormeJuridique, LigneEcriture } from './dossier';
@@ -38,7 +40,9 @@ export type Fonction =
   | 'seuil'
   | 'bilanOuverture'
   | 'margeBrute'
-  | 'echelle';
+  | 'echelle'
+  | 'facturation'
+  | 'budget';
 
 export interface Operation {
   numero: string;
@@ -109,6 +113,10 @@ export interface Exercice {
     ficheMargeBrute?: boolean;
     /** Tous niveaux : données de la fiche « Échelle des prix ». */
     echellePrix?: DonneesEchelle;
+    /** CFC 2 et MP : facturation et paiements (factures à établir, ordres de paiement, contrôle des paiements). */
+    facturation?: DonneesFacturation;
+    /** CFC 2 et MP : budget (préparer) et écarts entre budget et chiffres effectifs (comparer). */
+    budget?: DonneesBudget;
   };
   corrige?: EcritureCorrigee[];
   /**
@@ -149,6 +157,8 @@ export function fonctionsExercice(ex: Exercice): Set<Fonction> {
   const cfc2 = NIVEAUX.indexOf(ex.niveau) >= NIVEAUX.indexOf('CFC2');
   if (cfc2 && ex.parametres.ficheSalaire) f.add('salaire');
   if (cfc2 && ex.parametres.calculatriceTva) f.add('calculatriceTva');
+  if (cfc2 && ex.parametres.facturation) f.add('facturation');
+  if (cfc2 && ex.parametres.budget) f.add('budget');
   if (ex.niveau === 'MP') {
     f.add('analyse');
     f.add('degres');
@@ -239,6 +249,21 @@ export function estNouvelleVersionSimulation(ancien: Exercice, nouveau: Exercice
   );
 }
 
+/**
+ * Exercice fourni dont le corrigé a été corrigé depuis que l'élève l'a commencé (la session garde une copie de
+ * l'exercice) : on reprend le corrigé du catalogue si l'énoncé est resté identique. Les écritures de l'élève ne
+ * changent pas ; seule la correction est recalculée. Sans effet pour un exercice sans corrigé (évaluation).
+ */
+export function avecCorrigeAJour(enregistre: Exercice, catalogue: readonly Exercice[]): Exercice {
+  const c = catalogue.find((x) => x.id === enregistre.id);
+  if (!c || !c.corrige || !enregistre.corrige || c.mode !== enregistre.mode) return enregistre;
+  const memeEnonce =
+    c.operations.length === enregistre.operations.length &&
+    c.operations.every((o, i) => o.numero === enregistre.operations[i]!.numero && o.texte === enregistre.operations[i]!.texte);
+  if (!memeEnonce || JSON.stringify(c.corrige) === JSON.stringify(enregistre.corrige)) return enregistre;
+  return { ...enregistre, corrige: c.corrige };
+}
+
 /** Contrôle d'un exercice avant distribution : erreurs bloquantes et avertissements. */
 export function controlerExercice(ex: Exercice, plan: Compte[]): { erreurs: string[]; avertissements: string[] } {
   const erreurs: string[] = [];
@@ -256,7 +281,9 @@ export function controlerExercice(ex: Exercice, plan: Compte[]): { erreurs: stri
     if (!dispo.has(n)) erreurs.push(`Bilan d'ouverture : le compte ${n} n'est pas disponible au niveau choisi.`);
   }
 
-  if (ex.operations.length === 0 && !(ex.ecrituresAutomatiques ?? []).length) erreurs.push("Ajoutez au moins une opération à l'énoncé.");
+  // Une fiche seule (budget ou facturation) peut se passer d'opérations au journal.
+  const ficheSeule = !!(ex.parametres.budget || ex.parametres.facturation);
+  if (ex.operations.length === 0 && !(ex.ecrituresAutomatiques ?? []).length && !ficheSeule) erreurs.push("Ajoutez au moins une opération à l'énoncé.");
   for (const a of ex.ecrituresAutomatiques ?? []) {
     if (ex.operations.some((o) => o.numero === a.piece)) erreurs.push(`La pièce automatique ${a.piece} porte le numéro d'une opération.`);
     const debit = a.lignes.reduce((t, l) => t + (l.debit ? l.montant : 0), 0);

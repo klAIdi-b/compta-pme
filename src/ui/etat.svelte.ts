@@ -1,10 +1,13 @@
 // État global de l'application (Svelte 5), sauvegardé automatiquement dans le navigateur.
 
 import type { Dossier } from '../engine/dossier';
+import type { FicheFacturation } from '../engine/facturation';
+import type { FicheBudget } from '../engine/budget';
 import type { Exercice } from '../engine/exercice';
-import { actualiserDossier, corrigeDepuisEcritures, creerDossier, estNouvelleVersionSimulation, fonctionsExercice, retourVisible, type EcritureCorrigee } from '../engine/exercice';
+import { actualiserDossier, avecCorrigeAJour, corrigeDepuisEcritures, creerDossier, estNouvelleVersionSimulation, fonctionsExercice, retourVisible, type EcritureCorrigee } from '../engine/exercice';
 import { ajouterEcriture } from '../engine/journal';
 import { plan as planParDefaut } from '../data/plan';
+import { exercicesDemo } from '../data/demos';
 import { ecrire, lire } from '../io/stockage';
 import type { DernierExport } from '../io/fichiers';
 import type { Suivi } from '../engine/correction';
@@ -28,6 +31,8 @@ export type Vue =
   | 'bilanOuverture'
   | 'margeBrute'
   | 'echelle'
+  | 'facturation'
+  | 'budget'
   | 'bouclement'
   | 'theorie';
 
@@ -73,6 +78,8 @@ export interface Fiches {
   seuil?: Record<string, string>;
   bilanOuverture?: Record<string, string>;
   margeBrute?: Record<string, string>;
+  facturation?: FicheFacturation;
+  budget?: FicheBudget;
   echelle?: Record<string, string>;
 }
 
@@ -93,10 +100,13 @@ interface Sauvegarde {
 
 /** Sessions enregistrées avant l'ajout du suivi, du rôle et des fiches : valeurs par défaut. */
 function completer(s: (Partial<Session> & Omit<Session, 'suivi' | 'role' | 'fiches'>) | null | undefined): Session | null {
-  return s ? { ...s, suivi: s.suivi ?? {}, role: s.role ?? 'eleve', fiches: s.fiches ?? {} } : null;
+  // Un exercice fourni dont le corrigé a changé reprend le corrigé à jour (le travail de l'élève est conservé).
+  return s
+    ? { ...s, exercice: avecCorrigeAJour(s.exercice, exercicesDemo), suivi: s.suivi ?? {}, role: s.role ?? 'eleve', fiches: s.fiches ?? {} }
+    : null;
 }
 
-const VUES: Vue[] = ['tableau', 'journal', 'comptes', 'grandlivre', 'balance', 'bilan', 'resultat', 'tva', 'salaire', 'repartition', 'analyse', 'degres', 'flux', 'seuil', 'bilanOuverture', 'margeBrute', 'echelle', 'bouclement', 'theorie'];
+const VUES: Vue[] = ['tableau', 'journal', 'comptes', 'grandlivre', 'balance', 'bilan', 'resultat', 'tva', 'salaire', 'repartition', 'analyse', 'degres', 'flux', 'seuil', 'bilanOuverture', 'margeBrute', 'echelle', 'facturation', 'budget', 'bouclement', 'theorie'];
 
 function vueDepuisAdresse(): Vue {
   const h = location.hash.replace('#', '') as Vue;
@@ -114,11 +124,15 @@ class Etat {
   visiteOuverte = $state(false);
   /** Guide d'utilisation ouvert (partie affichée), ou null. */
   guide = $state<null | 'eleve' | 'enseignant'>(null);
+  /** Parcours « Apprendre » ouvert (écran à part, comme le guide). */
+  apprendre = $state(false);
   stockageIndisponible = $state(false);
   /** Accueil affiché par-dessus une session en cours (reprise ou choix d'un autre exercice). */
   accueilOuvert = $state(false);
   /** Opération à sélectionner à l'ouverture du journal (récapitulatif de l'avancement). */
   pieceCiblee = $state<string | null>(null);
+  /** Dernière étape du parcours atteinte après le journal (non enregistrée) : le journal sait qu'il sert au bouclement. */
+  etapeParcours = $state<Vue | null>(null);
   /** Chapitre de théorie à ouvrir (lien « Revoir la théorie » sous un indice). */
   chapitreCible = $state<string | null>(null);
 
@@ -143,7 +157,7 @@ class Etat {
 
   /** Écran à afficher ; `enseignantOuvert` vient de l'état de l'espace enseignant. */
   ecran(enseignantOuvert: boolean): Ecran {
-    return ecranAffiche({ guide: this.guide !== null, enseignantOuvert, session: this.session, accueilOuvert: this.accueilOuvert });
+    return ecranAffiche({ guide: this.guide !== null, apprendre: this.apprendre, enseignantOuvert, session: this.session, accueilOuvert: this.accueilOuvert });
   }
 
   get dossier(): Dossier {
@@ -286,6 +300,7 @@ class Etat {
   /** Clic sur le nom du site ou « Changer d'exercice » : page d'accueil, le travail en cours est conservé. */
   allerAccueil() {
     this.guide = null;
+    this.apprendre = false;
     if (peutOuvrirAccueil(this.genre)) this.accueilOuvert = true;
   }
 

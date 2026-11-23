@@ -18,6 +18,8 @@
     margeBrute: 'M4 20h16M7 20V12M12 20V8M17 20V4M5 9l5-4 4 3 5-4',
     echelle: 'M5 20V14M10 20V11M15 20V8M20 20V5M3 20h18',
     tva: 'M6 4h12v16H6zM9 8h6M9 12h6M9 16h3',
+    budget: 'M4 20h16M4 4v16M8 16l3-4 3 2 5-7M15 7h4v4',
+    facturation: 'M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6M9 16h4',
     bouclement: 'M5 12.5l4.5 4.5L19 7',
     repartition: 'M12 3v9l7 4M12 12l-7 4',
     theorie: 'M4 5.5c3-1.5 5.5-1.5 8 0 2.5-1.5 5-1.5 8 0V19c-3-1.5-5.5-1.5-8 0-2.5-1.5-5-1.5-8 0zM12 5.5V19',

@@ -28,8 +28,11 @@
   import FicheBilanOuverture from './vues/FicheBilanOuverture.svelte';
   import FicheMargeBrute from './vues/FicheMargeBrute.svelte';
   import FicheEchelle from './vues/FicheEchelle.svelte';
+  import Facturation from './vues/Facturation.svelte';
+  import Budget from './vues/Budget.svelte';
   import Analyse from './vues/Analyse.svelte';
   import Visite from './composants/Visite.svelte';
+  import EtapeSuivante from './composants/EtapeSuivante.svelte';
 
   function exporterMaCopie() {
     const s = etat.session!;
@@ -103,6 +106,8 @@
         entrees: [
           ...(f.has('bilanOuverture') ? [{ vue: 'bilanOuverture' as Vue, libelle: "Bilan d'ouverture" }] : []),
           { vue: 'journal', libelle: 'Journal' },
+          ...(f.has('facturation') ? [{ vue: 'facturation' as Vue, libelle: 'Facturation' }] : []),
+          ...(f.has('budget') ? [{ vue: 'budget' as Vue, libelle: 'Budget' }] : []),
           ...(f.has('salaire') ? [{ vue: 'salaire' as Vue, libelle: 'Décompte de salaire' }] : []),
         ],
       },
@@ -144,6 +149,8 @@
 
 {#if ecran === 'guide' && etat.guide}
   <Differe charger={() => import('./vues/Guide.svelte')} props={{ partie: etat.guide, onFermer: () => (etat.guide = null) }} />
+{:else if ecran === 'apprendre'}
+  <Differe charger={() => import('./vues/Apprendre.svelte')} props={{}} />
 {:else if ecran === 'enseignant'}
   <Differe charger={() => import('./vues/EspaceEnseignant.svelte')} props={{}} />
 {:else if simulationEleve.enLigne}
@@ -215,7 +222,8 @@
             </p>
           {/if}
           <button class="action-lateral" onclick={exporterPdf} disabled={pdfEnCours}>{pdfEnCours ? 'Création du PDF…' : 'Exporter en PDF'}</button>
-          <button class="action-lateral discrete" onclick={() => (etat.guide = 'eleve')}>Guide d'utilisation</button>
+          <button class="action-lateral discrete" onclick={() => (etat.apprendre = true)}>Apprendre pas à pas</button>
+        <button class="action-lateral discrete" onclick={() => (etat.guide = 'eleve')}>Guide d'utilisation</button>
           <button class="action-lateral discrete" onclick={() => (enseignant.ouvert = true)}>Espace enseignant</button>
         {/if}
       </div>
@@ -252,9 +260,12 @@
       {:else if etat.vue === 'bilanOuverture' && etat.fonctions.has('bilanOuverture')}<FicheBilanOuverture />
       {:else if etat.vue === 'margeBrute' && etat.fonctions.has('margeBrute')}<FicheMargeBrute />
       {:else if etat.vue === 'echelle' && etat.fonctions.has('echelle')}<FicheEchelle />
+      {:else if etat.vue === 'facturation' && etat.fonctions.has('facturation')}<Facturation />
+      {:else if etat.vue === 'budget' && etat.fonctions.has('budget')}<Budget />
       {:else if etat.vue === 'theorie'}<Differe charger={() => import('./vues/Theorie.svelte')} props={{}} />
       {:else}<TableauDeBord />
       {/if}
+      {#if vueEleve(genre)}<EtapeSuivante />{/if}
     </main>
   </div>
   {#if etat.visiteOuverte}<Visite />{/if}

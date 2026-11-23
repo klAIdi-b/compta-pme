@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="fr-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maquette — budget et écarts</title>
+<style>
+  /* Maquette statique (23.11.2026) : budget et écarts, d'après le plan d'études CFC (c5.ep1d, c6.ep4a)
+     et les compléments CFC de la MP. À valider avant l'interface. */
+  :root {
+    --bleu: #1F4E78; --bleu-nuit: #11304D; --selection: #D6E4F0; --zebre: #F7FAFD;
+    --action: #C4501A; --accent: #E8601C; --alerte: #B34A12; --alerte-fond: #FDF3EE; --ok: #1D6B3A; --ok-fond: #E3F2E8; --negatif: #B00020;
+    --fond: #F4F6FA; --carte: #FFFFFF; --texte: #1B2430; --texte-2: #5B6675; --bordure: #E3E8EF; --bordure-2: #EEF2F6;
+    --ombre: 0 1px 2px rgba(16, 24, 40, 0.06), 0 1px 3px rgba(16, 24, 40, 0.08); --rayon: 8px;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: var(--texte); background: #E9EDF3; padding-bottom: 48px; }
+  .intro, .etiquette, .note, .questions { max-width: 1280px; margin-left: auto; margin-right: auto; padding: 0 16px; }
+  .intro { margin-top: 28px; }
+  .intro h1 { font-size: 24px; margin: 0 0 6px; }
+  .etiquette { margin-top: 36px; margin-bottom: 8px; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--texte-2); }
+  .note { margin-top: 10px; font-size: 13px; color: var(--texte-2); line-height: 1.5; }
+  .ecran { max-width: 1280px; margin: 0 auto; border-radius: 10px; overflow: hidden; box-shadow: 0 8px 30px rgba(16,24,40,.12); background: var(--fond); }
+  .mt { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .sous { color: var(--texte-2); margin-top: 4px; line-height: 1.5; }
+
+  .app { display: grid; grid-template-columns: 232px 1fr; min-height: 560px; }
+  .lateral { background: var(--bleu-nuit); color: #fff; padding: 16px 12px; display: flex; flex-direction: column; gap: 2px; }
+  .marque { display: flex; align-items: center; gap: 10px; padding: 4px 8px 18px; font-weight: bold; font-size: 15px; }
+  .logo { width: 28px; height: 28px; border-radius: 7px; background: var(--action); display: grid; place-items: center; font-size: 12px; }
+  .rubrique { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #8FA9C4; padding: 14px 10px 6px; }
+  .nav { padding: 8px 10px; border-radius: 6px; color: #DCE6F0; }
+  .nav.actif { background: rgba(255,255,255,.12); color: #fff; font-weight: bold; box-shadow: inset 3px 0 0 var(--accent); }
+  .nav.nouveau::after { content: 'nouveau'; font-size: 10px; margin-left: 8px; padding: 1px 6px; border-radius: 999px; background: var(--accent); color: #fff; font-weight: bold; }
+
+  .principal { display: flex; flex-direction: column; min-width: 0; }
+  .barre-haut { height: 60px; background: #fff; border-bottom: 1px solid var(--bordure); display: flex; align-items: center; gap: 14px; padding: 0 24px; }
+  .fil { color: var(--texte-2); } .fil b { color: var(--texte); }
+  .puce { font-size: 12px; font-weight: bold; padding: 3px 9px; border-radius: 999px; background: var(--selection); color: var(--bleu); }
+  .contenu { padding: 24px; display: grid; gap: 18px; }
+  h1.p { margin: 0; font-size: 22px; }
+  .carte { background: var(--carte); border: 1px solid var(--bordure); border-radius: var(--rayon); box-shadow: var(--ombre); }
+  .carte-tete { padding: 12px 16px; border-bottom: 1px solid var(--bordure-2); display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+  .carte-tete h2 { margin: 0; font-size: 15px; }
+  .carte-corps { padding: 14px 16px; }
+  .deux { display: grid; grid-template-columns: minmax(0, 380px) minmax(0, 1fr); gap: 18px; align-items: start; }
+  .carte { overflow-x: auto; }
+
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; font-size: 12px; font-weight: bold; color: var(--texte-2); background: #F8FAFC; padding: 8px 10px; border-bottom: 1px solid var(--bordure); }
+  th.mt { text-align: right; }
+  td { padding: 8px 10px; border-bottom: 1px solid var(--bordure-2); vertical-align: middle; }
+  tbody tr:nth-child(even) td { background: var(--zebre); }
+
+  .btn { font: inherit; border-radius: 6px; padding: 8px 14px; border: 1px solid var(--bordure); background: #fff; color: var(--texte); }
+  .btn-principal { background: var(--action); border-color: var(--action); color: #fff; font-weight: bold; }
+  .actions { display: flex; gap: 10px; justify-content: flex-end; }
+
+  /* Pièce (document papier) */
+  .piece { background: #fff; border: 1px solid #D5DCE5; padding: 16px 18px; font-size: 13px; line-height: 1.45; box-shadow: 0 2px 6px rgba(16,24,40,.08); }
+  .piece h3 { margin: 0 0 8px; font-size: 14px; letter-spacing: .04em; }
+  .piece .emet { font-weight: bold; }
+  .piece table td, .piece table th { padding: 4px 6px; background: none !important; font-size: 12.5px; }
+  .piece .pied { margin-top: 8px; font-size: 12px; color: var(--texte-2); }
+
+  /* Champs à remplir par l'élève */
+  .entree { display: inline-flex; align-items: center; justify-content: flex-end; min-width: 110px; height: 32px; border: 1px solid #CBD5E1; border-radius: 6px; padding: 0 10px; background: #fff; font-variant-numeric: tabular-nums; }
+  .entree.large { min-width: 260px; justify-content: flex-start; }
+  .entree.ok { border-color: var(--ok); background: var(--ok-fond); }
+  .entree.faux { border-color: var(--accent); background: var(--alerte-fond); }
+  .entree.vide { color: #A5AFBC; }
+  .champs { display: grid; grid-template-columns: 220px 1fr; gap: 10px 14px; align-items: center; }
+  .champs .lib { font-size: 13px; color: var(--texte-2); font-weight: bold; }
+  .retour { border-left: 4px solid var(--accent); background: var(--alerte-fond); padding: 8px 12px; border-radius: 4px; font-size: 13px; }
+  .retour.ok { border-left-color: var(--ok); background: var(--ok-fond); }
+  .select { display: inline-flex; align-items: center; justify-content: space-between; gap: 10px; min-width: 230px; height: 32px; border: 1px solid #CBD5E1; border-radius: 6px; padding: 0 10px; background: #fff; }
+  .select::after { content: '▾'; color: var(--texte-2); }
+  .statut { font-size: 12px; font-weight: bold; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+  .statut.ok { background: var(--ok-fond); color: var(--ok); }
+  .statut.att { background: #FCEBE2; color: var(--alerte); }
+
+  /* Bulletin QR simplifié */
+  .qr { display: grid; grid-template-columns: 150px 1fr; gap: 14px; border-top: 2px dashed #9AA6B5; margin-top: 12px; padding-top: 10px; font-size: 12px; }
+  .qr .code { width: 130px; height: 130px; background: repeating-linear-gradient(45deg, #DDE3EA 0 6px, #EEF2F6 6px 12px); display: grid; place-items: center; color: var(--texte-2); font-size: 11px; text-align: center; }
+  .qr b { display: block; font-size: 11px; color: var(--texte-2); margin-top: 4px; }
+
+  .questions { margin-top: 36px; }
+  .questions .carte-corps ol { margin: 0; padding-left: 22px; line-height: 1.6; }
+  .questions li { margin-bottom: 8px; }
+  @media (max-width: 1000px) { .app { grid-template-columns: 1fr; } .lateral { display: none; } .deux { grid-template-columns: 1fr; } }
+  .total td { font-weight: bold; border-top: 2px solid var(--bordure); }
+</style>
+</head>
+<body>
+
+<div class="intro">
+  <h1>Budget et écarts : maquettes des écrans</h1>
+  <p class="sous">
+    Maquettes statiques, à valider avant l'interface : les boutons ne fonctionnent pas. Elles répondent au plan d'études
+    CFC (2e année : c5.ep1d préparer des budgets et des décomptes et en tirer des recommandations ; option Finances :
+    c6.ep4a déterminer et interpréter les écarts entre le budget et les chiffres effectifs) et aux compléments CFC de la
+    maturité. Exemple : Cycles du Léman organise une « Journée du vélo électrique » le 6 juin 2026. Montants en CHF.
+  </p>
+</div>
+
+<div class="etiquette">Écran 1 · Préparer le budget</div>
+<div class="ecran">
+  <div class="app">
+    <aside class="lateral">
+      <div class="marque"><span class="logo">CP</span> Compta PME</div>
+      <div class="nav">Tableau de bord</div>
+      <div class="rubrique">Saisie</div>
+      <div class="nav">Journal</div>
+      <div class="nav">Facturation</div>
+      <div class="nav actif nouveau">Budget</div>
+      <div class="rubrique">États financiers</div>
+      <div class="nav">Bilan</div><div class="nav">Compte de résultat</div>
+    </aside>
+    <div class="principal">
+      <div class="barre-haut"><span class="fil">Cycles du Léman / <b>Budget</b></span><span class="puce">CFC · niveau 2</span><span class="puce">Entraînement</span></div>
+      <div class="contenu">
+        <div><h1 class="p">Budget</h1><div class="sous">Onglets : <b>Préparer le budget</b> · Comparer avec les chiffres effectifs</div></div>
+        <div class="deux">
+          <div class="piece">
+            <h3>NOTE DE SANDRA ROCHAT</h3>
+            <div>Journée du vélo électrique, samedi 6 juin 2026, au parc des Évaux.</div>
+            <ul style="margin:8px 0 0;padding-left:18px">
+              <li>Nous attendons 60 participants ; inscription 25.00 par personne.</li>
+              <li>Chaque participant achète en moyenne une boisson à 6.00 ; nous les achetons 2.50 pièce.</li>
+              <li>Le Garage Favre nous verse 800.00 de sponsoring.</li>
+              <li>Location du parc 400.00, assurance de la journée 150.00, transport des vélos de démonstration 300.00.</li>
+              <li>Publicité (affiches et réseaux sociaux) 350.00.</li>
+              <li>Un t-shirt offert à chaque participant, 9.00 pièce.</li>
+            </ul>
+            <div class="pied">Montants hors TVA.</div>
+          </div>
+          <div class="carte">
+            <div class="carte-tete"><h2>Budget de la journée</h2></div>
+            <div class="carte-corps" style="display:grid;gap:12px">
+              <table>
+                <thead><tr><th>Produits</th><th class="mt">Budget</th></tr></thead>
+                <tbody>
+                  <tr><td>Inscriptions</td><td class="mt"><span class="entree ok">1'500.00</span></td></tr>
+                  <tr><td>Ventes de boissons</td><td class="mt"><span class="entree ok">360.00</span></td></tr>
+                  <tr><td>Sponsoring</td><td class="mt"><span class="entree ok">800.00</span></td></tr>
+                  <tr class="total"><td>Total des produits</td><td class="mt"><span class="entree ok">2'660.00</span></td></tr>
+                </tbody>
+              </table>
+              <table>
+                <thead><tr><th>Charges</th><th class="mt">Budget</th></tr></thead>
+                <tbody>
+                  <tr><td>Location du parc</td><td class="mt"><span class="entree ok">400.00</span></td></tr>
+                  <tr><td>Assurance</td><td class="mt"><span class="entree ok">150.00</span></td></tr>
+                  <tr><td>Transport des vélos</td><td class="mt"><span class="entree ok">300.00</span></td></tr>
+                  <tr><td>Achat des boissons</td><td class="mt"><span class="entree ok">150.00</span></td></tr>
+                  <tr><td>Publicité</td><td class="mt"><span class="entree ok">350.00</span></td></tr>
+                  <tr><td>T-shirts</td><td class="mt"><span class="entree faux">450.00</span></td></tr>
+                  <tr class="total"><td>Total des charges</td><td class="mt"><span class="entree vide">0.00</span></td></tr>
+                  <tr class="total"><td>Résultat prévu (bénéfice ou perte)</td><td class="mt"><span class="entree vide">0.00</span></td></tr>
+                </tbody>
+              </table>
+              <div class="retour"><b>T-shirts :</b> 60 participants × 9.00 = 540.00.</div>
+              <div class="champs">
+                <span class="lib">Participants nécessaires pour couvrir les charges</span><span><span class="entree vide">0</span> <span class="sous">facultatif, selon l'exercice</span></span>
+              </div>
+              <div class="actions"><button class="btn btn-principal">Vérifier</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="etiquette">Écran 2 · Comparer avec les chiffres effectifs</div>
+<div class="ecran">
+  <div class="app">
+    <aside class="lateral">
+      <div class="marque"><span class="logo">CP</span> Compta PME</div>
+      <div class="nav">Tableau de bord</div>
+      <div class="rubrique">Saisie</div>
+      <div class="nav">Journal</div>
+      <div class="nav">Facturation</div>
+      <div class="nav actif nouveau">Budget</div>
+      <div class="rubrique">États financiers</div>
+      <div class="nav">Bilan</div><div class="nav">Compte de résultat</div>
+    </aside>
+    <div class="principal">
+      <div class="barre-haut"><span class="fil">Cycles du Léman / Budget / <b>Comparer</b></span><span class="puce">CFC · niveau 2</span></div>
+      <div class="contenu">
+        <div class="sous" style="margin:0">
+          La journée a eu lieu, avec 48 participants seulement. Les chiffres effectifs viennent des pièces de l'exercice,
+          ou de vos comptes si l'exercice vous a fait comptabiliser la période.
+        </div>
+        <div class="carte">
+          <div class="carte-tete"><h2>Budget et chiffres effectifs</h2><span class="sous" style="margin:0">Écart = effectif − budget ; écart en % = écart ÷ budget × 100, à 0,1 près</span></div>
+          <table>
+            <thead><tr><th>Poste</th><th class="mt">Budget</th><th class="mt">Effectif</th><th class="mt">Écart</th><th class="mt">Écart en %</th><th>Appréciation</th></tr></thead>
+            <tbody>
+              <tr><td>Inscriptions</td><td class="mt">1'500.00</td><td class="mt">1'200.00</td><td class="mt"><span class="entree ok">−300.00</span></td><td class="mt"><span class="entree ok">−20.0</span></td><td><span class="select">Défavorable</span></td></tr>
+                  <tr><td>Ventes de boissons</td><td class="mt">360.00</td><td class="mt">288.00</td><td class="mt"><span class="entree ok">−72.00</span></td><td class="mt"><span class="entree ok">−20.0</span></td><td><span class="select">Défavorable</span></td></tr>
+                  <tr><td>Sponsoring</td><td class="mt">800.00</td><td class="mt">800.00</td><td class="mt"><span class="entree ok">0.00</span></td><td class="mt"><span class="entree ok">0.0</span></td><td><span class="select">Conforme</span></td></tr>
+                  <tr class="total"><td>Total des produits</td><td class="mt">2'660.00</td><td class="mt">2'288.00</td><td class="mt"><span class="entree ok">−372.00</span></td><td class="mt"><span class="entree ok">−14.0</span></td><td><span class="select">Défavorable</span></td></tr>
+                  <tr><td>Location du parc</td><td class="mt">400.00</td><td class="mt">400.00</td><td class="mt"><span class="entree ok">0.00</span></td><td class="mt"><span class="entree ok">0.0</span></td><td><span class="select">Conforme</span></td></tr>
+                  <tr><td>Assurance</td><td class="mt">150.00</td><td class="mt">150.00</td><td class="mt"><span class="entree ok">0.00</span></td><td class="mt"><span class="entree ok">0.0</span></td><td><span class="select">Conforme</span></td></tr>
+                  <tr><td>Transport des vélos</td><td class="mt">300.00</td><td class="mt">360.00</td><td class="mt"><span class="entree ok">60.00</span></td><td class="mt"><span class="entree ok">20.0</span></td><td><span class="select">Défavorable</span></td></tr>
+                  <tr><td>Achat des boissons</td><td class="mt">150.00</td><td class="mt">140.00</td><td class="mt"><span class="entree ok">−10.00</span></td><td class="mt"><span class="entree ok">−6.7</span></td><td><span class="select">Favorable</span></td></tr>
+                  <tr><td>Publicité</td><td class="mt">350.00</td><td class="mt">520.00</td><td class="mt"><span class="entree ok">170.00</span></td><td class="mt"><span class="entree ok">48.6</span></td><td><span class="select">Défavorable</span></td></tr>
+                  <tr><td>T-shirts</td><td class="mt">540.00</td><td class="mt">540.00</td><td class="mt"><span class="entree ok">0.00</span></td><td class="mt"><span class="entree ok">0.0</span></td><td><span class="select">Conforme</span></td></tr>
+                  <tr class="total"><td>Total des charges</td><td class="mt">1'890.00</td><td class="mt">2'110.00</td><td class="mt"><span class="entree ok">220.00</span></td><td class="mt"><span class="entree ok">11.6</span></td><td><span class="select">Défavorable</span></td></tr>
+                  <tr class="total"><td>Résultat</td><td class="mt">770.00</td><td class="mt">178.00</td><td class="mt"><span class="entree ok">−592.00</span></td><td class="mt"><span class="entree ok">−76.9</span></td><td><span class="select">Défavorable</span></td></tr>
+            </tbody>
+          </table>
+          <div class="carte-corps" style="display:grid;gap:12px">
+            <div class="champs">
+              <span class="lib">Cause principale de l'écart sur le résultat</span>
+              <span><span class="select">Moins de participants que prévu</span></span>
+              <span class="lib">Recommandation pour la prochaine édition (texte libre, non corrigé)</span>
+              <span><span class="entree large vide" style="min-width:520px">Par exemple : inscriptions anticipées, publicité ciblée, t-shirts commandés après les inscriptions…</span></span>
+            </div>
+            <div class="actions"><button class="btn btn-principal">Vérifier</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="questions">
+  <div class="carte">
+    <div class="carte-tete"><h2>Questions à valider avant de programmer</h2></div>
+    <div class="carte-corps">
+      <ol>
+        <li><b>Calcul de l'écart.</b> Écart = effectif − budget ; écart en % = écart ÷ budget × 100, arrondi à 0,1 point. Est-ce la convention du cours, ou l'écart se calcule-t-il budget − effectif ?</li>
+        <li><b>Appréciation.</b> Produit : effectif supérieur au budget = favorable. Charge : effectif supérieur au budget = défavorable. Écart nul = conforme. Ces trois mots vous conviennent-ils ?</li>
+        <li><b>Chiffres effectifs.</b> Donnés par l'énoncé, comme ici, ou repris des comptes de l'élève quand il a comptabilisé la période (budget trimestriel d'un magasin comparé à son compte de résultat) ? Je propose les deux, au choix par exercice.</li>
+        <li><b>Seuil.</b> Faut-il demander le nombre de participants qui couvre les charges (lien avec le seuil de rentabilité), ou le garder pour la maturité ?</li>
+        <li><b>Cause principale.</b> Un choix corrigé dans une liste (moins de participants, prix, charge mal estimée, charge imprévue), plus une recommandation en texte libre non corrigée : d'accord ?</li>
+        <li><b>Niveau et points.</b> Comme la facturation : CFC 2 et MP, activé par exercice, points en évaluation au prorata des champs justes (budget 3 points, comparaison 3 points) ?</li>
+        <li><b>Premier contenu.</b> Un exercice « Journée du vélo électrique » (budget d'un événement, c5.ep1d), puis un second sur le budget trimestriel d'un magasin comparé à ses comptes (c6.ep4a) : d'accord ?</li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

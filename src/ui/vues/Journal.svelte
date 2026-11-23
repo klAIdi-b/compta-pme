@@ -4,7 +4,9 @@
   import { vueEleve } from '../modes';
   import { comptesDisponibles } from '../../engine/dossier';
   import { ajouterEcriture, estExtournee, extourner, modifierEcriture, nouvelId, supprimerEcriture } from '../../engine/journal';
-  import { diagnostiquer, enregistrerTentative, solutionDisponible, INDICES, type Diagnostic } from '../../engine/correction';
+  import { diagnostiquer, ecrituresRetenues, enregistrerTentative, solutionDisponible, INDICES, type Diagnostic } from '../../engine/correction';
+  import { erreurTypique } from '../../engine/erreurs-typiques';
+  import { SOMMAIRE } from '../../data/theorie-index';
   import type { Dossier, Ecriture } from '../../engine/dossier';
   import { bouclementCorrige, corrigeBouclement, diagnostiquerBouclement, PIECE_BOUCLEMENT } from '../../engine/correction-bouclement';
   import { operationsSaisies } from '../../engine/exercice';
@@ -104,6 +106,16 @@
     if (!c) return null;
     const comptes = c.lignes.flatMap((l) => [l.debit, l.credit]).filter((x): x is string => !!x);
     return chapitrePourComptes(comptes, ex.niveau);
+  }
+  /** Erreur typique reconnue pour une opération (explication et chapitre à revoir), hors bouclement. */
+  function erreurTypiqueDe(k: string) {
+    if (k === PIECE_BOUCLEMENT) return null;
+    const c = solutionDe(k);
+    if (!c) return null;
+    const lignes = ecrituresRetenues(d.ecritures).filter((e) => cle(e.piece) === k).flatMap((e) => e.lignes);
+    const r = erreurTypique(lignes, c.lignes);
+    const ch = r ? SOMMAIRE.find((x) => x.id === r.chapitre) : undefined;
+    return r && ch ? { ...r, titre: ch.titre } : null;
   }
   function revoirTheorie(id: string) {
     etat.chapitreCible = id;
@@ -563,6 +575,7 @@
               {#if retour && derniereParPiece.get(kc) === e.id && st && st !== 'juste' && st !== 'manquante'}
                 {@const s = suivi[kc]}
                 {@const solution = s?.solutionVue ? solutionDe(kc) : null}
+                {@const typique = st === 'compte' || st === 'compte_classe' || st === 'erronee' ? erreurTypiqueDe(kc) : null}
                 <tr class="ligne-retour" class:zebre={k % 2 === 1}>
                   <td></td><td></td>
                   <td colspan="6">
@@ -578,10 +591,18 @@
                         {#if (solutionsOuvertes || solutionDisponible(s)) && !s?.solutionVue}
                           <button class="btn-lien solution" onclick={() => voirSolution(kc)}>Voir la solution</button>
                         {/if}
-                        {#each [chapitreDe(kc)].filter((x) => x !== null) as ch (ch.id)}
-                          <button class="btn-lien solution" onclick={() => revoirTheorie(ch.id)}>Revoir la théorie : {ch.titre}</button>
-                        {/each}
+                        {#if !typique}
+                          {#each [chapitreDe(kc)].filter((x) => x !== null) as ch (ch.id)}
+                            <button class="btn-lien solution" onclick={() => revoirTheorie(ch.id)}>Revoir la théorie : {ch.titre}</button>
+                          {/each}
+                        {/if}
                       </div>
+                      {#if typique}
+                        <div class="retour pourquoi">
+                          <b>Pourquoi ?</b> {typique.explication}
+                          <button class="btn-lien solution" onclick={() => revoirTheorie(typique.chapitre)}>Revoir la théorie : {typique.titre}</button>
+                        </div>
+                      {/if}
                       {#if solution}
                         <div class="solution-detail">
                           <b>{kc === PIECE_BOUCLEMENT ? 'Écritures de bouclement attendues, d\'après vos comptes :' : `Solution de l'opération ${kc} :`}</b>
@@ -744,6 +765,7 @@
   tr.ligne-retour td { padding-top: 0; }
   .retour { padding: 7px 12px; background: var(--c-alerte-fond); border-left: 4px solid var(--c-accent); font-size: 13px; border-radius: 6px; }
   .retour.neutre { background: var(--c-fond-2); border-left-color: var(--c-bordure); color: var(--c-texte-2); }
+  .retour.pourquoi { margin-top: 6px; background: var(--c-fond); border-left-color: var(--c-structure); }
   .solution { margin-left: 8px; font-weight: bold; }
   .solution-detail { margin-top: 6px; padding: 6px 10px; border-left: 4px solid var(--c-structure); background: var(--c-selection); font-size: 13px; }
   .solution-detail table { margin-top: 4px; width: auto; }

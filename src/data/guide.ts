@@ -64,6 +64,28 @@ export const GUIDE: PartieGuide[] = [
         ],
       },
       {
+        id: 'apprendre',
+        titre: 'Apprendre pas à pas',
+        blocs: [
+          {
+            type: 'p',
+            texte:
+              "Avant les exercices complets, « Apprendre pas à pas » (page d'accueil ou barre latérale) reprend les notions " +
+              'de la 1re année une à une, dans l’ordre du cours.',
+          },
+          {
+            type: 'etapes',
+            items: [
+              'Lisez l’objectif et l’essentiel ; « Lire la théorie » ouvre le chapitre du cours.',
+              'Suivez l’exemple travaillé : quels comptes, de quel type, augmente ou diminue, donc débit ou crédit.',
+              'Faites la série de 10 questions courtes : classer un compte, passer une écriture, retrouver l’opération, trouver ' +
+                'l’écriture fausse, calculer un solde. Chaque réponse est corrigée tout de suite, avec une explication.',
+              'Avec 8 réponses justes sur 10, la notion est maîtrisée. Sinon, recommencez : questions et montants changent.',
+            ],
+          },
+        ],
+      },
+      {
         id: 'ecran',
         titre: "Se repérer à l'écran",
         blocs: [
@@ -172,6 +194,13 @@ export const GUIDE: PartieGuide[] = [
           {
             type: 'p',
             texte:
+              'Quand vous avez choisi un mauvais compte pour une raison fréquente (un véhicule passé en charge, Dettes ' +
+              'fournisseurs au lieu d’Autres dettes, un paiement repassé en charge…), « Pourquoi ? » explique ce qui a été ' +
+              'confondu et propose le chapitre de théorie à revoir.',
+          },
+          {
+            type: 'p',
+            texte:
               "En haut à droite, la barre d'avancement indique combien de pièces vous avez saisies : en vert les justes, en " +
               "orange celles à revoir. Un clic ouvre le récapitulatif de toutes les pièces ; un clic sur une pièce l'ouvre " +
               "dans le journal. En évaluation, la barre indique seulement le nombre de pièces saisies.",
@@ -216,12 +245,26 @@ export const GUIDE: PartieGuide[] = [
                 'en entraînement, chaque résultat est contrôlé.',
               'Résultat par degrés, Flux de trésorerie et Seuil de rentabilité (maturité) : calculez chaque degré ou chaque ' +
                 'flux d’après vos comptes avant bouclement ; en entraînement, chaque résultat est contrôlé.',
+              'Facturation (CFC 2 et maturité, si l’enseignant la propose) : établissez les factures d’après les bons de ' +
+                'commande (rabais, TVA et escompte arrondis aux 5 centimes, échéance), remplissez les ordres de paiement des ' +
+                'factures reçues (escompte seulement dans le délai) et contrôlez les paiements des clients sur le relevé bancaire. ' +
+                'Comptabilisez ensuite chaque pièce au journal. En évaluation, ces documents rapportent des points.',
+              'Budget (CFC 2 et maturité, si l’enseignant le propose) : préparez le budget d’après la note de la direction, puis ' +
+                'comparez-le avec les chiffres effectifs (donnés, ou soldes de vos comptes) : écart = effectif − budget, écart en % ' +
+                '= écart ÷ budget × 100, appréciation (favorable, défavorable, conforme), cause principale et recommandation.',
               "Bouclement : depuis l'écran Bouclement, « Saisir les écritures de bouclement » ouvre le journal sur la pièce B1. " +
                 "Chaque étape affiche sa consigne ; en entraînement, « Besoin d'aide ? » rappelle la règle, puis les comptes " +
                 "concernés (sans les montants). Selon l'exercice, ces écritures sont corrigées comme les opérations.",
             ],
           },
           { type: 'p', texte: 'Ce que vous écrivez dans les fiches est enregistré avec votre travail.' },
+          {
+            type: 'p',
+            texte:
+              'Après le journal, le logiciel vous guide : dès la dernière opération juste (entraînement) ou saisie (évaluation), ' +
+              'la balance s’ouvre, puis une barre en bas de l’écran donne la consigne de chaque étape et le bouton « Étape suivante » : ' +
+              'balance, compte de résultat, bilan, bouclement, puis les fiches demandées.',
+          },
         ],
       },
       {
@@ -470,6 +513,38 @@ export const GUIDE: PartieGuide[] = [
         ],
       },
       {
+        id: 'sequences',
+        titre: 'Séquences prêtes : apprendre pas à pas',
+        blocs: [
+          {
+            type: 'p',
+            texte:
+              'Le parcours « Apprendre pas à pas » compte sept modules pour la 1re année CFC : le bilan, débit et crédit, ' +
+              'charges et produits, factures, dettes et créances, le compte privé, achats et ventes de marchandises, ' +
+              'puis une synthèse. Chaque module correspond à un chapitre de la théorie.',
+          },
+          {
+            type: 'etapes',
+            items: [
+              '5 minutes, en classe entière : projetez l’objectif et « L’essentiel » du module ; ouvrez la théorie si besoin.',
+              '10 minutes : déroulez l’exemple travaillé au projecteur en faisant répondre la classe aux trois questions ' +
+                '(quels comptes, de quel type, augmente ou diminue).',
+              '15 à 25 minutes, individuellement : chaque élève fait une série ; ceux qui n’atteignent pas 8 sur 10 recommencent ' +
+                '(nouvelle série). Circulez auprès de ceux qui échouent deux fois.',
+              '5 minutes : faites le point à main levée (qui a maîtrisé ?) et annoncez le module suivant.',
+              'Après les modules 1 à 5, donnez un exercice complet de niveau 1 (par exemple Cycles du Léman) ; après le module 6, ' +
+                'un exercice avec marchandises. Le journal terminé, le logiciel guide l’élève jusqu’au bouclement.',
+            ],
+          },
+          {
+            type: 'retenir',
+            texte:
+              'Les séries sont générées : deux voisins n’ont pas les mêmes questions, et un élève peut s’entraîner autant qu’il le faut. ' +
+              'La progression reste dans le navigateur de l’élève (aucune donnée en ligne).',
+          },
+        ],
+      },
+      {
         id: 'corriger-copies',
         titre: 'Corriger les copies',
         blocs: [
@@ -484,6 +559,8 @@ export const GUIDE: PartieGuide[] = [
                 'fréquentes de la classe.',
               '« Détail » affiche, pour chaque opération fausse, les écritures de l’élève à côté du corrigé (la case à ' +
                 'cocher montre aussi celles des opérations justes).',
+              '« Bilan de la classe par notion » regroupe les opérations par notion du cours : taux de réussite, élèves sous ' +
+                '50 % à reprendre (groupe de remédiation) et erreur typique la plus fréquente, avec les élèves concernés.',
               '« Exporter les résultats (CSV) » produit un fichier qui s’ouvre dans Excel.',
               '« Copies corrigées (PDF) » produit un seul document pour la classe : le tableau des notes, puis une page par ' +
                 'élève avec le résultat de chaque opération et, pour les erreurs, ses écritures à côté du corrigé.',
@@ -491,7 +568,11 @@ export const GUIDE: PartieGuide[] = [
           },
           {
             type: 'retenir',
-            texte: 'Note = 1 + points obtenus / points maximum × 5, arrondie au demi-point.',
+            texte:
+              'Note = 1 + points obtenus / points maximum × 5, arrondie au demi-point. Avec la rubrique Facturation, chaque ' +
+              'facture établie vaut 3 points, chaque ordre de paiement 2 points et le contrôle des paiements 3 points, au ' +
+              'prorata des champs justes (au demi-point inférieur). Avec la rubrique Budget : 3 points pour le budget préparé ' +
+              'et 3 points pour la comparaison.',
           },
         ],
       },

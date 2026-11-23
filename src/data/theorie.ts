@@ -453,7 +453,7 @@ export const CHAPITRES: Chapitre[] = [
             exemples: [
               {
                 cas: "Achat d'une machine de 8'000.00 : 3'000.00 payés par la banque, le solde à crédit",
-                lignes: [D('1500', 8000), C('1020', 3000), C('2000', 5000)],
+                lignes: [D('1500', 8000), C('1020', 3000), C('2010', 5000)],
               },
               {
                 cas: "Achat d'un véhicule de 32'000.00 : l'ancien véhicule est repris pour 12'000.00, le solde est payé par la banque",
@@ -484,6 +484,13 @@ export const CHAPITRES: Chapitre[] = [
               { cas: '10.03 — Paiement de cette facture par la banque', lignes: s('2010', '1020', 550) },
               { cas: 'Même achat payé par la banque, la facture n\'ayant pas été comptabilisée', lignes: s('1521', '1020', 550) },
             ],
+          },
+          {
+            type: 'retenir',
+            texte:
+              "Achat à crédit : 2000 Dettes fournisseurs seulement pour des marchandises achetées pour être revendues. " +
+              "Pour tout ce qui sert à l'entreprise (véhicule, mobilier, machines, ordinateurs) et pour les autres factures " +
+              '(services, frais), on utilise 2010 Autres dettes.',
           },
         ],
       },
@@ -1596,7 +1603,7 @@ export const CHAPITRES: Chapitre[] = [
           },
           {
             type: 'ecritures',
-            exemples: [{ cas: "Facture du notaire pour l'acte constitutif, 2'800.00", lignes: s('6550', '2000', 2800) }],
+            exemples: [{ cas: "Facture du notaire pour l'acte constitutif, 2'800.00", lignes: s('6550', '2010', 2800) }],
           },
         ],
       },
@@ -1822,9 +1829,9 @@ export const CHAPITRES: Chapitre[] = [
           {
             type: 'ecritures',
             exemples: [
-              { cas: 'Facture du ramonage et de l’entretien de la chaudière, 680.00', lignes: s('7510', '2000', 680) },
+              { cas: 'Facture du ramonage et de l’entretien de la chaudière, 680.00', lignes: s('7510', '2010', 680) },
               { cas: "Amortissement indirect de 1 % sur une valeur d'acquisition de 600'000.00", lignes: s('7510', '1609', 6000) },
-              { cas: "Pose d'un ascenseur qui augmente la valeur du bâtiment, 45'000.00", lignes: s('1600', '2000', 45000) },
+              { cas: "Pose d'un ascenseur qui augmente la valeur du bâtiment, 45'000.00", lignes: s('1600', '2010', 45000) },
             ],
           },
         ],
