@@ -27,7 +27,7 @@ async function saisir(page: import('@playwright/test').Page, libelle: string, de
 
 test('un élève comptabilise, voit le retour et son avancement, puis reprend son travail', async ({ page }) => {
   await commencer(page, 'cycles', /Cycles du Léman/);
-  await expect(page.getByRole('heading', { name: 'Tableau de bord' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /Votre mission/ })).toBeVisible();
   await page.getByRole('button', { name: /Commencer la saisie|Continuer la saisie/ }).click();
   // La visite guidée peut s'ouvrir la première fois.
   const fermerVisite = page.getByRole('button', { name: /Passer|Fermer la visite|Terminer/ });

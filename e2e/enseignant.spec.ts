@@ -82,7 +82,7 @@ test("évaluation formative : aucun retour pendant la saisie, correction et note
   await page.getByRole('button', { name: "Valider l'écriture" }).click();
   await expect(page.getByText('À revoir')).toHaveCount(0);
   // Terminer : note indicative, correction visible, saisie fermée.
-  await page.getByRole('link', { name: 'Tableau de bord' }).click();
+  await page.getByRole('link', { name: /Votre mission/ }).click();
   page.once('dialog', (d) => d.accept());
   await page.getByRole('button', { name: 'Terminer et voir la correction' }).click();
   await expect(page.getByText('Note indicative')).toBeVisible();

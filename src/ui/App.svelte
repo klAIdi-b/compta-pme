@@ -9,6 +9,9 @@
   import AvancementEntete from './composants/AvancementEntete.svelte';
   import Icone from './composants/Icone.svelte';
   import { vueEleve } from './modes';
+  import { avecParcours, etapesParcours, etatJournal, rangParcours } from './parcours';
+  import { avancementSession, avecCorrection } from './avancement';
+  import { estBoucle } from '../engine/closing';
   import { dateHeure, periode } from './format';
   import Accueil from './vues/Accueil.svelte';
   import TableauDeBord from './vues/TableauDeBord.svelte';
@@ -94,55 +97,57 @@
   /** Écran affiché (machine à états explicite : src/ui/modes.ts). */
   const ecran = $derived(etat.ecran(enseignant.ouvert));
 
-  type Entree = { vue: Vue; libelle: string };
+  type Entree = { vue: Vue; libelle: string; etape?: number; fait?: boolean };
   type Rubrique = { titre: string | null; entrees: Entree[] };
 
+  /**
+   * Navigation en parcours (refonte du 23.11.2026) : les étapes de l'exercice dans l'ordre du cours, numérotées et
+   * cochées une fois faites ; les consultations et les fiches d'appoint sont regroupées dans « Outils ».
+   */
+  const journalTermine = $derived.by(() => {
+    const s = etat.session;
+    if (!s || !vueEleve(etat.genre)) return false;
+    const a = avancementSession(s);
+    return !!a && etatJournal(a, avecCorrection(s) && !etat.verrouille).termine;
+  });
+  const etapesApres = $derived(etat.session ? etapesParcours(etat.exercice, etat.fonctions) : []);
+  const rangAtteint = $derived(etat.etapeParcours ? rangParcours(etapesApres, etat.etapeParcours) : 0);
+  const boucleFait = $derived(!!etat.session && etat.dossier.ecritures.length > 0 && estBoucle(etat.dossier));
   const rubriques = $derived.by((): Rubrique[] => {
     const f = etat.session ? etat.fonctions : new Set();
+    const saisies = (etat.session?.dossier.ecritures.length ?? 0) > 0;
+    const parcours: Entree[] = [
+      { vue: 'tableau' as Vue, libelle: 'Votre mission', fait: saisies },
+      { vue: 'journal' as Vue, libelle: 'Journal', fait: journalTermine },
+      ...etapesApres.map((e, i) => ({
+        vue: e.vue,
+        libelle: e.libelle,
+        fait: e.vue === 'bouclement' ? boucleFait : journalTermine && rangAtteint > i + 1,
+      })),
+    ].map((e, i) => ({ ...e, etape: i + 1 }));
     return [
-      { titre: null, entrees: [{ vue: 'tableau', libelle: 'Tableau de bord' }] },
+      { titre: 'Votre parcours', entrees: parcours },
       {
-        titre: 'Saisie',
+        titre: 'Outils',
         entrees: [
           ...(f.has('bilanOuverture') ? [{ vue: 'bilanOuverture' as Vue, libelle: "Bilan d'ouverture" }] : []),
-          { vue: 'journal', libelle: 'Journal' },
           ...(f.has('facturation') ? [{ vue: 'facturation' as Vue, libelle: 'Facturation' }] : []),
           ...(f.has('budget') ? [{ vue: 'budget' as Vue, libelle: 'Budget' }] : []),
           ...(f.has('salaire') ? [{ vue: 'salaire' as Vue, libelle: 'Décompte de salaire' }] : []),
-        ],
-      },
-      {
-        titre: 'Consultation',
-        entrees: [
+          ...(f.has('tva') ? [{ vue: 'tva' as Vue, libelle: 'TVA' }] : []),
           { vue: 'comptes', libelle: 'Comptes' },
           { vue: 'grandlivre', libelle: 'Grand livre' },
-          { vue: 'balance', libelle: 'Balance' },
+          ...(etapesApres.some((e) => e.vue === 'balance') ? [] : [{ vue: 'balance' as Vue, libelle: 'Balance' }]),
+          ...(etapesApres.some((e) => e.vue === 'bilan') ? [] : [{ vue: 'bilan' as Vue, libelle: 'Bilan' }]),
+          ...(etapesApres.some((e) => e.vue === 'resultat') ? [] : [{ vue: 'resultat' as Vue, libelle: 'Compte de résultat' }]),
+          ...(etapesApres.some((e) => e.vue === 'bouclement') ? [] : [{ vue: 'bouclement' as Vue, libelle: 'Bouclement' }]),
+          { vue: 'theorie', libelle: 'Théorie' },
         ],
       },
-      {
-        titre: 'États financiers',
-        entrees: [
-          { vue: 'bilan', libelle: 'Bilan' },
-          { vue: 'resultat', libelle: 'Compte de résultat' },
-          ...(f.has('margeBrute') ? [{ vue: 'margeBrute' as Vue, libelle: 'Marge brute' }] : []),
-          ...(f.has('degres') ? [{ vue: 'degres' as Vue, libelle: 'Résultat par degrés' }] : []),
-          ...(f.has('flux') ? [{ vue: 'flux' as Vue, libelle: 'Flux de trésorerie' }] : []),
-          ...(f.has('analyse') ? [{ vue: 'analyse' as Vue, libelle: 'Analyse' }] : []),
-          ...(f.has('seuil') ? [{ vue: 'seuil' as Vue, libelle: 'Seuil de rentabilité' }] : []),
-          ...(f.has('echelle') ? [{ vue: 'echelle' as Vue, libelle: 'Échelle des prix' }] : []),
-        ],
-      },
-      {
-        titre: 'Clôture',
-        entrees: [
-          ...(f.has('tva') ? [{ vue: 'tva' as Vue, libelle: 'TVA' }] : []),
-          { vue: 'bouclement', libelle: 'Bouclement' },
-          ...(f.has('repartition') ? [{ vue: 'repartition' as Vue, libelle: 'Répartition du bénéfice' }] : []),
-        ],
-      },
-      { titre: 'Cours', entrees: [{ vue: 'theorie', libelle: 'Théorie' }] },
     ];
   });
+  /** Menu de navigation sur téléphone et petite tablette : ouvert par le bouton « Menu », refermé après un choix. */
+  let menuOuvert = $state(false);
   /** Libellé de la rubrique affichée, pour le fil d'Ariane de l'en-tête. */
   const libelleVue = $derived(rubriques.flatMap((r) => r.entrees).find((e) => e.vue === etat.vue)?.libelle ?? '');
 </script>
@@ -165,6 +170,9 @@
   <a class="lien-evitement" href="#contenu-principal">Aller au contenu</a>
   <div class="app">
     <header class="entete" data-visite="entete">
+      <button class="bouton-menu" aria-expanded={menuOuvert} aria-controls="navigation-principale" onclick={() => (menuOuvert = !menuOuvert)}>
+        <span class="trait" aria-hidden="true"></span><span class="sr-only">Menu</span>
+      </button>
       {#if genre === 'travail'}
         <button class="logo logo-bouton" title="Retour à la page d'accueil" onclick={() => etat.allerAccueil()}>
           <span class="pastille-logo" aria-hidden="true">CP</span>Compta PME
@@ -191,18 +199,23 @@
       {/if}
     </header>
 
-    <nav class="lateral" aria-label="Navigation" data-visite="navigation">
+    {#if menuOuvert}<button class="voile-menu" aria-label="Fermer le menu" onclick={() => (menuOuvert = false)}></button>{/if}
+    <nav class="lateral" class:ouvert={menuOuvert} id="navigation-principale" aria-label="Navigation" data-visite="navigation">
       {#each rubriques as r}
         {#if r.titre}<div class="rubrique">{r.titre}</div>{/if}
         {#each r.entrees as e}
           <a
             href={`#${e.vue}`}
             class:actif={etat.vue === e.vue}
+            class:etape={e.etape !== undefined}
+            class:fait={e.fait}
             aria-current={etat.vue === e.vue ? 'page' : undefined}
             onclick={(ev) => {
               ev.preventDefault();
+              menuOuvert = false;
               etat.aller(e.vue);
-            }}><Icone nom={e.vue} /><span>{e.libelle}</span></a
+            }}
+            >{#if e.etape !== undefined}<span class="num-etape" aria-hidden="true">{e.fait ? '✓' : e.etape}</span>{:else}<Icone nom={e.vue} />{/if}<span>{e.libelle}</span>{#if e.fait}<span class="sr-only"> (fait)</span>{/if}</a
           >
         {/each}
       {/each}
@@ -213,7 +226,7 @@
         {:else if genre === 'apercu'}
           <button class="action-lateral principale" onclick={fermerApercu}>Fermer l'aperçu</button>
         {:else}
-          <button class="action-lateral principale" onclick={exporterMaCopie}>Exporter ma copie</button>
+          <button class="action-lateral" class:principale={journalTermine || !avecParcours(s.exercice)} onclick={exporterMaCopie}>Exporter ma copie</button>
           {#if statut !== 'vide'}
             <p class="rappel-export" class:a-faire={statut !== 'a-jour'} role="status">
               {#if statut === 'jamais'}Copie jamais exportée. Votre travail n'existe que dans ce navigateur.
@@ -229,7 +242,9 @@
       </div>
     </nav>
 
-    <main class="principal" id="contenu-principal" tabindex="-1">
+    <!-- Zone qui défile : atteignable au clavier (règle WCAG scrollable-region-focusable). -->
+    <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+    <main class="principal" id="contenu-principal" tabindex="0" aria-label="Contenu">
       {#if genre === 'apercu'}
         <div class="bandeau-apercu" role="status">
           <span><b>Aperçu enseignant.</b> Vous voyez l'exercice comme vos élèves{s.exercice.mode === 'evaluation' ? ' (évaluation : aucun retour pendant la saisie)' : s.exercice.mode === 'formative' ? ' (évaluation formative : correction quand l’élève termine)' : ''}. Ce que vous saisissez ici n'est ni enregistré dans l'exercice, ni dans une copie.</span>
@@ -272,27 +287,37 @@
 {/if}
 
 <style>
-  .app { display: grid; grid-template-columns: 232px minmax(0, 1fr); grid-template-rows: 60px minmax(0, 1fr); height: 100vh; height: 100dvh; }
+  .app { display: grid; grid-template-columns: 244px minmax(0, 1fr); grid-template-rows: 64px minmax(0, 1fr); height: 100vh; height: 100dvh; }
   .entete {
-    grid-column: 1 / -1; display: flex; align-items: center; gap: 24px; padding: 0 20px;
-    background: var(--c-fond); border-bottom: 1px solid var(--c-bordure);
+    grid-column: 1 / -1; display: flex; align-items: center; gap: 20px; padding: 0 20px;
+    background: var(--c-fond); border-bottom: 1px solid var(--c-bordure-2);
   }
   .logo { font-weight: bold; color: var(--c-texte); font-size: 15px; width: 192px; flex: none; display: flex; align-items: center; gap: 10px; }
   .pastille-logo { width: 28px; height: 28px; border-radius: 7px; background: var(--c-action); color: #fff; display: grid; place-items: center; font-size: 12px; }
   .fil { color: var(--c-texte-2); white-space: nowrap; }
   .dossier { display: flex; align-items: baseline; gap: 16px; flex: 1; min-width: 0; }
-  .dossier strong { font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .meta { color: var(--c-texte-2); white-space: nowrap; }
+  .dossier strong { font-size: 16px; font-weight: 650; color: var(--c-encre); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 6ch; }
+  .meta { display: none; }
   .badge-niveau { background: var(--c-structure); color: #fff; }
   .entete .badge { align-self: center; }
   .badge-mode { background: var(--c-selection); color: var(--c-structure); }
   .eleve { color: var(--c-texte-2); white-space: nowrap; display: flex; align-items: center; gap: 8px; }
   .initiales { width: 32px; height: 32px; border-radius: 50%; background: var(--c-selection); color: var(--c-structure); display: grid; place-items: center; font-weight: bold; font-size: 12px; text-transform: uppercase; }
-  .lateral { background: var(--c-nuit); color: #fff; padding: 12px; overflow-y: auto; gap: 2px; }
-  .rubrique { font-size: 12px; font-weight: bold; color: #9fb6cc; padding: 16px 10px 6px; }
-  .lateral a { display: flex; align-items: center; gap: 10px; padding: 8px 10px; color: #dce6f0; text-decoration: none; border-radius: 6px; }
+  .lateral { background: var(--c-nuit); color: #fff; padding: 14px 12px; overflow-y: auto; gap: 2px; }
+  .rubrique { font-size: 11.5px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #8fa9c4; padding: 16px 10px 8px; }
+  .rubrique:first-child { padding-top: 4px; }
+  .lateral a { display: flex; align-items: center; gap: 10px; padding: 8px 10px; color: #dce6f0; text-decoration: none; border-radius: 8px; }
   .lateral a:hover { background: rgba(255, 255, 255, 0.07); color: #fff; }
-  .lateral a.actif { background: rgba(255, 255, 255, 0.13); color: #fff; font-weight: bold; box-shadow: inset 3px 0 0 var(--c-accent); }
+  .lateral a.actif { background: rgba(255, 255, 255, 0.13); color: #fff; font-weight: 650; box-shadow: inset 3px 0 0 var(--c-accent); }
+  .num-etape {
+    width: 22px; height: 22px; border-radius: 50%; flex: none; display: grid; place-items: center; font-size: 12px; font-weight: 700;
+    border: 1.5px solid rgba(255, 255, 255, 0.35); color: #dce6f0;
+  }
+  .lateral a.actif .num-etape { background: var(--c-accent); border-color: var(--c-accent); color: #fff; }
+  .lateral a.fait .num-etape { background: #2e8b57; border-color: #2e8b57; color: #fff; }
+  .lateral a.etape + a.etape { position: relative; }
+  .bouton-menu { display: none; }
+  .voile-menu { display: none; }
   .lateral { display: flex; flex-direction: column; }
   .bas { margin-top: auto; padding: 16px 0 4px; display: flex; flex-direction: column; gap: 8px; }
   .action-lateral {
@@ -309,7 +334,7 @@
     display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: -4px 0 16px; padding: 10px 14px;
     background: var(--c-alerte-fond); border: 1px solid var(--c-accent); border-radius: 8px;
   }
-  .principal { overflow: auto; padding: 24px 28px 48px; min-width: 0; }
+  .principal { overflow: auto; padding: 28px 32px 56px; min-width: 0; }
   @media (max-width: 1280px) {
     .nom-eleve { display: none; }
     .fil { display: none; }
@@ -318,8 +343,36 @@
     .entete { gap: 14px; }
   }
   @media (max-width: 1100px) {
-    .app { grid-template-columns: 196px minmax(0, 1fr); }
-    .logo { width: 156px; }
-    .principal { padding: 16px; }
+    .app { grid-template-columns: 210px minmax(0, 1fr); }
+    .logo { width: auto; }
+    .principal { padding: 18px; }
+    .badge-mode { display: none; }
+  }
+  /* Téléphone et petite tablette : la navigation devient un menu qu'on ouvre ; le contenu prend toute la largeur. */
+  @media (max-width: 900px) {
+    .app { grid-template-columns: minmax(0, 1fr); }
+    .entete { gap: 12px; padding: 0 12px; }
+    .bouton-menu {
+      display: grid; place-items: center; width: 40px; height: 40px; flex: none; border: 1px solid var(--c-bordure-2);
+      border-radius: 10px; background: #fff; cursor: pointer;
+    }
+    .bouton-menu .trait, .bouton-menu .trait::before, .bouton-menu .trait::after {
+      display: block; width: 18px; height: 2px; background: var(--c-encre); border-radius: 2px; position: relative; content: '';
+    }
+    .bouton-menu .trait::before { position: absolute; top: -6px; left: 0; }
+    .bouton-menu .trait::after { position: absolute; top: 6px; left: 0; }
+    .logo { font-size: 0; gap: 0; }
+    .badge-niveau { display: none; }
+    .lateral {
+      position: fixed; top: 64px; bottom: 0; left: 0; width: min(300px, 86vw); z-index: 40; transform: translateX(-102%);
+      transition: transform 0.2s ease; box-shadow: var(--ombre-haute);
+    }
+    .lateral.ouvert { transform: none; }
+    .voile-menu { display: block; position: fixed; inset: 64px 0 0 0; z-index: 35; background: rgba(15, 30, 45, 0.4); border: 0; }
+    .principal { padding: 16px 14px 40px; }
+  }
+  @media (max-width: 600px) {
+    .dossier, .eleve { display: none; }
+    .entete { justify-content: space-between; }
   }
 </style>

@@ -7,7 +7,7 @@ async function ouvrirParLien(page: Page, id: string) {
   await page.getByLabel('Nom', { exact: true }).fill('Martin');
   await page.getByLabel('Classe').fill('2CFC1');
   await page.getByRole('button', { name: 'Commencer' }).click();
-  await expect(page.getByRole('heading', { name: 'Tableau de bord' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /Votre mission/ })).toBeVisible();
 }
 
 /** Ligne de tableau qui contient un libellé, pour lire sa colonne « Contrôle ». */
