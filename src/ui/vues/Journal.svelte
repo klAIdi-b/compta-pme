@@ -801,10 +801,10 @@
   }
   /* Tablette en paysage et petits écrans : comptes et montant plus étroits pour laisser de la place au libellé. */
   @media (max-width: 1180px) {
-    .c-date { width: 96px; }
-    .c-piece { width: 48px; }
-    .c-compte { width: 175px; }
-    .c-montant { width: 100px; }
+    .c-date { width: 90px; }
+    .c-piece { width: 44px; }
+    .c-compte { width: 150px; }
+    .c-montant { width: 92px; }
   }
   .aide-clavier summary { cursor: pointer; color: var(--c-structure); font-weight: 600; font-size: 13px; margin-bottom: 4px; }
   .aide-clavier:not([open]) { padding-bottom: 2px; }
