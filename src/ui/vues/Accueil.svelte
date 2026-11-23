@@ -1,5 +1,7 @@
 <script lang="ts">
   import { etat } from '../etat.svelte';
+  import { lireProgression } from '../../io/apprendre';
+  import { MODULES } from '../../data/apprendre';
   import { estDossier, exercicesDemo } from '../../data/demos';
   import { classerExercices, etiquetteNiveau, filiereDe, LIBELLES_FILIERE, LIBELLES_MODE, type Exercice, type Filiere } from '../../engine/exercice';
   import { EXT_EXERCICE, ErreurFichier, importerExercice, statutExport } from '../../io/fichiers';
@@ -137,6 +139,10 @@
     oublierLien();
     etat.commencer({ prenom: prenom.trim(), nom: nom.trim(), classe: classe.trim() }, ex);
   }
+
+  // Parcours « Apprendre » : notions maîtrisées dans ce navigateur (relu à chaque ouverture de l'accueil).
+  const NB_MODULES = MODULES.length;
+  const maitrises = Object.values(lireProgression()).filter((p) => p.maitrise).length;
 </script>
 
 <div class="page">
@@ -211,6 +217,21 @@
             <button class="btn" onclick={() => etat.commencer(s.eleve, s.exercice)}>Reprendre</button>
           </div>
         {/each}
+      </section>
+    {/if}
+
+    {#if !exLien}
+      <section class="carte apprendre" aria-labelledby="titre-apprendre">
+        <div class="tete-carte">
+          <div>
+            <h2 id="titre-apprendre">Apprendre pas à pas</h2>
+            <div class="discret petit">
+              CFC 1re année : une notion à la fois, avec un exemple et des questions courtes, avant les exercices complets.
+              {#if maitrises > 0}· {maitrises} notion{maitrises > 1 ? 's' : ''} maîtrisée{maitrises > 1 ? 's' : ''} sur {NB_MODULES}{/if}
+            </div>
+          </div>
+          <button class="btn" onclick={() => (etat.apprendre = true)}>{maitrises > 0 ? 'Continuer le parcours' : 'Ouvrir le parcours'}</button>
+        </div>
       </section>
     {/if}
 

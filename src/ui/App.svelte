@@ -145,6 +145,8 @@
 
 {#if ecran === 'guide' && etat.guide}
   <Differe charger={() => import('./vues/Guide.svelte')} props={{ partie: etat.guide, onFermer: () => (etat.guide = null) }} />
+{:else if ecran === 'apprendre'}
+  <Differe charger={() => import('./vues/Apprendre.svelte')} props={{}} />
 {:else if ecran === 'enseignant'}
   <Differe charger={() => import('./vues/EspaceEnseignant.svelte')} props={{}} />
 {:else if simulationEleve.enLigne}
@@ -216,7 +218,8 @@
             </p>
           {/if}
           <button class="action-lateral" onclick={exporterPdf} disabled={pdfEnCours}>{pdfEnCours ? 'Création du PDF…' : 'Exporter en PDF'}</button>
-          <button class="action-lateral discrete" onclick={() => (etat.guide = 'eleve')}>Guide d'utilisation</button>
+          <button class="action-lateral discrete" onclick={() => (etat.apprendre = true)}>Apprendre pas à pas</button>
+        <button class="action-lateral discrete" onclick={() => (etat.guide = 'eleve')}>Guide d'utilisation</button>
           <button class="action-lateral discrete" onclick={() => (enseignant.ouvert = true)}>Espace enseignant</button>
         {/if}
       </div>

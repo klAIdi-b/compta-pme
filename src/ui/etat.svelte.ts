@@ -118,6 +118,8 @@ class Etat {
   visiteOuverte = $state(false);
   /** Guide d'utilisation ouvert (partie affichée), ou null. */
   guide = $state<null | 'eleve' | 'enseignant'>(null);
+  /** Parcours « Apprendre » ouvert (écran à part, comme le guide). */
+  apprendre = $state(false);
   stockageIndisponible = $state(false);
   /** Accueil affiché par-dessus une session en cours (reprise ou choix d'un autre exercice). */
   accueilOuvert = $state(false);
@@ -149,7 +151,7 @@ class Etat {
 
   /** Écran à afficher ; `enseignantOuvert` vient de l'état de l'espace enseignant. */
   ecran(enseignantOuvert: boolean): Ecran {
-    return ecranAffiche({ guide: this.guide !== null, enseignantOuvert, session: this.session, accueilOuvert: this.accueilOuvert });
+    return ecranAffiche({ guide: this.guide !== null, apprendre: this.apprendre, enseignantOuvert, session: this.session, accueilOuvert: this.accueilOuvert });
   }
 
   get dossier(): Dossier {
@@ -292,6 +294,7 @@ class Etat {
   /** Clic sur le nom du site ou « Changer d'exercice » : page d'accueil, le travail en cours est conservé. */
   allerAccueil() {
     this.guide = null;
+    this.apprendre = false;
     if (peutOuvrirAccueil(this.genre)) this.accueilOuvert = true;
   }
 

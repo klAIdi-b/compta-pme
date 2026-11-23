@@ -7,7 +7,7 @@
 //
 //    Seul un « travail » d'élève est mis de côté, et jamais par-dessus un autre travail déjà mis de côté.
 //
-// 2. Écran affiché, par priorité : guide > espace enseignant > accueil > logiciel.
+// 2. Écran affiché, par priorité : guide > parcours Apprendre > espace enseignant > accueil > logiciel.
 
 /** Ce qui suffit pour qualifier une session (sous-ensemble de `Session`). */
 export interface SessionQualifiable {
@@ -46,15 +46,18 @@ export function aMettreDeCote<S extends SessionQualifiable>(active: S | null, de
   return genreSession(active) === 'travail' ? active : dejaDeCote;
 }
 
-export type Ecran = 'guide' | 'enseignant' | 'accueil' | 'logiciel';
+export type Ecran = 'guide' | 'apprendre' | 'enseignant' | 'accueil' | 'logiciel';
 
 export function ecranAffiche(x: {
   guide: boolean;
+  /** Parcours « Apprendre » ouvert (exercices courts, sans exercice en cours). */
+  apprendre?: boolean;
   enseignantOuvert: boolean;
   session: SessionQualifiable | null;
   accueilOuvert: boolean;
 }): Ecran {
   if (x.guide) return 'guide';
+  if (x.apprendre) return 'apprendre';
   if (x.enseignantOuvert) return 'enseignant';
   if (!x.session) return 'accueil';
   // L'accueil ne se superpose qu'à un travail d'élève : un aperçu ou un corrigé reste affiché.
