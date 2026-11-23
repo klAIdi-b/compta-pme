@@ -8,7 +8,7 @@ import {
 
 const contexte = (id: string): ContexteSerie => {
   const m = MODULES.find((x) => x.id === id)!;
-  return { plan, modeles: m.modeles.map(modeleParId), comptes: m.comptes, types: m.types };
+  return { plan, modeles: m.modeles.map(modeleParId), comptes: m.comptes, types: m.types, calculs: m.calculs };
 };
 
 describe('parcours Apprendre : contenu', () => {
@@ -26,6 +26,7 @@ describe('parcours Apprendre : contenu', () => {
 
   it('chaque module propose dans ses listes les comptes de ses modèles et un exemple qui lui appartient', () => {
     for (const mod of MODULES) {
+      if (mod.calculs) continue;
       expect(mod.modeles).toContain(mod.exemple);
       for (const id of mod.modeles) {
         const m = modeleParId(id);

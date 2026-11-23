@@ -5,17 +5,30 @@
 import type { FormatQuestion, ModeleOperation } from '../engine/exercices-courts';
 import type { TypeCompte } from '../engine/plan';
 
+export type NiveauApprendre = 'CFC1' | 'CFC2' | 'MP';
+
+export const LIBELLES_NIVEAU_APPRENDRE: Record<NiveauApprendre, string> = {
+  CFC1: 'CFC · 1re année',
+  CFC2: 'CFC · 2e année et option Finances',
+  MP: 'Maturité professionnelle',
+};
+
 export interface ModuleApprendre {
   id: string;
+  niveau: NiveauApprendre;
   titre: string;
   /** Ce que l'élève saura faire à la fin du module. */
   objectif: string;
   /** Points essentiels, repris de la théorie validée. */
   rappel: string[];
-  /** Chapitre de théorie correspondant. */
-  chapitre: string;
-  /** Modèle utilisé pour l'exemple travaillé. */
-  exemple: string;
+  /** Chapitre de théorie correspondant (aucun pour les notions sans chapitre). */
+  chapitre?: string;
+  /** Modèle utilisé pour l'exemple travaillé (modules d'écritures) ; sinon, un calcul généré sert d'exemple. */
+  exemple?: string;
+  /** Générateurs de calculs (src/engine/calculs.ts) pour les modules de calcul. */
+  calculs?: string[];
+  /** Objectifs du plan d'études couverts (codes). */
+  plan?: string[];
   modeles: string[];
   /** Comptes proposés dans les listes et pour « classer » ou « solde ». */
   comptes: string[];
@@ -75,6 +88,7 @@ const COMPTES_GESTION = ['3200', '4200', '5200', '6000', '6200', '6300', '6400',
 export const MODULES: ModuleApprendre[] = [
   {
     id: 'bilan',
+    niveau: 'CFC1',
     titre: 'Le bilan : actif ou passif',
     objectif: "Classer chaque compte à l'actif ou au passif et reconnaître les quatre variations du bilan.",
     rappel: [
@@ -92,6 +106,7 @@ export const MODULES: ModuleApprendre[] = [
   },
   {
     id: 'comptes',
+    niveau: 'CFC1',
     titre: 'Débit et crédit : opérations du bilan',
     objectif: 'Passer une écriture simple entre deux comptes du bilan et calculer le solde d\'un compte.',
     rappel: [
@@ -109,6 +124,7 @@ export const MODULES: ModuleApprendre[] = [
   },
   {
     id: 'charges-produits',
+    niveau: 'CFC1',
     titre: 'Charges et produits',
     objectif: 'Reconnaître une charge et un produit et passer les écritures correspondantes.',
     rappel: [
@@ -126,6 +142,7 @@ export const MODULES: ModuleApprendre[] = [
   },
   {
     id: 'factures',
+    niveau: 'CFC1',
     titre: 'Factures, dettes et créances',
     objectif: 'Distinguer facture reçue, facture envoyée et paiement, et choisir entre Dettes fournisseurs et Autres dettes.',
     rappel: [
@@ -143,6 +160,7 @@ export const MODULES: ModuleApprendre[] = [
   },
   {
     id: 'prive',
+    niveau: 'CFC1',
     titre: 'Le compte privé',
     objectif: 'Comptabiliser les prélèvements et apports du propriétaire sans les confondre avec les charges.',
     rappel: [
@@ -160,6 +178,7 @@ export const MODULES: ModuleApprendre[] = [
   },
   {
     id: 'marchandises',
+    niveau: 'CFC1',
     titre: 'Achats et ventes de marchandises',
     objectif: 'Comptabiliser achats, ventes, retours et frais liés aux marchandises.',
     rappel: [
@@ -177,6 +196,7 @@ export const MODULES: ModuleApprendre[] = [
   },
   {
     id: 'synthese-cfc1',
+    niveau: 'CFC1',
     titre: 'Synthèse : toutes les opérations',
     objectif: 'Passer sans aide les écritures de toutes les notions de la 1re année.',
     rappel: [
@@ -191,6 +211,84 @@ export const MODULES: ModuleApprendre[] = [
     formats: ['ecriture', 'ecriture', 'operation', 'erreur', 'solde'],
     duree: 45,
   },
+  ...MODULES_CALCUL(),
 ];
+
+/** Module de calcul : pas d'écriture, des questions générées par src/engine/calculs.ts. */
+function calcul(
+  id: string, niveau: NiveauApprendre, titre: string, objectif: string, rappel: string[], calculs: string[], plan: string[],
+  chapitre?: string, duree = 45,
+): ModuleApprendre {
+  return { id, niveau, titre, objectif, rappel, chapitre, calculs, plan, modeles: [], comptes: [], types: [], formats: ['calcul'], duree };
+}
+
+function MODULES_CALCUL(): ModuleApprendre[] {
+  return [
+    calcul('livres-auxiliaires', 'CFC2', 'Livres auxiliaires des clients',
+      'Tenir les comptes individuels des clients et les rapprocher du compte collectif Créances clients.',
+      ['Chaque client a son compte dans le livre auxiliaire : solde initial + factures − paiements.', 'La somme des soldes des clients est égale au solde du compte collectif Créances clients.'],
+      ['livres-auxiliaires'], ['CFC c6.ep1a', 'CFC c6.ep1b', 'MP compléments CFC'], 'journal', 30),
+    calcul('declaration-salaire', 'CFC2', 'Déclaration de salaire',
+      'Établir la déclaration annuelle des salaires et calculer les cotisations sociales.',
+      ['La masse salariale soumise à l’AVS est la somme des salaires bruts de l’année.', 'Les cotisations AVS/AI/APG et AC sont payées pour moitié par l’employé et pour moitié par l’employeur (taux donnés).'],
+      ['declaration-salaire'], ['CFC c6.ep2a', 'CFC c6.ep2b', 'MP 4.1'], 'salaires', 30),
+    calcul('marge-contributive', 'CFC2', 'Marge contributive',
+      'Calculer la marge contributive, le résultat et le seuil de rentabilité.',
+      ['Marge contributive par pièce = prix de vente − coût variable.', 'Résultat = marge contributive totale − charges fixes.', 'Seuil de rentabilité = charges fixes ÷ marge contributive par pièce.'],
+      ['marge-contributive'], ['CFC c6.ep1a', 'CFC c6.ep1b', 'MP 9.4'], 'seuil'),
+    calcul('repartition-couts', 'CFC2', 'Feuille de répartition des coûts',
+      'Répartir les charges indirectes sur les centres de coûts.',
+      ['Chaque charge indirecte est répartie sur les centres selon une clé (en %).', 'Le total d’un centre est la somme des parts qu’il reçoit.'],
+      ['repartition-simple'], ['CFC c6.ep1a', 'MP 9.2'], undefined, 30),
+    calcul('classes-pme', 'MP', 'Plan comptable PME : les classes',
+      'Classer chaque compte dans sa classe du plan comptable PME.',
+      ['Le premier chiffre du numéro donne la classe : 1 actifs, 2 passifs, 3 chiffre d’affaires, 4 charges de marchandises, 5 personnel, 6 autres charges d’exploitation, 7 activités annexes, 8 exceptionnels, hors exploitation et impôts, 9 clôture.'],
+      ['classe-compte'], ['MP 1.1'], 'comptes', 20),
+    calcul('interets', 'MP', 'Intérêts commerciaux',
+      'Calculer un intérêt, une durée, un taux ou un capital (année commerciale).',
+      ['I = C × t × j ÷ 36 000 (360 jours par an, 30 jours par mois).', 'On en tire j = I × 36 000 ÷ (C × t), t = I × 36 000 ÷ (C × j), C = I × 36 000 ÷ (t × j).'],
+      ['interet'], ['MP 2.2'], 'interets', 30),
+    calcul('compte-courant', 'MP', 'Compte courant et méthode des nombres',
+      'Calculer l’intérêt d’un compte courant par la méthode des nombres, et l’impôt anticipé.',
+      ['Nombre = capital × jours ÷ 100 ; intérêt = total des nombres × taux ÷ 360.', 'Sur l’intérêt créditeur, la banque retient l’impôt anticipé de 35 %.'],
+      ['compte-courant'], ['MP 2.3'], 'interets', 30),
+    calcul('devises', 'MP', 'Monnaies étrangères',
+      'Choisir le bon cours (billets ou devises, achat ou vente) et convertir un montant.',
+      ['Virement : cours des devises ; espèces : cours des billets.', 'L’entreprise paie à l’étranger : la banque lui vend la monnaie (cours vente). L’entreprise reçoit une monnaie étrangère : la banque l’achète (cours achat).'],
+      ['devises'], ['MP 2.4'], 'monnaies', 30),
+    calcul('prix-inverse', 'MP', 'Calcul des prix à rebours',
+      'Retrouver le prix d’achat à partir du prix de vente brut.',
+      ['On remonte l’échelle des prix : PVB → PVC → PVN → PR → PRA → PAN → PAC → PAB.', 'Un pourcentage ajouté (bénéfice, frais généraux) se retire en divisant par (100 + taux) % ; un pourcentage déduit (rabais, escompte) se retire en divisant par (100 − taux) %.'],
+      ['prix-inverse'], ['MP 3.4'], 'prix'),
+    calcul('amortissements-mp', 'MP', 'Cession et changement de méthode',
+      'Calculer la valeur comptable, le résultat d’une cession et le passage de la méthode directe à la méthode indirecte.',
+      ['Valeur comptable = valeur d’acquisition − amortissements cumulés.', 'Résultat de cession = prix de vente − valeur comptable.', 'Passage à la méthode indirecte : les amortissements cumulés sont reportés au fonds d’amortissements cumulés.'],
+      ['cession', 'changement-methode'], ['MP 5.2'], 'amortissements'),
+    calcul('perte-capital', 'MP', 'Perte de capital et surendettement',
+      'Reconnaître une perte de capital et un surendettement d’après le bilan d’une SA.',
+      ['Perte de capital (art. 725 CO) : actifs − dettes couvrent moins de la moitié du capital-actions et des réserves légales.', 'Surendettement (art. 725b CO) : les dettes ne sont plus couvertes par les actifs.'],
+      ['perte-capital'], ['MP 5.6'], 'societes', 30),
+    calcul('titres-immeubles', 'MP', 'Bordereaux et rendements',
+      'Établir un bordereau d’achat d’obligations et calculer le rendement d’un titre ou d’un immeuble.',
+      ['Bordereau : prix (nominal × cours) + intérêt couru (30/360) + courtage + droit de timbre.', 'Rendement = revenu de l’année (± gain ou perte) ÷ capital investi × 100.', 'Immeuble : rendement brut = loyers ÷ prix ; rendement net = (loyers − charges − intérêts) ÷ fonds propres.'],
+      ['bordereau', 'rendements'], ['MP 6.1', 'MP 6.2'], 'titres'),
+    calcul('point-mort', 'MP', 'Point mort et rotation du stock',
+      'Calculer le chiffre d’affaires et la date du point mort, la rotation et la durée de stockage.',
+      ['CA au point mort = charges fixes ÷ taux de marge (marge contributive = marge brute).', 'Date du point mort = CA au point mort ÷ CA annuel × 360.', 'Rotation du stock = PRAMV ÷ stock moyen ; durée de stockage = 360 ÷ rotation.'],
+      ['point-mort'], ['MP 9.4', 'CFC c6.ep1a'], 'seuil'),
+    calcul('flux-direct', 'MP', 'Flux de trésorerie : méthode directe',
+      'Calculer le cash-flow d’exploitation par la méthode directe et le free cash-flow.',
+      ['Méthode directe : encaissements d’exploitation − paiements d’exploitation.', 'Free cash-flow = cash-flow d’exploitation − investissements + désinvestissements.'],
+      ['flux-direct'], ['MP 7.1'], 'flux', 30),
+    calcul('analytique', 'MP', 'Comptabilité analytique',
+      'Répartir les charges indirectes (avec un centre auxiliaire), calculer un coût d’unité d’œuvre et un prix de revient complet.',
+      ['Répartition primaire sur les centres, puis secondaire : le centre auxiliaire est réparti sur les centres principaux.', 'Coût d’une unité d’œuvre = total du centre ÷ nombre d’unités.', 'Prix de revient = coût de production + frais d’administration et de vente.'],
+      ['analytique'], ['MP 9.2', 'MP 9.3', 'CFC c6.ep1a']),
+    calcul('normes', 'MP', 'Comptes de groupe et normes',
+      'Situer les normes de présentation des comptes et le principe de la consolidation.',
+      ['Swiss GAAP RPC (Suisse), IFRS (international), US GAAP (États-Unis) visent une image fidèle.', 'Consolidation : les comptes des sociétés du groupe sont réunis ; les opérations internes au groupe sont éliminées.'],
+      ['normes'], ['MP 5.7'], 'evaluation', 20),
+  ];
+}
 
 export const modeleParId = (id: string) => MODELES.find((m) => m.id === id)!;

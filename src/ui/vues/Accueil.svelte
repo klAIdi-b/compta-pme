@@ -226,7 +226,7 @@
           <div>
             <h2 id="titre-apprendre">Apprendre pas à pas</h2>
             <div class="discret petit">
-              CFC 1re année : une notion à la fois, avec un exemple et des questions courtes, avant les exercices complets.
+              CFC et maturité : une notion à la fois, avec un exemple et des questions courtes (écritures et calculs du plan d'études).
               {#if maitrises > 0}· {maitrises} notion{maitrises > 1 ? 's' : ''} maîtrisée{maitrises > 1 ? 's' : ''} sur {NB_MODULES}{/if}
             </div>
           </div>
