@@ -100,7 +100,7 @@ footer { margin-top: 48px; border-top: 1px solid var(--bordure); padding-top: 12
 </style>
 <div class="page">
 <header>
-  <p class="sur-titre">École de commerce Aimée-Stitelmann · Comptabilité</p>
+  <p class="sur-titre">Compta PME · Comptabilité en partie double</p>
   <h1>Guide d'utilisation de Compta PME</h1>
   <p class="chapeau">Logiciel de comptabilité en partie double pour les classes CFC et de maturité professionnelle. Il
   fonctionne dans le navigateur, sans compte ni installation ; aucune donnée d'élève n'est envoyée en ligne.</p>
