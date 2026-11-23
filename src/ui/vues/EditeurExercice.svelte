@@ -61,6 +61,7 @@
   let calculatriceTva = $state(source.parametres.calculatriceTva ?? false);
   let ficheBilanOuverture = $state(source.parametres.ficheBilanOuverture ?? false);
   let ficheMargeBrute = $state(source.parametres.ficheMargeBrute ?? false);
+  let formulaireTva = $state(source.parametres.formulaireTva ?? false);
   const ech0 = source.parametres.echellePrix;
   let echArticle = $state(ech0?.article ?? '');
   let echPab = $state<number | null>(ech0?.pab ?? null);
@@ -182,6 +183,7 @@
         calculatriceTva,
         ficheBilanOuverture,
         ficheMargeBrute,
+        formulaireTva,
         echellePrix:
           echPab !== null && echPab > 0
             ? {
@@ -404,6 +406,7 @@
       </div>
       <label class="case"><input type="checkbox" bind:checked={ficheSalaire} /> Fiche « Décompte de salaire »</label>
       <label class="case large"><input type="checkbox" bind:checked={calculatriceTva} /> Calculatrice de TVA (aide au calcul)</label>
+      <label class="case large"><input type="checkbox" bind:checked={formulaireTva} /> Formulaire officiel de décompte TVA</label>
     {/if}
     <label class="case"><input type="checkbox" bind:checked={ficheBilanOuverture} /> Fiche « Bilan d'ouverture »</label>
     <label class="case"><input type="checkbox" bind:checked={ficheMargeBrute} /> Fiche « Marge brute »</label>

@@ -111,6 +111,8 @@ export interface Exercice {
     ficheBilanOuverture?: boolean;
     /** Tous niveaux : fiche « Marge brute » (CAB, CAN, PRAMA, PRAMV d'après les comptes). */
     ficheMargeBrute?: boolean;
+    /** CFC 2 et MP : formulaire officiel de décompte TVA à remplir dans l'écran TVA (chiffres 200 à 510). */
+    formulaireTva?: boolean;
     /** Tous niveaux : données de la fiche « Échelle des prix ». */
     echellePrix?: DonneesEchelle;
     /** CFC 2 et MP : facturation et paiements (factures à établir, ordres de paiement, contrôle des paiements). */
