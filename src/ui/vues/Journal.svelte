@@ -101,6 +101,9 @@
     x === 'juste' ? 'juste' : x === 'incomplete' ? 'neutre' : x && x !== 'manquante' ? 'revoir' : '';
 
   /** Chapitre de théorie lié à une opération, d'après les comptes de son corrigé. */
+  /** Raccourcis clavier : affichés d'emblée tant qu'aucune écriture n'est validée, puis repliés. */
+  let aideClavierOuverte = $state(etat.dossier.ecritures.filter((e) => !e.automatique).length === 0);
+
   function chapitreDe(k: string) {
     const c = solutionDe(k);
     if (!c) return null;
@@ -417,7 +420,9 @@
       {/if}
       <div class="plan-saisie" class:avec-piece={!!(operationCourante?.piece && voirPiece)}>
       {#if operationCourante?.piece && voirPiece}
-        <div class="zone-piece"><PieceVue piece={operationCourante.piece} /></div>
+        <!-- Zone qui défile : atteignable au clavier (règle WCAG scrollable-region-focusable). -->
+        <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+        <div class="zone-piece" tabindex="0" role="region" aria-label="Pièce comptable"><PieceVue piece={operationCourante.piece} /></div>
       {/if}
       <div class="grille-saisie">
       <table>
@@ -438,15 +443,15 @@
           {#each lignes as l, i (l.cle)}
             <tr data-ligne={i}>
               {#if i === 0}
-                <td><input id="saisie-date" class="champ num" aria-label="Date" placeholder="JJ.MM.AAAA" autocomplete="off" data-champ bind:value={date} /></td>
-                <td><input id="saisie-piece" class="champ num" aria-label="Pièce" autocomplete="off" data-champ bind:value={piece} /></td>
-                <td><input id="saisie-libelle" class="champ" aria-label="Libellé" autocomplete="off" data-champ bind:value={libelle} /></td>
+                <td data-etiquette="Date"><input id="saisie-date" class="champ num" aria-label="Date" placeholder="JJ.MM.AAAA" autocomplete="off" data-champ bind:value={date} /></td>
+                <td data-etiquette="Pièce"><input id="saisie-piece" class="champ num" aria-label="Pièce" autocomplete="off" data-champ bind:value={piece} /></td>
+                <td data-etiquette="Libellé" class="t-libelle"><input id="saisie-libelle" class="champ" aria-label="Libellé" autocomplete="off" data-champ bind:value={libelle} /></td>
               {:else}
                 <td></td><td></td><td></td>
               {/if}
-              <td><ChampCompte id={`debit-${l.cle}`} libelle={`Compte au débit, ligne ${i + 1}`} {comptes} bind:valeur={l.debit} /></td>
-              <td><ChampCompte id={`credit-${l.cle}`} libelle={`Compte au crédit, ligne ${i + 1}`} {comptes} bind:valeur={l.credit} aligne="droite" /></td>
-              <td><ChampMontant id={`montant-${l.cle}`} libelle={`Montant, ligne ${i + 1}`} bind:valeur={l.montant} /></td>
+              <td data-etiquette="Compte au débit" class="t-compte"><ChampCompte id={`debit-${l.cle}`} libelle={`Compte au débit, ligne ${i + 1}`} {comptes} bind:valeur={l.debit} /></td>
+              <td data-etiquette="Compte au crédit" class="t-compte"><ChampCompte id={`credit-${l.cle}`} libelle={`Compte au crédit, ligne ${i + 1}`} {comptes} bind:valeur={l.credit} aligne="droite" /></td>
+              <td data-etiquette="Montant CHF" class="t-montant"><ChampMontant id={`montant-${l.cle}`} libelle={`Montant, ligne ${i + 1}`} bind:valeur={l.montant} /></td>
               <td>
                 {#if lignes.length > 1}
                   <button class="retirer" title="Retirer la ligne" aria-label={`Retirer la ligne ${i + 1}`} onclick={() => retirerLigne(i)}>×</button>
@@ -493,10 +498,11 @@
           <ul>{#each erreurs as e}<li>{e}</li>{/each}</ul>
         </div>
       {/if}
-      <div class="aide-clavier">
+      <details class="aide-clavier" bind:open={aideClavierOuverte}>
+        <summary>Raccourcis clavier</summary>
         <kbd>Tab</kbd> champ suivant · <kbd>Entrée</kbd> ligne suivante, puis validation quand l'écriture est équilibrée ·
         <kbd>Échap</kbd> retire la ligne · compte : cliquez dans le champ ou tapez une partie du nom, puis <kbd>Tab</kbd> ou <kbd>Entrée</kbd> choisit le compte en surbrillance
-      </div>
+      </details>
       </div>
       </div>
     </section>
@@ -799,5 +805,19 @@
     .c-piece { width: 48px; }
     .c-compte { width: 175px; }
     .c-montant { width: 100px; }
+  }
+  .aide-clavier summary { cursor: pointer; color: var(--c-structure); font-weight: 600; font-size: 13px; margin-bottom: 4px; }
+  .aide-clavier:not([open]) { padding-bottom: 2px; }
+  /* Téléphone et tablette en portrait : la grille de saisie s'empile, chaque champ porte son étiquette ; les tableaux défilent. */
+  @media (max-width: 820px) {
+    .grille-saisie thead { display: none; }
+    .grille-saisie table, .grille-saisie tbody { display: block; }
+    .grille-saisie tr { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 10px; padding: 12px 18px; border-bottom: 1px solid var(--c-bordure-3); }
+    .grille-saisie td { display: block; padding: 0; border: 0; width: auto; }
+    .grille-saisie td:empty { display: none; }
+    .grille-saisie td[data-etiquette]::before { content: attr(data-etiquette); display: block; font-size: 12px; font-weight: 600; color: var(--c-texte-2); margin-bottom: 4px; }
+    .grille-saisie td.t-libelle, .grille-saisie td.t-compte { grid-column: 1 / -1; }
+    .defilement { overflow-x: auto; }
+    .plateaux { min-width: 0; width: 100%; }
   }
 </style>

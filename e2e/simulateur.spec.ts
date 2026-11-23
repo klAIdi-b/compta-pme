@@ -244,7 +244,7 @@ test('échange par fichier : le groupe ouvre sa situation, enregistre ses décis
   // Le groupe : accueil, ouvrir sa situation, décider, enregistrer.
   await page.getByRole('button', { name: "Fermer l'espace enseignant" }).click();
   const choix = page.waitForEvent('filechooser');
-  await page.getByRole('button', { name: 'Simulateur : ouvrir ma situation' }).click();
+  await page.getByRole('button', { name: 'ouvrir la situation de mon groupe' }).click();
   await (await choix).setFiles({ name: 'situation.compta-situation.json', mimeType: 'application/json', buffer: Buffer.from(exporterSituation(sit)) });
   await expect(page.getByRole('heading', { name: 'Les Lémaniques' })).toBeVisible();
   await controler(page, '8-situation-eleve');

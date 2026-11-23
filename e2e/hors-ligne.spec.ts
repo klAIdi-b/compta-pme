@@ -25,7 +25,7 @@ test('après une première visite, le logiciel fonctionne entièrement hors lign
   await page.getByLabel('Rechercher un exercice').fill('cycles');
   await page.getByText(/Cycles du Léman/).first().click();
   await page.getByRole('button', { name: 'Commencer' }).click();
-  await expect(page.getByRole('heading', { name: 'Tableau de bord' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /Votre mission/ })).toBeVisible();
 
   // Le module PDF, chargé à la demande, doit aussi être disponible hors ligne.
   const telechargement = page.waitForEvent('download');

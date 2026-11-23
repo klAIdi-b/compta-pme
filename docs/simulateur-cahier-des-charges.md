@@ -328,7 +328,7 @@ Pendant que l'école ou le DIP répond, tout ce qui ne demande pas de compte en 
 C'est le secours prévu au § 8, qui permet déjà aux groupes de décider sur leur propre poste.
 
 1. Dans le tableau de la partie, l'enseignant clique sur **Distribuer les situations du tour N (fichiers)**. Il obtient une archive ZIP avec un fichier `.compta-situation.json` par groupe. Ce fichier ne contient que les chiffres du groupe : sa situation, ses imprévus et le résumé de son tour précédent, jamais ceux des autres entreprises.
-2. Le groupe ouvre Compta PME, clique sur **Simulateur : ouvrir ma situation** dans l'accueil, puis choisit son fichier. Il retrouve l'écran de décisions validé, avec le même contrôle des liquidités, et clique sur « Valider et enregistrer le fichier de décisions ». Il obtient un fichier `.compta-decisions.json` à remettre à l'enseignant. Rien n'est conservé dans le navigateur du groupe.
+2. Le groupe ouvre Compta PME, clique dans l'accueil sur **ouvrir la situation de mon groupe** (sous « Que voulez-vous faire ? »), puis choisit son fichier. Il retrouve l'écran de décisions validé, avec le même contrôle des liquidités, et clique sur « Valider et enregistrer le fichier de décisions ». Il obtient un fichier `.compta-decisions.json` à remettre à l'enseignant. Rien n'est conservé dans le navigateur du groupe.
 3. L'enseignant clique sur **Importer des décisions…** (plusieurs fichiers à la fois). Chaque fichier est contrôlé : même partie, tour en cours, entreprise connue, décisions acceptables compte tenu des imprévus du tour. Les décisions acceptées sont validées.
 
 L'écran de décisions est désormais le même pour l'enseignant et pour le groupe : il dépend seulement de la « situation » du groupe (`src/engine/simulation/situation.ts`).

@@ -34,11 +34,13 @@ export const GUIDE: PartieGuide[] = [
           {
             type: 'etapes',
             items: [
-              'Sur la page d’accueil, indiquez votre prénom, votre nom et votre classe.',
+              'Sur la page d’accueil, « Que voulez-vous faire ? » propose trois entrées : apprendre une notion, vous exercer ' +
+                'sur une entreprise, faire une évaluation.',
               "Choisissez votre formation (CFC ou maturité professionnelle), puis ouvrez un niveau et choisissez l'exercice. " +
                 "La recherche trouve un exercice par sujet (« TVA », « salaires »…). Un fichier reçu de votre enseignant " +
                 "s'ouvre avec le bouton « Ouvrir un exercice reçu… ».",
-              'Cliquez sur « Commencer ». Le tableau de bord présente votre situation dans l’entreprise : lisez-la avant de commencer.',
+              'Indiquez votre prénom, votre nom et votre classe (« Vos informations »), puis cliquez sur « Commencer ». ' +
+                '« Votre mission » présente l’entreprise et ce qui vous est demandé.',
               'Cliquez sur « Commencer la saisie » pour ouvrir le journal.',
             ],
           },
@@ -51,8 +53,8 @@ export const GUIDE: PartieGuide[] = [
             type: 'p',
             texte:
               "Quand vous revenez sur le site, l'accueil affiche « Reprendre où vous en étiez » avec votre avancement, puis vos " +
-              "autres exercices en cours. Vous pouvez travailler sur plusieurs exercices : le bouton « Changer d'exercice » du " +
-              "tableau de bord ouvre l'accueil, et chaque exercice reprend là où vous l'aviez laissé. Dans la liste, chaque " +
+              "autres exercices en cours. Vous pouvez travailler sur plusieurs exercices : le lien « Changer d'exercice » de " +
+              "« Votre mission » ouvre l'accueil, et chaque exercice reprend là où vous l'aviez laissé. Dans la liste, chaque " +
               "exercice commencé indique « En cours » ou « Terminé ».",
           },
           {
@@ -96,9 +98,11 @@ export const GUIDE: PartieGuide[] = [
           {
             type: 'liste',
             items: [
-              "En haut : l'entreprise, l'exercice, la formation et le niveau, le mode (entraînement ou évaluation).",
-              'À gauche : les rubriques. Saisie (journal, fiches), Consultation (comptes en T, grand livre, balance), ' +
-                'États financiers (bilan, compte de résultat), Clôture (TVA, bouclement), Cours (théorie, ce guide).',
+              "En haut : l'entreprise, la formation et le niveau, le mode (entraînement ou évaluation) et votre avancement.",
+              'À gauche, « Votre parcours » : les étapes numérotées de l’exercice (votre mission, journal, balance, compte de ' +
+                'résultat, bilan, bouclement, puis les fiches demandées), cochées une fois faites. En dessous, « Outils » : ' +
+                'comptes en T, grand livre, théorie et fiches d’appoint (facturation, budget, salaire, TVA).',
+              'Sur téléphone ou petite tablette, ce menu s’ouvre avec le bouton à trois traits en haut à gauche.',
               'Au centre : une seule tâche à la fois.',
               'Dans le journal, l’énoncé et ses opérations sont affichés à droite ou en dessous, selon la taille de l’écran.',
             ],
@@ -214,7 +218,7 @@ export const GUIDE: PartieGuide[] = [
             texte:
               'En évaluation, aucun retour n’est affiché pendant le travail : votre enseignant corrige votre copie. En ' +
               'évaluation formative, aucun retour non plus pendant la saisie ; quand vous avez fini, « Terminer et voir la ' +
-              'correction » (tableau de bord) ferme la saisie et affiche ce qui est juste ou à revoir, les solutions et une ' +
+              'correction » (« Votre mission ») ferme la saisie et affiche ce qui est juste ou à revoir, les solutions et une ' +
               'note indicative. À l’accueil, l’onglet « Évaluation » regroupe les évaluations reçues de votre enseignant.',
           },
         ],
@@ -341,7 +345,7 @@ export const GUIDE: PartieGuide[] = [
           {
             type: 'etapes',
             items: [
-              "Cliquez sur « Espace enseignant » (page d'accueil ou bas de la barre latérale).",
+              "Cliquez sur « Espace enseignant » (en haut à droite de la page d'accueil, ou en bas de la barre latérale).",
               'À la première visite dans un navigateur, choisissez vous-même un code d’au moins 4 caractères et confirmez-le. ' +
                 'Il n’existe pas de code par défaut.',
               'Le code est ensuite demandé à chaque ouverture. Il se modifie dans l’onglet « Paramètres ».',

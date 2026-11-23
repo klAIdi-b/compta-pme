@@ -9,7 +9,7 @@ test('un lien direct ouvre l’accueil avec l’exercice déjà choisi', async (
   await page.getByLabel('Nom', { exact: true }).fill('Martin');
   await page.getByLabel('Classe').fill('2CFC1');
   await page.getByRole('button', { name: 'Commencer' }).click();
-  await expect(page.getByRole('heading', { name: 'Tableau de bord' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /Votre mission/ })).toBeVisible();
   await expect(page.locator('.entete strong').first()).toHaveText('Outils & Cie');
   // Le lien est retiré de l'adresse : un rechargement ne rouvre pas l'accueil.
   expect(page.url()).not.toContain('exercice=');
