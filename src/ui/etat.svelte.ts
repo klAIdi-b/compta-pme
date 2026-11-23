@@ -123,6 +123,8 @@ class Etat {
   accueilOuvert = $state(false);
   /** Opération à sélectionner à l'ouverture du journal (récapitulatif de l'avancement). */
   pieceCiblee = $state<string | null>(null);
+  /** Dernière étape du parcours atteinte après le journal (non enregistrée) : le journal sait qu'il sert au bouclement. */
+  etapeParcours = $state<Vue | null>(null);
   /** Chapitre de théorie à ouvrir (lien « Revoir la théorie » sous un indice). */
   chapitreCible = $state<string | null>(null);
 

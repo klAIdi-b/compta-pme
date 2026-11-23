@@ -30,6 +30,7 @@
   import FicheEchelle from './vues/FicheEchelle.svelte';
   import Analyse from './vues/Analyse.svelte';
   import Visite from './composants/Visite.svelte';
+  import EtapeSuivante from './composants/EtapeSuivante.svelte';
 
   function exporterMaCopie() {
     const s = etat.session!;
@@ -255,6 +256,7 @@
       {:else if etat.vue === 'theorie'}<Differe charger={() => import('./vues/Theorie.svelte')} props={{}} />
       {:else}<TableauDeBord />
       {/if}
+      {#if vueEleve(genre)}<EtapeSuivante />{/if}
     </main>
   </div>
   {#if etat.visiteOuverte}<Visite />{/if}
