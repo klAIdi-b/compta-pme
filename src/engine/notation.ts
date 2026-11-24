@@ -15,6 +15,7 @@ import {
   bouclementCorrige,
   corrigeBouclement,
   ecrituresPourNotation,
+  piecesHorsEnonce,
   PIECE_BOUCLEMENT,
   POINTS_BOUCLEMENT_PAR_DEFAUT,
 } from './correction-bouclement';
@@ -85,6 +86,8 @@ export interface CorrectionCopie {
   points: number;
   max: number;
   note: number;
+  /** Numéros de pièce saisis qui ne correspondent à aucune opération de l'énoncé ni au bouclement (non corrigés). */
+  piecesHorsEnonce: string[];
 }
 
 /**
@@ -116,7 +119,7 @@ export function corrigerCopie(ex: Exercice, d: Dossier, fiches?: { facturation?:
   }
   const points = operations.reduce((s, o) => s + o.points, 0);
   const max = operations.reduce((s, o) => s + o.max, 0);
-  return { operations, points, max, note: noteSuisse(points, max) };
+  return { operations, points, max, note: noteSuisse(points, max), piecesHorsEnonce: piecesHorsEnonce(d, ex) };
 }
 
 // ---------- Synthèse de plusieurs copies ----------

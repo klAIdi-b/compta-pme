@@ -9,7 +9,7 @@
   import { erreurTypique } from '../../engine/erreurs-typiques';
   import { SOMMAIRE } from '../../data/theorie-index';
   import type { Dossier, Ecriture } from '../../engine/dossier';
-  import { bouclementCorrige, corrigeBouclement, diagnostiquerBouclement, PIECE_BOUCLEMENT } from '../../engine/correction-bouclement';
+  import { bouclementCorrige, corrigeBouclement, diagnostiquerBouclement, piecesHorsEnonce, PIECE_BOUCLEMENT } from '../../engine/correction-bouclement';
   import { operationsSaisies } from '../../engine/exercice';
   import { annee, lireDate } from '../../engine/dates';
   import type { Centimes } from '../../engine/money';
@@ -49,6 +49,8 @@
   function cle(piece: string): string {
     return avecBouclement && !operations.some((o) => o.numero === piece) && !piecesAutomatiques.has(piece) ? PIECE_BOUCLEMENT : piece;
   }
+  /** Numéros de pièce saisis qui ne sont ni une opération de l'énoncé ni une écriture de bouclement : à signaler à l'élève. */
+  const horsEnonce = $derived(vueEleve(etat.genre) ? piecesHorsEnonce(d, ex) : []);
   function solutionDe(k: string) {
     return k === PIECE_BOUCLEMENT ? corrigeBouclement(d, ex) : corrigeParPiece.get(k);
   }
@@ -620,6 +622,16 @@
         {/if}
       {/if}
     </div>
+
+    {#if horsEnonce.length}
+      <div class="message avert hors-enonce" role="status">
+        {@render picto('avert')}
+        <div>
+          <b>{horsEnonce.length > 1 ? `Pièces ${horsEnonce.join(', ')} : ces numéros ne correspondent` : `Pièce ${horsEnonce[0]} : ce numéro ne correspond`} à aucune opération de l'énoncé.</b>
+          <p>{horsEnonce.length > 1 ? 'Ces écritures sont' : 'Cette écriture est'} dans vos comptes, mais {horsEnonce.length > 1 ? 'elles ne sont rattachées' : "elle n'est rattachée"} à aucune opération. Vérifiez le numéro de pièce et corrigez-le.</p>
+        </div>
+      </div>
+    {/if}
 
     <section class="carte ecritures-validees" aria-label="Écritures validées">
       <h2>Écritures validées</h2>

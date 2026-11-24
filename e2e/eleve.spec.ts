@@ -375,3 +375,20 @@ test('téléphone : le menu se ferme avec Échap, rend le focus, et la liste des
   await page.goBack();
   await expect(page.getByRole('heading', { level: 1, name: 'Bon retour, Léa.' })).toBeVisible();
 });
+
+test('une écriture saisie sous un numéro de pièce qui n’est pas une opération est signalée à l’élève', async ({ page }) => {
+  await commencer(page, 'cycles', /Cycles du Léman/);
+  await page.getByRole('button', { name: /Commencer la saisie|Continuer la saisie/ }).click();
+  const fermerVisite = page.getByRole('button', { name: /Passer|Fermer la visite|Terminer/ });
+  if (await fermerVisite.first().isVisible().catch(() => false)) await fermerVisite.first().click();
+  await expect(page.locator('.hors-enonce')).toHaveCount(0);
+  await page.locator('#saisie-piece').fill('3a');
+  await saisir(page, 'Vente', '1020', '3200', '6400');
+  const alerte = page.locator('.hors-enonce');
+  await expect(alerte).toContainText('Pièce 3a : ce numéro ne correspond à aucune opération');
+  // Une écriture rattachée à une opération ne déclenche rien de plus.
+  await page.locator('#saisie-piece').fill('1');
+  await saisir(page, 'Achat de marchandises à crédit', '4200', '2000', '4800');
+  await expect(alerte).toContainText('Pièce 3a');
+  await expect(alerte).not.toContainText('Pièces');
+});
