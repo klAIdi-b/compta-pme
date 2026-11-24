@@ -1,6 +1,6 @@
 <!--
-  Bandeau de l'accueil et du parcours Apprendre (demande de l'enseignant du 24.11.2026) : le nom du site, quatre
-  onglets toujours visibles (Accueil, Apprendre, Exercices, Évaluation), puis le guide et l'espace enseignant.
+  Bandeau de l'accueil et du parcours Apprendre (demande de l'enseignant du 24.11.2026) : le nom du site, cinq
+  onglets toujours visibles (Accueil, Apprendre, Théorie, Exercices, Évaluation), puis le guide et l'espace enseignant.
   Sur téléphone, les onglets passent sur une seconde ligne qui défile, sans menu caché.
 -->
 <script lang="ts">
@@ -12,6 +12,7 @@
   const RUBRIQUES: { id: Rubrique; libelle: string }[] = [
     { id: 'accueil', libelle: 'Accueil' },
     { id: 'apprendre', libelle: 'Apprendre' },
+    { id: 'theorie', libelle: 'Théorie' },
     { id: 'exercices', libelle: 'Exercices' },
     { id: 'evaluation', libelle: 'Évaluation' },
   ];
@@ -26,7 +27,7 @@
   <button class="logo" title="Retour à la page d'accueil" onclick={() => etat.ouvrirRubrique('accueil')}>Compta PME</button>
   <nav class="rubriques" aria-label="Rubriques">
     {#each RUBRIQUES as r (r.id)}
-      <button class:actif={actif === r.id} aria-current={actif === r.id ? 'page' : undefined} onclick={() => etat.ouvrirRubrique(r.id)}>{r.libelle}</button>
+      <button class:actif={actif === r.id} class:vers-accueil={r.id === 'accueil'} aria-current={actif === r.id ? 'page' : undefined} onclick={() => etat.ouvrirRubrique(r.id)}>{r.libelle}</button>
     {/each}
   </nav>
   <nav class="liens" aria-label="Liens utiles">
@@ -70,6 +71,8 @@
   }
   @media (max-width: 420px) {
     .lien.guide { display: none; }
+    /* Sur un petit téléphone, le nom du site tient lieu d'onglet « Accueil » : les quatre autres tiennent sur la ligne. */
+    .rubriques button.vers-accueil { display: none; }
     .rubriques { padding: 0; }
     .rubriques button { padding: 0 var(--e-2); font-size: var(--t-14); }
   }

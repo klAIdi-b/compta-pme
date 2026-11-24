@@ -46,6 +46,16 @@ test('onglets du bandeau : chaque rubrique a sa page, le bouton Retour ramène e
   await rubriques.getByRole('button', { name: 'Apprendre' }).click();
   await expect(page.getByRole('heading', { level: 1, name: 'Apprendre pas à pas' })).toBeVisible();
   await expect(page.getByRole('navigation', { name: 'Rubriques' }).getByRole('button', { name: 'Apprendre' })).toHaveAttribute('aria-current', 'page');
+  // Théorie sans exercice : l'élève choisit son année ; la 2ème CFC ajoute ses chapitres à ceux de la 1ère.
+  await page.getByRole('navigation', { name: 'Rubriques' }).getByRole('button', { name: 'Théorie' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Théorie' })).toBeVisible();
+  const annees = page.getByRole('group', { name: 'Votre année' });
+  await expect(annees.getByRole('button', { name: '1ère CFC' })).toHaveAttribute('aria-pressed', 'true');
+  const nb1 = await page.locator('.sommaire li').count();
+  await annees.getByRole('button', { name: '2ème CFC' }).click();
+  expect(await page.locator('.sommaire li').count()).toBeGreaterThan(nb1);
+  await page.locator('.sommaire li button').first().click();
+  await expect(page.getByRole('heading', { level: 2 }).first()).toBeVisible();
   await page.getByRole('navigation', { name: 'Rubriques' }).getByRole('button', { name: 'Exercices' }).click();
   await expect(page.getByRole('heading', { level: 1, name: 'Choisir un exercice' })).toBeVisible();
   await page.getByRole('navigation', { name: 'Rubriques' }).getByRole('button', { name: 'Évaluation' }).click();
@@ -53,6 +63,8 @@ test('onglets du bandeau : chaque rubrique a sa page, le bouton Retour ramène e
   await expect(page.getByRole('button', { name: 'Ouvrir un exercice reçu…' })).toBeVisible();
   await page.goBack();
   await expect(page.getByRole('heading', { level: 1, name: 'Choisir un exercice' })).toBeVisible();
+  await page.goBack();
+  await expect(page.getByRole('heading', { level: 1, name: 'Théorie' })).toBeVisible();
   await page.goBack();
   await expect(page.getByRole('heading', { level: 1, name: 'Apprendre pas à pas' })).toBeVisible();
   await page.goBack();
@@ -68,7 +80,7 @@ test('accueil au clavier et avec moins d’animations', async ({ page }) => {
   await page.goto('./');
   // Clavier : après le nom du site, les quatre onglets et les deux liens du bandeau, la première action.
   let atteint = false;
-  for (let i = 0; i < 9 && !atteint; i++) {
+  for (let i = 0; i < 10 && !atteint; i++) {
     await page.keyboard.press('Tab');
     atteint = await page.evaluate(() => document.activeElement?.textContent?.trim() === 'Valider cette écriture');
   }

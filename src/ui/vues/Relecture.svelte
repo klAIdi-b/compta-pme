@@ -13,7 +13,7 @@
   type Ligne = ElementRelecture & { exercice?: Exercice; chapitre?: string; precision: string };
   type Section = { titre: string; lignes: Ligne[] };
 
-  const LIBELLES_NIVEAU = { CFC1: 'CFC 1re année', CFC2: 'CFC 2e année', MP: 'Maturité professionnelle' } as const;
+  const LIBELLES_NIVEAU = { CFC1: '1ère CFC', CFC2: '2ème CFC', MP: 'Maturité professionnelle' } as const;
 
   const sections: Section[] = [
     {

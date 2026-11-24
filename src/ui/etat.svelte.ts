@@ -14,7 +14,7 @@ import type { Suivi } from '../engine/correction';
 import { aMettreDeCote, ecranAffiche, genreSession, peutOuvrirAccueil, vueEleve, type Ecran, type GenreSession } from './modes';
 
 /** Pages de l'accueil, et rubriques du bandeau (les mêmes, plus le parcours Apprendre). */
-export type PageAccueil = 'accueil' | 'exercices' | 'evaluation';
+export type PageAccueil = 'accueil' | 'theorie' | 'exercices' | 'evaluation';
 export type Rubrique = PageAccueil | 'apprendre';
 
 export type Vue =

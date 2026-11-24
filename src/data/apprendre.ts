@@ -8,8 +8,8 @@ import type { TypeCompte } from '../engine/plan';
 export type NiveauApprendre = 'CFC1' | 'CFC2' | 'MP';
 
 export const LIBELLES_NIVEAU_APPRENDRE: Record<NiveauApprendre, string> = {
-  CFC1: 'CFC · 1re année',
-  CFC2: 'CFC · 2e année et option Finances',
+  CFC1: '1ère CFC',
+  CFC2: '2ème CFC et option Finances',
   MP: 'Maturité professionnelle',
 };
 
@@ -200,7 +200,7 @@ export const MODULES: ModuleApprendre[] = [
     id: 'synthese-cfc1',
     niveau: 'CFC1',
     titre: 'Synthèse : toutes les opérations',
-    objectif: 'Passer sans aide les écritures de toutes les notions de la 1re année.',
+    objectif: 'Passer sans aide les écritures de toutes les notions de la 1ère CFC.',
     rappel: [
       'Lisez l\'opération jusqu\'au bout : moyen de paiement, à crédit ou comptant, marchandises ou investissement, privé ou entreprise.',
       'Puis les trois questions : quels comptes, de quel type, augmente ou diminue ?',
@@ -237,19 +237,19 @@ function MODULES_CALCUL(): ModuleApprendre[] {
     ecritures('tva-ecritures', 'CFC2', 'TVA : comptabilisation au net',
       'Comptabiliser achats, ventes, charges, investissements, escomptes et décompte de TVA selon la méthode au net.',
       ['Ventes : la TVA due va au crédit de TVA due ; achats : l’impôt préalable va au débit (marchandises et services, ou investissements et autres charges).', 'Décompte : l’impôt préalable est viré en diminution de la TVA due, le solde va à la dette envers l’AFC.', 'Un escompte corrige aussi la TVA.'],
-      ['tva'], ['CFC 2e année (E&S Partie VIII)', 'MP 3.2'], 'tva', ['1000', '1020', '1100', '1170', '1171', '1530', '2000', '2200', '2205', '3200', '3209', '4200', '6400']),
+      ['tva'], ['2ème CFC (E&S Partie VIII)', 'MP 3.2'], 'tva', ['1000', '1020', '1100', '1170', '1171', '1530', '2000', '2200', '2205', '3200', '3209', '4200', '6400']),
     ecritures('amortissements-ecritures', 'CFC2', 'Amortissements : méthode directe ou indirecte',
       'Choisir les comptes de l’amortissement direct et indirect.',
       ['Méthode directe : Amortissements au débit, compte de l’immobilisation au crédit.', 'Méthode indirecte : Amortissements au débit, fonds d’amortissements cumulés (xxx9) au crédit ; l’immobilisation garde sa valeur d’acquisition.'],
-      ['amortissements'], ['CFC 2e année', 'MP 5.2'], 'amortissements', ['1500', '1509', '1510', '1519', '1520', '1530', '1539', '6800'], 30),
+      ['amortissements'], ['2ème CFC', 'MP 5.2'], 'amortissements', ['1500', '1509', '1510', '1519', '1520', '1530', '1539', '6800'], 30),
     ecritures('transitoires-ecritures', 'CFC2', 'Actifs et passifs transitoires',
       'Régulariser charges et produits à la clôture, puis les extourner à la réouverture.',
       ['Charge payée d’avance : Actifs transitoires au débit, la charge au crédit.', 'Charge à payer (pas encore facturée ou payée) : la charge au débit, Passifs transitoires au crédit.', 'À la réouverture, on extourne : écriture inverse.'],
-      ['transitoires'], ['CFC 2e année', 'MP 5.1'], 'transitoires', ['1300', '2300', '6000', '6100', '6300', '6400', '6900'], 30),
+      ['transitoires'], ['2ème CFC', 'MP 5.1'], 'transitoires', ['1300', '2300', '6000', '6100', '6300', '6400', '6900'], 30),
     ecritures('creances-ecritures', 'CFC2', 'Pertes sur créances et ducroire',
       'Comptabiliser une perte, une créance douteuse, un règlement partiel, l’ajustement du ducroire et une récupération.',
       ['Perte définitive : Pertes sur créances au débit, Créances clients au crédit (pas de correction de TVA dans le cours).', 'Créance douteuse : virée de Créances clients à Créances douteuses.', 'Ducroire : on ajuste la différence ; une créance amortie l’an passé puis récupérée est un produit exceptionnel.'],
-      ['creances'], ['CFC 2e année', 'MP 3.1', 'MP 5.3'], 'creances', ['1020', '1100', '1108', '1109', '3805', '8510'], 30),
+      ['creances'], ['2ème CFC', 'MP 3.1', 'MP 5.3'], 'creances', ['1020', '1100', '1108', '1109', '3805', '8510'], 30),
     ecritures('salaires-ecritures', 'CFC2', 'Salaires et charges sociales',
       'Comptabiliser le salaire, les retenues, les charges de l’employeur, les paiements aux assurances et une avance.',
       ['Salaire : brut au débit de Salaires ; retenues au crédit des dettes envers les assurances ; net au crédit de la banque.', 'Charges sociales de l’employeur : au débit de Charges sociales, au crédit des dettes envers les assurances.'],

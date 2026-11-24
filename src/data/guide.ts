@@ -73,8 +73,8 @@ export const GUIDE: PartieGuide[] = [
             type: 'p',
             texte:
               "Avant les exercices complets, « Apprendre pas à pas » (page d'accueil ou barre latérale) reprend les notions " +
-              'une à une, dans l’ordre du cours : écritures de la 1re année CFC, écritures composées de la 2e année (TVA, ' +
-              'amortissements, transitoires, créances, salaires) et de la maturité (société anonyme, titres), calculs de la 2e année et de l’option ' +
+              'une à une, dans l’ordre du cours : écritures de la 1ère CFC, écritures composées de la 2ème CFC (TVA, ' +
+              'amortissements, transitoires, créances, salaires) et de la maturité (société anonyme, titres), calculs de la 2ème CFC et de l’option ' +
               'Finances (livres auxiliaires, déclaration de salaire, marge contributive, répartition des coûts) et de la ' +
               'maturité (intérêts, compte courant, devises, calcul des prix à rebours, cession, perte de capital, titres et ' +
               'immeubles, point mort, flux de trésorerie, comptabilité analytique, normes).',
@@ -256,11 +256,11 @@ export const GUIDE: PartieGuide[] = [
                 'en entraînement, chaque résultat est contrôlé.',
               'Résultat par degrés, Flux de trésorerie et Seuil de rentabilité (maturité) : calculez chaque degré ou chaque ' +
                 'flux d’après vos comptes avant bouclement ; en entraînement, chaque résultat est contrôlé.',
-              'Facturation (CFC 2 et maturité, si l’enseignant la propose) : établissez les factures d’après les bons de ' +
+              'Facturation (2ème CFC et maturité, si l’enseignant la propose) : établissez les factures d’après les bons de ' +
                 'commande (rabais, TVA et escompte arrondis aux 5 centimes, échéance), remplissez les ordres de paiement des ' +
                 'factures reçues (escompte seulement dans le délai) et contrôlez les paiements des clients sur le relevé bancaire. ' +
                 'Comptabilisez ensuite chaque pièce au journal. En évaluation, ces documents rapportent des points.',
-              'Budget (CFC 2 et maturité, si l’enseignant le propose) : préparez le budget d’après la note de la direction, puis ' +
+              'Budget (2ème CFC et maturité, si l’enseignant le propose) : préparez le budget d’après la note de la direction, puis ' +
                 'comparez-le avec les chiffres effectifs (donnés, ou soldes de vos comptes) : écart = effectif − budget, écart en % ' +
                 '= écart ÷ budget × 100, appréciation (favorable, défavorable, conforme), cause principale et recommandation.',
               "Bouclement : depuis l'écran Bouclement, « Saisir les écritures de bouclement » ouvre le journal sur la pièce B1. " +
@@ -530,7 +530,7 @@ export const GUIDE: PartieGuide[] = [
           {
             type: 'p',
             texte:
-              'Le parcours « Apprendre pas à pas » compte sept modules pour la 1re année CFC : le bilan, débit et crédit, ' +
+              'Le parcours « Apprendre pas à pas » compte sept modules pour la 1ère CFC : le bilan, débit et crédit, ' +
               'charges et produits, factures, dettes et créances, le compte privé, achats et ventes de marchandises, ' +
               'puis une synthèse. Chaque module correspond à un chapitre de la théorie.',
           },

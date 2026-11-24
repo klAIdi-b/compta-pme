@@ -90,13 +90,13 @@ test('partie CFC 2 : employés et véhicule dans les décisions, tour calculé a
   await page.getByRole('button', { name: 'Entrer' }).click();
   await page.getByRole('button', { name: 'Simulateur', exact: true }).click();
   await page.getByRole('button', { name: 'Nouvelle partie' }).click();
-  await page.getByRole('button', { name: 'CFC 2', exact: true }).click();
+  await page.getByRole('button', { name: '2ème CFC', exact: true }).click();
   await page.getByLabel('Nom de la partie').fill('3CA essai');
   await page.getByText('Éclair · 2 à 3 séances').click();
   await page.getByLabel("Nom de l'entreprise 1").fill('Les Gourmets');
   await page.getByLabel("Nom de l'entreprise 2").fill('Panier Lémanique');
   await page.getByRole('button', { name: 'Créer la partie' }).click();
-  await expect(page.getByText('CFC 2', { exact: true })).toBeVisible();
+  await expect(page.getByText('2ème CFC', { exact: true })).toBeVisible();
 
   await page.getByRole('button', { name: 'Saisir' }).first().click();
   await expect(page.getByLabel('Employés (sans le propriétaire)')).toHaveValue('1');

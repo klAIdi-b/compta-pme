@@ -1,12 +1,22 @@
-<!-- Théorie : sommaire des chapitres du niveau de l'exercice, puis lecture d'un chapitre. -->
+<!-- Théorie : sommaire des chapitres du niveau de l'exercice, puis lecture d'un chapitre. Ouverte depuis l'onglet du
+     bandeau (`libre`), elle n'a pas d'exercice : l'élève choisit l'année, et les comptes viennent du plan du cours. -->
 <script lang="ts">
   import { etat } from '../etat.svelte';
   import { chapitresDuNiveau, THEORIE_VALIDEE } from '../../data/theorie';
   import { etiquetteNiveau } from '../../engine/exercice';
   import ChapitreTheorie from '../composants/ChapitreTheorie.svelte';
+  import { plan } from '../../data/plan';
+  import { LIBELLES_ANNEE } from '../../engine/exercice';
+  import type { Niveau } from '../../engine/plan';
 
-  const chapitres = $derived(chapitresDuNiveau(etat.exercice.niveau));
-  const intitules = $derived(new Map(etat.dossier.plan.map((c) => [c.numero, c.intitule])));
+  let { libre = false }: { libre?: boolean } = $props();
+  const NIVEAUX: Niveau[] = ['CFC1', 'CFC2', 'MP'];
+  /** Année choisie quand la théorie est ouverte sans exercice (la maturité si l'élève a choisi cette formation). */
+  let niveauLibre = $state<Niveau>(etat.prefs.filiere === 'MP' ? 'MP' : 'CFC1');
+  const niveau = $derived(libre ? niveauLibre : etat.exercice.niveau);
+
+  const chapitres = $derived(chapitresDuNiveau(niveau));
+  const intitules = $derived(new Map((libre ? plan : etat.dossier.plan).map((c) => [c.numero, c.intitule])));
   let choisi = $state<string | null>(etat.chapitreCible);
   etat.chapitreCible = null;
   const chapitre = $derived(chapitres.find((c) => c.id === choisi) ?? null);
@@ -21,8 +31,20 @@
 
 <div class="titre">
   <h1>Théorie</h1>
-  <span class="sous">Rappels de cours · {etiquetteNiveau(etat.exercice)}</span>
+  <span class="sous">Rappels de cours{libre ? '' : ` · ${etiquetteNiveau(etat.exercice)}`}</span>
 </div>
+
+{#if libre}
+  <div class="choix-annee">
+    <span class="discret" id="libelle-annee">Votre année</span>
+    <div class="segments" role="group" aria-labelledby="libelle-annee">
+      {#each NIVEAUX as n (n)}
+        <button type="button" aria-pressed={niveauLibre === n} onclick={() => { niveauLibre = n; choisi = null; }}>{LIBELLES_ANNEE[n]}</button>
+      {/each}
+    </div>
+    <span class="discret petit">Chaque année reprend les chapitres des précédentes.</span>
+  </div>
+{/if}
 
 {#if !THEORIE_VALIDEE}
   <p class="discret petit avis">Contenu proposé, en cours de relecture par l'enseignant.</p>
@@ -69,6 +91,8 @@
 {/if}
 
 <style>
+  .choix-annee { display: flex; align-items: center; gap: var(--e-3); flex-wrap: wrap; margin-bottom: var(--e-4); }
+  .petit { font-size: var(--t-13); }
   .avis { margin: -6px 0 12px; }
   .petit { font-size: var(--t-12); }
   .sommaire { margin: 0; padding: 10px 14px 14px 36px; }

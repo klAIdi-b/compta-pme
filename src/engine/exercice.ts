@@ -361,12 +361,14 @@ export const LIBELLES_MODE: Record<Mode, string> = {
   evaluation: 'Évaluation',
 };
 
-export const LIBELLES_NIVEAU: Record<Niveau, string> = { CFC1: 'CFC 1', CFC2: 'CFC 2', MP: 'MP' };
+export const LIBELLES_NIVEAU: Record<Niveau, string> = { CFC1: '1ère CFC', CFC2: '2ème CFC', MP: 'MP' };
+/** Année de formation, en toutes lettres (dénominations de l'école : 1ère CFC, 2ème CFC). */
+export const LIBELLES_ANNEE: Record<Niveau, string> = { CFC1: '1ère CFC', CFC2: '2ème CFC', MP: 'Maturité professionnelle' };
 
 /** Contenu disponible selon `niveau` (comptes et fonctions), libellés de l'éditeur. */
 export const LIBELLES_CONTENU: Record<Niveau, string> = {
-  CFC1: 'Bases (CFC, 1re année)',
-  CFC2: 'CFC complet (2e année : TVA, clôture, salaires)',
+  CFC1: 'Bases (1ère CFC)',
+  CFC2: 'CFC complet (2ème CFC : TVA, clôture, salaires)',
   MP: 'Maturité professionnelle (sociétés, titres, analyse)',
 };
 

@@ -16,6 +16,7 @@
   import BarreAvancement from '../composants/BarreAvancement.svelte';
   import DemoEcriture from '../composants/DemoEcriture.svelte';
   import BandeauRubriques from '../composants/BandeauRubriques.svelte';
+  import Differe from '../composants/Differe.svelte';
   import { exerciceDuLien, oublierLien } from '../lien';
 
   /** Page affichée : l'accueil, le choix d'un exercice ou l'évaluation (onglets du bandeau). */
@@ -327,6 +328,9 @@
           <button class="btn-lien" onclick={ouvrirSituation}>ouvrir la situation de mon groupe</button>
         </p>
       </section>
+    {:else if page === 'theorie'}
+      <!-- Théorie ouverte sans exercice : l'élève choisit son année. Fichier chargé à la demande. -->
+      <Differe charger={() => import('./Theorie.svelte')} props={{ libre: true }} />
     {:else}
     <!-- Pages « Exercices » et « Évaluation » : le choix en trois étapes, seul sur sa page. -->
     <section class="hero tete-page" aria-labelledby="titre-accueil">
