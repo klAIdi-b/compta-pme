@@ -37,6 +37,12 @@ test('un élève comptabilise, voit le retour et son avancement, puis reprend so
   await saisir(page, 'Achat de marchandises à crédit', '4200', '2000', '4800');
   await expect(page.getByText('Juste').first()).toBeVisible();
   await expect(page.getByRole('button', { name: /1 \/ 15 pièces/ })).toBeVisible();
+  // Bilan en direct après une écriture juste : la perte n'est comptée qu'une fois, les deux totaux sont égaux.
+  const vivant = page.locator('.bilan-vivant');
+  await expect(vivant.locator('summary')).toContainText("Actif 97'800.00 · Passif 97'800.00");
+  await expect(vivant.locator('.bloc.perte')).toHaveCount(1);
+  await expect(vivant.locator('.effet')).toContainText("augmentent tous les deux de 4'800.00");
+  await expect(vivant).not.toContainText("n'est plus équilibré");
 
   // Opération 2 volontairement fausse (comptes inversés) : indice et lien vers la théorie.
   await saisir(page, 'Essai', '2000', '4200', '4800');
