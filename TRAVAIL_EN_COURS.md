@@ -129,3 +129,7 @@ règle ni compte inventé, texte original, rien de validé n'est retiré, nouvea
   mention « À relire ». Restent : sa relecture et ses réponses aux points comptables signalés, puis les leçons raccourcies.
 - 24.11.2026 — Théorie validée par l'enseignant (« c'est validé ») : mention « À relire » retirée des 30 chapitres, publié.
   Chantier clos, sauf la suite prévue : raccourcir les leçons d'Apprendre (à proposer avant de modifier).
+- 24.11.2026 — Leçons gardées telles quelles (choix de l'enseignant). Dans un module, lien vers le chapitre de théorie (nouvel
+  onglet) à la place du chapitre déplié ; exemples de la théorie changés dans sept chapitres pour ne plus répéter ceux des
+  leçons. Publié sur la prévisualisation ; fusion dans `main` sur accord.
+- 24.11.2026 — Lien vers la théorie et nouveaux exemples fusionnés dans `main` sur l'accord de l'enseignant.

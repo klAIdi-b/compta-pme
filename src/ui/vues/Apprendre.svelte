@@ -21,7 +21,7 @@
   import { nomFichier } from '../../io/fichiers';
   import { telecharger } from '../fichiers-navigateur';
   import { dt } from '../format';
-  import ChapitreTheorie from '../composants/ChapitreTheorie.svelte';
+  import { lienTheorie } from '../lien';
 
   const NB = 10;
   /** Points d'une série : un chiffre après la virgule seulement s'il est utile. */
@@ -34,7 +34,6 @@
   let progression = $state<Progression>(lireProgression());
   let module = $state.raw<ModuleApprendre | null>(null);
   let etape = $state<'decouvrir' | 'serie' | 'bilan' | 'projection'>('decouvrir');
-  let theorieOuverte = $state(false);
 
   // Série en cours
   let questions = $state<Question[]>([]);
@@ -81,7 +80,6 @@
   function ouvrir(mod: ModuleApprendre | null) {
     module = mod;
     etape = 'decouvrir';
-    theorieOuverte = false;
     haut();
   }
 
@@ -414,10 +412,10 @@
         <div class="corps-carte">
           <ul>{#each module.rappel as r}<li>{r}</li>{/each}</ul>
           {#if chapitre}
-            <button class="btn-lien" aria-expanded={theorieOuverte} onclick={() => (theorieOuverte = !theorieOuverte)}>
-              {theorieOuverte ? 'Masquer la théorie' : `Lire la théorie : ${chapitre.titre}`}
-            </button>
-            {#if theorieOuverte}<div class="theorie"><ChapitreTheorie {chapitre} {intitules} /></div>{/if}
+            <p class="vers-theorie">
+              <a href={lienTheorie(chapitre.id)} target="_blank" rel="noopener">Ouvrir le chapitre dans la Théorie : {chapitre.titre}</a>
+              <span class="discret petit">(nouvel onglet : vous gardez votre place ici)</span>
+            </p>
           {/if}
         </div>
       </section>
@@ -855,7 +853,8 @@
   .etat { font-size: var(--t-13); color: var(--c-texte-2); white-space: nowrap; }
   .etat.maitrise { color: var(--c-ok); font-weight: bold; }
   .corps-carte p, .corps-carte li { line-height: 1.5; }
-  .theorie { margin-top: 10px; border-top: 1px solid var(--c-bordure-3); padding-top: 6px; }
+  .vers-theorie { margin: 12px 0 0; display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; }
+  .vers-theorie a { color: var(--c-structure); font-weight: var(--graisse-moyen); text-underline-offset: 3px; min-height: 24px; display: inline-flex; align-items: center; }
   .operation, .enonce { font-weight: bold; }
   .enonce { font-size: var(--t-17); margin: 4px 0 14px; }
   .consigne { margin: 0; color: var(--c-texte-2); }

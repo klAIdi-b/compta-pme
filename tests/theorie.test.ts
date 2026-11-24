@@ -138,8 +138,8 @@ describe('théorie enrichie (modèle du 24.11.2026)', () => {
       return b?.type === 'exemple' ? (b.lignes ?? []).map((l) => l.montant) : [];
     };
     // Bouclement : le solde du privé viré au capital = bénéfice − prélèvements.
-    expect(exemple('prive', '64')).toEqual([3530, 1710]);
-    expect(3530 - 1820).toBe(1710);
+    expect(exemple('prive', '52')).toEqual([7200, 2900]);
+    expect(7200 - 4300).toBe(2900);
     // Escompte : montant payé + escompte = dette éteinte.
     expect(exemple('marchandises', '2 %')).toEqual([4800, 4704, 96]);
     expect(4704 + 96).toBe(4800);
