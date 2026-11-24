@@ -133,3 +133,12 @@ règle ni compte inventé, texte original, rien de validé n'est retiré, nouvea
   onglet) à la place du chapitre déplié ; exemples de la théorie changés dans sept chapitres pour ne plus répéter ceux des
   leçons. Publié sur la prévisualisation ; fusion dans `main` sur accord.
 - 24.11.2026 — Lien vers la théorie et nouveaux exemples fusionnés dans `main` sur l'accord de l'enseignant.
+
+# Suites de l'audit du 24.11.2026 (rapport `AUDIT_COMPTA_PME.md`, non commité)
+
+Corrections faites une à une, sur accord de l'enseignant, d'abord sur `apercu`.
+
+- [x] E1. « Bilan en direct » : la perte de l'exercice n'est plus comptée deux fois. Blocs, totaux et effet de la dernière
+  écriture calculés par `src/engine/bilan-vivant.ts` à partir de `bilan()` ; test `tests/bilan-vivant.test.ts` sur tous les
+  corrigés ; contrôle à l'écran dans `e2e/eleve.spec.ts`. Fait le 24.11.2026, à commiter et publier sur accord.
+- [ ] E2 à E9 et les autres actions du rapport : en attente des décisions de l'enseignant.
