@@ -129,7 +129,6 @@ export const GUIDE: PartieGuide[] = [
               '« Erreurs fréquentes » montre les pièges habituels et comment les éviter.',
               '« Vérifiez vos connaissances » : cherchez la réponse, puis cliquez sur la question pour l’afficher. Rien n’est noté ni enregistré.',
               '« Pour s’exercer » ouvre le module d’Apprendre pas à pas ou un exercice sur le même sujet.',
-              'Un chapitre marqué « À relire » est en cours de relecture par l’enseignant.',
             ],
           },
         ],

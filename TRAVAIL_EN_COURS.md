@@ -108,11 +108,11 @@ règle ni compte inventé, texte original, rien de validé n'est retiré, nouvea
   (`public/maquettes/theorie-chapitre-tva.html`). Modèle validé par l'enseignant (« Oui, 1ère CFC »).
 - [x] G2. Modèle enrichi dans le code (nouveaux blocs, affichage, tests) et 1ère CFC : neuf chapitres
   (`src/data/theorie-cfc1.ts`).
-- [ ] G3. Relecture de la 1ère CFC par l'enseignant.
+- [x] G3. Relecture de la 1ère CFC par l'enseignant.
 - [x] G4. 2ème CFC (TVA selon la maquette, amortissements, transitoires, créances, salaires ; chapitres à créer :
   facturation, budget, marge contributive et répartition des coûts).
 - [x] G5. Maturité professionnelle.
-- [ ] G6. Vérification finale, puis fusion dans `main` après accord explicite ; raccourcir ensuite les leçons.
+- [x] G6. Vérification finale, puis fusion dans `main` après accord explicite ; raccourcir ensuite les leçons.
 
 - 24.11.2026 — G1 et G2 faites. Reste G3 : attendre la relecture de la 1ère CFC avant de rédiger la 2ème CFC.
 - 24.11.2026 — G4 faite après l'accord « Oui, 2ème CFC » : huit chapitres dans `src/data/theorie-cfc2.ts`, publiés sur la
@@ -127,3 +127,5 @@ règle ni compte inventé, texte original, rien de validé n'est retiré, nouvea
   accord explicite, puis leçons d'Apprendre raccourcies.
 - 24.11.2026 — Théorie de référence fusionnée dans `main` sur l'accord explicite de l'enseignant. Les chapitres gardent la
   mention « À relire ». Restent : sa relecture et ses réponses aux points comptables signalés, puis les leçons raccourcies.
+- 24.11.2026 — Théorie validée par l'enseignant (« c'est validé ») : mention « À relire » retirée des 30 chapitres, publié.
+  Chantier clos, sauf la suite prévue : raccourcir les leçons d'Apprendre (à proposer avant de modifier).

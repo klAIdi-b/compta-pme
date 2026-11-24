@@ -2,7 +2,7 @@
 // amortissements, transitoires, pertes sur créances et ducroire, salaires) et trois chapitres nouveaux, qui expliquent des
 // rubriques existantes du logiciel : facturation et paiements, budget et écarts, marge contributive et répartition des coûts.
 // Texte original ; comptes du plan du cours disponibles en 2ème CFC ; règles du projet (CLAUDE.md) et du moteur
-// (src/engine/facturation.ts, budget.ts, calculs.ts). Contenu À RELIRE par l'enseignant (aRelire).
+// (src/engine/facturation.ts, budget.ts, calculs.ts). Contenu validé par l'enseignant le 24.11.2026.
 // Non traité ici, en attente de la décision de l'enseignant : l'escompte avec correction de la TVA (classé en maturité).
 import type { Chapitre } from './theorie';
 import { C, D, P, enrichir, p, r3, s } from './theorie-cfc1';

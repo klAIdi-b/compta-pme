@@ -3,7 +3,7 @@
 // exemples résolus pas à pas, cas contrastés, erreurs fréquentes, questions d'auto-vérification, liens pour s'exercer.
 // Deux chapitres naissent d'un découpage, sans texte perdu : « Achats et ventes à crédit » (section tirée du journal) et
 // « Compte privé et bouclement » (sections tirées du compte de résultat).
-// Texte original ; comptes du plan du cours ; montants en francs. Contenu À RELIRE par l'enseignant (aRelire).
+// Texte original ; comptes du plan du cours ; montants en francs. Contenu validé par l'enseignant le 24.11.2026.
 import type { Bloc, Chapitre, LigneExemple, PosteSchema, Section } from './theorie';
 
 export const s = (debit: string, credit: string, montant: number): LigneExemple[] => [{ debit, credit, montant }];
@@ -46,7 +46,6 @@ export function enrichir(base: Chapitre, e: Enrichissement): Chapitre {
     resume: e.resume ?? base.resume,
     bases: e.bases ?? base.bases,
     objectifs: e.objectifs,
-    aRelire: true,
     sections: [
       { titre: 'Les termes à connaître', blocs: [{ type: 'definitions', termes: e.termes }] },
       ...(e.avant ?? []),
