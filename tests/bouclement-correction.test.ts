@@ -3,7 +3,8 @@ import { demoCfc1 } from '../src/data/demo-cfc1';
 import { creerDossier, type Exercice } from '../src/engine/exercice';
 import { ajouterEcriture, extourner } from '../src/engine/journal';
 import { ecrituresDeBouclement } from '../src/engine/closing';
-import { clotureDeGestionPar9000, diagnostiquerBouclement, PIECE_BOUCLEMENT } from '../src/engine/correction-bouclement';
+import { clotureDeGestionPar9000, corrigeBouclement, diagnostiquerBouclement, estEcritureBouclement, piecesHorsEnonce, PIECE_BOUCLEMENT } from '../src/engine/correction-bouclement';
+import { demoMp } from '../src/data/demo-mp';
 import { soldes } from '../src/engine/ledger';
 import { corrigerCopie } from '../src/engine/notation';
 import type { Dossier, LigneEcriture } from '../src/engine/dossier';
@@ -175,6 +176,72 @@ describe('bouclement par le compte de résultat avec clôture des comptes de ges
     virements(base).forEach((lignes, i) => (d = passer(d, `B${i + 1}`, lignes)));
     expect(clotureDeGestionPar9000(d, ex).size).toBe(0);
     expect(diagnostiquerBouclement(d, ex)).toBe('juste');
+  });
+});
+
+describe('pièce hors énoncé (audit du 24.11.2026)', () => {
+  /** Le corrigé, mais l'opération 3 (vente de 6'400.00) saisie sous la pièce « 3a ». */
+  function avec3a(): Dossier {
+    let d = creerDossier(ex, plan);
+    ex.corrige!.forEach((c, i) => {
+      const r = ajouterEcriture(d, { id: `E${i + 1}`, date: '2026-03-01', piece: c.piece === '3' ? '3a' : c.piece, libelle: 'x', lignes: c.lignes });
+      if (!r.ok) throw new Error(r.erreurs.join());
+      d = r.valeur;
+    });
+    return d;
+  }
+
+  it('l’écriture « 3a » reste dans les comptes : le bouclement attendu est celui du bénéfice de 3’530.00, pas d’une perte', () => {
+    const d = avec3a();
+    expect(corrigeBouclement(d, ex)?.lignes).toEqual([
+      { debit: '9000', credit: '2850', montant: chf(3530) },
+      { debit: '2850', credit: '2800', montant: chf(2730) },
+    ]);
+    expect(piecesHorsEnonce(d, ex)).toEqual(['3a']);
+  });
+
+  it('l’élève qui boucle d’après ses comptes est juste au bouclement : il ne perd que l’opération 3, pas deux fois', () => {
+    let d = avec3a();
+    const attendues = ecrituresDeBouclement(d);
+    if (!attendues.ok) throw new Error();
+    attendues.valeur.forEach((e, i) => (d = passer(d, `B${i + 1}`, e.lignes)));
+    expect(diagnostiquerBouclement(d, ex)).toBe('juste');
+    const copie = corrigerCopie(ex, d);
+    expect(copie.operations.find((o) => o.piece === '3')).toMatchObject({ points: 0 });
+    expect(copie.operations.at(-1)).toMatchObject({ piece: PIECE_BOUCLEMENT, points: 3, max: 3 });
+    expect(copie.max - copie.points).toBe(copie.operations.find((o) => o.piece === '3')!.max);
+    expect(copie.piecesHorsEnonce).toEqual(['3a']);
+    // Les écritures B1 et B2 ne sont pas signalées : ce sont des écritures de bouclement.
+    expect(piecesHorsEnonce(d, ex)).toEqual(['3a']);
+  });
+
+  it('une écriture hors énoncé extournée n’est plus signalée ; un corrigé saisi normalement ne signale rien', () => {
+    expect(piecesHorsEnonce(operations(), ex)).toEqual([]);
+    let d = passer(operations(), 'X', [{ debit: '6000', credit: '1020', montant: chf(100) }]);
+    expect(piecesHorsEnonce(d, ex)).toEqual(['X']);
+    const r = extourner(d, d.ecritures.at(-1)!.id, '2026-12-31');
+    if (!r.ok) throw new Error();
+    expect(piecesHorsEnonce(r.valeur, ex)).toEqual([]);
+  });
+
+  it('reconnaît le bouclement à ses comptes : compte de résultat, ou virement entre privé et capital', () => {
+    const d = operations();
+    const e = (lignes: LigneEcriture[], piece = 'Z') => ({ id: 'T', date: '2026-12-31', piece, libelle: '', lignes });
+    expect(estEcritureBouclement(e([{ debit: '9000', credit: '2850', montant: 1 }]), ex, d)).toBe(true);
+    expect(estEcritureBouclement(e([{ debit: '2850', credit: '2800', montant: 1 }]), ex, d)).toBe(true);
+    expect(estEcritureBouclement(e([{ debit: '9000', credit: '6000', montant: 1 }]), ex, d)).toBe(true);
+    // Un apport ou un retrait saisi hors énoncé n'est pas du bouclement.
+    expect(estEcritureBouclement(e([{ debit: '1020', credit: '2800', montant: 1 }]), ex, d)).toBe(false);
+    expect(estEcritureBouclement(e([{ debit: '2850', credit: '1020', montant: 1 }]), ex, d)).toBe(false);
+    // Une écriture rattachée à une opération de l'énoncé n'est jamais du bouclement.
+    expect(estEcritureBouclement(e([{ debit: '9000', credit: '2850', montant: 1 }], '3'), ex, d)).toBe(false);
+  });
+
+  it('société : le virement du résultat au bénéfice reporté est une écriture de bouclement', () => {
+    const d = creerDossier(demoMp, plan);
+    const e = { id: 'T', date: '2026-12-31', piece: 'B1', libelle: '', lignes: [{ debit: '9000', credit: '2970', montant: 1 }] };
+    expect(estEcritureBouclement(e, demoMp, d)).toBe(true);
+    expect(piecesHorsEnonce({ ...d, ecritures: [...d.ecritures, e] }, demoMp)).toEqual([]);
   });
 });
 

@@ -111,7 +111,7 @@ describe('comptabilité mixte (phase S4)', () => {
     expect(dossier.ecritures.length).toBe(ex.ecrituresAutomatiques!.length);
     const auto = dossier.ecritures[0]!;
     expect(auto.automatique).toBe(true);
-    expect(estEcritureBouclement(auto, ex)).toBe(false);
+    expect(estEcritureBouclement(auto, ex, dossier)).toBe(false);
     expect(extourner(dossier, auto.id, auto.date).ok).toBe(false);
     expect(supprimerEcriture(dossier, auto.id).ok).toBe(false);
     expect(modifierEcriture(dossier, auto.id, { ...auto }).ok).toBe(false);

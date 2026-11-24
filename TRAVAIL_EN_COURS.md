@@ -144,4 +144,7 @@ Corrections faites une à une, sur accord de l'enseignant, d'abord sur `apercu`.
 - [x] E2. Bouclement par 9000 : la correction accepte une clôture complète des comptes de charges et de produits par 9000
   (`clotureDeGestionPar9000`), une clôture partielle reste fausse ; phrase du chapitre Journal réécrite selon la méthode du
   18.11.2026. Fait le 24.11.2026, à commiter et publier sur accord.
-- [ ] E3 à E9 et les autres actions du rapport : en attente des décisions de l'enseignant.
+- [x] E4. Pièce hors énoncé : une écriture de bouclement se reconnaît à ses comptes (compte de résultat, ou virement entre
+  privé et capital) ; toute autre pièce hors énoncé reste dans les comptes et est signalée à l'élève (journal) et à
+  l'enseignant (détail de la copie, `CorrectionCopie.piecesHorsEnonce`). Fait le 24.11.2026, à commiter et publier sur accord.
+- [ ] E3, E5 à E9 et les autres actions du rapport : en attente des décisions de l'enseignant.

@@ -196,6 +196,14 @@
                         <label><input type="checkbox" bind:checked={voirJustes} /> Montrer aussi les écritures des opérations justes</label>
                       </td>
                     </tr>
+                    {#if l.correction.piecesHorsEnonce.length}
+                      <tr>
+                        <td colspan="4" class="hors-enonce">
+                          <b>{l.correction.piecesHorsEnonce.length > 1 ? 'Pièces hors énoncé' : 'Pièce hors énoncé'} : {l.correction.piecesHorsEnonce.join(', ')}.</b>
+                          L'élève a saisi {l.correction.piecesHorsEnonce.length > 1 ? 'des écritures sous des numéros qui ne sont pas ceux' : "une écriture sous un numéro qui n'est pas celui"} d'une opération : elles comptent dans ses comptes, mais ne sont rattachées à aucune opération et ne sont pas corrigées.
+                        </td>
+                      </tr>
+                    {/if}
                     {#each l.correction.operations as o}
                       <tr>
                         <td class="num" style="width:40px">{o.piece}</td>
@@ -346,6 +354,7 @@
   .cote-a-cote { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-size: var(--t-12); }
   .etiquette { font-weight: bold; color: var(--c-structure); margin-bottom: 2px; }
   .ligne-ecr { font-variant-numeric: tabular-nums; }
+  .hors-enonce { color: var(--c-alerte-texte); font-size: var(--t-13); padding: 6px 0; }
   .aides-vues { font-weight: normal; font-size: var(--t-12); color: var(--c-texte-2); }
   .tete-bilan { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
   .aide-bilan { margin: 0; padding: 10px 18px 0; }
