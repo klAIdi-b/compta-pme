@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="fr-CH">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex" />
+<title>Compta PME · accueil engageant (trois directions)</title>
+<style>
+/* Maquette du 24.11.2026 : trois directions pour la page d'accueil. Variables du design system validé (theme.css). */
+:root {
+  --c-structure: #1f4e78; --c-structure-2: #163a5a; --c-nuit: #11304d; --c-encre: #0f2742;
+  --c-selection: #d6e4f0; --c-bleu-doux: #eaf1f8; --c-fond-tete: #f8fafc; --c-fond-page: #f6f7f9; --c-fond: #ffffff;
+  --c-action: #c4501a; --c-action-fonce: #a8420f; --c-accent: #e8601c; --c-orange-doux: #fdf0e8;
+  --c-texte: #1b2430; --c-texte-2: #56616f; --c-bordure: #8793a2; --c-bordure-2: #dfe5ec; --c-bordure-3: #eef2f6;
+  --c-succes: #1d6b3a; --c-succes-fond: #e6f3ea; --c-erreur: #b00020;
+  --t-12: 0.75rem; --t-13: 0.8125rem; --t-14: 0.875rem; --t-15: 0.9375rem; --t-17: 1.0625rem; --t-20: 1.25rem; --t-26: 1.625rem;
+  --t-titre: clamp(1.875rem, 1.2rem + 2.6cqi, 3rem); /* nouvelle variable proposée pour le seul titre de l'accueil */
+  --e-1: 4px; --e-2: 8px; --e-3: 12px; --e-4: 16px; --e-5: 24px; --e-6: 32px; --e-7: 48px;
+  --r-1: 4px; --r-2: 6px; --r-3: 8px;
+  --ombre-haute: 0 10px 30px rgba(15, 39, 66, 0.1), 0 2px 6px rgba(15, 39, 66, 0.06);
+  --police: 'Inter Variable', 'Inter', 'Segoe UI Variable Text', 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif;
+  --actif-1: #2a6aa0; --actif-2: #1f4e78; --passif-1: #b3541e; --passif-2: #8f3f12; --passif-3: #1d6b3a; /* blocs du bilan en direct */
+}
+* { box-sizing: border-box; }
+body { margin: 0; font-family: var(--police); font-size: var(--t-15); line-height: 1.5; color: var(--c-texte); background: var(--c-fond-page); -webkit-font-smoothing: antialiased; }
+h1, h2, h3, p { margin: 0; }
+.num { font-variant-numeric: tabular-nums lining-nums; }
+:focus-visible { outline: 2px solid var(--c-accent); outline-offset: 2px; }
+button { font: inherit; }
+
+/* ---------- Page de présentation ---------- */
+.doc { max-width: 1560px; margin: 0 auto; padding: var(--e-6) var(--e-5) var(--e-7); }
+.doc > header { max-width: 78ch; margin-bottom: var(--e-6); }
+.doc > header h1 { font-size: var(--t-26); color: var(--c-encre); letter-spacing: -0.015em; }
+.doc > header p { margin-top: var(--e-2); }
+.direction { margin-top: var(--e-7); }
+.direction > h2 { font-size: var(--t-20); color: var(--c-encre); padding-bottom: var(--e-2); border-bottom: 2px solid var(--c-structure); }
+.avis { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--e-4); margin: var(--e-4) 0 var(--e-5); }
+.avis div { background: var(--c-fond); border: 1px solid var(--c-bordure-2); border-left: 4px solid var(--c-succes); border-radius: var(--r-2); padding: var(--e-3) var(--e-4); }
+.avis div.gene { border-left-color: var(--c-accent); }
+.avis b { display: block; margin-bottom: 2px; }
+.cadres { display: flex; gap: var(--e-5); align-items: flex-start; flex-wrap: wrap; }
+.etiq { font-size: var(--t-12); color: var(--c-texte-2); font-weight: 600; text-transform: uppercase; letter-spacing: .05em; margin-bottom: var(--e-2); }
+.cadre { container-type: inline-size; background: var(--c-fond-page); border: 1px solid #c3ccd7; border-radius: var(--r-3); overflow: hidden; box-shadow: var(--ombre-haute); }
+.cadre.ordi { width: 1100px; max-width: 100%; }
+.cadre.tel { width: 360px; border-radius: 22px; }
+.rejouer { margin-top: var(--e-3); min-height: 40px; padding: 0 var(--e-4); border: 1px solid var(--c-bordure); border-radius: var(--r-2); background: var(--c-fond); color: var(--c-structure); font-weight: 550; cursor: pointer; }
+
+/* ---------- Éléments communs aux trois directions ---------- */
+.barre { display: flex; align-items: center; gap: var(--e-3); min-height: 56px; padding: 0 var(--e-5); background: var(--c-fond); border-bottom: 1px solid var(--c-bordure-2); }
+.marque { display: flex; align-items: center; gap: var(--e-2); font-weight: 700; color: var(--c-encre); }
+.marque i { width: 28px; height: 28px; border-radius: var(--r-2); background: var(--c-action); color: #fff; display: grid; place-items: center; font-size: var(--t-12); font-style: normal; }
+.barre nav { margin-left: auto; display: flex; gap: var(--e-1); }
+.barre nav a { color: var(--c-structure); text-decoration: none; font-weight: 550; padding: 10px 10px; border-radius: var(--r-2); font-size: var(--t-14); }
+.barre nav a:hover { background: var(--c-bleu-doux); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--e-2); min-height: 44px; padding: 0 var(--e-5); border-radius: var(--r-2); border: 1px solid var(--c-bordure); background: var(--c-fond); color: var(--c-structure); font-weight: 600; cursor: pointer; text-decoration: none; transition: background-color .12s, border-color .12s, transform .12s; }
+.btn:hover { background: var(--c-fond-tete); }
+.btn.principal { background: var(--c-action); border-color: var(--c-action); color: #fff; }
+.btn.principal:hover { background: var(--c-action-fonce); border-color: var(--c-action-fonce); }
+.btn:active { transform: translateY(1px); }
+.surtitre { font-size: var(--t-13); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--c-action-fonce); }
+.titre { font-size: var(--t-titre); line-height: 1.08; letter-spacing: -0.03em; font-weight: 700; color: var(--c-encre); text-wrap: balance; }
+.accroche { font-size: var(--t-17); color: var(--c-texte-2); max-width: 46ch; }
+.fleche { transition: transform .15s; display: inline-block; }
+a:hover .fleche, button:hover .fleche { transform: translateX(3px); }
+.jauge { height: 8px; border-radius: 4px; background: var(--c-bordure-2); overflow: hidden; display: flex; }
+.jauge i { background: var(--c-succes); }
+.jauge i + i { background: var(--c-accent); }
+@keyframes monte { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+/* =====================================================================================
+   DIRECTION A — « Le logiciel en action »
+   ===================================================================================== */
+.A .hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: var(--e-6); align-items: center; padding: var(--e-7) var(--e-6) var(--e-6); }
+.A .hero-texte { display: grid; gap: var(--e-4); justify-items: start; }
+.A .demo { background: var(--c-fond); border: 1px solid var(--c-bordure-2); border-radius: var(--r-3); box-shadow: var(--ombre-haute); overflow: hidden; }
+.A .demo-tete { display: flex; justify-content: space-between; align-items: center; padding: var(--e-2) var(--e-4); background: var(--c-fond-tete); border-bottom: 1px solid var(--c-bordure-2); font-size: var(--t-13); color: var(--c-texte-2); font-weight: 550; }
+.A .operation { padding: var(--e-3) var(--e-4); background: var(--c-bleu-doux); font-size: var(--t-14); }
+.A .ecriture { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 110px; gap: var(--e-2); padding: var(--e-3) var(--e-4); align-items: end; }
+.A .champ { border: 1px solid var(--c-bordure); border-radius: var(--r-1); min-height: 38px; padding: 0 var(--e-2); display: flex; align-items: center; font-size: var(--t-14); background: var(--c-fond); overflow: hidden; white-space: nowrap; }
+.A .champ small, .A .ecriture label { display: block; font-size: var(--t-12); color: var(--c-texte-2); font-weight: 550; margin-bottom: 2px; }
+.A .champ span { opacity: 0; }
+.A .bilan { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--e-3); padding: var(--e-3) var(--e-4) var(--e-4); border-top: 1px solid var(--c-bordure-3); }
+.A .cote-tete { display: flex; justify-content: space-between; font-size: var(--t-13); font-weight: 650; margin-bottom: 4px; }
+.A .pile { display: flex; flex-direction: column; gap: 3px; height: 150px; }
+.A .bloc { border-radius: var(--r-2); color: #fff; font-size: var(--t-12); font-weight: 600; padding: 4px 8px; display: flex; justify-content: space-between; align-items: center; min-height: 26px; flex: var(--part) 1 0; transition: flex-grow .7s ease, box-shadow .3s; overflow: hidden; white-space: nowrap; }
+.A .verdict { margin: 0 var(--e-4) var(--e-4); padding: var(--e-2) var(--e-3); border: 1px solid var(--c-succes); border-left-width: 4px; border-radius: var(--r-2); background: var(--c-succes-fond); color: #124526; font-size: var(--t-14); opacity: 0; }
+/* État « écriture passée » : les champs se remplissent, deux blocs grandissent, le verdict apparaît. */
+.A .demo.joue .champ span { animation: monte .35s ease forwards; }
+.A .demo.joue .ecriture > div:nth-child(2) .champ span { animation-delay: .35s; }
+.A .demo.joue .ecriture > div:nth-child(3) .champ span { animation-delay: .7s; }
+.A .demo.joue .bloc.plus { --part: var(--apres); box-shadow: inset 0 0 0 2px #fff, 0 0 0 2px var(--c-accent); transition-delay: 1.2s; }
+.A .demo.joue .avant { display: none; } .A .demo:not(.joue) .apres { display: none; }
+.A .demo.joue .verdict { animation: monte .4s ease 1.9s forwards; }
+.A .suite { padding: 0 var(--e-6) var(--e-6); display: grid; gap: var(--e-4); }
+.A .reprise { display: grid; grid-template-columns: 1fr auto; gap: var(--e-4); align-items: center; background: var(--c-fond); border: 1px solid var(--c-bordure-2); border-left: 4px solid var(--c-accent); border-radius: var(--r-3); padding: var(--e-4) var(--e-5); }
+.A .chemins { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--e-3); }
+.A .chemin { text-align: left; background: var(--c-fond); border: 1px solid var(--c-bordure-2); border-radius: var(--r-3); padding: var(--e-4); cursor: pointer; display: grid; gap: var(--e-1); color: var(--c-texte); transition: border-color .15s, transform .15s, box-shadow .15s; }
+.A .chemin:hover { border-color: var(--c-structure); transform: translateY(-2px); box-shadow: var(--ombre-haute); }
+.A .chemin b { font-size: var(--t-17); color: var(--c-encre); }
+.A .chemin span { color: var(--c-texte-2); font-size: var(--t-14); }
+.A .chemin em { font-style: normal; font-weight: 650; color: var(--c-action); font-size: var(--t-14); margin-top: var(--e-1); }
+@container (max-width: 700px) {
+  .A .hero { grid-template-columns: 1fr; padding: var(--e-5) var(--e-4); gap: var(--e-4); }
+  .A .hero-texte .btn { width: 100%; }
+  .A .suite { padding: 0 var(--e-4) var(--e-5); }
+  .A .chemins { grid-template-columns: 1fr; }
+  .A .reprise { grid-template-columns: 1fr; }
+  .A .pile { height: 196px; }
+  .A .bloc { min-height: 40px; }
+  .A .ecriture { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .A .ecriture > div:nth-child(3) { grid-column: 1 / -1; }
+  .A .bloc { flex-direction: column; align-items: flex-start; justify-content: center; white-space: normal; line-height: 1.25; }
+  .A .demo-tete span:last-child { display: none; }
+  .barre { padding: 0 var(--e-3); } .barre nav a:first-child { display: none; }
+}
+
+/* =====================================================================================
+   DIRECTION B — « Votre parcours »
+   ===================================================================================== */
+.B .haut { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: var(--e-5); padding: var(--e-6); align-items: stretch; }
+.B .bonjour { display: grid; gap: var(--e-3); align-content: center; justify-items: start; }
+.B .prochaine { background: var(--c-fond); border: 1px solid var(--c-bordure-2); border-radius: var(--r-3); padding: var(--e-5); display: grid; gap: var(--e-3); align-content: start; box-shadow: var(--ombre-haute); }
+.B .prochaine h2 { font-size: var(--t-20); color: var(--c-encre); }
+.B .prochaine .ligne { display: flex; justify-content: space-between; gap: var(--e-3); font-size: var(--t-14); color: var(--c-texte-2); }
+.B .parcours { margin: 0 var(--e-6) var(--e-6); background: var(--c-fond); border: 1px solid var(--c-bordure-2); border-radius: var(--r-3); padding: var(--e-5); }
+.B .parcours h2 { font-size: var(--t-17); color: var(--c-encre); margin-bottom: var(--e-4); }
+.B .etapes { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); position: relative; }
+.B .etapes::before { content: ''; position: absolute; left: 7%; right: 7%; top: 15px; height: 2px; background: var(--c-bordure-2); }
+.B .etapes::after { content: ''; position: absolute; left: 7%; top: 15px; height: 2px; width: 29%; background: var(--c-succes); transform-origin: left; animation: trace 1s ease .2s both; }
+@keyframes trace { from { transform: scaleX(0); } to { transform: none; } }
+.B .etapes li { display: grid; justify-items: center; gap: var(--e-2); text-align: center; font-size: var(--t-13); position: relative; z-index: 1; padding: 0 4px; }
+.B .etapes button { all: unset; cursor: pointer; display: grid; justify-items: center; gap: var(--e-2); border-radius: var(--r-2); padding-bottom: 2px; }
+.B .etapes button:focus-visible { outline: 2px solid var(--c-accent); outline-offset: 2px; }
+.B .pt { width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--c-bordure); background: var(--c-fond); display: grid; place-items: center; font-weight: 650; font-size: var(--t-13); color: var(--c-texte-2); transition: transform .15s, border-color .15s; }
+.B .etapes button:hover .pt { transform: scale(1.1); border-color: var(--c-structure); }
+.B .fait .pt { background: var(--c-succes); border-color: var(--c-succes); color: #fff; }
+.B .ici .pt { border-color: var(--c-accent); color: var(--c-encre); box-shadow: 0 0 0 4px var(--c-orange-doux); }
+.B .ici b { color: var(--c-encre); }
+.B .bas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--e-4); padding: 0 var(--e-6) var(--e-6); }
+.B .tuile { background: var(--c-fond); border: 1px solid var(--c-bordure-2); border-radius: var(--r-3); padding: var(--e-4) var(--e-5); display: grid; gap: var(--e-2); text-align: left; cursor: pointer; color: var(--c-texte); transition: border-color .15s, transform .15s; }
+.B .tuile:hover { border-color: var(--c-structure); transform: translateY(-2px); }
+.B .tuile b { font-size: var(--t-17); color: var(--c-encre); }
+.B .tuile span { color: var(--c-texte-2); font-size: var(--t-14); }
+.B .tuile em { font-style: normal; font-weight: 650; color: var(--c-action); font-size: var(--t-14); }
+@container (max-width: 700px) {
+  .B .haut { grid-template-columns: 1fr; padding: var(--e-5) var(--e-4) var(--e-4); gap: var(--e-4); }
+  .B .prochaine { padding: var(--e-4); } .B .prochaine .btn { width: 100%; }
+  .B .parcours { margin: 0 var(--e-4) var(--e-4); padding: var(--e-4); }
+  .B .etapes { grid-template-columns: 1fr; gap: var(--e-2); }
+  .B .etapes::before, .B .etapes::after { left: 15px; right: auto; top: 16px; bottom: 16px; width: 2px; height: auto; }
+  .B .etapes::after { height: 29%; transform-origin: top; animation-name: trace-v; }
+  .B .etapes li, .B .etapes button { justify-items: start; text-align: left; grid-template-columns: 32px 1fr; align-items: center; display: grid; gap: var(--e-3); padding: 0; width: 100%; min-height: 44px; }
+  .B .etapes li { display: block; }
+  .B .bas { grid-template-columns: 1fr; padding: 0 var(--e-4) var(--e-5); }
+}
+@keyframes trace-v { from { transform: scaleY(0); } to { transform: none; } }
+
+/* =====================================================================================
+   DIRECTION C — « Grand format »
+   ===================================================================================== */
+.C .barre { background: var(--c-nuit); border-bottom-color: #24486b; }
+.C .barre .marque { color: #fff; } .C .barre nav a { color: #dbe6f1; } .C .barre nav a:hover { background: rgba(255,255,255,.08); }
+.C .hero { background: var(--c-nuit); color: #dbe6f1; padding: var(--e-7) var(--e-6); display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: var(--e-6); align-items: center; }
+.C .hero .titre { color: #fff; } .C .hero .surtitre { color: #f3a276; } .C .hero .accroche { color: #c3d3e3; }
+.C .hero-texte { display: grid; gap: var(--e-4); justify-items: start; }
+.C .hero .btn.clair { background: transparent; border-color: #6f89a3; color: #fff; }
+.C .hero .btn.clair:hover { background: rgba(255,255,255,.08); }
+.C .actions { display: flex; gap: var(--e-3); flex-wrap: wrap; }
+.C .compte-t { background: var(--c-fond); color: var(--c-texte); border-radius: var(--r-3); padding: var(--e-4); box-shadow: 0 18px 40px rgba(0,0,0,.28); }
+.C .compte-t h3 { text-align: center; color: var(--c-structure); font-size: var(--t-15); padding-bottom: var(--e-2); }
+.C .t { display: grid; grid-template-columns: 1fr 1fr; }
+.C .t > div { padding: var(--e-2) var(--e-3); display: grid; gap: 4px; align-content: start; min-height: 132px; }
+.C .t > div:first-child { border-right: 2px solid var(--c-texte); }
+.C .t .sens { text-align: center; font-size: var(--t-12); color: var(--c-texte-2); border-bottom: 2px solid var(--c-texte); padding: 0 0 4px; grid-column: auto; min-height: 0; }
+.C .mvt { display: flex; justify-content: space-between; gap: var(--e-2); font-size: var(--t-14); animation: monte .4s ease both; }
+.C .mvt small { color: var(--c-texte-2); }
+.C .mvt.solde { font-style: italic; font-weight: 650; color: var(--c-structure); }
+.C .legende-t { margin-top: var(--e-2); font-size: var(--t-13); color: var(--c-texte-2); text-align: center; }
+.C .bento { display: grid; grid-template-columns: 1.35fr 1fr; grid-template-rows: auto auto; gap: var(--e-4); padding: var(--e-6); }
+.C .case { background: var(--c-fond); border: 1px solid var(--c-bordure-2); border-radius: var(--r-3); padding: var(--e-5); display: grid; gap: var(--e-2); text-align: left; cursor: pointer; color: var(--c-texte); align-content: start; transition: border-color .15s, box-shadow .15s, transform .15s; }
+.C .case:hover { border-color: var(--c-structure); box-shadow: var(--ombre-haute); transform: translateY(-2px); }
+.C .case.grande { grid-row: span 2; }
+.C .case b { font-size: var(--t-20); color: var(--c-encre); letter-spacing: -0.01em; }
+.C .case span { color: var(--c-texte-2); }
+.C .case em { font-style: normal; font-weight: 650; color: var(--c-action); }
+.C .visuel { margin-top: var(--e-3); border: 1px solid var(--c-bordure-2); border-radius: var(--r-2); overflow: hidden; background: var(--c-fond-tete); }
+.C .visuel svg { display: block; width: 100%; height: auto; }
+.C .reprise { margin: var(--e-6) var(--e-6) 0; background: var(--c-fond); border: 1px solid var(--c-bordure-2); border-left: 4px solid var(--c-accent); border-radius: var(--r-3); padding: var(--e-4) var(--e-5); display: grid; grid-template-columns: 1fr auto; gap: var(--e-4); align-items: center; }
+@container (max-width: 700px) {
+  .C .hero { grid-template-columns: 1fr; padding: var(--e-5) var(--e-4); gap: var(--e-5); }
+  .C .actions .btn { width: 100%; }
+  .C .bento { grid-template-columns: 1fr; padding: var(--e-4); }
+  .C .case { padding: var(--e-4); } .C .case.grande { grid-row: auto; }
+  .C .reprise { margin: var(--e-4) var(--e-4) 0; grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .A .champ span, .A .verdict { opacity: 1; }
+}
+</style>
+</head>
+<body>
+<div class="doc">
+  <header>
+    <p class="surtitre">Compta PME · maquette du 24.11.2026 · rien n'est appliqué au logiciel</p>
+    <h1>Page d'accueil : trois directions</h1>
+    <p>Chaque direction est montrée sur ordinateur (1100 px) et sur téléphone (360 px), avec les vrais textes et les vraies fonctions de l'accueil : reprise du travail, trois portes d'entrée, fil rouge, accès au guide et à l'espace enseignant. Le choix de l'exercice en trois étapes, la recherche et le lien direct restent sous ce premier écran, inchangés, dans les trois cas.</p>
+    <p>Les mouvements sont courts et montrent de la comptabilité. Ils sont coupés si l'appareil demande moins d'animations.</p>
+  </header>
+
+  <!-- ============================================================ A -->
+  <section class="direction" id="direction-a">
+    <h2>Direction A · « Le logiciel en action »</h2>
+    <div class="avis">
+      <div><b>Ce qui engage</b>L'élève voit tout de suite ce qu'il va faire : une écriture, et son effet sur le bilan. Le bouton « Valider cette écriture » lui fait passer sa première écriture en un clic, sans formulaire. Il comprend le logiciel avant d'avoir lu une ligne.</div>
+      <div class="gene"><b>Ce qui pourrait gêner</b>Le premier écran est chargé sur téléphone : la démonstration pousse « Reprendre » plus bas pour un élève qui revient. L'animation demande un composant à part, à maintenir si le journal change.</div>
+    </div>
+    <div class="cadres">
+      <div><p class="etiq">Ordinateur</p><div class="cadre ordi" data-direction="A"></div></div>
+      <div><p class="etiq">Téléphone</p><div class="cadre tel" data-direction="A"></div></div>
+    </div>
+  </section>
+
+  <!-- ============================================================ B -->
+  <section class="direction" id="direction-b">
+    <h2>Direction B · « Votre parcours »</h2>
+    <div class="avis">
+      <div><b>Ce qui engage</b>L'élève qui revient voit où il en est et quoi faire maintenant : une seule action, « Reprendre ». Le chemin des notions montre ce qui est acquis et ce qui vient, sans points ni classement. C'est la plus rapide à l'usage en classe.</div>
+      <div class="gene"><b>Ce qui pourrait gêner</b>Pour un tout nouvel élève, le chemin est vide : il faut une variante d'accueil (« Commencez ici »). Elle montre moins le logiciel lui-même que la direction A.</div>
+    </div>
+    <div class="cadres">
+      <div><p class="etiq">Ordinateur</p><div class="cadre ordi" data-direction="B"></div></div>
+      <div><p class="etiq">Téléphone</p><div class="cadre tel" data-direction="B"></div></div>
+    </div>
+  </section>
+
+  <!-- ============================================================ C -->
+  <section class="direction" id="direction-c">
+    <h2>Direction C · « Grand format »</h2>
+    <div class="avis">
+      <div><b>Ce qui engage</b>Une entrée affirmée, bleu nuit, avec un grand titre et un compte en T qui se remplit : la page a du caractère dès l'arrivée depuis Classroom. Les trois portes ne sont plus trois cartes identiques : chacune a sa taille et montre un vrai écran.</div>
+      <div class="gene"><b>Ce qui pourrait gêner</b>C'est la plus éloignée de l'allure actuelle : l'accueil sombre tranche avec le reste du logiciel, clair. Le grand titre occupe de la place avant la première action sur téléphone.</div>
+    </div>
+    <div class="cadres">
+      <div><p class="etiq">Ordinateur</p><div class="cadre ordi" data-direction="C"></div></div>
+      <div><p class="etiq">Téléphone</p><div class="cadre tel" data-direction="C"></div></div>
+    </div>
+  </section>
+</div>
+
+<!-- ===================================================================== Gabarits -->
+<template id="gabarit-A">
+  <div class="A">
+    <div class="barre"><span class="marque"><i>CP</i>Compta PME</span><nav aria-label="Liens utiles"><a href="#direction-a">Guide d'utilisation</a><a href="#direction-a">Espace enseignant</a></nav></div>
+    <div class="hero">
+      <div class="hero-texte">
+        <p class="surtitre">CFC employé·e de commerce · Maturité professionnelle</p>
+        <h1 class="titre">Passez votre première écriture.</h1>
+        <p class="accroche">Une opération, deux comptes, et le bilan bouge sous vos yeux. Essayez : validez l'écriture ci-contre.</p>
+        <button class="btn principal" data-jouer>Valider cette écriture</button>
+        <a class="btn" href="#direction-a">Continuer avec une vraie entreprise <span class="fleche" aria-hidden="true">→</span></a>
+      </div>
+      <div class="demo" aria-label="Démonstration : une écriture et son effet sur le bilan">
+        <div class="demo-tete"><span>Journal · Cycles du Léman</span><span class="num">Opération 1 sur 15</span></div>
+        <p class="operation"><b>Opération.</b> Le magasin achète une camionnette à crédit, 5'000.00.</p>
+        <div class="ecriture">
+          <div><label>Compte au débit</label><div class="champ"><span>Véhicules</span></div></div>
+          <div><label>Compte au crédit</label><div class="champ"><span>Autres dettes</span></div></div>
+          <div><label>Montant CHF</label><div class="champ num"><span>5'000.00</span></div></div>
+        </div>
+        <div class="bilan">
+          <div>
+            <div class="cote-tete"><span>Actif</span><span class="num"><span class="avant">93'000.00</span><span class="apres">98'000.00</span></span></div>
+            <div class="pile">
+              <div class="bloc" style="--part:56;background:var(--actif-1)"><span>Actifs circulants</span><span class="num">56'000.00</span></div>
+              <div class="bloc plus" style="--part:37;--apres:42;background:var(--actif-2)"><span>Actifs immobilisés</span><span class="num"><span class="avant">37'000.00</span><span class="apres">42'000.00</span></span></div>
+            </div>
+          </div>
+          <div>
+            <div class="cote-tete"><span>Passif</span><span class="num"><span class="avant">93'000.00</span><span class="apres">98'000.00</span></span></div>
+            <div class="pile">
+              <div class="bloc plus" style="--part:4;--apres:9;background:var(--passif-1)"><span>Dettes à court terme</span><span class="num"><span class="avant">4'000.00</span><span class="apres">9'000.00</span></span></div>
+              <div class="bloc" style="--part:25;background:var(--passif-2)"><span>Dettes à long terme</span><span class="num">25'000.00</span></div>
+              <div class="bloc" style="--part:64;background:var(--passif-3)"><span>Capitaux propres</span><span class="num">64'000.00</span></div>
+            </div>
+          </div>
+        </div>
+        <p class="verdict" role="status"><b>Juste.</b> L'actif et le passif augmentent tous les deux de 5'000.00 : le bilan reste équilibré.</p>
+      </div>
+    </div>
+    <div class="suite">
+      <div class="reprise">
+        <div><b>Bon retour, Léa.</b> Cycles du Léman — premier trimestre · 6 pièces sur 15
+          <div class="jauge" style="margin-top:8px;max-width:320px" role="img" aria-label="6 pièces saisies sur 15 : 5 justes, 1 à revoir"><i style="width:33%"></i><i style="width:7%"></i></div></div>
+        <button class="btn principal">Reprendre</button>
+      </div>
+      <div class="chemins">
+        <button class="chemin"><b>Apprendre une notion</b><span>Une leçon, un exemple, dix questions. Du bilan à la comptabilité analytique.</span><em>3 notions maîtrisées sur 31 <span class="fleche" aria-hidden="true">→</span></em></button>
+        <button class="chemin"><b>M'exercer sur une entreprise</b><span>Journal, bilan, bouclement, avec une correction à chaque écriture.</span><em>45 exercices et dossiers <span class="fleche" aria-hidden="true">→</span></em></button>
+        <button class="chemin"><b>Faire une évaluation</b><span>Ouvrez le fichier remis par votre enseignant, puis rendez votre copie dans Google Classroom.</span><em>Ouvrir une évaluation <span class="fleche" aria-hidden="true">→</span></em></button>
+      </div>
+    </div>
+  </div>
+</template>
+
+<template id="gabarit-B">
+  <div class="B">
+    <div class="barre"><span class="marque"><i>CP</i>Compta PME</span><nav aria-label="Liens utiles"><a href="#direction-b">Guide d'utilisation</a><a href="#direction-b">Espace enseignant</a></nav></div>
+    <div class="haut">
+      <div class="bonjour">
+        <p class="surtitre">CFC employé·e de commerce · Maturité professionnelle</p>
+        <h1 class="titre">Bon retour, Léa.</h1>
+        <p class="accroche">Vous avez passé 6 écritures sur 15 chez Cycles du Léman. Il vous en reste une à revoir avant de continuer.</p>
+      </div>
+      <div class="prochaine">
+        <p class="surtitre">Votre prochaine étape</p>
+        <h2>Cycles du Léman — premier trimestre</h2>
+        <div class="jauge" role="img" aria-label="6 pièces saisies sur 15 : 5 justes, 1 à revoir"><i style="width:33%"></i><i style="width:7%"></i></div>
+        <div class="ligne"><span>5 justes · 1 à revoir · 9 à saisir</span><span class="num">6 / 15</span></div>
+        <div class="ligne"><span>Dernière activité : hier à 16:42</span><span style="color:var(--c-action-fonce);font-weight:600">Copie jamais exportée</span></div>
+        <button class="btn principal">Reprendre l'opération 7 <span class="fleche" aria-hidden="true">→</span></button>
+      </div>
+    </div>
+    <div class="parcours">
+      <h2>Votre parcours de 1re année · 2 notions maîtrisées sur 8</h2>
+      <ol class="etapes">
+        <li class="fait"><button><span class="pt" aria-hidden="true">✓</span><span>Le bilan</span></button></li>
+        <li class="fait"><button><span class="pt" aria-hidden="true">✓</span><span>Débit et crédit</span></button></li>
+        <li class="ici"><button><span class="pt" aria-hidden="true">3</span><b>Charges et produits</b></button></li>
+        <li><button><span class="pt" aria-hidden="true">4</span><span>Factures et dettes</span></button></li>
+        <li><button><span class="pt" aria-hidden="true">5</span><span>Compte privé</span></button></li>
+        <li><button><span class="pt" aria-hidden="true">6</span><span>Marchandises</span></button></li>
+        <li><button><span class="pt" aria-hidden="true">7</span><span>Synthèse</span></button></li>
+      </ol>
+    </div>
+    <div class="bas">
+      <button class="tuile"><b>M'exercer sur une autre entreprise</b><span>45 exercices et dossiers de pièces, du premier trimestre d'un magasin à la clôture d'une société anonyme.</span><em>Choisir un exercice <span class="fleche" aria-hidden="true">→</span></em></button>
+      <button class="tuile"><b>Faire une évaluation</b><span>Ouvrez le fichier remis par votre enseignant, puis rendez votre copie dans Google Classroom.</span><em>Ouvrir une évaluation <span class="fleche" aria-hidden="true">→</span></em></button>
+    </div>
+  </div>
+</template>
+
+<template id="gabarit-C">
+  <div class="C">
+    <div class="barre"><span class="marque"><i>CP</i>Compta PME</span><nav aria-label="Liens utiles"><a href="#direction-c">Guide d'utilisation</a><a href="#direction-c">Espace enseignant</a></nav></div>
+    <div class="hero">
+      <div class="hero-texte">
+        <p class="surtitre">CFC employé·e de commerce · Maturité professionnelle</p>
+        <h1 class="titre">La comptabilité s'apprend en la faisant.</h1>
+        <p class="accroche">Tenez les comptes d'une vraie petite entreprise, écriture après écriture. Le logiciel vous dit tout de suite si c'est juste, et pourquoi.</p>
+        <div class="actions"><button class="btn principal">Commencer par le bilan · 10 minutes</button><button class="btn clair">Choisir un exercice</button></div>
+      </div>
+      <div class="compte-t" aria-label="Un compte en T qui se remplit">
+        <h3>Banque</h3>
+        <div class="t">
+          <div class="sens">Débit</div><div class="sens">Crédit</div>
+          <div>
+            <p class="mvt num" style="animation-delay:.2s"><small>SI</small><span>30'000.00</span></p>
+            <p class="mvt num" style="animation-delay:.8s"><small>Un client paie</small><span>4'000.00</span></p>
+          </div>
+          <div>
+            <p class="mvt num" style="animation-delay:1.4s"><small>Loyer</small><span>1'850.00</span></p>
+            <p class="mvt num" style="animation-delay:2s"><small>Fournisseur</small><span>3'000.00</span></p>
+            <p class="mvt solde num" style="animation-delay:2.8s"><small>SF</small><span>29'150.00</span></p>
+          </div>
+        </div>
+        <p class="legende-t">34'000.00 de chaque côté : le compte est équilibré.</p>
+      </div>
+    </div>
+    <div class="reprise">
+      <div><b>Bon retour, Léa.</b> Cycles du Léman — premier trimestre · 6 pièces sur 15
+        <div class="jauge" style="margin-top:8px;max-width:320px" role="img" aria-label="6 pièces saisies sur 15 : 5 justes, 1 à revoir"><i style="width:33%"></i><i style="width:7%"></i></div></div>
+      <button class="btn principal">Reprendre</button>
+    </div>
+    <div class="bento">
+      <button class="case grande">
+        <b>M'exercer sur une entreprise</b>
+        <span>Suivez Cycles du Léman, un magasin de vélos de Carouge, de son premier trimestre à son budget : journal, bilan, bouclement.</span>
+        <em>45 exercices et dossiers <span class="fleche" aria-hidden="true">→</span></em>
+        <div class="visuel" aria-hidden="true">
+          <svg viewBox="0 0 520 220" font-family="Inter, system-ui, sans-serif" font-size="12">
+            <rect width="520" height="34" fill="#eaf1f8"/><text x="14" y="22" fill="#0f2742" font-weight="600">Opération 7. Vente de vélos à crédit à un club, 6'400.00.</text>
+            <g fill="#56616f"><text x="14" y="58">Débit</text><text x="190" y="58">Crédit</text><text x="506" y="58" text-anchor="end">Montant</text></g>
+            <g fill="#1b2430"><text x="14" y="84">Créances clients</text><text x="190" y="84">Ventes de marchandises</text><text x="506" y="84" text-anchor="end">6'400.00</text></g>
+            <line x1="0" y1="98" x2="520" y2="98" stroke="#dfe5ec"/>
+            <rect x="14" y="112" width="492" height="34" rx="6" fill="#e6f3ea" stroke="#1d6b3a"/><text x="26" y="134" fill="#124526" font-weight="600">Juste. Passez à l'opération 8.</text>
+            <g><rect x="14" y="162" width="238" height="44" rx="6" fill="#2a6aa0"/><text x="24" y="188" fill="#fff" font-weight="600">Actif 104'400.00</text><rect x="268" y="162" width="238" height="44" rx="6" fill="#1d6b3a"/><text x="278" y="188" fill="#fff" font-weight="600">Passif 104'400.00</text></g>
+          </svg>
+        </div>
+      </button>
+      <button class="case"><b>Apprendre une notion</b><span>Une leçon, un exemple, dix questions.</span><em>3 notions maîtrisées sur 31 <span class="fleche" aria-hidden="true">→</span></em></button>
+      <button class="case"><b>Faire une évaluation</b><span>Ouvrez le fichier remis par votre enseignant, puis rendez votre copie dans Google Classroom.</span><em>Ouvrir une évaluation <span class="fleche" aria-hidden="true">→</span></em></button>
+    </div>
+  </div>
+</template>
+
+<script>
+// Chaque direction est écrite une fois et affichée dans les deux cadres : la mise en page suit la largeur du cadre.
+for (const cadre of document.querySelectorAll('.cadre')) {
+  cadre.append(document.getElementById('gabarit-' + cadre.dataset.direction).content.cloneNode(true));
+}
+// Direction A : le bouton passe l'écriture ; un second clic remet la démonstration à zéro.
+for (const b of document.querySelectorAll('[data-jouer]')) {
+  const demo = b.closest('.A').querySelector('.demo');
+  b.addEventListener('click', () => {
+    const joue = demo.classList.toggle('joue');
+    b.textContent = joue ? 'Rejouer la démonstration' : 'Valider cette écriture';
+  });
+}
+</script>
+</body>
+</html>
