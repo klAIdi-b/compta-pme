@@ -319,8 +319,42 @@
           {#if module.plan?.length}<p class="discret petit">Plan d'études : {module.plan.join(' · ')}</p>{/if}
         </div>
       </section>
+      {#if module.lecon}
+        <section class="carte lecon">
+          <h2>La leçon</h2>
+          <div class="corps-carte">
+            {#each module.lecon as partie (partie.titre)}
+              <article class="partie">
+                <h3>{partie.titre}</h3>
+                {#each partie.texte as t}<p>{t}</p>{/each}
+                {#if partie.exemple}
+                  <div class="exemple-lecon">
+                    <p class="etiquette-ex">Exemple</p>
+                    <p><b>{partie.exemple.situation}</b></p>
+                    {#if partie.exemple.tableau}
+                      <div class="defile-lecon">
+                        <table>
+                          <thead><tr>{#each partie.exemple.tableau.entetes as e}<th class:montant={e === 'CHF'}>{e}</th>{/each}</tr></thead>
+                          <tbody>
+                            {#each partie.exemple.tableau.lignes as l}
+                              <tr class:total={l[0]?.startsWith('Total')}>{#each l as c, j}<td class:montant={partie.exemple.tableau.entetes[j] === 'CHF'} class:num={partie.exemple.tableau.entetes[j] === 'CHF'}>{c}</td>{/each}</tr>
+                            {/each}
+                          </tbody>
+                        </table>
+                      </div>
+                    {/if}
+                    {#if partie.exemple.lignes}<ul>{#each partie.exemple.lignes as l}<li>{l}</li>{/each}</ul>{/if}
+                  </div>
+                {/if}
+                {#if partie.piege}<p class="piege"><b>Piège fréquent.</b> {partie.piege}</p>{/if}
+                {#if partie.retenir}<p class="a-retenir"><b>À retenir.</b> {partie.retenir}</p>{/if}
+              </article>
+            {/each}
+          </div>
+        </section>
+      {/if}
       <section class="carte">
-        <h2>L'essentiel</h2>
+        <h2>{module.lecon ? 'En résumé' : "L'essentiel"}</h2>
         <div class="corps-carte">
           <ul>{#each module.rappel as r}<li>{r}</li>{/each}</ul>
           {#if chapitre}
@@ -699,6 +733,19 @@
   .p-choix { font-size: clamp(18px, 2vw, 26px); line-height: 1.5; margin: 14px 0 0; padding-left: 1.6em; }
   .p-choix li { margin-bottom: 8px; }
   .p-reponse { font-size: clamp(18px, 2vw, 26px); line-height: 1.5; }
+  .lecon .corps-carte { padding: 8px 24px 22px; }
+  .partie { padding: 18px 0; border-bottom: 1px solid var(--c-bordure-3); max-width: 76ch; }
+  .partie:last-child { border-bottom: 0; padding-bottom: 0; }
+  .partie h3 { margin: 0 0 8px; font-size: 18px; letter-spacing: -0.01em; }
+  .partie p { margin: 0 0 10px; font-size: 16px; line-height: 1.65; }
+  .exemple-lecon { margin: 12px 0; padding: 14px 16px; background: var(--c-bleu-doux); border-radius: 10px; }
+  .exemple-lecon p { font-size: 15px; margin-bottom: 8px; }
+  .exemple-lecon ul { margin: 0; padding-left: 20px; line-height: 1.6; }
+  .exemple-lecon table { background: #fff; border-radius: 8px; overflow: hidden; }
+  .etiquette-ex { font-size: 12px !important; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--c-structure); margin-bottom: 4px !important; }
+  .defile-lecon { overflow-x: auto; }
+  .piege { padding: 10px 14px; background: var(--c-alerte-fond); border-left: 4px solid var(--c-accent); border-radius: 6px; }
+  .a-retenir { padding: 10px 14px; background: var(--c-ok-fond); border-left: 4px solid var(--c-ok); border-radius: 6px; }
   h2.niveau { font-size: 15px; color: var(--c-structure); margin: 18px 0 8px; }
   .donnees { width: 100%; margin: 6px 0 12px; }
   .donnees td, .donnees th { padding: 6px 8px; }
