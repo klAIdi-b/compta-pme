@@ -96,6 +96,6 @@
   .cellule.ok { background: var(--c-ok-fond); color: var(--c-ok); font-weight: bold; }
   .cellule.encours { color: var(--c-alerte-texte); }
   .legende { margin: 0 0 8px; }
-  .liste-modules { margin: 0; padding-left: 22px; columns: 2; font-size: 13px; color: var(--c-texte-2); }
+  .liste-modules { margin: 0; padding-left: 22px; columns: 2; font-size: var(--t-13); color: var(--c-texte-2); }
   @media (max-width: 700px) { .liste-modules { columns: 1; } }
 </style>

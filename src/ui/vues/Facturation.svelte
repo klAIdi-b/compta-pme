@@ -295,15 +295,15 @@
   td .champ.montant { text-align: right; }
   .controle { width: 90px; }
   .juste { color: var(--c-ok); font-weight: bold; }
-  .faux { color: var(--c-alerte-texte); font-weight: bold; }
-  .mentions { margin-top: 14px; border: 1px solid var(--c-bordure-2); border-radius: 6px; padding: 8px 12px 10px; display: grid; gap: 4px; }
+  .faux { color: var(--c-erreur); font-weight: bold; }
+  .mentions { margin-top: 14px; border: 1px solid var(--c-bordure-2); border-radius: var(--r-2); padding: 8px 12px 10px; display: grid; gap: 4px; }
   .mentions legend { font-weight: bold; padding: 0 4px; }
   .mentions label { display: flex; gap: 8px; align-items: center; }
   .controle-ligne { margin-top: 4px; }
   .consigne { margin: 0 0 12px; }
   .mesure { display: flex; flex-direction: column; gap: 6px; font-weight: bold; }
-  .mesure textarea { font: inherit; font-weight: normal; padding: 6px 8px; border: 1px solid var(--c-bordure); border-radius: 6px; }
+  .mesure textarea { font: inherit; font-weight: normal; padding: 6px 8px; border: 1px solid var(--c-bordure); border-radius: var(--r-2); }
   .note { margin-top: 4px; }
-  .petit { font-size: 12px; }
+  .petit { font-size: var(--t-12); }
   .nowrap { white-space: nowrap; }
 </style>

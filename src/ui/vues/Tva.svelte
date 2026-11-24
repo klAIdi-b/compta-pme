@@ -146,6 +146,6 @@
   .formulaire-tva input { width: 150px; text-align: right; }
   .formulaire-tva .total td { font-weight: bold; }
   .formulaire-tva .juste { color: var(--c-ok); font-weight: bold; }
-  .formulaire-tva .faux { color: var(--c-alerte-texte); font-weight: bold; }
+  .formulaire-tva .faux { color: var(--c-erreur); font-weight: bold; }
   .consigne-f { padding: 0 14px; }
 </style>

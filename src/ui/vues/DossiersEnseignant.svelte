@@ -126,11 +126,11 @@
 </p>
 
 <style>
-  .avis-public { background: var(--c-alerte-fond); border-left: 4px solid var(--c-accent); padding: 10px 14px; margin-bottom: 12px; max-width: 900px; }
+  .avis-public { background: var(--c-alerte-fond); border-left: 4px solid var(--c-avert-trait); padding: 10px 14px; margin-bottom: 12px; max-width: 900px; }
   .aide-haut { margin: 0 0 12px; max-width: 900px; }
-  h2.filiere { font-size: 16px; color: var(--c-structure); margin: 18px 0 8px; }
+  h2.filiere { font-size: var(--t-17); color: var(--c-structure); margin: 18px 0 8px; }
   .carte { margin-bottom: 14px; }
-  .carte h3 { margin: 0; padding: 10px 14px; font-size: 14px; border-bottom: 1px solid #d5dbe1; }
+  .carte h3 { margin: 0; padding: 10px 14px; font-size: var(--t-14); border-bottom: 1px solid #d5dbe1; }
   .num { text-align: right; width: 70px; }
   .actions { white-space: nowrap; }
   .actions .btn { margin: 2px 4px 2px 0; }

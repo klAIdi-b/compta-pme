@@ -22,11 +22,11 @@
 </span>
 
 <style>
-  .barre { display: inline-flex; height: 10px; border-radius: 5px; overflow: hidden; background: var(--c-bordure-2); vertical-align: middle; }
+  .barre { display: inline-flex; height: 10px; border-radius: var(--r-1); overflow: hidden; background: var(--c-bordure-2); vertical-align: middle; }
   .barre.sombre { background: rgba(255, 255, 255, 0.28); }
   .juste { background: var(--c-ok); }
   .revoir { background: var(--c-accent); }
   .saisie { background: #8fa9c4; }
   .neutre { background: #8fa9c4; }
-  .sombre .neutre { background: #d6e4f0; }
+  .sombre .neutre { background: var(--c-selection); }
 </style>

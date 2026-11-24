@@ -107,17 +107,17 @@
   .voile { position: fixed; inset: 0; z-index: 100; pointer-events: auto; }
   .voile:not(:has(.cible)) { background: rgba(15, 30, 45, 0.45); }
   .cible {
-    position: fixed; border: 3px solid var(--c-accent); border-radius: 4px;
+    position: fixed; border: 3px solid var(--c-accent); border-radius: var(--r-1);
     box-shadow: 0 0 0 9999px rgba(15, 30, 45, 0.45);
   }
   .bulle {
-    position: fixed; z-index: 101; width: 340px; background: #fff; border-radius: 4px;
+    position: fixed; z-index: 101; width: 340px; background: #fff; border-radius: var(--r-1);
     border-top: 4px solid var(--c-structure); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25); padding: 14px 16px;
   }
-  .etape { font-size: 12px; color: var(--c-texte-2); }
-  h2 { font-size: 16px; margin: 4px 0 8px; }
+  .etape { font-size: var(--t-12); color: var(--c-texte-2); }
+  h2 { font-size: var(--t-17); margin: 4px 0 8px; }
   p { margin: 0 0 12px; line-height: 1.45; }
-  .case { font-size: 13px; color: var(--c-texte-2); display: block; margin-bottom: 12px; }
+  .case { font-size: var(--t-13); color: var(--c-texte-2); display: block; margin-bottom: 12px; }
   .boutons { display: flex; align-items: center; gap: 8px; }
   .espace { flex: 1; }
 </style>

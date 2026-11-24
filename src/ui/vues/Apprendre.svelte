@@ -13,6 +13,7 @@
   import { erreurTypique } from '../../engine/erreurs-typiques';
   import { formatMontant, lireMontant } from '../../engine/money';
   import type { TypeCompte } from '../../engine/plan';
+  import { LECONS, exemplesDe } from '../../data/lecons';
   import { enregistrerRevision, enregistrerSerie, lireProgression, type Progression } from '../../io/apprendre';
   import { aRevoir } from '../../engine/revision';
   import { EXT_PROGRESSION, exporterProgression } from '../../io/progression';
@@ -64,8 +65,12 @@
   const exempleComposee = $derived(module?.ecritures?.length ? genererEcriture(module.ecritures[0]!, hasard(7)) : null);
   const comptesModule = $derived(module ? [...module.comptes].sort((a, b) => nom(a).localeCompare(nom(b), 'fr')) : []);
   const NIVEAUX: NiveauApprendre[] = ['CFC1', 'CFC2', 'MP'];
-  const indexModule = $derived(module ? MODULES.indexOf(module) : -1);
-  const suivant = $derived(indexModule >= 0 && indexModule < MODULES.length - 1 ? MODULES[indexModule + 1]! : null);
+  // Ordre affiché dans la liste : par formation, puis dans l'ordre du cours.
+  const ORDRE = NIVEAUX.flatMap((niv) => MODULES.filter((x) => x.niveau === niv));
+  const indexModule = $derived(module ? ORDRE.indexOf(module) : -1);
+  const suivant = $derived(indexModule >= 0 && indexModule < ORDRE.length - 1 ? ORDRE[indexModule + 1]! : null);
+  const precedent = $derived(indexModule > 0 ? ORDRE[indexModule - 1]! : null);
+  const lecon = $derived(module ? LECONS[module.id] : undefined);
 
   function haut() {
     document.querySelector('.contenu-apprendre')?.scrollIntoView({ block: 'start' });
@@ -248,6 +253,22 @@
   }
 </script>
 
+{#snippet navigationModules()}
+  <nav class="nav-modules" aria-label="Autres modules">
+    {#if precedent}
+      <button class="btn nav-item" onclick={() => ouvrir(precedent)}>
+        <span class="sens"><span aria-hidden="true">←</span> Module précédent</span><span class="nom">{precedent.titre}</span>
+      </button>
+    {/if}
+    <button class="btn-lien nav-menu" onclick={() => ouvrir(null)}>Tous les modules</button>
+    {#if suivant}
+      <button class="btn nav-item droite" onclick={() => ouvrir(suivant)}>
+        <span class="sens">Module suivant <span aria-hidden="true">→</span></span><span class="nom">{suivant.titre}</span>
+      </button>
+    {/if}
+  </nav>
+{/snippet}
+
 <div class="page">
   <header class="bandeau-haut">
     <button class="logo logo-bouton" title="Retour à la page d'accueil" onclick={() => etat.allerAccueil()}>Compta PME</button>
@@ -305,6 +326,9 @@
           {#if envoye}<p class="ok" role="status">Fichier téléchargé : déposez-le dans le devoir Classroom.</p>{/if}
         </form>
       </details>
+      <nav class="nav-modules" aria-label="Navigation">
+        <button class="btn" onclick={() => etat.allerAccueil()}><span aria-hidden="true">←</span> Retour à la page d'accueil</button>
+      </nav>
       <p class="discret petit">
         Votre progression reste dans ce navigateur. Les exercices complets (journal, bilan, bouclement) se trouvent sur
         la page d'accueil.
@@ -319,8 +343,77 @@
           {#if module.plan?.length}<p class="discret petit">Plan d'études : {module.plan.join(' · ')}</p>{/if}
         </div>
       </section>
+      {#if lecon}
+        <section class="carte lecon">
+          <h2>La leçon</h2>
+          <div class="corps-carte">
+            {#if lecon.length > 3}
+              <nav class="sommaire-lecon" aria-label="Plan de la leçon">
+                <ol>
+                  {#each lecon as partie, i (partie.titre)}
+                    <li><a href={`#partie-${i + 1}`} onclick={(e) => { e.preventDefault(); document.getElementById(`partie-${i + 1}`)?.scrollIntoView({ block: 'start' }); }}>{partie.titre.replace(/^\d+\.\s*/, '')}</a></li>
+                  {/each}
+                </ol>
+              </nav>
+            {/if}
+            {#each lecon as partie, i (partie.titre)}
+              <article class="partie" id={`partie-${i + 1}`}>
+                <h3>{partie.titre}</h3>
+                {#each partie.texte as t}<p>{t}</p>{/each}
+                {#if partie.definitions?.length}
+                  <dl class="definitions">
+                    {#each partie.definitions as d (d.terme)}<div><dt>{d.terme}</dt><dd>{d.definition}</dd></div>{/each}
+                  </dl>
+                {/if}
+                {#if partie.methode?.length}
+                  <div class="methode">
+                    <p class="etiquette-ex">La démarche</p>
+                    <ol>{#each partie.methode as m}<li>{m}</li>{/each}</ol>
+                  </div>
+                {/if}
+                {#each exemplesDe(partie) as x (x.situation)}
+                  <div class="exemple-lecon">
+                    <p class="etiquette-ex">Exemple</p>
+                    <p><b>{x.situation}</b></p>
+                    {#if x.lignes && x.tableau}<ul>{#each x.lignes as l}<li>{l}</li>{/each}</ul>{/if}
+                    {#if x.tableau}
+                      <!-- Zone qui peut défiler sur téléphone : atteignable au clavier (WCAG scrollable-region-focusable). -->
+                      <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+                      <div class="defile-lecon" tabindex="0" role="group" aria-label={`Tableau : ${x.situation}`}>
+                        <table>
+                          <thead><tr>{#each x.tableau.entetes as e}<th class:montant={e === 'CHF'}>{e}</th>{/each}</tr></thead>
+                          <tbody>
+                            {#each x.tableau.lignes as l}
+                              <tr class:total={l[0]?.startsWith('Total')}>{#each l as c, j}<td class:montant={x.tableau.entetes[j] === 'CHF'} class:num={x.tableau.entetes[j] === 'CHF'} class:masse={c !== '' && x.tableau.entetes[j + 1] === 'CHF' && l[j + 1] === ''}>{c}</td>{/each}</tr>
+                            {/each}
+                          </tbody>
+                        </table>
+                      </div>
+                    {/if}
+                    {#if x.lignes && !x.tableau}<ul>{#each x.lignes as l}<li>{l}</li>{/each}</ul>{/if}
+                    {#if x.conclusion}<p class="conclusion-ex">{x.conclusion}</p>{/if}
+                  </div>
+                {/each}
+                {#if partie.piege}<p class="piege"><b>Piège fréquent.</b> {partie.piege}</p>{/if}
+                {#if partie.retenir}<p class="a-retenir"><b>À retenir.</b> {partie.retenir}</p>{/if}
+                {#if partie.questions?.length}
+                  <div class="controle">
+                    <p class="etiquette-ex">Vérifiez que vous avez compris</p>
+                    {#each partie.questions as q (q.question)}
+                      <details>
+                        <summary>{q.question}</summary>
+                        <p>{q.reponse}</p>
+                      </details>
+                    {/each}
+                  </div>
+                {/if}
+              </article>
+            {/each}
+          </div>
+        </section>
+      {/if}
       <section class="carte">
-        <h2>L'essentiel</h2>
+        <h2>{lecon ? 'En résumé' : "L'essentiel"}</h2>
         <div class="corps-carte">
           <ul>{#each module.rappel as r}<li>{r}</li>{/each}</ul>
           {#if chapitre}
@@ -385,6 +478,7 @@
         <button class="btn" onclick={projeter}>Projeter une question pour la classe</button>
         <button class="btn btn-principal" onclick={commencerSerie}>Commencer la série de {NB} questions</button>
       </div>
+      {@render navigationModules()}
     {:else if etape === 'serie' && q}
       <nav class="fil">
         <button class="btn-lien" onclick={() => ouvrir(module)}>{module.titre}</button>
@@ -654,6 +748,7 @@
           <button class="btn" onclick={() => ouvrir(module)}>Revoir l'essentiel et l'exemple</button>
         {/if}
       </div>
+      {@render navigationModules()}
       {/if}
     {/if}
   </main>
@@ -662,14 +757,14 @@
 <style>
   .page { min-height: 100%; }
   .bandeau-haut { background: #fff; border-bottom: 1px solid var(--c-bordure-2); padding: 0 28px; height: 60px; display: flex; align-items: center; gap: 18px; }
-  .logo { color: var(--c-texte); font-weight: bold; font-size: 15px; display: flex; align-items: center; gap: 10px; }
-  .logo::before { content: 'CP'; width: 28px; height: 28px; border-radius: 7px; background: var(--c-action); color: #fff; display: grid; place-items: center; font-size: 12px; }
+  .logo { color: var(--c-texte); font-weight: bold; font-size: var(--t-15); display: flex; align-items: center; gap: 10px; }
+  .logo::before { content: 'CP'; width: 28px; height: 28px; border-radius: var(--r-2); background: var(--c-action); color: #fff; display: grid; place-items: center; font-size: var(--t-12); }
   .titre-espace { color: var(--c-texte-2); flex: 1; }
   .fermer { color: var(--c-structure); }
   .contenu { max-width: 900px; margin: 0 auto; padding: 24px 16px 48px; }
   .intro { margin: 0 0 16px; line-height: 1.5; }
   section { margin-bottom: 14px; }
-  .petit { font-size: 13px; }
+  .petit { font-size: var(--t-13); }
   .fil { display: flex; gap: 16px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
   .revision-jour { border: 1px solid #f1c9b3; background: linear-gradient(135deg, #fff 0%, var(--c-orange-doux) 100%); margin-bottom: 8px; }
   .ligne-revision { display: flex; gap: 20px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
@@ -679,36 +774,85 @@
   .envoi summary { padding: 14px 20px; cursor: pointer; font-weight: 600; color: var(--c-structure); }
   .envoi p { margin: 0 0 12px; }
   .grille-envoi { display: grid; grid-template-columns: 1fr 1fr 160px auto; gap: 12px; align-items: end; }
-  .grille-envoi label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: 600; color: var(--c-texte-2); }
+  .grille-envoi label { display: flex; flex-direction: column; gap: 4px; font-size: var(--t-13); font-weight: 600; color: var(--c-texte-2); }
   @media (max-width: 700px) { .grille-envoi { grid-template-columns: 1fr; } }
   .piece-a-classer {
     margin: 12px 0 16px; padding: 16px 18px; background: #fff; border: 1px solid #d5dce5; border-left: 5px solid var(--c-structure);
-    border-radius: 8px; box-shadow: var(--ombre-carte); font-size: 17px; font-weight: 600; cursor: grab; max-width: 70ch;
+    border-radius: var(--r-3); box-shadow: var(--ombre-carte); font-size: var(--t-17); font-weight: 600; cursor: grab; max-width: 70ch;
   }
   .classeurs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
   .classeur {
-    font: inherit; font-weight: 600; min-height: 84px; padding: 12px; border-radius: 12px; cursor: pointer; text-align: center;
+    font: inherit; font-weight: 600; min-height: 84px; padding: 12px; border-radius: var(--r-3); cursor: pointer; text-align: center;
     background: var(--c-bleu-doux); color: var(--c-structure); border: 2px dashed #a9bfd6;
   }
   .classeur[aria-checked='true'] { background: var(--c-structure); color: #fff; border-style: solid; border-color: var(--c-structure); }
   .classeur:disabled { cursor: default; opacity: 0.85; }
   @media (max-width: 700px) { .classeurs { grid-template-columns: 1fr 1fr; } }
   .projection .corps-carte { padding: 28px 32px; }
-  .p-consigne { font-size: 18px; color: var(--c-texte-2); margin: 0 0 10px; }
+  .p-consigne { font-size: var(--t-17); color: var(--c-texte-2); margin: 0 0 10px; }
   .p-enonce { font-size: clamp(22px, 2.6vw, 34px); font-weight: 700; color: var(--c-encre); line-height: 1.3; margin: 0 0 12px; }
   .p-choix { font-size: clamp(18px, 2vw, 26px); line-height: 1.5; margin: 14px 0 0; padding-left: 1.6em; }
   .p-choix li { margin-bottom: 8px; }
   .p-reponse { font-size: clamp(18px, 2vw, 26px); line-height: 1.5; }
-  h2.niveau { font-size: 15px; color: var(--c-structure); margin: 18px 0 8px; }
+  .lecon .corps-carte { padding: 8px 24px 22px; }
+  .partie { padding: 18px 0; border-bottom: 1px solid var(--c-bordure-3); max-width: 76ch; }
+  .partie:last-child { border-bottom: 0; padding-bottom: 0; }
+  .partie h3 { margin: 0 0 8px; font-size: var(--t-17); letter-spacing: -0.01em; }
+  .partie p { margin: 0 0 10px; font-size: var(--t-17); line-height: 1.65; }
+  .exemple-lecon { margin: 12px 0; padding: 14px 16px; background: var(--c-bleu-doux); border-radius: var(--r-3); }
+  .exemple-lecon p { font-size: var(--t-15); margin-bottom: 8px; }
+  .exemple-lecon ul { margin: 0; padding-left: 20px; line-height: 1.6; }
+  .exemple-lecon table { background: #fff; border-radius: var(--r-3); overflow: hidden; }
+  .etiquette-ex { font-size: var(--t-12) !important; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--c-structure); margin-bottom: 4px !important; }
+  .defile-lecon { overflow-x: auto; border-radius: var(--r-3); }
+  .sommaire-lecon { margin: 12px 0 4px; padding: 12px 16px; background: var(--c-fond-tete); border: 1px solid var(--c-bordure-2); border-radius: var(--r-3); max-width: 76ch; }
+  .sommaire-lecon ol { margin: 0; padding-left: 22px; columns: 2; column-gap: 28px; line-height: 1.7; }
+  .sommaire-lecon a { color: var(--c-structure); text-underline-offset: 3px; }
+  .partie { scroll-margin-top: 12px; }
+  .definitions { margin: 12px 0; padding: 12px 16px; border-left: 4px solid var(--c-structure); background: var(--c-fond-tete); border-radius: var(--r-2); display: grid; gap: 6px; }
+  .definitions div { display: block; }
+  .definitions dt { display: inline; font-weight: var(--graisse-fort); color: var(--c-encre); }
+  .definitions dt::after { content: ' : '; font-weight: 400; }
+  .definitions dd { display: inline; margin: 0; }
+  .methode { margin: 12px 0; padding: 12px 16px; border: 1px solid var(--c-bordure-2); border-radius: var(--r-3); }
+  .methode ol { margin: 0; padding-left: 22px; line-height: 1.6; }
+  .exemple-lecon ul + .defile-lecon { margin-top: 10px; }
+  .conclusion-ex { margin: 10px 0 0 !important; font-style: italic; }
+  td.masse { font-weight: var(--graisse-fort); color: var(--c-structure); }
+  .controle { margin-top: 12px; }
+  .controle details { border: 1px solid var(--c-bordure-2); border-radius: var(--r-2); padding: 8px 12px; margin-top: 6px; background: var(--c-fond); }
+  .controle summary { cursor: pointer; font-weight: var(--graisse-moyen); }
+  .controle details p { margin: 8px 0 2px; font-size: var(--t-15); }
+  @media (max-width: 600px) { .sommaire-lecon ol { columns: 1; } }
+  @media (max-width: 600px) {
+    .lecon .corps-carte { padding: 4px 14px 18px; }
+    .exemple-lecon { padding: 12px; }
+    .exemple-lecon table { font-size: var(--t-13); }
+    .exemple-lecon th, .exemple-lecon td { padding: 6px 8px; white-space: normal; }
+  }
+  .piege { padding: 10px 14px; background: var(--c-alerte-fond); border-left: 4px solid var(--c-avert-trait); border-radius: var(--r-2); }
+  .a-retenir { padding: 10px 14px; background: var(--c-ok-fond); border-left: 4px solid var(--c-ok); border-radius: var(--r-2); }
+  .nav-modules { display: grid; grid-template-columns: 1fr auto 1fr; gap: 12px; align-items: stretch; margin-top: 28px; padding-top: 18px; border-top: 1px solid var(--c-bordure-3); }
+  .nav-modules .nav-item { display: flex; flex-direction: column; gap: 2px; text-align: left; white-space: normal; height: auto; padding: 10px 14px; }
+  .nav-modules .nav-item.droite { text-align: right; grid-column: 3; }
+  .nav-modules .nav-menu { grid-column: 2; align-self: center; }
+  .nav-modules .sens { font-size: var(--t-12); color: var(--c-texte-2); }
+  .nav-modules .nom { font-weight: 600; }
+  @media (max-width: 700px) {
+    .nav-modules { grid-template-columns: 1fr; }
+    .nav-modules .nav-item.droite, .nav-modules .nav-menu { grid-column: 1; text-align: left; }
+    .nav-modules .nav-menu { order: 3; justify-self: start; }
+  }
+  h2.niveau { font-size: var(--t-15); color: var(--c-structure); margin: 18px 0 8px; }
   .donnees { width: 100%; margin: 6px 0 12px; }
   .donnees td, .donnees th { padding: 6px 8px; }
   .reponses td:first-child { width: 55%; }
-  .champ-calcul { width: 140px; text-align: right; font-size: 15px; padding: 5px 8px; }
-  .composee select { min-width: 300px; font-size: 14px; padding: 5px; }
-  .reponses select { min-width: 260px; font-size: 14px; padding: 5px; }
-  .unite { color: var(--c-texte-2); font-size: 12px; margin-left: 4px; }
-  .attendu { color: var(--c-alerte-texte); font-weight: bold; white-space: nowrap; }
-  .faux-ligne { background: var(--c-alerte-fond); }
+  .champ-calcul { width: 140px; text-align: right; font-size: var(--t-15); padding: 5px 8px; }
+  .composee select { min-width: 300px; font-size: var(--t-14); padding: 5px; }
+  .reponses select { min-width: 260px; font-size: var(--t-14); padding: 5px; }
+  .unite { color: var(--c-texte-2); font-size: var(--t-12); margin-left: 4px; }
+  .attendu { color: var(--c-erreur); font-weight: bold; white-space: nowrap; }
+  .faux-ligne { background: var(--c-erreur-fond); }
   .enonce-calcul { margin: 4px 0; font-weight: bold; }
   .modules { list-style: none; margin: 0 0 14px; padding: 0; display: grid; gap: 10px; }
   .module { display: flex; align-items: center; gap: 14px; padding: 12px 16px; margin: 0; }
@@ -716,40 +860,40 @@
   .module .texte { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
   .lien-module { border: none; background: none; padding: 0; font: inherit; font-weight: bold; color: var(--c-structure); cursor: pointer; text-align: left; }
   .lien-module:hover { text-decoration: underline; }
-  .etat { font-size: 13px; color: var(--c-texte-2); white-space: nowrap; }
+  .etat { font-size: var(--t-13); color: var(--c-texte-2); white-space: nowrap; }
   .etat.maitrise { color: var(--c-ok); font-weight: bold; }
   .corps-carte p, .corps-carte li { line-height: 1.5; }
   .theorie { margin-top: 10px; border-top: 1px solid var(--c-bordure-3); padding-top: 6px; }
   .operation, .enonce { font-weight: bold; }
-  .enonce { font-size: 17px; margin: 4px 0 14px; }
+  .enonce { font-size: var(--t-17); margin: 4px 0 14px; }
   .consigne { margin: 0; color: var(--c-texte-2); }
   .raisonnement { margin: 8px 0; padding-left: 22px; }
   .ecriture-ex, .liste-erreurs { width: 100%; }
   .montant { text-align: right; white-space: nowrap; }
   .actions-bas { display: flex; gap: 10px; flex-wrap: wrap; }
-  .barre { height: 6px; background: var(--c-bordure-3); border-radius: 3px; margin-bottom: 12px; overflow: hidden; }
+  .barre { height: 6px; background: var(--c-bordure-3); border-radius: var(--r-1); margin-bottom: 12px; overflow: hidden; }
   .barre span { display: block; height: 100%; background: var(--c-structure); }
   .choix-ligne { display: flex; gap: 8px; flex-wrap: wrap; }
   .choix-ligne .btn[aria-pressed='true'] { background: var(--c-selection); border-color: var(--c-structure); color: var(--c-structure); font-weight: bold; }
   .choix-colonne { display: grid; gap: 6px; }
-  .option { display: flex; gap: 8px; align-items: flex-start; padding: 8px 10px; border: 1px solid var(--c-bordure-2); border-radius: 6px; cursor: pointer; }
+  .option { display: flex; gap: 8px; align-items: flex-start; padding: 8px 10px; border: 1px solid var(--c-bordure-2); border-radius: var(--r-2); cursor: pointer; }
   .option:has(input:checked) { border-color: var(--c-structure); background: var(--c-selection); }
   .grille-ecriture { display: grid; grid-template-columns: 1fr 1fr auto; gap: 12px; align-items: end; }
-  .grille-ecriture label, .grille-solde label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; }
-  .grille-ecriture select { font-size: 15px; padding: 6px; }
-  .montant-donne { display: flex; flex-direction: column; gap: 4px; font-size: 13px; text-align: right; }
-  .montant-donne b { font-size: 15px; padding: 6px 0; }
+  .grille-ecriture label, .grille-solde label { display: flex; flex-direction: column; gap: 4px; font-size: var(--t-13); }
+  .grille-ecriture select { font-size: var(--t-15); padding: 6px; }
+  .montant-donne { display: flex; flex-direction: column; gap: 4px; font-size: var(--t-13); text-align: right; }
+  .montant-donne b { font-size: var(--t-15); padding: 6px 0; }
   .liste-erreurs tr.choisie { background: var(--c-selection); }
   .compte-t { width: auto; min-width: 360px; margin-bottom: 12px; }
   .compte-t th { text-align: center; }
   .compte-t td:nth-child(2) { border-right: 2px solid var(--c-texte); }
-  .abrev { color: var(--c-texte-2); font-size: 12px; }
+  .abrev { color: var(--c-texte-2); font-size: var(--t-12); }
   .grille-solde { display: flex; gap: 16px; align-items: end; flex-wrap: wrap; }
-  .grille-solde input { font-size: 15px; padding: 6px; width: 140px; text-align: right; }
-  .retour { margin-top: 14px; padding: 10px 12px; border-left: 4px solid var(--c-accent); background: var(--c-alerte-fond); border-radius: 6px; }
+  .grille-solde input { font-size: var(--t-15); padding: 6px; width: 140px; text-align: right; }
+  .retour { margin-top: 14px; padding: 10px 12px; border-left: 4px solid var(--c-erreur); background: var(--c-erreur-fond); border-radius: var(--r-2); }
   .retour.ok { border-left-color: var(--c-ok); background: var(--c-ok-fond); }
   .pourquoi { margin: 6px 0 0; }
-  .score { font-size: 18px; }
+  .score { font-size: var(--t-17); }
   .ok { color: var(--c-ok); font-weight: bold; }
   @media (max-width: 700px) {
     .grille-ecriture { grid-template-columns: 1fr; }

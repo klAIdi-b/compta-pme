@@ -1,4 +1,7 @@
 <script lang="ts">
+  import { dialogue } from './dialogue.svelte';
+  import Dialogue from './composants/Dialogue.svelte';
+  import { tick } from 'svelte';
   import { etat, type Vue } from './etat.svelte';
   import { etiquetteNiveau, LIBELLES_MODE } from '../engine/exercice';
   import { enseignant } from './enseignant.svelte';
@@ -14,14 +17,28 @@
   import { estBoucle } from '../engine/closing';
   import { dateHeure, periode } from './format';
   import Accueil from './vues/Accueil.svelte';
-  import TableauDeBord from './vues/TableauDeBord.svelte';
-  import Journal from './vues/Journal.svelte';
-  import Comptes from './vues/Comptes.svelte';
-  import GrandLivre from './vues/GrandLivre.svelte';
-  import Balance from './vues/Balance.svelte';
-  import Bilan from './vues/Bilan.svelte';
-  import CompteResultat from './vues/CompteResultat.svelte';
-  import Bouclement from './vues/Bouclement.svelte';
+
+  // Rubriques du logiciel chargées à la demande (24.11.2026) : la page d'accueil n'a pas à télécharger le journal et
+  // les états. Dès qu'un exercice est ouvert, elles sont chargées d'avance, pendant un temps mort : passer de l'une
+  // à l'autre reste immédiat. Hors ligne, le service worker les a déjà en cache.
+  const VUES_BASE = {
+    tableau: () => import('./vues/TableauDeBord.svelte'),
+    journal: () => import('./vues/Journal.svelte'),
+    comptes: () => import('./vues/Comptes.svelte'),
+    grandlivre: () => import('./vues/GrandLivre.svelte'),
+    balance: () => import('./vues/Balance.svelte'),
+    bilan: () => import('./vues/Bilan.svelte'),
+    resultat: () => import('./vues/CompteResultat.svelte'),
+    bouclement: () => import('./vues/Bouclement.svelte'),
+  };
+  let prechargees = false;
+  $effect(() => {
+    if (!etat.session || prechargees) return;
+    prechargees = true;
+    const lancer = () => Object.values(VUES_BASE).forEach((charger) => charger().catch(() => {}));
+    if ('requestIdleCallback' in window) window.requestIdleCallback(lancer, { timeout: 2000 });
+    else setTimeout(lancer, 300);
+  });
   import Visite from './composants/Visite.svelte';
   import EtapeSuivante from './composants/EtapeSuivante.svelte';
 
@@ -60,7 +77,7 @@
       const nom = nomFichier([s.eleve.nom, s.eleve.prenom, s.eleve.classe, s.exercice.titre], '.pdf');
       telechargerBlob(nom, await genererPdfCopie(s.eleve, s.exercice, s.dossier, nom));
     } catch {
-      alert("Le PDF n'a pas pu être créé. Vérifiez votre connexion lors du premier export, puis réessayez.");
+      dialogue.informer("Le PDF n'a pas pu être créé", ['Vérifiez votre connexion lors du premier export, puis réessayez.']);
     } finally {
       pdfEnCours = false;
     }
@@ -71,8 +88,8 @@
     enseignant.ouvert = true;
   }
 
-  function terminerCorrige(garder: boolean) {
-    if (!garder && !confirm('Abandonner la saisie du corrigé ? Les modifications seront perdues.')) return;
+  async function terminerCorrige(garder: boolean) {
+    if (!garder && !(await dialogue.demander({ titre: 'Abandonner la saisie du corrigé ?', texte: ['Les modifications seront perdues.'], confirmer: 'Abandonner', annuler: 'Continuer la saisie', danger: true }))) return;
     const r = etat.fermerCorrige(garder);
     if (r) {
       const ex = enseignant.trouver(r.exerciceId);
@@ -146,9 +163,35 @@
   });
   /** Menu de navigation sur téléphone et petite tablette : ouvert par le bouton « Menu », refermé après un choix. */
   let menuOuvert = $state(false);
+  let boutonMenu = $state<HTMLButtonElement | null>(null);
+  let navigation = $state<HTMLElement | null>(null);
+  /** Ouverture : le focus entre dans le menu (rubrique en cours) ; fermeture : il revient au bouton « Menu ». */
+  async function basculerMenu(ouvrir: boolean, rendreFocus = true) {
+    if (menuOuvert === ouvrir) return;
+    menuOuvert = ouvrir;
+    await tick();
+    if (ouvrir) (navigation?.querySelector<HTMLElement>('[aria-current="page"]') ?? navigation?.querySelector<HTMLElement>('a'))?.focus();
+    else if (rendreFocus) boutonMenu?.focus();
+  }
+  function toucheGlobale(e: KeyboardEvent) {
+    if (e.key === 'Escape' && menuOuvert) {
+      e.preventDefault();
+      basculerMenu(false);
+    }
+  }
+  // Fenêtre élargie pendant que le menu est ouvert (tablette tournée) : le menu redevient la barre latérale.
+  $effect(() => {
+    const large = window.matchMedia('(min-width: 901px)');
+    const fermer = () => { if (large.matches) menuOuvert = false; };
+    large.addEventListener('change', fermer);
+    return () => large.removeEventListener('change', fermer);
+  });
   /** Libellé de la rubrique affichée, pour le fil d'Ariane de l'en-tête. */
   const libelleVue = $derived(rubriques.flatMap((r) => r.entrees).find((e) => e.vue === etat.vue)?.libelle ?? '');
 </script>
+
+<svelte:window onkeydown={toucheGlobale} />
+<Dialogue />
 
 {#if ecran === 'guide' && etat.guide}
   <Differe charger={() => import('./vues/Guide.svelte')} props={{ partie: etat.guide, onFermer: () => (etat.guide = null) }} />
@@ -168,7 +211,7 @@
   <a class="lien-evitement" href="#contenu-principal">Aller au contenu</a>
   <div class="app">
     <header class="entete" data-visite="entete">
-      <button class="bouton-menu" aria-expanded={menuOuvert} aria-controls="navigation-principale" onclick={() => (menuOuvert = !menuOuvert)}>
+      <button class="bouton-menu" bind:this={boutonMenu} aria-expanded={menuOuvert} aria-controls="navigation-principale" onclick={() => basculerMenu(!menuOuvert)}>
         <span class="trait" aria-hidden="true"></span><span class="sr-only">Menu</span>
       </button>
       {#if genre === 'travail'}
@@ -197,8 +240,8 @@
       {/if}
     </header>
 
-    {#if menuOuvert}<button class="voile-menu" aria-label="Fermer le menu" onclick={() => (menuOuvert = false)}></button>{/if}
-    <nav class="lateral" class:ouvert={menuOuvert} id="navigation-principale" aria-label="Navigation" data-visite="navigation">
+    {#if menuOuvert}<button class="voile-menu" aria-label="Fermer le menu" tabindex="-1" onclick={() => basculerMenu(false)}></button>{/if}
+    <nav class="lateral" class:ouvert={menuOuvert} bind:this={navigation} id="navigation-principale" aria-label="Navigation" data-visite="navigation">
       {#each rubriques as r}
         {#if r.titre}<div class="rubrique">{r.titre}</div>{/if}
         {#each r.entrees as e}
@@ -210,7 +253,7 @@
             aria-current={etat.vue === e.vue ? 'page' : undefined}
             onclick={(ev) => {
               ev.preventDefault();
-              menuOuvert = false;
+              basculerMenu(false, false);
               etat.aller(e.vue);
             }}
             >{#if e.etape !== undefined}<span class="num-etape" aria-hidden="true">{e.fait ? '✓' : e.etape}</span>{:else}<Icone nom={e.vue} />{/if}<span>{e.libelle}</span>{#if e.fait}<span class="sr-only"> (fait)</span>{/if}</a
@@ -242,7 +285,7 @@
 
     <!-- Zone qui défile : atteignable au clavier (règle WCAG scrollable-region-focusable). -->
     <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
-    <main class="principal" id="contenu-principal" tabindex="0" aria-label="Contenu">
+    <main class="principal" id="contenu-principal" tabindex="0" aria-label="Contenu" inert={menuOuvert}>
       {#if genre === 'apercu'}
         <div class="bandeau-apercu" role="status">
           <span><b>Aperçu enseignant.</b> Vous voyez l'exercice comme vos élèves{s.exercice.mode === 'evaluation' ? ' (évaluation : aucun retour pendant la saisie)' : s.exercice.mode === 'formative' ? ' (évaluation formative : correction quand l’élève termine)' : ''}. Ce que vous saisissez ici n'est ni enregistré dans l'exercice, ni dans une copie.</span>
@@ -255,14 +298,14 @@
           la page.
         </div>
       {/if}
-      {#if etat.vue === 'tableau'}<TableauDeBord />
-      {:else if etat.vue === 'journal'}<Journal />
-      {:else if etat.vue === 'comptes'}<Comptes />
-      {:else if etat.vue === 'grandlivre'}<GrandLivre />
-      {:else if etat.vue === 'balance'}<Balance />
-      {:else if etat.vue === 'bilan'}<Bilan />
-      {:else if etat.vue === 'resultat'}<CompteResultat />
-      {:else if etat.vue === 'bouclement'}<Bouclement />
+      {#if etat.vue === 'tableau'}<Differe charger={VUES_BASE.tableau} props={{}} />
+      {:else if etat.vue === 'journal'}<Differe charger={VUES_BASE.journal} props={{}} />
+      {:else if etat.vue === 'comptes'}<Differe charger={VUES_BASE.comptes} props={{}} />
+      {:else if etat.vue === 'grandlivre'}<Differe charger={VUES_BASE.grandlivre} props={{}} />
+      {:else if etat.vue === 'balance'}<Differe charger={VUES_BASE.balance} props={{}} />
+      {:else if etat.vue === 'bilan'}<Differe charger={VUES_BASE.bilan} props={{}} />
+      {:else if etat.vue === 'resultat'}<Differe charger={VUES_BASE.resultat} props={{}} />
+      {:else if etat.vue === 'bouclement'}<Differe charger={VUES_BASE.bouclement} props={{}} />
       {:else if etat.vue === 'tva' && etat.fonctions.has('tva')}<Differe charger={() => import('./vues/Tva.svelte')} props={{}} />
       {:else if etat.vue === 'salaire' && etat.fonctions.has('salaire')}<Differe charger={() => import('./vues/Salaire.svelte')} props={{}} />
       {:else if etat.vue === 'repartition' && etat.fonctions.has('repartition')}<Differe charger={() => import('./vues/Repartition.svelte')} props={{}} />
@@ -276,7 +319,7 @@
       {:else if etat.vue === 'facturation' && etat.fonctions.has('facturation')}<Differe charger={() => import('./vues/Facturation.svelte')} props={{}} />
       {:else if etat.vue === 'budget' && etat.fonctions.has('budget')}<Differe charger={() => import('./vues/Budget.svelte')} props={{}} />
       {:else if etat.vue === 'theorie'}<Differe charger={() => import('./vues/Theorie.svelte')} props={{}} />
-      {:else}<TableauDeBord />
+      {:else}<Differe charger={VUES_BASE.tableau} props={{}} />
       {/if}
       {#if vueEleve(genre)}<EtapeSuivante />{/if}
     </main>
@@ -290,25 +333,25 @@
     grid-column: 1 / -1; display: flex; align-items: center; gap: 20px; padding: 0 20px;
     background: var(--c-fond); border-bottom: 1px solid var(--c-bordure-2);
   }
-  .logo { font-weight: bold; color: var(--c-texte); font-size: 15px; width: 192px; flex: none; display: flex; align-items: center; gap: 10px; }
-  .pastille-logo { width: 28px; height: 28px; border-radius: 7px; background: var(--c-action); color: #fff; display: grid; place-items: center; font-size: 12px; }
+  .logo { font-weight: bold; color: var(--c-texte); font-size: var(--t-15); width: 192px; flex: none; display: flex; align-items: center; gap: 10px; }
+  .pastille-logo { width: 28px; height: 28px; border-radius: var(--r-2); background: var(--c-action); color: #fff; display: grid; place-items: center; font-size: var(--t-12); }
   .fil { color: var(--c-texte-2); white-space: nowrap; }
   .dossier { display: flex; align-items: baseline; gap: 16px; flex: 1; min-width: 0; }
-  .dossier strong { font-size: 16px; font-weight: 650; color: var(--c-encre); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 6ch; }
+  .dossier strong { font-size: var(--t-17); font-weight: 650; color: var(--c-encre); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 6ch; }
   .meta { display: none; }
   .badge-niveau { background: var(--c-structure); color: #fff; }
   .entete .badge { align-self: center; }
   .badge-mode { background: var(--c-selection); color: var(--c-structure); }
   .eleve { color: var(--c-texte-2); white-space: nowrap; display: flex; align-items: center; gap: 8px; }
-  .initiales { width: 32px; height: 32px; border-radius: 50%; background: var(--c-selection); color: var(--c-structure); display: grid; place-items: center; font-weight: bold; font-size: 12px; text-transform: uppercase; }
+  .initiales { width: 32px; height: 32px; border-radius: 50%; background: var(--c-selection); color: var(--c-structure); display: grid; place-items: center; font-weight: bold; font-size: var(--t-12); text-transform: uppercase; }
   .lateral { background: var(--c-nuit); color: #fff; padding: 14px 12px; overflow-y: auto; gap: 2px; }
-  .rubrique { font-size: 11.5px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #8fa9c4; padding: 16px 10px 8px; }
+  .rubrique { font-size: var(--t-12); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #8fa9c4; padding: 16px 10px 8px; }
   .rubrique:first-child { padding-top: 4px; }
-  .lateral a { display: flex; align-items: center; gap: 10px; padding: 8px 10px; color: #dce6f0; text-decoration: none; border-radius: 8px; }
+  .lateral a { display: flex; align-items: center; gap: 10px; min-height: 38px; padding: 6px 10px; color: #dce6f0; text-decoration: none; border-radius: var(--r-3); }
   .lateral a:hover { background: rgba(255, 255, 255, 0.07); color: #fff; }
   .lateral a.actif { background: rgba(255, 255, 255, 0.13); color: #fff; font-weight: 650; box-shadow: inset 3px 0 0 var(--c-accent); }
   .num-etape {
-    width: 22px; height: 22px; border-radius: 50%; flex: none; display: grid; place-items: center; font-size: 12px; font-weight: 700;
+    width: 22px; height: 22px; border-radius: 50%; flex: none; display: grid; place-items: center; font-size: var(--t-12); font-weight: 700;
     border: 1.5px solid rgba(255, 255, 255, 0.35); color: #dce6f0;
   }
   .lateral a.actif .num-etape { background: var(--c-accent); border-color: var(--c-accent); color: #fff; }
@@ -319,18 +362,19 @@
   .lateral { display: flex; flex-direction: column; }
   .bas { margin-top: auto; padding: 16px 0 4px; display: flex; flex-direction: column; gap: 8px; }
   .action-lateral {
-    font: inherit; text-align: center; padding: 9px 10px; border-radius: 6px; cursor: pointer;
+    font: inherit; text-align: center; padding: 9px 10px; border-radius: var(--r-2); cursor: pointer;
     background: transparent; color: #fff; border: 1px solid rgba(255, 255, 255, 0.28);
   }
   .action-lateral:hover { background: rgba(255, 255, 255, 0.08); }
   .action-lateral.principale { background: var(--c-action); border-color: var(--c-action); font-weight: bold; }
-  .rappel-export { margin: 0 2px 4px; font-size: 12px; line-height: 1.35; color: #9fb6cc; }
+  .rappel-export { margin: 0 2px 4px; font-size: var(--t-12); line-height: 1.35; color: #9fb6cc; }
   .rappel-export.a-faire { color: #fff; border-left: 3px solid var(--c-accent); padding-left: 7px; }
-  .action-lateral.discrete { border: none; color: #9fb6cc; font-size: 12px; padding: 4px 10px; text-align: left; }
+  .action-lateral.discrete { border: none; color: #b4c6d8; font-size: var(--t-13); padding: 4px 10px; min-height: 28px; text-align: left; }
+  @media (pointer: coarse) { .lateral a, .action-lateral, .action-lateral.discrete { min-height: 44px; } }
   .badge-mode.corrige { background: var(--c-action); color: #fff; }
   .bandeau-apercu {
     display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: -4px 0 16px; padding: 10px 14px;
-    background: var(--c-alerte-fond); border: 1px solid var(--c-accent); border-radius: 8px;
+    background: var(--c-alerte-fond); border: 1px solid var(--c-avert-trait); border-radius: var(--r-3);
   }
   .principal { overflow: auto; padding: 28px 32px 56px; min-width: 0; }
   @media (max-width: 1280px) {
@@ -351,11 +395,11 @@
     .app { grid-template-columns: minmax(0, 1fr); }
     .entete { gap: 12px; padding: 0 12px; }
     .bouton-menu {
-      display: grid; place-items: center; width: 40px; height: 40px; flex: none; border: 1px solid var(--c-bordure-2);
-      border-radius: 10px; background: #fff; cursor: pointer;
+      display: grid; place-items: center; width: 44px; height: 44px; flex: none; border: 1px solid var(--c-bordure);
+      border-radius: var(--r-2); background: #fff; cursor: pointer;
     }
     .bouton-menu .trait, .bouton-menu .trait::before, .bouton-menu .trait::after {
-      display: block; width: 18px; height: 2px; background: var(--c-encre); border-radius: 2px; position: relative; content: '';
+      display: block; width: 18px; height: 2px; background: var(--c-encre); border-radius: var(--r-1); position: relative; content: '';
     }
     .bouton-menu .trait::before { position: absolute; top: -6px; left: 0; }
     .bouton-menu .trait::after { position: absolute; top: 6px; left: 0; }
@@ -363,9 +407,10 @@
     .badge-niveau { display: none; }
     .lateral {
       position: fixed; top: 64px; bottom: 0; left: 0; width: min(300px, 86vw); z-index: 40; transform: translateX(-102%);
-      transition: transform 0.2s ease; box-shadow: var(--ombre-haute);
+      /* Fermé : invisible pour le clavier et les lecteurs d'écran, pas seulement hors de l'écran. */
+      visibility: hidden; transition: transform 0.2s ease, visibility 0s linear 0.2s; box-shadow: var(--ombre-haute);
     }
-    .lateral.ouvert { transform: none; }
+    .lateral.ouvert { transform: none; visibility: visible; transition: transform 0.2s ease; }
     .voile-menu { display: block; position: fixed; inset: 64px 0 0 0; z-index: 35; background: rgba(15, 30, 45, 0.4); border: 0; }
     .principal { padding: 16px 14px 40px; }
   }

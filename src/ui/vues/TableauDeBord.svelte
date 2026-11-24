@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { dialogue } from '../dialogue.svelte';
   import { etat } from '../etat.svelte';
   import { etiquetteNiveau, LIBELLES_MODE, operationsSaisies } from '../../engine/exercice';
   import { balance } from '../../engine/ledger';
@@ -22,13 +23,13 @@
   const formative = $derived(s.exercice.mode === 'formative' && vueEleve(etat.genre) && (s.exercice.corrige?.length ?? 0) > 0);
   const resultat = $derived(formative && s.formativeTerminee ? corrigerCopie(s.exercice, s.dossier, s.fiches) : null);
   const fmt = (x: number) => (Number.isInteger(x) ? String(x) : x.toFixed(1));
-  function terminer() {
-    if (!confirm("Terminer l'évaluation formative ?\n\nLa saisie sera fermée et la correction s'affichera. Vous ne pourrez plus modifier vos écritures.")) return;
+  async function terminer() {
+    if (!(await dialogue.demander({ titre: "Terminer l'évaluation formative ?", texte: ["La saisie sera fermée et la correction s'affichera.", 'Vous ne pourrez plus modifier vos écritures.'], confirmer: 'Voir la correction', annuler: 'Continuer la saisie' }))) return;
     s.formativeTerminee = true;
   }
 
-  function recommencer() {
-    if (confirm("Recommencer l'exercice ? Toutes vos écritures seront effacées.")) etat.recommencer();
+  async function recommencer() {
+    if (await dialogue.demander({ titre: "Recommencer l'exercice ?", texte: ['Toutes vos écritures seront effacées.'], confirmer: 'Tout effacer et recommencer', danger: true })) etat.recommencer();
   }
   // L'accueil s'ouvre par-dessus le travail en cours : rien n'est effacé tant qu'un autre exercice n'est pas commencé.
   function quitter() {
@@ -112,23 +113,23 @@
 <style>
   .mission { margin-bottom: 24px; max-width: 78ch; }
   .mission h1 { font-size: clamp(26px, 3vw, 34px); letter-spacing: -0.025em; }
-  .surtitre { display: block; font-size: 13px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--c-action-fonce); margin-bottom: 6px; }
+  .surtitre { display: block; font-size: var(--t-13); font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--c-action-fonce); margin-bottom: 6px; }
   .sous-titre { margin: 6px 0 0; color: var(--c-texte-2); }
-  .accroche { font-size: 17px; line-height: 1.6; margin: 16px 0 0; }
+  .accroche { font-size: var(--t-17); line-height: 1.6; margin: 16px 0 0; }
   .suite { margin-top: 10px; }
   .suite summary { cursor: pointer; color: var(--c-structure); font-weight: 600; }
   .suite p { line-height: 1.6; margin: 10px 0 0; white-space: pre-line; }
   .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
   .formative { border-left: 4px solid var(--c-structure); margin-bottom: 16px; }
   .formative p { margin: 0 0 8px; }
-  .note { font-size: 18px; }
+  .note { font-size: var(--t-17); }
   .demarrer-corps { display: flex; gap: 28px; align-items: center; justify-content: space-between; padding: 22px 24px; flex-wrap: wrap; }
   .demarrer-texte { flex: 1 1 380px; min-width: 0; }
-  .demarrer-texte h2 { font-size: 18px; margin-bottom: 8px; }
+  .demarrer-texte h2 { font-size: var(--t-17); margin-bottom: 8px; }
   .demarrer-texte p { margin: 0; line-height: 1.6; max-width: 75ch; color: var(--c-texte); }
-  .progression { display: flex; flex-direction: column; gap: 6px; margin-top: 14px; color: var(--c-texte-2); font-size: 14px; }
-  .jauge { height: 8px; border-radius: 4px; background: #e8ecf2; overflow: hidden; max-width: 420px; }
-  .jauge span { display: block; height: 100%; background: var(--c-structure); border-radius: 4px; }
-  .options { display: flex; gap: 20px; flex-wrap: wrap; padding: 12px 24px; border-top: 1px solid var(--c-bordure-3); background: #fafbfd; font-size: 14px; }
+  .progression { display: flex; flex-direction: column; gap: 6px; margin-top: 14px; color: var(--c-texte-2); font-size: var(--t-14); }
+  .jauge { height: 8px; border-radius: var(--r-1); background: #e8ecf2; overflow: hidden; max-width: 420px; }
+  .jauge span { display: block; height: 100%; background: var(--c-structure); border-radius: var(--r-1); }
+  .options { display: flex; gap: 20px; flex-wrap: wrap; padding: 12px 24px; border-top: 1px solid var(--c-bordure-3); background: var(--c-zebra); font-size: var(--t-14); }
   @media (max-width: 640px) { .demarrer-action, .demarrer-action .btn { width: 100%; } }
 </style>

@@ -242,17 +242,17 @@
   .plein { grid-column: 1 / -1; }
   .champ-bloc { display: grid; gap: 6px; align-content: start; }
   .champ-bloc .segments { justify-self: start; flex-wrap: wrap; }
-  .lib { font-size: 12.5px; font-weight: bold; color: var(--c-texte-2); }
-  .aide { font-size: 12px; color: var(--c-texte-2); }
+  .lib { font-size: var(--t-12); font-weight: bold; color: var(--c-texte-2); }
+  .aide { font-size: var(--t-12); color: var(--c-texte-2); }
   .choix { display: grid; gap: 12px; }
   .trois { grid-template-columns: repeat(3, 1fr); }
-  .option { border: 1px solid var(--c-bordure-2); border-radius: 8px; padding: 12px 14px; display: grid; gap: 4px; cursor: pointer; }
+  .option { border: 1px solid var(--c-bordure-2); border-radius: var(--r-3); padding: 12px 14px; display: grid; gap: 4px; cursor: pointer; }
   .option.on { border-color: var(--c-structure); box-shadow: 0 0 0 3px rgba(31, 78, 120, 0.12); }
   .ligne { display: flex; align-items: center; gap: 8px; }
   .court { width: 90px; }
-  .cases { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13px; }
+  .cases { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: var(--t-13); }
   .equipes { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; }
-  .rappel-noms { margin: 12px 0 0; padding: 10px 14px; border-left: 4px solid var(--c-accent); background: var(--c-alerte-fond); border-radius: 6px; font-size: 13px; }
+  .rappel-noms { margin: 12px 0 0; padding: 10px 14px; border-left: 4px solid var(--c-avert-trait); background: var(--c-alerte-fond); border-radius: var(--r-2); font-size: var(--t-13); }
   .fin { display: flex; justify-content: flex-end; gap: 10px; }
   .segments button[disabled] { color: #9aa5b3; cursor: not-allowed; }
   @media (max-width: 760px) {

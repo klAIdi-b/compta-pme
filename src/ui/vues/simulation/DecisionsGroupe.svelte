@@ -252,15 +252,15 @@
   .grille { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 22px; }
   .plein { grid-column: 1 / -1; }
   .champ-bloc { display: grid; gap: 6px; align-content: start; }
-  .lib { font-size: 12.5px; font-weight: bold; color: var(--c-texte-2); }
-  .aide { font-size: 12px; color: var(--c-texte-2); margin: 0; }
+  .lib { font-size: var(--t-12); font-weight: bold; color: var(--c-texte-2); }
+  .aide { font-size: var(--t-12); color: var(--c-texte-2); margin: 0; }
   .corps-carte > .aide { margin-top: 12px; }
   .choix { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .option { border: 1px solid var(--c-bordure-2); border-radius: 8px; padding: 12px 14px; display: grid; gap: 4px; cursor: pointer; }
+  .option { border: 1px solid var(--c-bordure-2); border-radius: var(--r-3); padding: 12px 14px; display: grid; gap: 4px; cursor: pointer; }
   .option.on { border-color: var(--c-structure); box-shadow: 0 0 0 3px rgba(31, 78, 120, 0.12); }
   .ligne { display: flex; align-items: center; gap: 8px; }
   .entre { justify-content: space-between; flex-wrap: wrap; }
-  .jauge { height: 12px; border-radius: 6px; background: var(--c-bordure-3); overflow: hidden; margin: 8px 0 6px; }
+  .jauge { height: 12px; border-radius: var(--r-2); background: var(--c-bordure-3); overflow: hidden; margin: 8px 0 6px; }
   .jauge span { display: block; height: 100%; background: var(--c-structure); }
   .jauge.depasse span { background: var(--c-accent); }
   .fin { display: flex; justify-content: flex-end; align-items: center; gap: 16px; }

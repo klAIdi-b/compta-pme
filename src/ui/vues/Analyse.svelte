@@ -54,6 +54,6 @@
 
 <style>
   .juste { color: var(--c-ok); font-weight: bold; }
-  .faux { color: var(--c-alerte-texte); font-weight: bold; }
+  .faux { color: var(--c-erreur); font-weight: bold; }
   .note { margin-top: 12px; }
 </style>

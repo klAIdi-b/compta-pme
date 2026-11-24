@@ -108,8 +108,16 @@ test("l'élève supprime une écriture fausse et la saisit à nouveau", async ({
   if (await fermerVisite.first().isVisible().catch(() => false)) await fermerVisite.first().click();
   await saisir(page, 'Essai', '2000', '4200', '4800');
   await expect(page.getByText('À revoir').first()).toBeVisible();
-  page.once('dialog', (d) => d.accept());
+  await page.getByRole('button', { name: 'Autres actions pour la pièce 1' }).click();
   await page.getByRole('button', { name: 'Supprimer la pièce 1' }).click();
+  // Dialogue du logiciel : Échap annule, le bouton nommé confirme.
+  const boite = page.getByRole('dialog', { name: /Supprimer la pièce 1/ });
+  await expect(boite.getByRole('button', { name: 'Annuler' })).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(boite).toBeHidden();
+  await expect(page.getByText('À revoir').first()).toBeVisible();
+  await page.getByRole('button', { name: 'Supprimer la pièce 1' }).click();
+  await boite.getByRole('button', { name: "Supprimer l'écriture" }).click();
   await expect(page.getByText("Aucune écriture pour l'instant.")).toBeVisible();
   await saisir(page, 'Achat de marchandises à crédit', '4200', '2000', '4800');
   await expect(page.getByText('Juste').first()).toBeVisible();
@@ -230,4 +238,122 @@ test("l'accueil sépare l'entraînement et l'évaluation", async ({ page }) => {
   await page.getByLabel('Rechercher un exercice').fill('cycles');
   await page.locator('#choisir-exercice').getByText(/Cycles du Léman/).first().click();
   await expect(page.locator('.choisi-texte')).toContainText('Cycles du Léman');
+});
+
+test('journal : le verdict s’affiche sous la saisie et le bouton grisé dit pourquoi', async ({ page }) => {
+  await commencer(page, 'cycles', /Cycles du Léman/);
+  await page.goto('./#journal');
+  const fermerVisite = page.getByRole('button', { name: /Passer|Fermer la visite|Terminer/ });
+  if (await fermerVisite.first().isVisible().catch(() => false)) await fermerVisite.first().click();
+  const raison = page.locator('#raison-validation');
+  await expect(raison).toContainText('Choisissez les comptes');
+  const deb = page.getByLabel('Compte au débit, ligne 1');
+  await deb.fill('4200');
+  await deb.press('Tab');
+  await expect(raison).toContainText('Indiquez le montant');
+  await page.getByLabel('Montant, ligne 1').fill('4800');
+  await expect(raison).toContainText('il manque 4\'800.00 au crédit');
+  await expect(page.getByRole('button', { name: "Valider l'écriture" })).toBeDisabled();
+  // Écriture fausse (comptes inversés) : verdict sous la saisie, avec le bouton pour corriger.
+  await saisir(page, 'Achat', '2000', '4200', '4800');
+  const verdict = page.locator('.verdict');
+  await expect(verdict).toContainText('Opération 1 : à revoir');
+  await verdict.getByRole('button', { name: "Corriger l'écriture" }).click();
+  await expect(page.getByRole('heading', { name: 'Modification de la pièce 1' })).toBeVisible();
+  const debit = page.getByLabel('Compte au débit, ligne 1');
+  await debit.fill('4200');
+  await debit.press('Tab');
+  const credit = page.getByLabel('Compte au crédit, ligne 1');
+  await credit.fill('2000');
+  await credit.press('Tab');
+  await page.getByRole('button', { name: 'Enregistrer la modification' }).click();
+  await expect(verdict).toContainText('Juste');
+});
+
+test('téléphone (360 px) : le journal ne déborde pas et les écritures sont en fiches', async ({ page }) => {
+  await commencer(page, 'cycles', /Cycles du Léman/);
+  await page.goto('./#journal');
+  const fermerVisite = page.getByRole('button', { name: /Passer|Fermer la visite|Terminer/ });
+  if (await fermerVisite.first().isVisible().catch(() => false)) await fermerVisite.first().click();
+  await saisir(page, 'Achat de marchandises à crédit', '4200', '2000', '4800');
+  await page.setViewportSize({ width: 360, height: 740 });
+  await page.waitForTimeout(200);
+  const mesure = await page.evaluate(() => ({
+    page: document.documentElement.scrollWidth,
+    zones: [...document.querySelectorAll<HTMLElement>('main *')].filter((e) => e.scrollWidth > e.clientWidth + 1 && getComputedStyle(e).overflowX !== 'visible').map((e) => e.className),
+    droite: Math.max(...[...document.querySelectorAll<HTMLElement>('main *')].filter((e) => e.offsetParent).map((e) => e.getBoundingClientRect().right)),
+  }));
+  expect(mesure.page).toBeLessThanOrEqual(360);
+  expect(mesure.droite).toBeLessThanOrEqual(361);
+  await expect(page.getByText('Dettes fournisseurs').first()).toBeVisible();
+});
+
+test('téléphone (360 px) : bilan, résultat, balance, comptes et grand livre sans débordement', async ({ page }) => {
+  await commencer(page, 'cycles', /Cycles du Léman/);
+  await page.goto('./#journal');
+  const fermerVisite = page.getByRole('button', { name: /Passer|Fermer la visite|Terminer/ });
+  if (await fermerVisite.first().isVisible().catch(() => false)) await fermerVisite.first().click();
+  await saisir(page, 'Achat de marchandises à crédit', '4200', '2000', '4800');
+  await page.setViewportSize({ width: 360, height: 740 });
+  for (const vue of ['bilan', 'resultat', 'balance', 'comptes', 'grandlivre']) {
+    await page.goto(`./#${vue}`);
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    const mesure = await page.evaluate(() => {
+      const main = document.querySelector('main')!;
+      const visibles = [...main.querySelectorAll<HTMLElement>('*')].filter((e) => e.offsetParent !== null);
+      return {
+        droite: Math.max(...visibles.map((e) => e.getBoundingClientRect().right)),
+        coupes: visibles.filter((e) => e.clientWidth > 1 && e.scrollWidth > e.clientWidth + 1 && getComputedStyle(e).overflowX === 'hidden' && getComputedStyle(e).textOverflow !== 'ellipsis').length,
+      };
+    });
+    expect(mesure.droite, vue).toBeLessThanOrEqual(361);
+    expect(mesure.coupes, vue).toBe(0);
+  }
+  // Bilan : l'intitulé et le montant d'un poste ne se chevauchent pas.
+  await page.goto('./#bilan');
+  const chevauchements = await page.evaluate(() =>
+    [...document.querySelectorAll('.poste')].filter((p) => {
+      const lib = p.querySelector('.lib')?.getBoundingClientRect();
+      const mt = [...p.querySelectorAll('.montant')].find((x) => x.textContent!.trim())?.getBoundingClientRect();
+      return lib && mt && lib.width > 0 && lib.right > mt.left + 1 && lib.bottom > mt.top && mt.bottom > lib.top;
+    }).length,
+  );
+  expect(chevauchements).toBe(0);
+});
+
+test('téléphone : le menu se ferme avec Échap, rend le focus, et la liste des exercices reste repliée à l’accueil', async ({ page }) => {
+  await commencer(page, 'cycles', /Cycles du Léman/);
+  await page.setViewportSize({ width: 360, height: 740 });
+  await page.goto('./#journal');
+  const fermerVisite = page.getByRole('button', { name: /Passer|Fermer la visite|Terminer/ });
+  if (await fermerVisite.first().isVisible().catch(() => false)) await fermerVisite.first().click();
+  const menu = page.getByRole('button', { name: 'Menu' });
+  const nav = page.getByRole('navigation', { name: 'Navigation' });
+  // Fermé : la navigation n'est pas atteignable.
+  await expect(nav).toBeHidden();
+  await menu.click();
+  await expect(nav).toBeVisible();
+  await expect(nav.getByRole('link', { name: /Journal/ })).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(nav).toBeHidden();
+  await expect(menu).toBeFocused();
+  // Cibles : aucun bouton, lien ou champ visible de moins de 24 px.
+  const petits = await page.evaluate(() =>
+    [...document.querySelectorAll<HTMLElement>('main button, main a, main input, main select, main summary, header button')]
+      .filter((e) => e.offsetParent !== null)
+      .map((e) => ({ n: (e.innerText || e.getAttribute('aria-label') || e.tagName).trim().slice(0, 30), r: e.getBoundingClientRect() }))
+      .filter((x) => x.r.height < 24 || x.r.width < 24)
+      .map((x) => `${x.n} ${Math.round(x.r.width)}×${Math.round(x.r.height)}`),
+  );
+  expect(petits).toEqual([]);
+  // Accueil avec un travail en cours : la liste est repliée, « Reprendre » est tout de suite visible.
+  await menu.click();
+  await page.keyboard.press('Escape');
+  await page.getByTitle("Retour à la page d'accueil").click();
+  await expect(page.getByRole('button', { name: 'Reprendre' }).first()).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Afficher la liste des exercices' })).toBeVisible();
+  const hauteur = await page.evaluate(() => document.documentElement.scrollHeight);
+  expect(hauteur).toBeLessThan(3200);
+  await page.getByRole('button', { name: /M'exercer sur une entreprise/ }).click();
+  await expect(page.getByLabel('Rechercher un exercice')).toBeVisible();
 });

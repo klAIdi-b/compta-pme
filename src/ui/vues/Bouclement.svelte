@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { dialogue } from '../dialogue.svelte';
   import { etat } from '../etat.svelte';
   import { vueEleve } from '../modes';
   import { boucler, estBoucle, reouvrir } from '../../engine/closing';
@@ -41,10 +42,15 @@
     return `B${n}`;
   });
 
-  function rouvrir() {
-    if (!confirm(`Ouvrir l'exercice comptable ${anneeSuivante} ? L'exercice actuel sera archivé et le bilan de clôture deviendra le bilan d'ouverture.`)) return;
+  async function rouvrir() {
+    const ok = await dialogue.demander({
+      titre: `Ouvrir l'exercice comptable ${anneeSuivante} ?`,
+      texte: ["L'exercice actuel sera archivé et le bilan de clôture deviendra le bilan d'ouverture."],
+      confirmer: `Ouvrir l'exercice ${anneeSuivante}`,
+    });
+    if (!ok) return;
     const r = reouvrir(d, mode);
-    if (!r.ok) return alert(r.erreurs.join('\n'));
+    if (!r.ok) return void dialogue.informer("L'exercice n'a pas pu être ouvert", r.erreurs);
     etat.session!.archives.push(d);
     etat.majDossier(r.valeur);
   }
@@ -115,7 +121,7 @@
 
 <style>
   section { margin-bottom: 16px; }
-  .revoir { color: var(--c-alerte-texte); }
-  .petit { font-size: 12px; margin: 6px 0 0; }
-  .petit-inline { font-size: 13px; margin-left: 10px; }
+  .revoir { color: var(--c-erreur); }
+  .petit { font-size: var(--t-12); margin: 6px 0 0; }
+  .petit-inline { font-size: var(--t-13); margin-left: 10px; }
 </style>

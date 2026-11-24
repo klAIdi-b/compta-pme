@@ -100,3 +100,18 @@ test('fil rouge sur l’accueil et onglet Progression de l’espace enseignant',
   await page.getByRole('button', { name: /Les factures et les paiements de mars/ }).click();
   await expect(page.locator('.choisi-texte')).toContainText('facturation et paiements de mars');
 });
+
+test('leçon d’un module et navigation en bas de page', async ({ page }) => {
+  await page.goto('./');
+  await page.getByRole('button', { name: /Ouvrir le parcours|Continuer le parcours/ }).click();
+  await page.getByRole('button', { name: 'Charges et produits', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'La leçon' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /Charge ou investissement/ })).toBeVisible();
+  const nav = page.getByRole('navigation', { name: 'Autres modules' });
+  await nav.getByRole('button', { name: /Module suivant/ }).click();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Factures, dettes et créances');
+  await page.getByRole('navigation', { name: 'Autres modules' }).getByRole('button', { name: /Module précédent/ }).click();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Charges et produits');
+  await page.getByRole('navigation', { name: 'Autres modules' }).getByRole('button', { name: 'Tous les modules' }).click();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Apprendre pas à pas');
+});

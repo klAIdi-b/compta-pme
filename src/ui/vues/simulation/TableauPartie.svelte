@@ -1,5 +1,6 @@
 <!-- Simulateur : tableau de la partie (écran 2 de la maquette validée le 21.11.2026). -->
 <script lang="ts">
+  import { dialogue } from '../../dialogue.svelte';
   import { simulations } from '../../simulation.svelte';
   import { controlerDecisions, estCfc2, etatsCourants, imprevusEntreprise, libellePeriode, moisDuTour, partieTerminee } from '../../../engine/simulation/tour';
   import type { Imprevu } from '../../../engine/simulation/types';
@@ -109,8 +110,8 @@
     if (erreurs.length === 0) simulations.vue = { ecran: 'projection', id };
   }
 
-  function annuler() {
-    if (!confirm(`Annuler le calcul du tour ${e.decisionsParTour.length} ? Ses décisions redeviennent modifiables.`)) return;
+  async function annuler() {
+    if (!(await dialogue.demander({ titre: `Annuler le calcul du tour ${e.decisionsParTour.length} ?`, texte: ['Ses décisions redeviennent modifiables.'], confirmer: 'Annuler le calcul', annuler: 'Garder le tour', danger: true }))) return;
     simulations.annulerDernierTour(id);
     message = 'Le dernier tour a été annulé : vous pouvez modifier ses décisions et le recalculer.';
   }
@@ -324,17 +325,17 @@
   .actions-haut, .ligne { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
   .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
   .kpi { padding: 14px 18px; }
-  .kpi .l { font-size: 12px; color: var(--c-texte-2); text-transform: uppercase; letter-spacing: 0.05em; }
-  .kpi .v { font-size: 21px; font-weight: bold; margin-top: 6px; }
-  .kpi .d { font-size: 12px; margin-top: 4px; color: var(--c-texte-2); }
+  .kpi .l { font-size: var(--t-12); color: var(--c-texte-2); text-transform: uppercase; letter-spacing: 0.05em; }
+  .kpi .v { font-size: var(--t-20); font-weight: bold; margin-top: 6px; }
+  .kpi .d { font-size: var(--t-12); margin-top: 4px; color: var(--c-texte-2); }
   .tete { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-  .aide { font-size: 12px; color: var(--c-texte-2); margin: 0; }
+  .aide { font-size: var(--t-12); color: var(--c-texte-2); margin: 0; }
   .marge { margin: 12px 18px; }
   .defile { overflow-x: auto; }
-  .statut { font-size: 12px; font-weight: bold; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+  .statut { font-size: var(--t-12); font-weight: bold; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
   .statut.ok { background: var(--c-ok-fond); color: var(--c-ok); }
   .statut.att { background: var(--c-alerte-fond); color: var(--c-alerte-texte); }
-  .petit { padding: 5px 10px; font-size: 13px; }
+  .petit { padding: 5px 10px; font-size: var(--t-13); }
   .imprevus ul { margin: 0 0 12px; padding-left: 18px; }
   .imprevus .ligne { flex-wrap: wrap; }
   .court-auto { width: auto; }

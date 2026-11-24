@@ -73,8 +73,8 @@
   .synthese { display: flex; flex-wrap: wrap; background: #fff; border: 1px solid var(--c-bordure-2); border-radius: var(--rayon); margin-bottom: 18px; }
   .synthese div { flex: 1 1 160px; padding: 12px 18px; border-left: 1px solid var(--c-bordure-2); }
   .synthese div:first-child { border-left: 0; }
-  .synthese span { display: block; font-size: 13px; color: var(--c-texte-2); }
-  .synthese b { font-size: 17px; }
+  .synthese span { display: block; font-size: var(--t-13); color: var(--c-texte-2); }
+  .synthese b { font-size: var(--t-17); }
   .synthese b.negatif { color: var(--c-negatif); }
   p { margin-top: 12px; }
 </style>

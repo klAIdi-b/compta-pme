@@ -129,13 +129,13 @@
 <style>
   .page { min-height: 100%; }
   .bandeau-haut { background: #fff; border-bottom: 1px solid var(--c-bordure-2); padding: 0 28px; height: 60px; display: flex; align-items: center; gap: 18px; }
-  .logo { color: var(--c-texte); font-weight: bold; font-size: 15px; display: flex; align-items: center; gap: 10px; }
-  .logo::before { content: 'CP'; width: 28px; height: 28px; border-radius: 7px; background: var(--c-action); color: #fff; display: grid; place-items: center; font-size: 12px; }
+  .logo { color: var(--c-texte); font-weight: bold; font-size: var(--t-15); display: flex; align-items: center; gap: 10px; }
+  .logo::before { content: 'CP'; width: 28px; height: 28px; border-radius: var(--r-2); background: var(--c-action); color: #fff; display: grid; place-items: center; font-size: var(--t-12); }
   .titre-espace { color: var(--c-texte-2); flex: 1; }
   .contenu { max-width: 1200px; margin: 0 auto; padding: 24px 16px; display: grid; gap: 18px; }
   .etroit { max-width: 480px; }
-  .code { font-size: 20px; letter-spacing: 0.15em; text-transform: uppercase; }
-  .aide { font-size: 12px; color: var(--c-texte-2); }
+  .code { font-size: var(--t-20); letter-spacing: 0.15em; text-transform: uppercase; }
+  .aide { font-size: var(--t-12); color: var(--c-texte-2); }
   .ligne { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
   .corps-carte .btn-principal { margin-top: 8px; }
 </style>
