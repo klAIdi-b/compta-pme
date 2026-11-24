@@ -112,6 +112,29 @@ export const GUIDE: PartieGuide[] = [
         ],
       },
       {
+        id: 'theorie',
+        titre: 'Consulter la théorie',
+        blocs: [
+          {
+            type: 'p',
+            texte:
+              'La théorie est le cours de référence : on y revient pour revoir une règle, chercher un exemple ou préparer une ' +
+              'évaluation. Elle s’ouvre par l’onglet « Théorie » de la page d’accueil, ou par la rubrique « Théorie » pendant un exercice.',
+          },
+          {
+            type: 'liste',
+            items: [
+              'Sur la page d’accueil, choisissez votre année : 1ère CFC, 2ème CFC ou Maturité professionnelle. Chaque année reprend les chapitres des précédentes.',
+              'Chaque chapitre annonce ses objectifs, définit les termes à connaître, puis explique la règle avec des exemples résolus pas à pas.',
+              '« Erreurs fréquentes » montre les pièges habituels et comment les éviter.',
+              '« Vérifiez vos connaissances » : cherchez la réponse, puis cliquez sur la question pour l’afficher. Rien n’est noté ni enregistré.',
+              '« Pour s’exercer » ouvre le module d’Apprendre pas à pas ou un exercice sur le même sujet.',
+              'Un chapitre marqué « À relire » est en cours de relecture par l’enseignant.',
+            ],
+          },
+        ],
+      },
+      {
         id: 'saisir',
         titre: 'Saisir une écriture',
         blocs: [

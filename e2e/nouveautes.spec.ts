@@ -115,3 +115,93 @@ test('leçon d’un module et navigation en bas de page', async ({ page }) => {
   await page.getByRole('navigation', { name: 'Autres modules' }).getByRole('button', { name: 'Tous les modules' }).click();
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Apprendre pas à pas');
 });
+
+test('théorie enrichie : chapitre lisible à 360 px, réponses masquées au clavier, sans défaut d’accessibilité', async ({ page }) => {
+  const { default: AxeBuilder } = await import('@axe-core/playwright');
+  await page.setViewportSize({ width: 360, height: 740 });
+  await page.goto('./');
+  await page.getByRole('navigation', { name: 'Rubriques' }).getByRole('button', { name: 'Théorie' }).click();
+  await expect(page.locator('.sommaire').getByText('À relire').first()).toBeVisible();
+  await page.locator('.sommaire li button').filter({ hasText: 'Compte privé' }).click();
+  await expect(page.getByRole('heading', { level: 2, name: /Compte privé et bouclement/ })).toBeVisible();
+  await expect(page.getByText('À la fin de ce chapitre, vous savez')).toBeVisible();
+  for (const titre of ['Les termes à connaître', 'Erreurs fréquentes', 'Vérifiez vos connaissances', "Pour s'exercer"]) {
+    await expect(page.getByRole('heading', { level: 3, name: titre })).toBeVisible();
+  }
+  const mesure = await page.evaluate(() => ({
+    page: document.documentElement.scrollWidth,
+    hors: [...document.querySelectorAll<HTMLElement>('article *')].filter((e) => {
+      if (e.offsetParent === null) return false;
+      if (e.getBoundingClientRect().right <= window.innerWidth + 1) return false;
+      for (let q = e.parentElement; q; q = q.parentElement) if (['auto', 'scroll'].includes(getComputedStyle(q).overflowX)) return false;
+      return true;
+    }).length,
+  }));
+  expect(mesure.page).toBeLessThanOrEqual(360);
+  expect(mesure.hors).toBe(0);
+  // Réponse masquée : fermée au départ, ouverte au clavier.
+  const question = page.locator('.questions details').first();
+  await expect(question.locator('p')).toBeHidden();
+  await question.locator('summary').focus();
+  await page.keyboard.press('Enter');
+  await expect(question.locator('p')).toBeVisible();
+  const axe = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze();
+  expect(axe.violations.map((v) => `${v.id} (${v.nodes.length})`)).toEqual([]);
+});
+
+for (const [annee, chapitres] of [
+  ['1ère CFC', ['Le cadre légal', 'Le bilan', 'Les comptes et les règles', 'Le journal et les écritures', 'Achats et ventes à crédit', 'Charges, produits', 'Compte privé', 'Marchandises et stock', 'Échelle des prix']],
+  ['2ème CFC', ['TVA', 'Amortissements', 'Actifs et passifs transitoires', 'Pertes sur créances', 'Salaires', 'Facturation et paiements', 'Budget et analyse', 'Marge contributive']],
+  ['Maturité professionnelle', ['Monnaies étrangères', 'Rémunération du propriétaire', 'Sociétés', 'Provisions', 'Titres et produits', 'Immeubles', 'Intérêts, frais bancaires', "Principes d'évaluation", 'Compte de résultat à plusieurs', 'Tableau des flux', 'Seuil de rentabilité', 'Comptabilité analytique', 'Analyse du bilan']],
+] as const) test(`théorie enrichie, ${annee} : chaque chapitre tient à 360 px, sans défaut d’accessibilité`, async ({ page }) => {
+  test.setTimeout(180_000);
+  const { default: AxeBuilder } = await import('@axe-core/playwright');
+  await page.setViewportSize({ width: 360, height: 740 });
+  await page.goto('./');
+  await page.getByRole('navigation', { name: 'Rubriques' }).getByRole('button', { name: 'Théorie' }).click();
+  await page.getByRole('group', { name: 'Votre année' }).getByRole('button', { name: annee }).click();
+  for (const titre of chapitres) {
+    await page.locator('.sommaire li button').filter({ hasText: titre }).click();
+    await expect(page.getByRole('heading', { level: 2 }).filter({ hasText: titre })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 3, name: 'Vérifiez vos connaissances' })).toBeVisible();
+    const mesure = await page.evaluate(() => ({
+      page: document.documentElement.scrollWidth,
+      hors: [...document.querySelectorAll<HTMLElement>('article *')].filter((e) => {
+        if (e.offsetParent === null) return false;
+        if (e.getBoundingClientRect().right <= window.innerWidth + 1) return false;
+        for (let q = e.parentElement; q; q = q.parentElement) if (['auto', 'scroll'].includes(getComputedStyle(q).overflowX)) return false;
+        return true;
+      }).length,
+    }));
+    expect(mesure.page, titre).toBeLessThanOrEqual(360);
+    expect(mesure.hors, titre).toBe(0);
+    const axe = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze();
+    expect(axe.violations.map((v) => `${titre} : ${v.id} (${v.nodes.length})`)).toEqual([]);
+    await page.getByRole('navigation', { name: 'Chapitres' }).getByRole('button', { name: 'Sommaire' }).click();
+  }
+});
+
+test('théorie : choix de l’année et ouverture d’un chapitre au clavier, tableau en fiches sur téléphone', async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 740 });
+  await page.goto('./');
+  await page.getByRole('navigation', { name: 'Rubriques' }).getByRole('button', { name: 'Théorie' }).click();
+  const annee = page.getByRole('group', { name: 'Votre année' }).getByRole('button', { name: '2ème CFC' });
+  await annee.focus();
+  await page.keyboard.press('Enter');
+  await expect(annee).toHaveAttribute('aria-pressed', 'true');
+  const lien = page.locator('.sommaire li button').filter({ hasText: 'Budget et analyse' });
+  await lien.focus();
+  await page.keyboard.press('Enter');
+  await expect(page.getByRole('heading', { level: 2 }).filter({ hasText: 'Budget et analyse' })).toBeVisible();
+  // Tableau de six colonnes : une fiche par ligne, chaque montant sous son étiquette, rien de coupé à droite.
+  const cellule = page.locator('table.tableau.empile td[data-etiquette="Écart en %"]').first();
+  await expect(cellule).toBeVisible();
+  await expect(cellule).toHaveText(/\+10,0\s%/);
+  const droite = await cellule.evaluate((e) => e.getBoundingClientRect().right);
+  expect(droite).toBeLessThanOrEqual(360);
+  // Retour au sommaire au clavier.
+  const sommaire = page.getByRole('navigation', { name: 'Chapitres' }).getByRole('button', { name: 'Sommaire' });
+  await sommaire.focus();
+  await page.keyboard.press('Enter');
+  await expect(page.getByRole('heading', { level: 2, name: 'Sommaire' })).toBeVisible();
+});

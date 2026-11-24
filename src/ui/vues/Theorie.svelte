@@ -56,7 +56,7 @@
     <ol class="sommaire">
       {#each chapitres as c}
         <li>
-          <button class="lien-chapitre" onclick={() => ouvrir(c.id)}>{c.titre}</button>
+          <button class="lien-chapitre" onclick={() => ouvrir(c.id)}>{c.titre}</button>{#if c.aRelire} <span class="a-relire">À relire</span>{/if}
           <span class="discret">{c.resume}</span>
         </li>
       {/each}
@@ -69,9 +69,18 @@
   </nav>
 
   <article class="carte chapitre">
-    <h2>{chapitre.titre}</h2>
+    <h2>{chapitre.titre}{#if chapitre.aRelire} <span class="a-relire">À relire</span>{/if}</h2>
     <div class="corps-carte">
       <p class="resume">{chapitre.resume}</p>
+      {#if chapitre.objectifs?.length}
+        <div class="objectifs">
+          <p><b>À la fin de ce chapitre, vous savez :</b></p>
+          <ul>{#each chapitre.objectifs as o}<li>{o}</li>{/each}</ul>
+        </div>
+        <nav class="plan" aria-label="Plan du chapitre">
+          <ol>{#each chapitre.sections as sec}<li>{sec.titre}</li>{/each}</ol>
+        </nav>
+      {/if}
       <ChapitreTheorie {chapitre} {intitules} />
       {#if chapitre.bases?.length}
         <h3>Bases légales</h3>
@@ -91,6 +100,13 @@
 {/if}
 
 <style>
+  .a-relire { display: inline-block; font-size: var(--t-12); font-weight: var(--graisse-fort); color: var(--c-avert); background: var(--c-avert-fond); border: 1px solid var(--c-avert-trait); border-radius: var(--r-1); padding: 0 8px; vertical-align: middle; }
+  .objectifs { margin: 0 0 12px; }
+  .objectifs p { margin: 0 0 4px; }
+  .objectifs ul { margin: 0; padding-left: 20px; }
+  .plan { background: var(--c-fond-tete); border: 1px solid var(--c-bordure-2); border-radius: var(--r-3); padding: var(--e-3) var(--e-4); margin-bottom: 12px; max-width: 80ch; }
+  .plan ol { margin: 0; padding-left: 22px; columns: 2; column-gap: var(--e-6); font-size: var(--t-14); }
+  @media (max-width: 700px) { .plan ol { columns: 1; } }
   .choix-annee { display: flex; align-items: center; gap: var(--e-3); flex-wrap: wrap; margin-bottom: var(--e-4); }
   .petit { font-size: var(--t-13); }
   .avis { margin: -6px 0 12px; }

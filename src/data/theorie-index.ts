@@ -15,7 +15,9 @@ export const SOMMAIRE: EntreeSommaire[] = [
   { id: 'bilan', titre: 'Le bilan', niveau: 'CFC1' },
   { id: 'comptes', titre: 'Les comptes et les règles du débit et du crédit', niveau: 'CFC1' },
   { id: 'journal', titre: 'Le journal et les écritures', niveau: 'CFC1' },
-  { id: 'resultat', titre: 'Compte de résultat, compte privé et bouclement', niveau: 'CFC1' },
+  { id: 'credit', titre: 'Achats et ventes à crédit : créances et dettes', niveau: 'CFC1' },
+  { id: 'resultat', titre: 'Charges, produits et compte de résultat', niveau: 'CFC1' },
+  { id: 'prive', titre: 'Compte privé et bouclement de la raison individuelle', niveau: 'CFC1' },
   { id: 'marchandises', titre: 'Marchandises et stock', niveau: 'CFC1' },
   { id: 'prix', titre: 'Échelle des prix et nombre clé', niveau: 'CFC1' },
   { id: 'tva', titre: 'TVA — méthode effective', niveau: 'CFC2' },
@@ -23,6 +25,9 @@ export const SOMMAIRE: EntreeSommaire[] = [
   { id: 'transitoires', titre: 'Actifs et passifs transitoires', niveau: 'CFC2' },
   { id: 'creances', titre: 'Pertes sur créances, créances douteuses et ducroire', niveau: 'CFC2' },
   { id: 'salaires', titre: 'Salaires et assurances sociales', niveau: 'CFC2' },
+  { id: 'facturation', titre: 'Facturation et paiements', niveau: 'CFC2' },
+  { id: 'budget', titre: 'Budget et analyse des écarts', niveau: 'CFC2' },
+  { id: 'couts', titre: 'Marge contributive et répartition des coûts', niveau: 'CFC2' },
   { id: 'monnaies', titre: 'Monnaies étrangères', niveau: 'MP' },
   { id: 'proprietaire', titre: 'Rémunération du propriétaire', niveau: 'MP' },
   { id: 'societes', titre: 'Sociétés (SA, Sàrl) et répartition du bénéfice', niveau: 'MP' },
@@ -34,6 +39,7 @@ export const SOMMAIRE: EntreeSommaire[] = [
   { id: 'resultat-degres', titre: 'Compte de résultat à plusieurs degrés', niveau: 'MP' },
   { id: 'flux', titre: 'Tableau des flux de trésorerie', niveau: 'MP' },
   { id: 'seuil', titre: 'Seuil de rentabilité', niveau: 'MP' },
+  { id: 'analytique', titre: 'Comptabilité analytique', niveau: 'MP' },
   { id: 'analyse', titre: 'Analyse du bilan et du compte de résultat', niveau: 'MP' },
 ];
 

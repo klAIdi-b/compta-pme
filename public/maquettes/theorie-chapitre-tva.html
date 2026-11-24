@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="fr-CH">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex" />
+<title>Compta PME · chapitre modèle de théorie : la TVA</title>
+<style>
+/* Maquette du 24.11.2026 : chapitre de théorie selon le modèle enrichi proposé. Variables du design system (theme.css).
+   Rien n'est appliqué au logiciel : le chapitre TVA en ligne n'est pas modifié. */
+:root {
+  --c-structure: #1f4e78; --c-structure-2: #163a5a; --c-encre: #0f2742; --c-selection: #d6e4f0; --c-bleu-doux: #eaf1f8;
+  --c-fond-tete: #f8fafc; --c-fond-page: #f6f7f9; --c-fond: #fff; --c-zebra: #fafbfd;
+  --c-action: #c4501a; --c-accent: #e8601c; --c-texte: #1b2430; --c-texte-2: #56616f;
+  --c-bordure: #8793a2; --c-bordure-2: #dfe5ec; --c-bordure-3: #eef2f6;
+  --c-succes: #1d6b3a; --c-succes-fond: #e6f3ea; --c-erreur: #b00020; --c-erreur-fond: #fdecee; --c-avert: #7a5200; --c-avert-fond: #fff5db; --c-avert-trait: #c98a00;
+  --t-12: .75rem; --t-13: .8125rem; --t-14: .875rem; --t-15: .9375rem; --t-17: 1.0625rem; --t-20: 1.25rem; --t-26: 1.625rem;
+  --e-1: 4px; --e-2: 8px; --e-3: 12px; --e-4: 16px; --e-5: 24px; --e-6: 32px; --e-7: 48px; --r-1: 4px; --r-2: 6px; --r-3: 8px;
+  --police: 'Inter Variable', 'Inter', 'Segoe UI Variable Text', 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif;
+}
+* { box-sizing: border-box; }
+body { margin: 0; font-family: var(--police); font-size: var(--t-15); line-height: 1.6; color: var(--c-texte); background: var(--c-fond-page); -webkit-font-smoothing: antialiased; }
+h1, h2, h3, p, ol, ul, dl, dd { margin: 0; }
+.num, td.m, th.m { font-variant-numeric: tabular-nums lining-nums; }
+:focus-visible { outline: 2px solid var(--c-accent); outline-offset: 2px; }
+.page > *, .corps > *, .exemple > *, .variante > *, .contraste > div, .contraste > div > * { min-width: 0; }
+.page { max-width: 880px; margin: 0 auto; padding: var(--e-6) var(--e-4) var(--e-7); display: grid; gap: var(--e-5); }
+.note-maquette { background: var(--c-avert-fond); border: 1px solid var(--c-avert-trait); border-left-width: 4px; border-radius: var(--r-2); padding: var(--e-3) var(--e-4); color: var(--c-avert); font-size: var(--t-14); }
+.a-relire { display: inline-block; font-size: var(--t-12); font-weight: 650; color: var(--c-avert); background: var(--c-avert-fond); border: 1px solid var(--c-avert-trait); border-radius: var(--r-1); padding: 1px 8px; vertical-align: middle; }
+.surtitre { font-size: var(--t-13); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--c-texte-2); }
+h1 { font-size: var(--t-26); color: var(--c-encre); letter-spacing: -.015em; line-height: 1.2; }
+.carte { background: var(--c-fond); border: 1px solid var(--c-bordure-2); border-radius: var(--r-3); }
+.carte > h2 { font-size: var(--t-17); color: var(--c-encre); padding: var(--e-3) var(--e-5); border-bottom: 1px solid var(--c-bordure-3); scroll-margin-top: 12px; }
+.corps { padding: var(--e-4) var(--e-5) var(--e-5); display: grid; gap: var(--e-3); }
+.corps > p, .corps li { max-width: 72ch; }
+.sommaire ol { padding-left: 22px; columns: 2; column-gap: var(--e-6); }
+.sommaire a { color: var(--c-structure); text-underline-offset: 3px; }
+.objectifs ul { padding-left: 20px; }
+dl.termes { display: grid; gap: var(--e-2); }
+dl.termes dt { display: inline; font-weight: 650; color: var(--c-encre); }
+dl.termes dt::after { content: ' : '; font-weight: 400; }
+dl.termes dd { display: inline; }
+dl.termes div { max-width: 72ch; }
+.defile { overflow-x: auto; border: 1px solid var(--c-bordure-2); border-radius: var(--r-2); }
+table { border-collapse: collapse; width: 100%; font-size: var(--t-14); }
+th { text-align: left; background: var(--c-fond-tete); color: var(--c-texte-2); font-weight: 550; font-size: var(--t-13); padding: var(--e-2) var(--e-3); border-bottom: 1px solid var(--c-bordure-2); white-space: nowrap; }
+td { padding: var(--e-2) var(--e-3); border-bottom: 1px solid var(--c-bordure-3); vertical-align: top; }
+tr:last-child td { border-bottom: 0; }
+td.m, th.m { text-align: right; white-space: nowrap; }
+.debit { border-left: 1px solid var(--c-bordure-2); } .credit { border-left: 1px solid var(--c-bordure-2); border-right: 1px solid var(--c-bordure-2); }
+th.debit, th.credit { color: var(--c-structure); }
+td small { display: block; color: var(--c-texte-2); font-size: var(--t-12); }
+tr.total td { font-weight: 650; border-top: 1px solid var(--c-texte); }
+.etiq { font-size: var(--t-12); font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--c-structure); }
+/* Exemple résolu */
+.exemple { background: var(--c-bleu-doux); border-radius: var(--r-3); padding: var(--e-4); display: grid; gap: var(--e-3); }
+.exemple .enonce { font-weight: 600; }
+.exemple ol.raisonnement { padding-left: 22px; display: grid; gap: 2px; }
+.exemple .defile { background: var(--c-fond); }
+.effets { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--e-2); }
+.effets div { background: var(--c-fond); border: 1px solid var(--c-bordure-2); border-radius: var(--r-2); padding: var(--e-2) var(--e-3); font-size: var(--t-14); }
+.effets b { display: block; font-size: var(--t-12); color: var(--c-texte-2); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+.variante { border-top: 1px dashed var(--c-bordure); padding-top: var(--e-3); display: grid; gap: var(--e-2); }
+/* Cas contrastés */
+.contraste { display: grid; grid-template-columns: 1fr 1fr; gap: var(--e-3); }
+.contraste > div { border: 1px solid var(--c-bordure-2); border-radius: var(--r-3); padding: var(--e-3) var(--e-4); display: grid; gap: var(--e-2); align-content: start; }
+.contraste h3 { font-size: var(--t-15); color: var(--c-encre); }
+.contraste .defile { border: 0; }
+/* Compte en T */
+.compte-t { border: 1px solid var(--c-bordure); border-radius: var(--r-1); padding: var(--e-3); max-width: 520px; }
+.compte-t h3 { text-align: center; color: var(--c-structure); font-size: var(--t-15); padding-bottom: var(--e-2); }
+.t { display: grid; grid-template-columns: 1fr 1fr; }
+.t .sens { text-align: center; font-size: var(--t-12); color: var(--c-texte-2); border-bottom: 2px solid var(--c-texte); padding-bottom: 3px; }
+.t .cote { padding: var(--e-2) var(--e-3); display: grid; gap: 3px; align-content: start; font-size: var(--t-14); }
+.t .cote.g { border-right: 2px solid var(--c-texte); }
+.t .l { display: flex; justify-content: space-between; gap: var(--e-2); }
+.t .l span:first-child { color: var(--c-texte-2); font-size: var(--t-13); }
+.t .tot { border-top: 1px solid var(--c-texte); font-weight: 650; padding-top: 3px; }
+/* Encadrés (deux seulement : erreurs fréquentes et à retenir) */
+.erreurs { display: grid; gap: var(--e-2); padding: 0; list-style: none; }
+.erreurs li { border: 1px solid var(--c-bordure-2); border-left: 4px solid var(--c-erreur); border-radius: var(--r-2); padding: var(--e-2) var(--e-3); max-width: none; }
+.erreurs b { color: var(--c-erreur); }
+.retenir { border: 1px solid var(--c-succes); border-left-width: 4px; background: var(--c-succes-fond); border-radius: var(--r-2); padding: var(--e-2) var(--e-3); color: #124526; }
+/* Questions à réponse masquée */
+details { border: 1px solid var(--c-bordure-2); border-radius: var(--r-2); padding: var(--e-2) var(--e-3); background: var(--c-fond); }
+summary { cursor: pointer; font-weight: 550; min-height: 24px; }
+details p { margin-top: var(--e-2); }
+.liens ul { padding-left: 20px; }
+.liens a { color: var(--c-structure); text-underline-offset: 3px; }
+.bases { font-size: var(--t-14); color: var(--c-texte-2); }
+@media (max-width: 640px) {
+  .page { padding: var(--e-4) var(--e-3) var(--e-6); gap: var(--e-4); }
+  .carte > h2 { padding: var(--e-3) var(--e-4); } .corps { padding: var(--e-3) var(--e-4) var(--e-4); }
+  .sommaire ol { columns: 1; } .contraste { grid-template-columns: 1fr; }
+  @media (pointer: coarse) { summary { min-height: 44px; display: flex; align-items: center; } }
+}
+</style>
+</head>
+<body>
+<main class="page">
+  <p class="note-maquette"><b>Maquette, rien n'est appliqué au logiciel.</b> Chapitre rédigé selon le modèle enrichi proposé pour l'onglet Théorie. Le chapitre TVA actuellement en ligne (665 mots) n'est pas modifié. Ce texte fait environ 1'650 mots.</p>
+
+  <header>
+    <p class="surtitre">Théorie · 2ème CFC <span class="a-relire">À relire</span></p>
+    <h1>La TVA, méthode effective</h1>
+  </header>
+
+  <nav class="carte sommaire" aria-label="Plan du chapitre">
+    <h2>Plan du chapitre</h2>
+    <div class="corps"><ol>
+      <li><a href="#s1">Qui paie la TVA ?</a></li>
+      <li><a href="#s2">TVA due et impôt préalable</a></li>
+      <li><a href="#s3">Les taux et les calculs</a></li>
+      <li><a href="#s4">Les comptes de la TVA</a></li>
+      <li><a href="#s5">Comptabiliser au net</a></li>
+      <li><a href="#s6">Comptabiliser au brut</a></li>
+      <li><a href="#s7">Le décompte et le paiement</a></li>
+      <li><a href="#s8">Erreurs fréquentes</a></li>
+      <li><a href="#s9">Vérifiez vos connaissances</a></li>
+      <li><a href="#s10">Pour s'exercer</a></li>
+    </ol></div>
+  </nav>
+
+  <section class="carte objectifs">
+    <h2>Objectifs</h2>
+    <div class="corps">
+      <p>À la fin de ce chapitre, vous savez :</p>
+      <ul>
+        <li>calculer la TVA à partir d'un montant hors taxe ou TVA comprise ;</li>
+        <li>comptabiliser un achat et une vente avec TVA, au net et au brut ;</li>
+        <li>établir le décompte d'une période et comptabiliser le paiement à l'AFC.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="carte">
+    <h2>Les termes à connaître</h2>
+    <div class="corps"><dl class="termes">
+      <div><dt>TVA</dt><dd>taxe sur la valeur ajoutée, impôt de la Confédération sur la consommation.</dd></div>
+      <div><dt>Assujetti</dt><dd>entreprise qui doit facturer la TVA et la verser à la Confédération.</dd></div>
+      <div><dt>Hors taxe (HT)</dt><dd>prix sans la TVA.</dd></div>
+      <div><dt>TVA comprise (TTC)</dt><dd>prix payé par le client, TVA incluse.</dd></div>
+      <div><dt>TVA due</dt><dd>TVA facturée aux clients, que l'entreprise doit reverser.</dd></div>
+      <div><dt>Impôt préalable (IP)</dt><dd>TVA payée aux fournisseurs, que l'entreprise peut déduire.</dd></div>
+      <div><dt>AFC</dt><dd>Administration fédérale des contributions, qui encaisse la TVA.</dd></div>
+      <div><dt>Décompte</dt><dd>calcul, à la fin d'une période, de ce que l'entreprise doit à l'AFC.</dd></div>
+    </dl></div>
+  </section>
+
+  <section class="carte">
+    <h2 id="s1">1. Qui paie la TVA ?</h2>
+    <div class="corps">
+      <p>La TVA est un impôt sur la consommation. C'est le client final qui la supporte : elle est comprise dans le prix qu'il paie.</p>
+      <p>L'entreprise ne fait que l'encaisser pour la Confédération. La TVA n'est donc pour elle ni un produit ni une charge : c'est de l'argent qui ne lui appartient pas.</p>
+      <p>Seules les entreprises assujetties facturent la TVA. Une entreprise le devient dès que son chiffre d'affaires atteint 100'000 francs par an. Certaines prestations sont exclues du champ de l'impôt, par exemple la plupart des soins médicaux, de l'enseignement ou des locations d'immeubles : elles ne portent pas de TVA et ne donnent pas droit à la déduction de l'impôt préalable.</p>
+      <p class="retenir"><b>À retenir.</b> L'entreprise collecte la TVA ; le consommateur la paie.</p>
+    </div>
+  </section>
+
+  <section class="carte">
+    <h2 id="s2">2. TVA due et impôt préalable</h2>
+    <div class="corps">
+      <p>Une entreprise assujettie facture la TVA à ses clients : c'est la TVA due. Elle paie aussi de la TVA à ses propres fournisseurs : c'est l'impôt préalable.</p>
+      <p>Elle a le droit de déduire l'impôt préalable de la TVA due. Elle ne verse à l'AFC que la différence. Ainsi, chaque entreprise ne reverse que la TVA sur ce qu'elle a ajouté au prix.</p>
+      <div class="exemple">
+        <p class="etiq">Exemple</p>
+        <p class="enonce">Un magasin achète un vélo 600.00 hors taxe et le revend 1'000.00 hors taxe.</p>
+        <div class="defile"><table>
+          <thead><tr><th>Étape</th><th class="m">Hors taxe</th><th class="m">TVA 8,1 %</th><th>Qui la reverse</th></tr></thead>
+          <tbody>
+            <tr><td>Achat au grossiste</td><td class="m">600.00</td><td class="m">48.60</td><td>Le grossiste</td></tr>
+            <tr><td>Vente au client</td><td class="m">1'000.00</td><td class="m">81.00</td><td>Le magasin, après déduction de 48.60</td></tr>
+            <tr class="total"><td>Versé par le magasin</td><td></td><td class="m">32.40</td><td>81.00 − 48.60</td></tr>
+          </tbody>
+        </table></div>
+        <p>La Confédération reçoit 48.60 + 32.40 = 81.00, soit 8,1 % du prix final. Le magasin n'a rien payé de sa poche.</p>
+      </div>
+      <p class="retenir"><b>À retenir.</b> TVA due − impôt préalable = montant à verser à l'AFC.</p>
+    </div>
+  </section>
+
+  <section class="carte">
+    <h2 id="s3">3. Les taux et les calculs</h2>
+    <div class="corps">
+      <div class="defile"><table>
+        <thead><tr><th>Taux</th><th>Application</th></tr></thead>
+        <tbody>
+          <tr><td class="num">8,1 %</td><td>Taux normal : la plupart des biens et des services</td></tr>
+          <tr><td class="num">2,6 %</td><td>Taux réduit : notamment denrées alimentaires, livres, médicaments</td></tr>
+          <tr><td class="num">3,8 %</td><td>Taux spécial pour l'hébergement</td></tr>
+        </tbody>
+      </table></div>
+      <p>Deux calculs suffisent. Ils dépendent du montant que vous connaissez.</p>
+      <div class="defile"><table>
+        <thead><tr><th>Vous connaissez</th><th>Calcul de la TVA</th><th>Exemple à 8,1 %</th></tr></thead>
+        <tbody>
+          <tr><td>Le montant hors taxe</td><td>HT × taux</td><td>1'000.00 × 8,1 % = 81.00</td></tr>
+          <tr><td>Le montant TVA comprise</td><td>TTC × taux ÷ (100 + taux)</td><td>1'081.00 × 8,1 ÷ 108,1 = 81.00</td></tr>
+        </tbody>
+      </table></div>
+      <p>Les montants de TVA sont arrondis aux 5 centimes.</p>
+      <div class="exemple">
+        <p class="etiq">Exemple</p>
+        <p class="enonce">Une facture de 249.90 hors taxe, au taux de 8,1 %.</p>
+        <p>249.90 × 8,1 % = 20.2419, arrondi à 20.25. Montant TVA comprise : 249.90 + 20.25 = 270.15.</p>
+      </div>
+      <p class="retenir"><b>À retenir.</b> Le taux s'applique toujours au montant hors taxe. Un montant TVA comprise représente 108,1 % du hors taxe.</p>
+    </div>
+  </section>
+
+  <section class="carte">
+    <h2 id="s4">4. Les comptes de la TVA</h2>
+    <div class="corps">
+      <div class="defile"><table>
+        <thead><tr><th>Compte</th><th>Nature</th><th>Ce qu'il contient</th></tr></thead>
+        <tbody>
+          <tr><td>2200 TVA due</td><td>Passif</td><td>La TVA facturée aux clients</td></tr>
+          <tr><td>1170 IP s/marchandises et services</td><td>Actif</td><td>L'impôt préalable sur les achats de marchandises et de services</td></tr>
+          <tr><td>1171 IP s/investissements et AGE</td><td>Actif</td><td>L'impôt préalable sur les investissements et les autres charges d'exploitation</td></tr>
+          <tr><td>2205 Dettes AFC</td><td>Passif</td><td>Le montant à verser à l'AFC après le décompte</td></tr>
+        </tbody>
+      </table></div>
+      <p>La TVA due est une dette : elle est au passif. L'impôt préalable est une créance envers l'AFC : il est à l'actif.</p>
+      <div class="contraste">
+        <div>
+          <h3>1170 IP s/marchandises et services</h3>
+          <p>Ce que l'entreprise achète pour le revendre, et les services liés à ces achats.</p>
+          <p>Exemple : la TVA sur une facture de vélos destinés à la vente.</p>
+        </div>
+        <div>
+          <h3>1171 IP s/investissements et AGE</h3>
+          <p>Ce qui sert au fonctionnement de l'entreprise : biens durables et autres charges d'exploitation.</p>
+          <p>Exemple : la TVA sur une camionnette, une réparation, l'électricité.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="carte">
+    <h2 id="s5">5. Comptabiliser au net</h2>
+    <div class="corps">
+      <p>Au net, la TVA est séparée à chaque opération. Le compte de charge ou de produit reçoit le montant hors taxe. La TVA va directement dans son propre compte.</p>
+      <div class="exemple">
+        <p class="etiq">Exemple résolu</p>
+        <p class="enonce">Vente de marchandises à crédit, 2'000.00 hors taxe, TVA 8,1 %.</p>
+        <ol class="raisonnement">
+          <li><b>Quels comptes sont touchés ?</b> Créances clients, Ventes de marchandises et TVA due.</li>
+          <li><b>De quel type est chacun ?</b> Un actif, un produit et un passif.</li>
+          <li><b>Augmente ou diminue ?</b> Les trois augmentent : la créance au débit, la vente et la TVA due au crédit.</li>
+        </ol>
+        <p>TVA : 2'000.00 × 8,1 % = 162.00. Le client devra 2'162.00.</p>
+        <div class="defile"><table>
+          <thead><tr><th class="debit">Débit</th><th class="credit">Crédit</th><th class="m">Montant</th></tr></thead>
+          <tbody>
+            <tr><td class="debit">Créances clients<small>1100</small></td><td class="credit"></td><td class="m">2'162.00</td></tr>
+            <tr><td class="debit"></td><td class="credit">Ventes de marchandises<small>3200</small></td><td class="m">2'000.00</td></tr>
+            <tr><td class="debit"></td><td class="credit">TVA due<small>2200</small></td><td class="m">162.00</td></tr>
+          </tbody>
+        </table></div>
+        <div class="effets">
+          <div><b>Bilan, actif</b>Créances clients + 2'162.00</div>
+          <div><b>Bilan, passif</b>TVA due + 162.00</div>
+          <div><b>Compte de résultat</b>Produits + 2'000.00</div>
+        </div>
+        <p>Le résultat augmente de 2'000.00 seulement : la TVA n'est pas un produit.</p>
+        <div class="variante">
+          <p class="etiq">Variante</p>
+          <p class="enonce">Achat d'une camionnette à crédit, 20'000.00 hors taxe, TVA 8,1 %.</p>
+          <p>La TVA payée est un impôt préalable sur un investissement : 20'000.00 × 8,1 % = 1'620.00. Ce n'est pas un achat de marchandises : la dette va dans Autres dettes.</p>
+          <div class="defile"><table>
+            <thead><tr><th class="debit">Débit</th><th class="credit">Crédit</th><th class="m">Montant</th></tr></thead>
+            <tbody>
+              <tr><td class="debit">Véhicules<small>1530</small></td><td class="credit"></td><td class="m">20'000.00</td></tr>
+              <tr><td class="debit">IP s/investissements et AGE<small>1171</small></td><td class="credit"></td><td class="m">1'620.00</td></tr>
+              <tr><td class="debit"></td><td class="credit">Autres dettes<small>2010</small></td><td class="m">21'620.00</td></tr>
+            </tbody>
+          </table></div>
+        </div>
+      </div>
+      <p class="retenir"><b>À retenir.</b> Au net : le hors taxe dans le compte de charge, d'actif ou de produit ; la TVA dans son compte ; le total TVA comprise dans la créance, la dette ou la banque.</p>
+    </div>
+  </section>
+
+  <section class="carte">
+    <h2 id="s6">6. Comptabiliser au brut</h2>
+    <div class="corps">
+      <p>Au brut, on comptabilise pendant la période les montants TVA comprise dans les comptes de charges et de produits. À la fin de la période, on calcule la TVA contenue dans ces comptes et on la vire dans les comptes de TVA.</p>
+      <p>Le résultat final est le même qu'au net. Seul le moment où la TVA est séparée change.</p>
+      <div class="contraste">
+        <div>
+          <h3>Au net</h3>
+          <p>La même vente de 2'162.00 TVA comprise, en une écriture :</p>
+          <div class="defile"><table><tbody>
+            <tr><td>Créances clients</td><td class="m">2'162.00</td></tr>
+            <tr><td>à Ventes de marchandises</td><td class="m">2'000.00</td></tr>
+            <tr><td>à TVA due</td><td class="m">162.00</td></tr>
+          </tbody></table></div>
+        </div>
+        <div>
+          <h3>Au brut</h3>
+          <p>À la facture, puis à la fin de la période :</p>
+          <div class="defile"><table><tbody>
+            <tr><td>Créances clients / Ventes de marchandises</td><td class="m">2'162.00</td></tr>
+            <tr><td>Ventes de marchandises / TVA due</td><td class="m">162.00</td></tr>
+          </tbody></table></div>
+        </div>
+      </div>
+      <p>Pour les achats, le raisonnement est le même : l'achat est comptabilisé TVA comprise, puis l'impôt préalable est retiré du compte d'achats à la fin de la période (IP s/marchandises et services / Achats de marchandises).</p>
+    </div>
+  </section>
+
+  <section class="carte">
+    <h2 id="s7">7. Le décompte et le paiement</h2>
+    <div class="corps">
+      <p>À la fin de chaque période, en général le trimestre, l'entreprise établit son décompte. Elle vire l'impôt préalable en diminution de la TVA due. Le solde est sa dette envers l'AFC.</p>
+      <div class="exemple">
+        <p class="etiq">Exemple résolu</p>
+        <p class="enonce">Fin du trimestre : TVA due 3'321.00 ; impôt préalable 810.00 sur les marchandises et 1'644.30 sur les investissements et autres charges.</p>
+        <p>À verser : 3'321.00 − 810.00 − 1'644.30 = 866.70.</p>
+        <div class="defile"><table>
+          <thead><tr><th>Étape</th><th class="debit">Débit</th><th class="credit">Crédit</th><th class="m">Montant</th></tr></thead>
+          <tbody>
+            <tr><td>Impôt préalable viré</td><td class="debit">TVA due</td><td class="credit">IP s/marchandises et services</td><td class="m">810.00</td></tr>
+            <tr><td>Impôt préalable viré</td><td class="debit">TVA due</td><td class="credit">IP s/investissements et AGE</td><td class="m">1'644.30</td></tr>
+            <tr><td>Solde dû à l'AFC</td><td class="debit">TVA due</td><td class="credit">Dettes AFC</td><td class="m">866.70</td></tr>
+            <tr><td>Paiement</td><td class="debit">Dettes AFC</td><td class="credit">Banque</td><td class="m">866.70</td></tr>
+          </tbody>
+        </table></div>
+        <div class="compte-t" role="img" aria-label="Compte TVA due : au crédit 3'321.00 ; au débit 810.00, 1'644.30 et 866.70 ; le compte est soldé.">
+          <h3>TVA due</h3>
+          <div class="t">
+            <div class="sens">Débit</div><div class="sens">Crédit</div>
+            <div class="cote g">
+              <div class="l"><span>IP marchandises</span><span class="num">810.00</span></div>
+              <div class="l"><span>IP investissements</span><span class="num">1'644.30</span></div>
+              <div class="l"><span>Dettes AFC</span><span class="num">866.70</span></div>
+              <div class="l tot"><span></span><span class="num">3'321.00</span></div>
+            </div>
+            <div class="cote">
+              <div class="l"><span>TVA du trimestre</span><span class="num">3'321.00</span></div>
+              <div class="l">&nbsp;</div><div class="l">&nbsp;</div>
+              <div class="l tot"><span></span><span class="num">3'321.00</span></div>
+            </div>
+          </div>
+        </div>
+        <p>Après le décompte, le compte TVA due et les deux comptes d'impôt préalable sont à zéro. Les trois premières écritures peuvent être réunies en une écriture composée.</p>
+      </div>
+      <p class="retenir"><b>À retenir.</b> Le décompte solde les trois comptes de TVA ; ce qui reste est dans Dettes AFC jusqu'au paiement.</p>
+    </div>
+  </section>
+
+  <section class="carte">
+    <h2 id="s8">8. Erreurs fréquentes</h2>
+    <div class="corps"><ul class="erreurs">
+      <li><b>Oublier la TVA.</b> L'écriture ne contient que le hors taxe, ou que le total. Si l'entreprise est assujettie, chaque achat et chaque vente soumis portent une ligne de TVA.</li>
+      <li><b>Appliquer le taux au montant TVA comprise.</b> 8,1 % de 1'081.00 font 87.55, et non 81.00. À partir d'un montant TVA comprise, on multiplie par 8,1 et on divise par 108,1.</li>
+      <li><b>Passer la TVA en charge ou en produit.</b> La TVA payée n'est pas un coût et la TVA encaissée n'est pas une vente : elles vont dans les comptes de TVA.</li>
+      <li><b>Se tromper de compte d'impôt préalable.</b> Marchandises et services d'un côté, investissements et autres charges d'exploitation de l'autre.</li>
+      <li><b>Arrêter le décompte trop tôt.</b> Virer l'impôt préalable ne suffit pas : le solde de TVA due doit encore être viré à Dettes AFC.</li>
+    </ul></div>
+  </section>
+
+  <section class="carte">
+    <h2 id="s9">9. Vérifiez vos connaissances</h2>
+    <div class="corps">
+      <details><summary>Une facture s'élève à 648.60 TVA comprise, au taux de 8,1 %. Quelle est la TVA ?</summary><p>648.60 × 8,1 ÷ 108,1 = 48.60. Le montant hors taxe est de 600.00.</p></details>
+      <details><summary>Pourquoi la TVA encaissée auprès d'un client n'augmente-t-elle pas le bénéfice ?</summary><p>Parce qu'elle n'appartient pas à l'entreprise : elle est due à la Confédération. Elle est inscrite au passif, dans TVA due, et non dans un compte de produit.</p></details>
+      <details><summary>L'entreprise reçoit une facture d'électricité de 300.00 hors taxe, à payer. Quelle écriture au net ?</summary><p>TVA : 300.00 × 8,1 % = 24.30. Électricité, gaz 300.00 et IP s/investissements et AGE 24.30 au débit ; Autres dettes 324.30 au crédit.</p></details>
+      <details><summary>TVA due 2'430.00, impôt préalable 1'180.00 au total. Quel montant va dans Dettes AFC ?</summary><p>2'430.00 − 1'180.00 = 1'250.00.</p></details>
+      <details><summary>Après le décompte et avant le paiement, quels comptes de TVA ont encore un solde ?</summary><p>Un seul : Dettes AFC. TVA due et les deux comptes d'impôt préalable sont soldés.</p></details>
+    </div>
+  </section>
+
+  <section class="carte liens">
+    <h2 id="s10">10. Pour s'exercer</h2>
+    <div class="corps">
+      <ul>
+        <li>Parcours guidé : module « TVA : comptabilisation au net » de l'onglet Apprendre.</li>
+        <li>Exercice : Électro Salève, TVA du premier trimestre.</li>
+        <li>Dossier de pièces : Outils &amp; Cie, TVA du premier trimestre.</li>
+        <li>Dans un exercice : rubrique « TVA », avec la calculatrice et le décompte.</li>
+      </ul>
+      <p class="bases"><b>Bases légales.</b> Loi fédérale régissant la taxe sur la valeur ajoutée (LTVA) : art. 10 (assujettissement, seuil de 100'000 francs), art. 25 (taux de l'impôt).</p>
+    </div>
+  </section>
+</main>
+</body>
+</html>
