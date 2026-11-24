@@ -115,3 +115,36 @@ test('leçon d’un module et navigation en bas de page', async ({ page }) => {
   await page.getByRole('navigation', { name: 'Autres modules' }).getByRole('button', { name: 'Tous les modules' }).click();
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Apprendre pas à pas');
 });
+
+test('théorie enrichie : chapitre lisible à 360 px, réponses masquées au clavier, sans défaut d’accessibilité', async ({ page }) => {
+  const { default: AxeBuilder } = await import('@axe-core/playwright');
+  await page.setViewportSize({ width: 360, height: 740 });
+  await page.goto('./');
+  await page.getByRole('navigation', { name: 'Rubriques' }).getByRole('button', { name: 'Théorie' }).click();
+  await expect(page.locator('.sommaire').getByText('À relire').first()).toBeVisible();
+  await page.locator('.sommaire li button').filter({ hasText: 'Compte privé' }).click();
+  await expect(page.getByRole('heading', { level: 2, name: /Compte privé et bouclement/ })).toBeVisible();
+  await expect(page.getByText('À la fin de ce chapitre, vous savez')).toBeVisible();
+  for (const titre of ['Les termes à connaître', 'Erreurs fréquentes', 'Vérifiez vos connaissances', "Pour s'exercer"]) {
+    await expect(page.getByRole('heading', { level: 3, name: titre })).toBeVisible();
+  }
+  const mesure = await page.evaluate(() => ({
+    page: document.documentElement.scrollWidth,
+    hors: [...document.querySelectorAll<HTMLElement>('article *')].filter((e) => {
+      if (e.offsetParent === null) return false;
+      if (e.getBoundingClientRect().right <= window.innerWidth + 1) return false;
+      for (let q = e.parentElement; q; q = q.parentElement) if (['auto', 'scroll'].includes(getComputedStyle(q).overflowX)) return false;
+      return true;
+    }).length,
+  }));
+  expect(mesure.page).toBeLessThanOrEqual(360);
+  expect(mesure.hors).toBe(0);
+  // Réponse masquée : fermée au départ, ouverte au clavier.
+  const question = page.locator('.questions details').first();
+  await expect(question.locator('p')).toBeHidden();
+  await question.locator('summary').focus();
+  await page.keyboard.press('Enter');
+  await expect(question.locator('p')).toBeVisible();
+  const axe = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze();
+  expect(axe.violations.map((v) => `${v.id} (${v.nodes.length})`)).toEqual([]);
+});

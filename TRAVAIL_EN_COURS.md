@@ -97,3 +97,21 @@ Exception à la charte pour l'accueil seulement : voir CLAUDE.md, section « Int
 - 24.11.2026 — F4 faite et publiée sur la prévisualisation. Restent F3 (accord pour la fusion) et F5.
 - 24.11.2026 — F5 faite et publiée sur la prévisualisation. Reste F3 : accord de l'enseignant pour la fusion dans `main`.
 - 24.11.2026 — F3 faite : fusion dans `main` demandée par l'enseignant (« Fusionner dans main »). Chantier terminé.
+
+# Chantier « Théorie de référence » (demande du 24.11.2026)
+
+Faire de l'onglet Théorie la référence complète du cours ; les leçons d'Apprendre y renvoient. Règles : aucune
+règle ni compte inventé, texte original, rien de validé n'est retiré, nouveau contenu sur `apercu` et marqué
+« À relire », une année à la fois, fusion dans `main` seulement après accord explicite. Détails dans CLAUDE.md.
+
+- [x] G1. Proposition : articulation Théorie / leçons, couverture, modèle de chapitre, chapitre TVA en maquette
+  (`public/maquettes/theorie-chapitre-tva.html`). Modèle validé par l'enseignant (« Oui, 1ère CFC »).
+- [x] G2. Modèle enrichi dans le code (nouveaux blocs, affichage, tests) et 1ère CFC : neuf chapitres
+  (`src/data/theorie-cfc1.ts`).
+- [ ] G3. Relecture de la 1ère CFC par l'enseignant.
+- [ ] G4. 2ème CFC (TVA selon la maquette, amortissements, transitoires, créances, salaires ; chapitres à créer :
+  facturation, budget, marge contributive et répartition des coûts).
+- [ ] G5. Maturité professionnelle.
+- [ ] G6. Vérification finale, puis fusion dans `main` après accord explicite ; raccourcir ensuite les leçons.
+
+- 24.11.2026 — G1 et G2 faites. Reste G3 : attendre la relecture de la 1ère CFC avant de rédiger la 2ème CFC.

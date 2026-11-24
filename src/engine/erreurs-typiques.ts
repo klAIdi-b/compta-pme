@@ -57,7 +57,7 @@ const REGLES: Regle[] = [
     explication:
       "Dettes fournisseurs seulement pour des marchandises achetées pour être revendues. Pour un investissement " +
       '(véhicule, mobilier, machine, ordinateur) ou une autre facture (service, frais) : Autres dettes.',
-    chapitre: 'journal',
+    chapitre: 'credit',
   },
   {
     id: 'fournisseurs-en-autres-dettes',
@@ -65,7 +65,7 @@ const REGLES: Regle[] = [
     attendu: parmi('2000'),
     saisi: parmi('2010'),
     explication: 'Des marchandises achetées à crédit pour être revendues : la dette va dans Dettes fournisseurs.',
-    chapitre: 'journal',
+    chapitre: 'credit',
   },
   {
     id: 'paiement-en-charge',
@@ -75,7 +75,7 @@ const REGLES: Regle[] = [
     explication:
       "La charge a déjà été comptabilisée à la réception de la facture. Le paiement éteint la dette : on débite la dette, " +
       "pas une deuxième fois la charge.",
-    chapitre: 'journal',
+    chapitre: 'credit',
   },
   {
     id: 'encaissement-en-vente',
@@ -85,7 +85,7 @@ const REGLES: Regle[] = [
     explication:
       "La vente a déjà été comptabilisée à l'envoi de la facture. L'encaissement éteint la créance du client : on crédite " +
       'Créances clients, pas une deuxième fois les ventes.',
-    chapitre: 'journal',
+    chapitre: 'credit',
   },
   {
     id: 'credit-paye-comptant-client',
@@ -94,7 +94,7 @@ const REGLES: Regle[] = [
     saisi: LIQUIDITES,
     explication:
       "Le client recevra une facture et paiera plus tard : aucun argent n'entre aujourd'hui, l'entreprise a une créance.",
-    chapitre: 'journal',
+    chapitre: 'credit',
   },
   {
     id: 'credit-paye-comptant-fournisseur',
@@ -103,7 +103,7 @@ const REGLES: Regle[] = [
     saisi: LIQUIDITES,
     explication:
       "La facture sera payée plus tard : aucun argent ne sort aujourd'hui, l'entreprise a une dette.",
-    chapitre: 'journal',
+    chapitre: 'credit',
   },
   {
     id: 'moyen-de-paiement',
@@ -128,7 +128,7 @@ const REGLES: Regle[] = [
     saisi: CHARGE,
     explication:
       "Cette dépense concerne la vie privée du propriétaire : elle va dans son compte privé, pas dans les charges de l'entreprise.",
-    chapitre: 'resultat',
+    chapitre: 'prive',
   },
   {
     id: 'charge-en-prive',
@@ -136,7 +136,7 @@ const REGLES: Regle[] = [
     attendu: CHARGE,
     saisi: parmi('2850'),
     explication: "Cette dépense sert à l'entreprise : c'est une charge, pas un prélèvement privé.",
-    chapitre: 'resultat',
+    chapitre: 'prive',
   },
   {
     id: 'achat-en-stock',
@@ -185,3 +185,6 @@ export function erreurTypique(eleve: readonly LigneEcriture[], corrige: readonly
   }
   return null;
 }
+
+/** Identifiants des erreurs typiques reconnues (liens depuis la théorie, tests). */
+export const IDS_ERREURS_TYPIQUES: string[] = [...new Set(REGLES.map((r) => r.id))];

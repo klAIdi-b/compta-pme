@@ -5,6 +5,7 @@
 
 import type { Niveau } from '../engine/plan';
 import { RATIOS } from '../engine/analyse';
+import { enrichirCfc1 } from './theorie-cfc1';
 
 /** Passe à true une fois le contenu relu et validé par l'enseignant (retire la mention « proposé »). */
 export const THEORIE_VALIDEE = true;
@@ -21,12 +22,44 @@ export interface ExempleEcriture {
   lignes: LigneExemple[];
 }
 
+/** Poste d'un compte en T ou d'un bilan dessiné : libellé et montant en francs. */
+export interface PosteSchema {
+  libelle: string;
+  montant: number;
+}
+
 export type Bloc =
   | { type: 'p'; texte: string }
   | { type: 'liste'; items: string[] }
   | { type: 'ecritures'; titre?: string; exemples: ExempleEcriture[] }
   | { type: 'tableau'; entetes: string[]; lignes: string[][] }
-  | { type: 'retenir'; texte: string };
+  | { type: 'retenir'; texte: string }
+  // ----- Modèle enrichi (24.11.2026) -----
+  /** Vocabulaire du chapitre. */
+  | { type: 'definitions'; termes: { terme: string; definition: string }[] }
+  /** Exemple résolu pas à pas : les trois questions, le calcul, l'écriture, l'effet sur le bilan et le résultat. */
+  | {
+      type: 'exemple';
+      enonce: string;
+      raisonnement?: string[];
+      calcul?: string[];
+      lignes?: LigneExemple[];
+      effets?: { actif?: string; passif?: string; resultat?: string };
+      conclusion?: string;
+      variante?: { enonce: string; texte?: string[]; lignes?: LigneExemple[] };
+    }
+  /** Deux notions qui se confondent, côte à côte. */
+  | { type: 'contraste'; cas: { titre: string; texte: string[]; lignes?: LigneExemple[] }[] }
+  /** Erreurs fréquentes ; `typique` renvoie à une erreur reconnue par le journal (src/engine/erreurs-typiques.ts). */
+  | { type: 'erreurs'; items: { erreur: string; correction: string; typique?: string }[] }
+  /** Compte en T : le solde est inscrit par l'auteur, les deux côtés ont le même total. */
+  | { type: 'compteT'; compte: string; debit: PosteSchema[]; credit: PosteSchema[] }
+  /** Bilan dessiné en deux colonnes (avant ou après une opération). */
+  | { type: 'bilan'; titre: string; actif: PosteSchema[]; passif: PosteSchema[] }
+  /** Questions d'auto-vérification, réponse masquée. */
+  | { type: 'questions'; items: { question: string; reponse: string }[] }
+  /** Pour s'exercer : module du parcours Apprendre et exercices du logiciel (identifiants). */
+  | { type: 'liens'; module?: string; exercices?: string[] };
 
 export interface Section {
   titre: string;
@@ -40,6 +73,10 @@ export interface Chapitre {
   niveau: Niveau;
   resume: string;
   bases?: string[];
+  /** Ce que l'élève sait faire à la fin du chapitre (modèle enrichi). */
+  objectifs?: string[];
+  /** Chapitre enrichi pas encore validé par l'enseignant : mention « À relire » affichée. */
+  aRelire?: boolean;
   sections: Section[];
 }
 
@@ -47,7 +84,8 @@ const s = (debit: string, credit: string, montant: number): LigneExemple[] => [{
 const D = (compte: string, montant: number): LigneExemple => ({ debit: compte, credit: null, montant });
 const C = (compte: string, montant: number): LigneExemple => ({ debit: null, credit: compte, montant });
 
-export const CHAPITRES: Chapitre[] = [
+/** Chapitres validés par l'enseignant le 07.11.2026 : ils restent tels quels et servent de base aux chapitres enrichis. */
+export const CHAPITRES_VALIDES: Chapitre[] = [
   // ───────────────────────────── CFC 1 ─────────────────────────────
   {
     id: 'cadre-legal',
@@ -2311,6 +2349,12 @@ export const CHAPITRES: Chapitre[] = [
 ];
 
 /** Chapitres visibles pour un niveau donné (CFC1 ⊂ CFC2 ⊂ MP). */
+/**
+ * Chapitres affichés : les chapitres validés, enrichis année par année (modèle du 24.11.2026). Les chapitres enrichis
+ * gardent toutes les sections validées et portent `aRelire` jusqu'à la validation de l'enseignant.
+ */
+export const CHAPITRES: Chapitre[] = enrichirCfc1(CHAPITRES_VALIDES);
+
 export function chapitresDuNiveau(niveau: Niveau): Chapitre[] {
   const ordre: Niveau[] = ['CFC1', 'CFC2', 'MP'];
   return CHAPITRES.filter((c) => ordre.indexOf(c.niveau) <= ordre.indexOf(niveau));
