@@ -141,4 +141,7 @@ Corrections faites une à une, sur accord de l'enseignant, d'abord sur `apercu`.
 - [x] E1. « Bilan en direct » : la perte de l'exercice n'est plus comptée deux fois. Blocs, totaux et effet de la dernière
   écriture calculés par `src/engine/bilan-vivant.ts` à partir de `bilan()` ; test `tests/bilan-vivant.test.ts` sur tous les
   corrigés ; contrôle à l'écran dans `e2e/eleve.spec.ts`. Fait le 24.11.2026, à commiter et publier sur accord.
-- [ ] E2 à E9 et les autres actions du rapport : en attente des décisions de l'enseignant.
+- [x] E2. Bouclement par 9000 : la correction accepte une clôture complète des comptes de charges et de produits par 9000
+  (`clotureDeGestionPar9000`), une clôture partielle reste fausse ; phrase du chapitre Journal réécrite selon la méthode du
+  18.11.2026. Fait le 24.11.2026, à commiter et publier sur accord.
+- [ ] E3 à E9 et les autres actions du rapport : en attente des décisions de l'enseignant.

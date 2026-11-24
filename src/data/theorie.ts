@@ -549,7 +549,7 @@ export const CHAPITRES_VALIDES: Chapitre[] = [
             items: [
               "Ouvrir les comptes d'actif et de passif d'après le bilan d'ouverture.",
               'Passer chaque opération au journal, puis la reporter dans les comptes du grand livre.',
-              'Clôturer les comptes de charges et de produits par le compte de résultat (9000).',
+              "Établir le compte de résultat d'après les soldes des comptes de charges et de produits : il donne le bénéfice ou la perte de l'exercice.",
               'Virer le bénéfice ou la perte au compte privé, puis le solde du compte privé au capital.',
               "Clôturer les comptes d'actif et de passif et dresser le bilan final, qui servira à rouvrir l'exercice suivant.",
             ],

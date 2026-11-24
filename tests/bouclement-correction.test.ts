@@ -3,7 +3,8 @@ import { demoCfc1 } from '../src/data/demo-cfc1';
 import { creerDossier, type Exercice } from '../src/engine/exercice';
 import { ajouterEcriture, extourner } from '../src/engine/journal';
 import { ecrituresDeBouclement } from '../src/engine/closing';
-import { diagnostiquerBouclement, PIECE_BOUCLEMENT } from '../src/engine/correction-bouclement';
+import { clotureDeGestionPar9000, diagnostiquerBouclement, PIECE_BOUCLEMENT } from '../src/engine/correction-bouclement';
+import { soldes } from '../src/engine/ledger';
 import { corrigerCopie } from '../src/engine/notation';
 import type { Dossier, LigneEcriture } from '../src/engine/dossier';
 import { chf, plan } from './fixtures';
@@ -99,6 +100,81 @@ describe('correction du bouclement', () => {
     expect(avec.note).toBe(6);
     const sansBouclement = { ...demoCfc1, parametres: { ...demoCfc1.parametres, corrigerBouclement: false } };
     expect(corrigerCopie(sansBouclement, d).operations.some((o) => o.piece === PIECE_BOUCLEMENT)).toBe(false);
+  });
+});
+
+/** Lignes qui soldent chaque compte de charges et de produits par le compte de résultat (méthode non enseignée au cours). */
+function lignesDeCloture(d: Dossier): LigneEcriture[] {
+  const types = new Map(plan.map((c) => [c.numero, c.type]));
+  const lignes: LigneEcriture[] = [];
+  for (const [n, x] of soldes(d)) {
+    const t = types.get(n);
+    if ((t !== 'charge' && t !== 'produit') || x.solde === 0) continue;
+    lignes.push(x.solde > 0 ? { debit: '9000', credit: n, montant: x.solde } : { debit: n, credit: '9000', montant: -x.solde });
+  }
+  return lignes;
+}
+
+describe('bouclement par le compte de résultat avec clôture des comptes de gestion (audit du 24.11.2026)', () => {
+  const virements = (d: Dossier) => {
+    const r = ecrituresDeBouclement(d);
+    if (!r.ok) throw new Error();
+    return r.valeur.map((e) => e.lignes);
+  };
+
+  it('clôture complète par 9000, écriture par écriture, puis B1 et B2 : juste, tous les points, note 6', () => {
+    const base = operations();
+    const attendus = virements(base);
+    let d = base;
+    for (const l of lignesDeCloture(base)) d = passer(d, 'C', [l]);
+    expect(clotureDeGestionPar9000(d, ex).size).toBe(lignesDeCloture(base).length);
+    expect(diagnostiquerBouclement(d, ex)).toBe('manquante');
+    attendus.forEach((lignes, i) => (d = passer(d, `B${i + 1}`, lignes)));
+    expect(diagnostiquerBouclement(d, ex)).toBe('juste');
+    const copie = corrigerCopie(ex, d);
+    expect(copie.operations.at(-1)).toMatchObject({ piece: PIECE_BOUCLEMENT, points: 3, max: 3 });
+    expect(copie.points).toBe(copie.max);
+    expect(copie.note).toBe(6);
+  });
+
+  it('clôture complète passée en deux écritures composées (charges, puis produits) : juste aussi', () => {
+    const base = operations();
+    const cloture = lignesDeCloture(base);
+    const charges = cloture.filter((l) => l.debit === '9000');
+    const produits = cloture.filter((l) => l.credit === '9000');
+    const total = (ls: LigneEcriture[]) => ls.reduce((t, l) => t + l.montant, 0);
+    let d = passer(base, 'C1', [{ debit: '9000', credit: null, montant: total(charges) }, ...charges.map((l) => ({ debit: null, credit: l.credit, montant: l.montant }))]);
+    d = passer(d, 'C2', [...produits.map((l) => ({ debit: l.debit, credit: null, montant: l.montant })), { debit: null, credit: '9000', montant: total(produits) }]);
+    virements(base).forEach((lignes, i) => (d = passer(d, `B${i + 1}`, lignes)));
+    expect(diagnostiquerBouclement(d, ex)).toBe('juste');
+    expect(corrigerCopie(ex, d).note).toBe(6);
+  });
+
+  it('clôture partielle (un compte de charges oublié) : non reconnue, le bouclement reste faux', () => {
+    const base = operations();
+    let d = base;
+    for (const l of lignesDeCloture(base).slice(1)) d = passer(d, 'C', [l]);
+    expect(clotureDeGestionPar9000(d, ex).size).toBe(0);
+    virements(base).forEach((lignes, i) => (d = passer(d, `B${i + 1}`, lignes)));
+    expect(diagnostiquerBouclement(d, ex)).not.toBe('juste');
+    expect(corrigerCopie(ex, d).operations.at(-1)).toMatchObject({ piece: PIECE_BOUCLEMENT, max: 3 });
+    expect(corrigerCopie(ex, d).operations.at(-1)!.points).toBeLessThan(3);
+  });
+
+  it('clôture complète mais virement du résultat faux : le bouclement reste faux', () => {
+    const base = operations();
+    let d = base;
+    for (const l of lignesDeCloture(base)) d = passer(d, 'C', [l]);
+    d = passer(d, 'B1', [{ debit: '9000', credit: '2800', montant: chf(3530) }]);
+    expect(diagnostiquerBouclement(d, ex)).not.toBe('juste');
+  });
+
+  it('la méthode du cours (B1 et B2 seulement) n’est pas touchée', () => {
+    const base = operations();
+    let d = base;
+    virements(base).forEach((lignes, i) => (d = passer(d, `B${i + 1}`, lignes)));
+    expect(clotureDeGestionPar9000(d, ex).size).toBe(0);
+    expect(diagnostiquerBouclement(d, ex)).toBe('juste');
   });
 });
 
