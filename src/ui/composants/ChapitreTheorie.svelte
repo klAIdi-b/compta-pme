@@ -18,6 +18,10 @@
   function lignes(e: ExempleEcriture) {
     return e.lignes.map((l) => ({ debit: l.debit, credit: l.credit, montant: fr(l.montant) }));
   }
+  /** Espaces insécables du français : un « % », un deux-points ou un point d'interrogation ne passent jamais seuls à la ligne. */
+  const ins = (t: string) => t.replace(/ ([%:;?!»])/g, ' $1').replace(/« /g, '« ');
+  /** Sur téléphone, un tableau de quatre colonnes ou plus s'affiche en fiches (une par ligne, montants étiquetés). */
+  const enFiches = (entetes: string[]) => entetes.length >= 4;
   const titreModule = (id: string) => MODULES.find((m) => m.id === id)?.titre ?? id;
   const titreExercice = (id: string) => exercicesDemo.find((e) => e.id === id)?.titre ?? id;
 </script>
@@ -42,17 +46,29 @@
     <h3>{sec.titre}</h3>
     {#each sec.blocs as b}
       {#if b.type === 'p'}
-        <p>{b.texte}</p>
+        <p>{ins(b.texte)}</p>
       {:else if b.type === 'retenir'}
-        <p class="retenir"><b>À retenir :</b> {b.texte}</p>
+        <p class="retenir"><b>À retenir :</b> {ins(b.texte)}</p>
       {:else if b.type === 'liste'}
-        <ul>{#each b.items as it}<li>{it}</li>{/each}</ul>
+        <ul>{#each b.items as it}<li>{ins(it)}</li>{/each}</ul>
       {:else if b.type === 'tableau'}
         <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
         <div class="defile" tabindex="0" role="group" aria-label={`Tableau : ${b.entetes.filter(Boolean).join(', ')}`}>
-          <table class="tableau">
-            <thead><tr>{#each b.entetes as e}<th>{e}</th>{/each}</tr></thead>
-            <tbody>{#each b.lignes as l}<tr>{#each l as cel}<td>{cel}</td>{/each}</tr>{/each}</tbody>
+          <table class="tableau" class:empile={enFiches(b.entetes)} style:--colonnes={Math.min(b.entetes.length - 1, 3)}>
+            <thead><tr>{#each b.entetes as e}<th>{ins(e)}</th>{/each}</tr></thead>
+            <tbody>
+              {#each b.lignes as l, n}
+                <tr class:zebre={n % 2 === 1}>
+                  {#each l as cel, k}
+                    {#if enFiches(b.entetes)}
+                      <td class:large={k === 0} class:vide={k > 0 && !cel} data-etiquette={k > 0 && cel ? b.entetes[k] || undefined : undefined}>{ins(cel)}</td>
+                    {:else}
+                      <td>{ins(cel)}</td>
+                    {/if}
+                  {/each}
+                </tr>
+              {/each}
+            </tbody>
           </table>
         </div>
       {:else if b.type === 'ecritures'}
@@ -76,28 +92,28 @@
         </table>
       {:else if b.type === 'definitions'}
         <dl class="termes">
-          {#each b.termes as t (t.terme)}<div><dt>{t.terme}</dt><dd>{t.definition}</dd></div>{/each}
+          {#each b.termes as t (t.terme)}<div><dt>{t.terme}</dt><dd>{ins(t.definition)}</dd></div>{/each}
         </dl>
       {:else if b.type === 'exemple'}
         <div class="exemple">
           <p class="etiq">Exemple résolu</p>
-          <p class="enonce">{b.enonce}</p>
+          <p class="enonce">{ins(b.enonce)}</p>
           {#if b.raisonnement?.length}<ol class="raisonnement">{#each b.raisonnement as r}<li>{r}</li>{/each}</ol>{/if}
-          {#if b.calcul?.length}<ul class="calcul">{#each b.calcul as c}<li>{c}</li>{/each}</ul>{/if}
+          {#if b.calcul?.length}<ul class="calcul">{#each b.calcul as c}<li>{ins(c)}</li>{/each}</ul>{/if}
           {#if b.lignes?.length}{@render ecriture(b.lignes)}{/if}
           {#if b.effets}
             <div class="effets">
-              {#if b.effets.actif}<div><b>Bilan, actif</b>{b.effets.actif}</div>{/if}
-              {#if b.effets.passif}<div><b>Bilan, passif</b>{b.effets.passif}</div>{/if}
-              {#if b.effets.resultat}<div><b>Compte de résultat</b>{b.effets.resultat}</div>{/if}
+              {#if b.effets.actif}<div><b>Bilan, actif</b>{ins(b.effets.actif)}</div>{/if}
+              {#if b.effets.passif}<div><b>Bilan, passif</b>{ins(b.effets.passif)}</div>{/if}
+              {#if b.effets.resultat}<div><b>Compte de résultat</b>{ins(b.effets.resultat)}</div>{/if}
             </div>
           {/if}
-          {#if b.conclusion}<p>{b.conclusion}</p>{/if}
+          {#if b.conclusion}<p>{ins(b.conclusion)}</p>{/if}
           {#if b.variante}
             <div class="variante">
               <p class="etiq">Variante</p>
-              <p class="enonce">{b.variante.enonce}</p>
-              {#each b.variante.texte ?? [] as t}<p>{t}</p>{/each}
+              <p class="enonce">{ins(b.variante.enonce)}</p>
+              {#each b.variante.texte ?? [] as t}<p>{ins(t)}</p>{/each}
               {#if b.variante.lignes?.length}{@render ecriture(b.variante.lignes)}{/if}
             </div>
           {/if}
@@ -106,15 +122,15 @@
         <div class="contraste">
           {#each b.cas as c (c.titre)}
             <div class="cas">
-              <h4>{c.titre}</h4>
-              {#each c.texte as t}<p>{t}</p>{/each}
+              <h4>{ins(c.titre)}</h4>
+              {#each c.texte as t}<p>{ins(t)}</p>{/each}
               {#if c.lignes?.length}{@render ecriture(c.lignes)}{/if}
             </div>
           {/each}
         </div>
       {:else if b.type === 'erreurs'}
         <ul class="erreurs">
-          {#each b.items as x (x.erreur)}<li><b>{x.erreur}</b> {x.correction}</li>{/each}
+          {#each b.items as x (x.erreur)}<li><b>{ins(x.erreur)}</b> {ins(x.correction)}</li>{/each}
         </ul>
       {:else if b.type === 'compteT'}
         {@const somme = Math.max(total(b.debit), total(b.credit))}
@@ -146,8 +162,8 @@
         <div class="questions">
           {#each b.items as q (q.question)}
             <details>
-              <summary>{q.question}</summary>
-              <p>{q.reponse}</p>
+              <summary>{ins(q.question)}</summary>
+              <p>{ins(q.reponse)}</p>
             </details>
           {/each}
         </div>
@@ -179,6 +195,10 @@
   .numero { font-size: var(--t-12); color: var(--c-texte-2); font-variant-numeric: tabular-nums; }
   .montant { text-align: right; white-space: nowrap; }
   .defile { overflow-x: auto; }
+  @media (max-width: 700px) {
+    .tableau.empile td.vide { display: none; }
+    .tableau.empile td:not(.large) { font-variant-numeric: tabular-nums; }
+  }
   .etiq { font-size: var(--t-12); font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--c-structure); margin: 0; }
   dl.termes { margin: 6px 0 12px; display: grid; gap: 6px; }
   dl.termes div { max-width: 80ch; }

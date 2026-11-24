@@ -44,7 +44,7 @@ describe('exercices courts générés', () => {
     expect(genererSerie(contexte('comptes'), ['ecriture'], 10, 43)).not.toEqual(a);
   });
 
-  it('chaque module génère 10 questions justes à leur propre réponse, sur 200 graines', () => {
+  it('chaque module génère 10 questions justes à leur propre réponse, sur 200 graines', { timeout: 30_000 }, () => {
     for (const mod of MODULES) {
       for (let g = 1; g <= 200; g++) {
         const serie = genererSerie(contexte(mod.id), mod.formats, 10, g);

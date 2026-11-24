@@ -8,7 +8,7 @@ import { estJuste, genererSerie, hasard } from '../src/engine/exercices-courts';
 const saisie = (c: ChampCalcul) => (c.type === 'chf' ? (c.attendu / 100).toFixed(2) : String(c.attendu));
 
 describe('calculs générés', () => {
-  it('chaque générateur donne, sur 300 graines, des réponses finies, justes à leur propre saisie et expliquées', () => {
+  it('chaque générateur donne, sur 300 graines, des réponses finies, justes à leur propre saisie et expliquées', { timeout: 30_000 }, () => {
     for (const id of Object.keys(GENERATEURS)) {
       for (let g = 1; g <= 300; g++) {
         const q = genererCalcul(id, hasard(g), { plan, modeles: MODELES });

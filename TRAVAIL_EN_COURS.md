@@ -120,3 +120,8 @@ règle ni compte inventé, texte original, rien de validé n'est retiré, nouvea
 - 24.11.2026 — G5 faite après l'accord « Oui, maturité » : treize chapitres dans `src/data/theorie-mp.ts`, publiés sur la
   prévisualisation. Les 30 chapitres sont enrichis et marqués « À relire ». Reste G3 (relecture des trois années par
   l'enseignant) et G6 (vérification finale, fusion dans `main` sur accord explicite, puis leçons raccourcies).
+- 24.11.2026 — Étape 3 (vérification) faite après l'accord « Oui, étape 3 » : calculs des 30 chapitres refaits par un test,
+  arrondi aux 5 centimes, comptes des réponses, renvois des modules ; 30 chapitres contrôlés à 360 px ; grands tableaux en
+  fiches sur téléphone ; guide complété. `npm test` (591), `check`, `build` et `test:ecrans` (48) sans erreur. Publié sur la
+  prévisualisation. G6 reste ouverte pour sa seconde moitié : relecture de l'enseignant, puis fusion dans `main` sur son
+  accord explicite, puis leçons d'Apprendre raccourcies.
