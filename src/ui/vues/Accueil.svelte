@@ -146,6 +146,23 @@
   const nbEntrainement = exercicesDemo.filter((e) => e.mode === 'entrainement').length;
 
   // Portes d'entrée : l'exercice ou l'évaluation ouvre la liste, déjà filtrée, et la fait défiler à l'écran.
+  // Entreprise fil rouge : les exercices de Cycles du Léman dans l'ordre, de la 1re à la 2e année.
+  const FIL_ROUGE = [
+    { id: 'demo-cfc1-cycles-du-leman', etape: 'Le premier trimestre : journal, bilan, bouclement' },
+    { id: 'dossier-cfc2-cycles-du-leman-facturation', etape: 'Les factures et les paiements de mars' },
+    { id: 'budget-cfc2-cycles-du-leman-journee', etape: 'Le budget de la Journée du vélo électrique' },
+    { id: 'budget-cfc2-cycles-du-leman-trimestre', etape: 'Le budget du 2e trimestre et les comptes' },
+  ]
+    .map((x) => ({ ...x, ex: exercicesDemo.find((e) => e.id === x.id) }))
+    .filter((x): x is { id: string; etape: string; ex: Exercice } => !!x.ex);
+  function choisirFilRouge(ex: Exercice) {
+    choisirFiliere(filiereDe(ex));
+    typeListe = typeDe(ex);
+    recherche = '';
+    choix = ex.id;
+    formulaire?.querySelector('.identite')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
   let formulaire = $state<HTMLFormElement | null>(null);
   function allerAuChoix(t: TypeListe) {
     typeListe = t;
@@ -261,6 +278,23 @@
             <span class="porte-meta">Fichier remis par l'enseignant</span>
             <span class="porte-action">Ouvrir une évaluation →</span>
           </button>
+        </div>
+        <div class="carte fil-rouge">
+          <div class="tete-fil">
+            <h3>Suivre une entreprise : Cycles du Léman</h3>
+            <span class="discret petit">Le même magasin de vélos, d'étape en étape</span>
+          </div>
+          <ol class="etapes-fil">
+            {#each FIL_ROUGE as x, i (x.id)}
+              {@const st = etatExercice(x.ex)}
+              <li>
+                <button type="button" class="etape-fil" class:choisi={choix === x.id} onclick={() => choisirFilRouge(x.ex)}>
+                  <span class="num-fil" class:fait={st.classe === 'fini'} aria-hidden="true">{st.classe === 'fini' ? '✓' : i + 1}</span>
+                  <span class="texte-fil">{x.etape}<span class="discret petit">{etiquetteNiveau(x.ex)}{st.texte ? ` · ${st.texte}` : ''}</span></span>
+                </button>
+              </li>
+            {/each}
+          </ol>
         </div>
         <p class="aussi">
           Simulateur d'entreprise en groupe :
@@ -454,6 +488,22 @@
   .porte-texte { color: var(--c-texte-2); line-height: 1.5; flex: 1; }
   .porte-meta { font-size: 13px; color: var(--c-texte-2); }
   .porte-action { font-weight: 650; color: var(--c-action); margin-top: 4px; }
+  .fil-rouge { margin-top: 16px; }
+  .tete-fil { display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; padding: 16px 20px 0; }
+  .tete-fil h3 { margin: 0; font-size: 17px; color: var(--c-encre); }
+  .etapes-fil { list-style: none; margin: 0; padding: 12px 14px 14px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+  .etape-fil {
+    font: inherit; text-align: left; width: 100%; height: 100%; display: flex; gap: 10px; align-items: flex-start; padding: 10px;
+    border: 1px solid transparent; border-radius: 10px; background: none; cursor: pointer; color: var(--c-texte);
+  }
+  .etape-fil:hover { background: #f5f8fc; }
+  .etape-fil.choisi { border-color: var(--c-structure); background: #f5f9fd; }
+  .num-fil { width: 26px; height: 26px; border-radius: 50%; flex: none; display: grid; place-items: center; font-weight: 700; font-size: 13px; background: var(--c-bleu-doux); color: var(--c-structure); }
+  .num-fil.fait { background: var(--c-ok-fond); color: var(--c-ok); }
+  .texte-fil { display: flex; flex-direction: column; gap: 2px; font-weight: 600; line-height: 1.35; }
+  .texte-fil .discret { font-weight: normal; }
+  @media (max-width: 860px) { .etapes-fil { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 520px) { .etapes-fil { grid-template-columns: 1fr; } }
   .aussi { margin: 14px 2px 0; color: var(--c-texte-2); }
   .choisir { overflow: visible; margin-top: 28px; scroll-margin-top: 80px; }
   .tete-choisir { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding: 18px 20px; border-bottom: 1px solid var(--c-bordure-3); }

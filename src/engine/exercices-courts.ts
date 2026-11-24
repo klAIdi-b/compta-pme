@@ -220,7 +220,7 @@ interface Tour { rang: number }
 function questionCalcul(h: Hasard, x: ContexteSerie, t: Tour): Question | null {
   if (!x.calculs?.length) return null;
   const id = x.calculs[t.rang++ % x.calculs.length]!;
-  return genererCalcul(id, h, { plan: x.plan });
+  return genererCalcul(id, h, { plan: x.plan, modeles: x.modeles });
 }
 
 function questionComposee(h: Hasard, x: ContexteSerie, t: Tour): Question | null {

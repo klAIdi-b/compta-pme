@@ -7,7 +7,7 @@ async function commencer(page: import('@playwright/test').Page, recherche: strin
   await page.getByLabel('Nom', { exact: true }).fill('Martin');
   await page.getByLabel('Classe').fill('2CFC1');
   await page.getByLabel('Rechercher un exercice').fill(recherche);
-  await page.getByText(titre).first().click();
+  await page.locator('#choisir-exercice').getByText(titre).first().click();
   await page.getByRole('button', { name: 'Commencer' }).click();
 }
 
@@ -46,7 +46,7 @@ test('un élève comptabilise, voit le retour et son avancement, puis reprend so
   await page.keyboard.press('Escape');
   await page.getByRole('button', { name: 'Compta PME' }).click();
   await expect(page.getByRole('heading', { name: 'Bon retour, Léa' })).toBeVisible();
-  await expect(page.getByText(/En cours · 2 \/ 15/)).toBeVisible();
+  await expect(page.locator('#choisir-exercice').getByText(/En cours · 2 \/ 15/)).toBeVisible();
   await page.getByRole('button', { name: 'Reprendre' }).first().click();
   // L'élève retrouve la rubrique qu'il avait quittée.
   await expect(page.getByRole('heading', { name: 'Journal' })).toBeVisible();
@@ -91,7 +91,7 @@ test('Échap ferme le récapitulatif des pièces et rend le focus au bouton', as
   await page.getByLabel('Nom', { exact: true }).fill('Martin');
   await page.getByLabel('Classe').fill('2CFC1');
   await page.getByLabel('Rechercher un exercice').fill('outils');
-  await page.getByText(/Outils & Cie/).first().click();
+  await page.locator('#choisir-exercice').getByText(/Outils & Cie/).first().click();
   await page.getByRole('button', { name: 'Commencer' }).click();
   const declencheur = page.locator('.avancement .declencheur');
   await declencheur.click();
@@ -228,6 +228,6 @@ test("l'accueil sépare l'entraînement et l'évaluation", async ({ page }) => {
   await expect(page.getByText("Aucune évaluation pour l'instant.")).toBeVisible();
   await page.getByRole('button', { name: 'Entraînement', exact: true }).click();
   await page.getByLabel('Rechercher un exercice').fill('cycles');
-  await page.getByText(/Cycles du Léman/).first().click();
+  await page.locator('#choisir-exercice').getByText(/Cycles du Léman/).first().click();
   await expect(page.locator('.choisi-texte')).toContainText('Cycles du Léman');
 });

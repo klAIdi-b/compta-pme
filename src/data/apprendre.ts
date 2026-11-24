@@ -263,6 +263,13 @@ function MODULES_CALCUL(): ModuleApprendre[] {
       ['Titres au prix d’achat frais compris ; vente créditée au net des frais.', 'Dividende : net en banque, impôt anticipé à récupérer, brut en Produits des titres.', 'Provision : la charge par nature au débit, la provision au crédit.'],
       ['titres'], ['MP 6.1', 'MP 5.1'], 'titres', ['1020', '1060', '1176', '2600', '2640', '6100', '6900', '6940', '6952', '8900']),
 
+    {
+      ...calcul('classer-pieces', 'CFC1', 'Classer les pièces',
+        'Reconnaître, avant toute écriture, si une pièce concerne des marchandises, un investissement, une charge ou le privé.',
+        ['Marchandises : achetées pour être revendues.', 'Investissement : un bien qui sert durablement à l’entreprise ; il figure au bilan.', 'Charge : une dépense consommée pendant l’exercice.', 'Privé : ce que le propriétaire prend ou paie pour lui-même.'],
+        ['trier'], ['CFC c5.ep1a', 'CFC c5.ep1b'], 'journal', 20),
+      modeles: ['achat-credit', 'ordinateur-banque', 'mobilier-credit', 'vehicule-credit', 'machine-credit', 'loyer', 'electricite', 'assurance', 'fournitures', 'telephone', 'publicite-credit', 'carburant', 'prive-caisse', 'prive-poste', 'prive-facture'],
+    },
     calcul('livres-auxiliaires', 'CFC2', 'Livres auxiliaires des clients',
       'Tenir les comptes individuels des clients et les rapprocher du compte collectif Créances clients.',
       ['Chaque client a son compte dans le livre auxiliaire : solde initial + factures − paiements.', 'La somme des soldes des clients est égale au solde du compte collectif Créances clients.'],

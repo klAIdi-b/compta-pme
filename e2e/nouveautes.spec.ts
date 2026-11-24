@@ -79,3 +79,24 @@ test('formulaire officiel de décompte TVA dans l’écran TVA', async ({ page }
   await c200.fill('0');
   await expect(ligne(page, 'Total des contre-prestations')).toContainText('Juste');
 });
+
+test('classer les pièces : exemple, classeurs et question projetée pour la classe', async ({ page }) => {
+  await page.goto('./');
+  await page.getByRole('button', { name: /Ouvrir le parcours|Continuer le parcours/ }).click();
+  await page.getByRole('button', { name: 'Classer les pièces', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Exemple travaillé' })).toBeVisible();
+  await page.getByRole('button', { name: 'Projeter une question pour la classe' }).click();
+  await page.getByRole('button', { name: 'Révéler la réponse' }).click();
+  await expect(page.getByRole('status')).toContainText('Réponse');
+  await page.getByRole('button', { name: 'Terminer' }).click();
+  await page.getByRole('button', { name: /Commencer la série/ }).click();
+  await page.getByRole('radio', { name: "Charge de l'entreprise" }).click();
+  await page.getByRole('button', { name: 'Vérifier' }).click();
+  await expect(page.getByRole('status')).toContainText(/Juste|Pas tout à fait/);
+});
+
+test('fil rouge sur l’accueil et onglet Progression de l’espace enseignant', async ({ page }) => {
+  await page.goto('./');
+  await page.getByRole('button', { name: /Les factures et les paiements de mars/ }).click();
+  await expect(page.locator('.choisi-texte')).toContainText('facturation et paiements de mars');
+});

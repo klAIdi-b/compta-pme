@@ -87,6 +87,8 @@ export const GUIDE: PartieGuide[] = [
               'Faites la série de 10 questions courtes : classer un compte, passer une écriture, retrouver l’opération, trouver ' +
                 'l’écriture fausse, calculer un solde. Chaque réponse est corrigée tout de suite, avec une explication.',
               'Avec 8 réponses justes sur 10, la notion est maîtrisée. Sinon, recommencez : questions et montants changent.',
+              'Une notion maîtrisée vous est redemandée quelques jours plus tard (« Révision du jour »). « Envoyer ma ' +
+                'progression à l’enseignant » télécharge un fichier à rendre dans le devoir Google Classroom.',
             ],
           },
         ],
@@ -550,6 +552,22 @@ export const GUIDE: PartieGuide[] = [
             texte:
               'Les séries sont générées : deux voisins n’ont pas les mêmes questions, et un élève peut s’entraîner autant qu’il le faut. ' +
               'La progression reste dans le navigateur de l’élève (aucune donnée en ligne).',
+          },
+        ],
+      },
+      {
+        id: 'progression',
+        titre: 'Suivre la progression et animer la classe',
+        blocs: [
+          {
+            type: 'liste',
+            items: [
+              'Onglet « Progression » : importez les fichiers de progression rendus par les élèves. Le tableau montre, pour ' +
+                'chaque élève et chaque notion, « M » (maîtrisé), le meilleur score ou « – » (pas commencé), et le nombre ' +
+                'd’élèves qui maîtrisent chaque notion.',
+              '« Projeter une question pour la classe » (dans chaque module d’Apprendre) affiche une question en grand : ' +
+                'la classe répond à main levée, puis vous révélez la réponse et l’explication.',
+            ],
           },
         ],
       },

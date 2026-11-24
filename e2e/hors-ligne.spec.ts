@@ -23,7 +23,7 @@ test('après une première visite, le logiciel fonctionne entièrement hors lign
   await page.getByLabel('Nom', { exact: true }).fill('Martin');
   await page.getByLabel('Classe').fill('2CFC1');
   await page.getByLabel('Rechercher un exercice').fill('cycles');
-  await page.getByText(/Cycles du Léman/).first().click();
+  await page.locator('#choisir-exercice').getByText(/Cycles du Léman/).first().click();
   await page.getByRole('button', { name: 'Commencer' }).click();
   await expect(page.getByRole('heading', { name: /Votre mission/ })).toBeVisible();
 
