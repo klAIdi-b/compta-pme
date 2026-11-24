@@ -125,3 +125,5 @@ règle ni compte inventé, texte original, rien de validé n'est retiré, nouvea
   fiches sur téléphone ; guide complété. `npm test` (591), `check`, `build` et `test:ecrans` (48) sans erreur. Publié sur la
   prévisualisation. G6 reste ouverte pour sa seconde moitié : relecture de l'enseignant, puis fusion dans `main` sur son
   accord explicite, puis leçons d'Apprendre raccourcies.
+- 24.11.2026 — Théorie de référence fusionnée dans `main` sur l'accord explicite de l'enseignant. Les chapitres gardent la
+  mention « À relire ». Restent : sa relecture et ses réponses aux points comptables signalés, puis les leçons raccourcies.
