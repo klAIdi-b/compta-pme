@@ -68,7 +68,7 @@ describe('imprévus', () => {
     expect(controlerImprevu(p0, { type: 'hausseFournisseur', entrepriseId: null, pourcent: 20 })).toHaveLength(1);
     expect(controlerImprevu(p0, { type: 'clientInsolvable', entrepriseId: 'a' }).join()).toMatch(/aucune facture client/);
     const cfc1 = partie(reglages({ niveau: 'CFC1' }));
-    expect(controlerImprevu(cfc1, { type: 'clientInsolvable', entrepriseId: 'a' }).join()).toMatch(/réservé au CFC 2/);
+    expect(controlerImprevu(cfc1, { type: 'clientInsolvable', entrepriseId: 'a' }).join()).toMatch(/réservé à la 2ème CFC/);
     expect(jouerTour(p0, { a: dec(10), b: dec(10) }, [{ type: 'clientInsolvable', entrepriseId: 'a' }]).ok).toBe(false);
   });
 

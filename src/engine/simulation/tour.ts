@@ -95,7 +95,7 @@ export function controlerImprevu(p: Partie, imp: Imprevu): string[] {
   if (imp.type === 'hausseFournisseur') {
     if (!Number.isInteger(imp.pourcent) || imp.pourcent < 5 || imp.pourcent > 10) e.push('La hausse doit être comprise entre 5 et 10 %.');
   } else {
-    if (!estCfc2(p.reglages)) e.push('Le client insolvable est réservé au CFC 2 et au MP (pertes sur créances).');
+    if (!estCfc2(p.reglages)) e.push('Le client insolvable est réservé à la 2ème CFC et à la maturité (pertes sur créances).');
     else if (cible && (etatsCourants(p).get(cible.id)?.creancesClients ?? 0) <= 0) {
       e.push(`${cible.nom} n'a aucune facture client à encaisser : un client insolvable n'est pas possible ce tour.`);
     }

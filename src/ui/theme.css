@@ -16,6 +16,7 @@
 :root {
   /* Typographie : sept tailles, jamais moins de 12 px. */
   --t-12: 0.75rem; --t-13: 0.8125rem; --t-14: 0.875rem; --t-15: 0.9375rem; --t-17: 1.0625rem; --t-20: 1.25rem; --t-26: 1.625rem;
+  --t-titre: clamp(1.875rem, 1.1rem + 2.6vw, 3rem); /* grand titre de la page d'accueil seulement */
   --graisse-moyen: 550; --graisse-fort: 650;
   /* Espacements (base 4 px). */
   --e-1: 4px; --e-2: 8px; --e-3: 12px; --e-4: 16px; --e-5: 24px; --e-6: 32px; --e-7: 48px;

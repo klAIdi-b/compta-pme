@@ -204,7 +204,7 @@
 {:else if simulationEleve.situation}
   <Differe charger={() => import('./vues/simulation/SituationEleve.svelte')} props={{}} />
 {:else if ecran === 'accueil' || !etat.session}
-  <Accueil onEnseignant={() => (enseignant.ouvert = true)} />
+  <Accueil />
 {:else}
   {@const s = etat.session}
   {@const genre = etat.genre}

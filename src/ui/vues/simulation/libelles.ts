@@ -1,7 +1,7 @@
 // Libellés de l'interface du simulateur.
 import type { AffichageResultats, Comptabilite, Entreprise, Imprevu, NiveauSimulation, Secteur } from '../../../engine/simulation/types';
 
-export const LIBELLE_NIVEAU: Record<NiveauSimulation, string> = { AFP: 'AFP', CFC1: 'CFC 1', CFC2: 'CFC 2', MP: 'MP' };
+export const LIBELLE_NIVEAU: Record<NiveauSimulation, string> = { AFP: 'AFP', CFC1: '1ère CFC', CFC2: '2ème CFC', MP: 'MP' };
 
 export const LIBELLE_COMPTABILITE: Record<Comptabilite, string> = {
   automatique: 'automatique',
@@ -17,9 +17,9 @@ export const LIBELLE_AFFICHAGE: Record<AffichageResultats, string> = {
 
 export const DESCRIPTION_NIVEAU: Record<NiveauSimulation, string> = {
   AFP: 'AFP : prix, quantité et publicité ; comptabilité automatique, sans saisie.',
-  CFC1: 'CFC 1 : achats, ventes, banque, caisse, prélèvement privé, sans TVA.',
-  CFC2: 'CFC 2 : en plus, TVA au net (prix TVA comprise), personnel et salaires, véhicule de livraison amorti.',
-  MP: 'MP : en plus du CFC 2, société anonyme, emprunt bancaire et intérêts, répartition du bénéfice.',
+  CFC1: '1ère CFC : achats, ventes, banque, caisse, prélèvement privé, sans TVA.',
+  CFC2: '2ème CFC : en plus, TVA au net (prix TVA comprise), personnel et salaires, véhicule de livraison amorti.',
+  MP: 'MP : en plus de la 2ème CFC, société anonyme, emprunt bancaire et intérêts, répartition du bénéfice.',
 };
 
 /** Pourcentage en dixièmes (pour mille) → « 26,8 % ». */

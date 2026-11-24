@@ -18,7 +18,8 @@ test('après une première visite, le logiciel fonctionne entièrement hors lign
 
   await context.setOffline(true);
   await page.reload();
-  await expect(page.getByRole('heading', { name: /Bienvenue|Bon retour/ })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /Passez votre première écriture|Bon retour/ })).toBeVisible();
+  await page.getByRole('navigation', { name: 'Rubriques' }).getByRole('button', { name: 'Exercices' }).click();
   await page.getByLabel('Prénom').fill('Léa');
   await page.getByLabel('Nom', { exact: true }).fill('Martin');
   await page.getByLabel('Classe').fill('2CFC1');

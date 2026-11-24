@@ -75,3 +75,25 @@ Aucune référence aux manuels. Textes et entreprises entièrement originaux.
 - [x] E5. Espace enseignant, onglet « Dossiers » : pour chaque dossier, PDF élève, corrigé PDF, exercice entraînement,
   exercice évaluation. Script `scripts/generer-dossiers.ts` (vite-node) qui écrit ces fichiers dans `dossiers/`.
 - [x] E6. Tests, contrôle, vérification dans le navigateur, publication.
+
+# Chantier « Accueil engageant » (demande du 24.11.2026)
+
+Refonte de l'aspect de la page d'accueil (`src/ui/vues/Accueil.svelte`), sans rien retirer de ses fonctions.
+Exception à la charte pour l'accueil seulement : voir CLAUDE.md, section « Interface et charte visuelle ».
+
+- [x] F1. Maquettes : `public/maquettes/accueil-engageant.html`, trois directions (A le logiciel en action,
+  B votre parcours, C grand format), ordinateur et téléphone. Choix de l'enseignant : **A, avec la reprise de B**.
+- [x] F2. Mise en œuvre sur la branche `apercu` : démonstration `composants/DemoEcriture.svelte`, carte
+  « Votre prochaine étape » pour l'élève qui revient, portes sans numéro, tests `e2e/accueil.spec.ts`.
+- [x] F3. Vérification par l'enseignant sur la prévisualisation (téléphone et ordinateur), puis fusion dans `main`
+  **seulement après son accord explicite**.
+
+- 24.11.2026 — F1 et F2 faites. Reste F3 : attendre l'accord de l'enseignant avant toute fusion dans `main`.
+- [x] F4. Onglets en haut (Accueil, Apprendre, Exercices, Évaluation) et pages séparées pour le choix d'un exercice et
+  l'évaluation (`composants/BandeauRubriques.svelte`, `etat.pageAccueil`), sur `apercu`.
+- [x] F5. Onglet « Théorie » accessible depuis l'accueil, avec le choix de l'année (1ère CFC, 2ème CFC, Maturité
+  professionnelle). Libellés « 1ère CFC » / « 2ème CFC » dans toute l'interface.
+
+- 24.11.2026 — F4 faite et publiée sur la prévisualisation. Restent F3 (accord pour la fusion) et F5.
+- 24.11.2026 — F5 faite et publiée sur la prévisualisation. Reste F3 : accord de l'enseignant pour la fusion dans `main`.
+- 24.11.2026 — F3 faite : fusion dans `main` demandée par l'enseignant (« Fusionner dans main »). Chantier terminé.
