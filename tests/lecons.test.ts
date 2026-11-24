@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { MODULES } from '../src/data/apprendre';
-import { LECONS } from '../src/data/lecons';
+import { LECONS, exemplesDe } from '../src/data/lecons';
 import { lirePlanCsv } from '../src/engine/plan';
 import planCsv from '../src/data/plan-pme.csv?raw';
 
@@ -13,11 +13,11 @@ describe('leçons du parcours Apprendre', () => {
   it('chaque leçon a au moins deux parties, un exemple et une phrase à retenir', () => {
     for (const [id, parties] of Object.entries(LECONS)) {
       expect(parties.length, id).toBeGreaterThanOrEqual(2);
-      expect(parties.some((p) => p.exemple), id).toBe(true);
+      expect(parties.some((p) => exemplesDe(p).length > 0), id).toBe(true);
       expect(parties.some((p) => p.retenir), id).toBe(true);
       for (const p of parties) {
         expect(p.texte.length, `${id} · ${p.titre}`).toBeGreaterThan(0);
-        for (const l of p.exemple?.tableau?.lignes ?? []) expect(l.length, `${id} · ${p.titre}`).toBe(p.exemple!.tableau!.entetes.length);
+        for (const x of exemplesDe(p)) for (const l of x.tableau?.lignes ?? []) expect(l.length, `${id} · ${p.titre}`).toBe(x.tableau!.entetes.length);
       }
     }
   });
@@ -35,8 +35,7 @@ describe('leçons du parcours Apprendre', () => {
     const abreges = new Set(['Banque', 'Poste', 'Capital-actions', 'Impôts', 'Charges financières']);
     for (const [id, parties] of Object.entries(LECONS)) {
       for (const p of parties) {
-        const t = p.exemple?.tableau;
-        if (!t) continue;
+        for (const t of exemplesDe(p).map((x) => x.tableau).filter((t) => !!t)) {
         const colonnes = t.entetes.map((e, i) => (e === 'Débit' || e === 'Crédit' ? i : -1)).filter((i) => i >= 0);
         for (const l of t.lignes) for (const i of colonnes) {
           for (const morceau of l[i]!.split(/(?<=\.\d{2}) et /)) {
@@ -45,7 +44,23 @@ describe('leçons du parcours Apprendre', () => {
             expect(connu, `${id} · ${p.titre} · « ${nom} »`).toBe(true);
           }
         }
+        }
       }
+    }
+  });
+
+  it('les leçons de 1re année sont approfondies : vocabulaire, plusieurs exemples, questions de contrôle', () => {
+    for (const m of MODULES.filter((x) => x.niveau === 'CFC1')) {
+      const parties = LECONS[m.id]!;
+      const nbExemples = parties.reduce((n, p) => n + exemplesDe(p).length, 0);
+      expect(nbExemples, m.id).toBeGreaterThanOrEqual(2);
+      expect(parties.length, m.id).toBeGreaterThanOrEqual(3);
+    }
+    for (const id of ['bilan', 'comptes', 'charges-produits', 'factures', 'prive', 'marchandises']) {
+      const parties = LECONS[id]!;
+      expect(parties.length, id).toBeGreaterThanOrEqual(5);
+      expect(parties.some((p) => p.definitions?.length), id).toBe(true);
+      expect(parties.some((p) => p.questions?.length), id).toBe(true);
     }
   });
 });

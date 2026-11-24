@@ -13,7 +13,7 @@
   import { erreurTypique } from '../../engine/erreurs-typiques';
   import { formatMontant, lireMontant } from '../../engine/money';
   import type { TypeCompte } from '../../engine/plan';
-  import { LECONS } from '../../data/lecons';
+  import { LECONS, exemplesDe } from '../../data/lecons';
   import { enregistrerRevision, enregistrerSerie, lireProgression, type Progression } from '../../io/apprendre';
   import { aRevoir } from '../../engine/revision';
   import { EXT_PROGRESSION, exporterProgression } from '../../io/progression';
@@ -347,33 +347,66 @@
         <section class="carte lecon">
           <h2>La leçon</h2>
           <div class="corps-carte">
-            {#each lecon as partie (partie.titre)}
-              <article class="partie">
+            {#if lecon.length > 3}
+              <nav class="sommaire-lecon" aria-label="Plan de la leçon">
+                <ol>
+                  {#each lecon as partie, i (partie.titre)}
+                    <li><a href={`#partie-${i + 1}`} onclick={(e) => { e.preventDefault(); document.getElementById(`partie-${i + 1}`)?.scrollIntoView({ block: 'start' }); }}>{partie.titre.replace(/^\d+\.\s*/, '')}</a></li>
+                  {/each}
+                </ol>
+              </nav>
+            {/if}
+            {#each lecon as partie, i (partie.titre)}
+              <article class="partie" id={`partie-${i + 1}`}>
                 <h3>{partie.titre}</h3>
                 {#each partie.texte as t}<p>{t}</p>{/each}
-                {#if partie.exemple}
+                {#if partie.definitions?.length}
+                  <dl class="definitions">
+                    {#each partie.definitions as d (d.terme)}<div><dt>{d.terme}</dt><dd>{d.definition}</dd></div>{/each}
+                  </dl>
+                {/if}
+                {#if partie.methode?.length}
+                  <div class="methode">
+                    <p class="etiquette-ex">La démarche</p>
+                    <ol>{#each partie.methode as m}<li>{m}</li>{/each}</ol>
+                  </div>
+                {/if}
+                {#each exemplesDe(partie) as x (x.situation)}
                   <div class="exemple-lecon">
                     <p class="etiquette-ex">Exemple</p>
-                    <p><b>{partie.exemple.situation}</b></p>
-                    {#if partie.exemple.tableau}
+                    <p><b>{x.situation}</b></p>
+                    {#if x.lignes && x.tableau}<ul>{#each x.lignes as l}<li>{l}</li>{/each}</ul>{/if}
+                    {#if x.tableau}
                       <!-- Zone qui peut défiler sur téléphone : atteignable au clavier (WCAG scrollable-region-focusable). -->
                       <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
-                      <div class="defile-lecon" tabindex="0" role="group" aria-label={`Tableau : ${partie.exemple.situation}`}>
+                      <div class="defile-lecon" tabindex="0" role="group" aria-label={`Tableau : ${x.situation}`}>
                         <table>
-                          <thead><tr>{#each partie.exemple.tableau.entetes as e}<th class:montant={e === 'CHF'}>{e}</th>{/each}</tr></thead>
+                          <thead><tr>{#each x.tableau.entetes as e}<th class:montant={e === 'CHF'}>{e}</th>{/each}</tr></thead>
                           <tbody>
-                            {#each partie.exemple.tableau.lignes as l}
-                              <tr class:total={l[0]?.startsWith('Total')}>{#each l as c, j}<td class:montant={partie.exemple.tableau.entetes[j] === 'CHF'} class:num={partie.exemple.tableau.entetes[j] === 'CHF'}>{c}</td>{/each}</tr>
+                            {#each x.tableau.lignes as l}
+                              <tr class:total={l[0]?.startsWith('Total')}>{#each l as c, j}<td class:montant={x.tableau.entetes[j] === 'CHF'} class:num={x.tableau.entetes[j] === 'CHF'} class:masse={c !== '' && x.tableau.entetes[j + 1] === 'CHF' && l[j + 1] === ''}>{c}</td>{/each}</tr>
                             {/each}
                           </tbody>
                         </table>
                       </div>
                     {/if}
-                    {#if partie.exemple.lignes}<ul>{#each partie.exemple.lignes as l}<li>{l}</li>{/each}</ul>{/if}
+                    {#if x.lignes && !x.tableau}<ul>{#each x.lignes as l}<li>{l}</li>{/each}</ul>{/if}
+                    {#if x.conclusion}<p class="conclusion-ex">{x.conclusion}</p>{/if}
                   </div>
-                {/if}
+                {/each}
                 {#if partie.piege}<p class="piege"><b>Piège fréquent.</b> {partie.piege}</p>{/if}
                 {#if partie.retenir}<p class="a-retenir"><b>À retenir.</b> {partie.retenir}</p>{/if}
+                {#if partie.questions?.length}
+                  <div class="controle">
+                    <p class="etiquette-ex">Vérifiez que vous avez compris</p>
+                    {#each partie.questions as q (q.question)}
+                      <details>
+                        <summary>{q.question}</summary>
+                        <p>{q.reponse}</p>
+                      </details>
+                    {/each}
+                  </div>
+                {/if}
               </article>
             {/each}
           </div>
@@ -772,6 +805,25 @@
   .exemple-lecon table { background: #fff; border-radius: var(--r-3); overflow: hidden; }
   .etiquette-ex { font-size: var(--t-12) !important; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--c-structure); margin-bottom: 4px !important; }
   .defile-lecon { overflow-x: auto; border-radius: var(--r-3); }
+  .sommaire-lecon { margin: 12px 0 4px; padding: 12px 16px; background: var(--c-fond-tete); border: 1px solid var(--c-bordure-2); border-radius: var(--r-3); max-width: 76ch; }
+  .sommaire-lecon ol { margin: 0; padding-left: 22px; columns: 2; column-gap: 28px; line-height: 1.7; }
+  .sommaire-lecon a { color: var(--c-structure); text-underline-offset: 3px; }
+  .partie { scroll-margin-top: 12px; }
+  .definitions { margin: 12px 0; padding: 12px 16px; border-left: 4px solid var(--c-structure); background: var(--c-fond-tete); border-radius: var(--r-2); display: grid; gap: 6px; }
+  .definitions div { display: block; }
+  .definitions dt { display: inline; font-weight: var(--graisse-fort); color: var(--c-encre); }
+  .definitions dt::after { content: ' : '; font-weight: 400; }
+  .definitions dd { display: inline; margin: 0; }
+  .methode { margin: 12px 0; padding: 12px 16px; border: 1px solid var(--c-bordure-2); border-radius: var(--r-3); }
+  .methode ol { margin: 0; padding-left: 22px; line-height: 1.6; }
+  .exemple-lecon ul + .defile-lecon { margin-top: 10px; }
+  .conclusion-ex { margin: 10px 0 0 !important; font-style: italic; }
+  td.masse { font-weight: var(--graisse-fort); color: var(--c-structure); }
+  .controle { margin-top: 12px; }
+  .controle details { border: 1px solid var(--c-bordure-2); border-radius: var(--r-2); padding: 8px 12px; margin-top: 6px; background: var(--c-fond); }
+  .controle summary { cursor: pointer; font-weight: var(--graisse-moyen); }
+  .controle details p { margin: 8px 0 2px; font-size: var(--t-15); }
+  @media (max-width: 600px) { .sommaire-lecon ol { columns: 1; } }
   @media (max-width: 600px) {
     .lecon .corps-carte { padding: 4px 14px 18px; }
     .exemple-lecon { padding: 12px; }
