@@ -205,3 +205,21 @@ test('théorie : choix de l’année et ouverture d’un chapitre au clavier, ta
   await page.keyboard.press('Enter');
   await expect(page.getByRole('heading', { level: 2, name: 'Sommaire' })).toBeVisible();
 });
+
+test('module d’Apprendre : le chapitre de théorie s’ouvre par un lien dans un nouvel onglet, sur la bonne année', async ({ page, context }) => {
+  await page.goto('./');
+  await page.getByRole('navigation', { name: 'Rubriques' }).getByRole('button', { name: 'Apprendre' }).click();
+  await page.getByRole('button', { name: 'TVA : comptabilisation au net', exact: true }).click();
+  // Le chapitre n'est plus déplié sous la leçon : un lien y mène.
+  await expect(page.getByRole('button', { name: /Lire la théorie/ })).toHaveCount(0);
+  const lien = page.getByRole('link', { name: /Ouvrir le chapitre dans la Théorie : TVA/ });
+  await expect(lien).toHaveAttribute('target', '_blank');
+  const [onglet] = await Promise.all([context.waitForEvent('page'), lien.click()]);
+  await onglet.waitForLoadState();
+  await expect(onglet.getByRole('heading', { level: 2 }).filter({ hasText: 'TVA' })).toBeVisible();
+  await expect(onglet.getByRole('group', { name: 'Votre année' }).getByRole('button', { name: '2ème CFC' })).toHaveAttribute('aria-pressed', 'true');
+  // L'adresse est nettoyée : un rechargement revient à l'accueil ordinaire.
+  expect(new URL(onglet.url()).search).toBe('');
+  // L'élève n'a pas quitté son module.
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('TVA : comptabilisation au net');
+});

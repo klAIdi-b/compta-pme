@@ -9,6 +9,7 @@ import { ajouterEcriture } from '../engine/journal';
 import { plan as planParDefaut } from '../data/plan';
 import { exercicesDemo } from '../data/demos';
 import { ecrire, lire } from '../io/stockage';
+import { chapitreDuLien } from './lien';
 import type { DernierExport } from '../io/fichiers';
 import type { Suivi } from '../engine/correction';
 import { aMettreDeCote, ecranAffiche, genreSession, peutOuvrirAccueil, vueEleve, type Ecran, type GenreSession } from './modes';
@@ -156,6 +157,14 @@ class Etat {
     if (this.genre === 'travail' && (lienExercice || !location.hash || location.hash === '#')) this.accueilOuvert = true;
     // Lien direct d'un enseignant : la page des exercices s'ouvre, l'exercice déjà choisi.
     if (lienExercice) this.pageAccueil = 'exercices';
+    // Lien d'un module d'Apprendre vers un chapitre : la rubrique Théorie s'ouvre sur ce chapitre, le travail en cours est conservé.
+    const lienChapitre = chapitreDuLien();
+    if (lienChapitre) {
+      this.chapitreCible = lienChapitre;
+      this.pageAccueil = 'theorie';
+      if (this.genre === 'travail') this.accueilOuvert = true;
+      history.replaceState(null, '', location.pathname);
+    }
     window.addEventListener('hashchange', () => (this.vue = vueDepuisAdresse()));
     // Bouton Retour du navigateur entre les rubriques de l'accueil (sans effet à l'intérieur d'un exercice).
     window.addEventListener('popstate', (e) => {

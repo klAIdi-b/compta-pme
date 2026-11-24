@@ -20,3 +20,17 @@ export function oublierLien() {
   if (!location.search) return;
   history.replaceState(null, '', `${location.pathname}${location.hash}`);
 }
+
+// Lien vers un chapitre de la théorie : un module d'Apprendre l'ouvre dans un nouvel onglet, pour que l'élève garde
+// sa place dans le module.
+const PARAMETRE_THEORIE = 'theorie';
+
+/** Identifiant de chapitre indiqué dans l'adresse, ou null. */
+export function chapitreDuLien(): string | null {
+  return new URLSearchParams(location.search).get(PARAMETRE_THEORIE);
+}
+
+/** Adresse qui ouvre la rubrique Théorie sur un chapitre. */
+export function lienTheorie(chapitreId: string): string {
+  return `${location.pathname.replace(/index\.html$/, '')}?${PARAMETRE_THEORIE}=${encodeURIComponent(chapitreId)}`;
+}

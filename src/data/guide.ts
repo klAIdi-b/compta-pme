@@ -82,7 +82,7 @@ export const GUIDE: PartieGuide[] = [
           {
             type: 'etapes',
             items: [
-              'Lisez l’objectif et l’essentiel ; « Lire la théorie » ouvre le chapitre du cours.',
+              'Lisez l’objectif, la leçon et le résumé ; « Ouvrir le chapitre dans la Théorie » montre le chapitre du cours dans un nouvel onglet, sans quitter le module.',
               'Suivez l’exemple travaillé : quels comptes, de quel type, augmente ou diminue, donc débit ou crédit.',
               'Faites la série de 10 questions courtes : classer un compte, passer une écriture, retrouver l’opération, trouver ' +
                 'l’écriture fausse, calculer un solde. Chaque réponse est corrigée tout de suite, avec une explication.',

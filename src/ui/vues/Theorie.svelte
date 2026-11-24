@@ -2,7 +2,7 @@
      bandeau (`libre`), elle n'a pas d'exercice : l'élève choisit l'année, et les comptes viennent du plan du cours. -->
 <script lang="ts">
   import { etat } from '../etat.svelte';
-  import { chapitresDuNiveau, THEORIE_VALIDEE } from '../../data/theorie';
+  import { CHAPITRES, chapitresDuNiveau, THEORIE_VALIDEE } from '../../data/theorie';
   import { etiquetteNiveau } from '../../engine/exercice';
   import ChapitreTheorie from '../composants/ChapitreTheorie.svelte';
   import { plan } from '../../data/plan';
@@ -12,7 +12,13 @@
   let { libre = false }: { libre?: boolean } = $props();
   const NIVEAUX: Niveau[] = ['CFC1', 'CFC2', 'MP'];
   /** Année choisie quand la théorie est ouverte sans exercice (la maturité si l'élève a choisi cette formation). */
-  let niveauLibre = $state<Niveau>(etat.prefs.filiere === 'MP' ? 'MP' : 'CFC1');
+  /** Arrivée par un lien vers un chapitre : l'année est au moins celle de ce chapitre. */
+  function anneeDeDepart(): Niveau {
+    const defaut: Niveau = etat.prefs.filiere === 'MP' ? 'MP' : 'CFC1';
+    const cible = CHAPITRES.find((c) => c.id === etat.chapitreCible)?.niveau ?? defaut;
+    return NIVEAUX.indexOf(cible) > NIVEAUX.indexOf(defaut) ? cible : defaut;
+  }
+  let niveauLibre = $state<Niveau>(anneeDeDepart());
   const niveau = $derived(libre ? niveauLibre : etat.exercice.niveau);
 
   const chapitres = $derived(chapitresDuNiveau(niveau));
