@@ -2353,7 +2353,8 @@ export const CHAPITRES_VALIDES: Chapitre[] = [
 /** Chapitres visibles pour un niveau donné (CFC1 ⊂ CFC2 ⊂ MP). */
 /**
  * Chapitres affichés : les chapitres validés, enrichis année par année (modèle du 24.11.2026). Les chapitres enrichis
- * gardent toutes les sections validées et portent `aRelire` jusqu'à la validation de l'enseignant.
+ * gardent toutes les sections validées. Validés par l'enseignant le 24.11.2026 : plus aucun ne porte `aRelire`
+ * (le champ reste disponible pour un futur chapitre en relecture).
  */
 export const CHAPITRES: Chapitre[] = enrichirMp(enrichirCfc2(enrichirCfc1(CHAPITRES_VALIDES)));
 

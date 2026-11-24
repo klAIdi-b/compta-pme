@@ -2,7 +2,7 @@
 // rien retirer ; un chapitre nouveau, « Comptabilité analytique », explique un module existant du parcours Apprendre.
 // Les sections nouvelles reprennent les règles déjà programmées (src/engine/calculs.ts) : intérêts en année commerciale,
 // méthode des nombres, perte de capital et surendettement, bordereau et rendements, point mort, méthode directe.
-// Texte original ; comptes du plan du cours ; règles du projet (CLAUDE.md). Contenu À RELIRE par l'enseignant (aRelire).
+// Texte original ; comptes du plan du cours ; règles du projet (CLAUDE.md). Contenu validé par l'enseignant le 24.11.2026.
 import type { Chapitre } from './theorie';
 import { C, D, P, enrichir, p, r3, s } from './theorie-cfc1';
 

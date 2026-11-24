@@ -121,7 +121,7 @@ test('théorie enrichie : chapitre lisible à 360 px, réponses masquées au cla
   await page.setViewportSize({ width: 360, height: 740 });
   await page.goto('./');
   await page.getByRole('navigation', { name: 'Rubriques' }).getByRole('button', { name: 'Théorie' }).click();
-  await expect(page.locator('.sommaire').getByText('À relire').first()).toBeVisible();
+  await expect(page.locator('.sommaire').getByText('À relire')).toHaveCount(0);
   await page.locator('.sommaire li button').filter({ hasText: 'Compte privé' }).click();
   await expect(page.getByRole('heading', { level: 2, name: /Compte privé et bouclement/ })).toBeVisible();
   await expect(page.getByText('À la fin de ce chapitre, vous savez')).toBeVisible();

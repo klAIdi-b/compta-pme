@@ -63,10 +63,14 @@ describe('théorie', () => {
 });
 
 describe('théorie enrichie (modèle du 24.11.2026)', () => {
-  const enrichis = CHAPITRES.filter((c) => c.aRelire);
+  const enrichis = CHAPITRES.filter((c) => c.objectifs?.length);
+
+  it('validés par l’enseignant le 24.11.2026 : plus aucun chapitre ne porte la mention « à relire »', () => {
+    expect(CHAPITRES.filter((c) => c.aRelire).map((c) => c.id)).toEqual([]);
+  });
   const blocs = (c: (typeof CHAPITRES)[number]) => c.sections.flatMap((s) => s.blocs);
 
-  it('les neuf chapitres de 1ère CFC sont enrichis et marqués « à relire »', () => {
+  it('les neuf chapitres de 1ère CFC sont enrichis', () => {
     expect(enrichis.filter((c) => c.niveau === 'CFC1').map((c) => c.id)).toEqual(['cadre-legal', 'bilan', 'comptes', 'journal', 'credit', 'resultat', 'prive', 'marchandises', 'prix']);
   });
 
