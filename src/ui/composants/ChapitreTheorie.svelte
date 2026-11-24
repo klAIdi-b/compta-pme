@@ -55,7 +55,7 @@
 
 <style>
   .chapitre-theorie :global(p), .chapitre-theorie :global(li) { max-width: 80ch; line-height: 1.5; }
-  h3 { font-size: 15px; color: var(--c-structure); margin: 20px 0 6px; }
+  h3 { font-size: var(--t-15); color: var(--c-structure); margin: 20px 0 6px; }
   .retenir { border-left: 4px solid var(--c-structure); background: var(--c-zebra); padding: 8px 12px; }
   .titre-ex { font-weight: bold; margin-bottom: 4px; }
   table.tableau, table.ecritures { margin: 6px 0 12px; }
@@ -63,6 +63,6 @@
   .tableau tbody tr:nth-child(even) { background: var(--c-zebra); }
   .ecritures tbody tr:not(.suite) td { border-top: 1px solid var(--c-bordure); }
   .ecritures tbody tr:first-child td { border-top: none; }
-  .numero { font-size: 11px; color: var(--c-texte-2); font-variant-numeric: tabular-nums; }
+  .numero { font-size: var(--t-12); color: var(--c-texte-2); font-variant-numeric: tabular-nums; }
   .montant { text-align: right; white-space: nowrap; }
 </style>

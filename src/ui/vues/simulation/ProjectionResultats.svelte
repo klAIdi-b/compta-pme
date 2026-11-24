@@ -97,27 +97,27 @@
 
 <style>
   .projection { position: fixed; inset: 0; z-index: 50; background: #fff; overflow: auto; padding: 56px 48px 40px; }
-  .retour { position: absolute; top: 12px; right: 16px; font-size: 13px; }
+  .retour { position: absolute; top: 12px; right: 16px; font-size: var(--t-13); }
   .entete { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; flex-wrap: wrap; border-bottom: 3px solid var(--c-nuit); padding-bottom: 16px; }
   h1 { font-size: 34px; color: var(--c-nuit); }
-  .sous { font-size: 18px; color: var(--c-texte-2); margin-top: 4px; }
-  .marche { display: flex; gap: 40px; font-size: 18px; flex-wrap: wrap; }
+  .sous { font-size: var(--t-17); color: var(--c-texte-2); margin-top: 4px; }
+  .marche { display: flex; gap: 40px; font-size: var(--t-17); flex-wrap: wrap; }
   .marche b { display: block; font-size: 30px; color: var(--c-nuit); font-variant-numeric: tabular-nums; }
   .classement { margin-top: 26px; }
-  .classement th { font-size: 14px; background: none; border-bottom: 2px solid var(--c-bordure-2); }
-  .classement td { font-size: 22px; padding: 16px 14px; vertical-align: middle; }
+  .classement th { font-size: var(--t-14); background: none; border-bottom: 2px solid var(--c-bordure-2); }
+  .classement td { font-size: var(--t-20); padding: 16px 14px; vertical-align: middle; }
   .classement tbody tr:hover td { background: inherit; }
-  .rang { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; font-weight: bold; font-size: 24px; background: var(--c-selection); color: var(--c-structure); }
+  .rang { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; font-weight: bold; font-size: var(--t-26); background: var(--c-selection); color: var(--c-structure); }
   .rang.premier { background: var(--c-nuit); color: #fff; }
   .part { display: inline-flex; align-items: center; gap: 10px; }
-  .part .b { width: 140px; height: 14px; background: var(--c-bordure-3); border-radius: 7px; overflow: hidden; }
+  .part .b { width: 140px; height: 14px; background: var(--c-bordure-3); border-radius: var(--r-2); overflow: hidden; }
   .part .b span { display: block; height: 100%; background: var(--c-structure); }
-  .imprevu { margin: 16px 0 0; font-size: 18px; color: var(--c-alerte-texte); }
-  .pied { margin-top: 18px; font-size: 15px; color: var(--c-texte-2); }
-  .message { font-size: 22px; margin-top: 40px; color: var(--c-texte-2); }
+  .imprevu { margin: 16px 0 0; font-size: var(--t-17); color: var(--c-alerte-texte); }
+  .pied { margin-top: 18px; font-size: var(--t-15); color: var(--c-texte-2); }
+  .message { font-size: var(--t-20); margin-top: 40px; color: var(--c-texte-2); }
   @media (max-width: 760px) {
     .projection { padding: 56px 16px 24px; }
-    .classement td { font-size: 16px; padding: 10px 8px; }
+    .classement td { font-size: var(--t-17); padding: 10px 8px; }
     .part .b { display: none; }
   }
 </style>

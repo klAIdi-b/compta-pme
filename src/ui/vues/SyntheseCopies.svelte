@@ -333,28 +333,28 @@
   section { margin-bottom: 16px; }
   .barre { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
   .barre label { display: flex; flex-direction: column; gap: 4px; min-width: 360px; }
-  .petit { font-size: 12px; }
+  .petit { font-size: var(--t-12); }
   .aide { padding: 0 14px 12px; margin: 0; }
   .messages { margin-bottom: 16px; }
   .messages ul { margin: 0; padding-left: 18px; }
   .actions { text-align: right; }
   .detail { background: var(--c-fond-2); padding: 6px 14px 10px; }
   .detail td { background: none; }
-  .faux { color: var(--c-alerte-texte); font-weight: bold; }
-  .options { padding: 4px 0 8px; font-size: 12px; }
+  .faux { color: var(--c-erreur); font-weight: bold; }
+  .options { padding: 4px 0 8px; font-size: var(--t-12); }
   .comparaison td { padding-top: 0; padding-bottom: 10px; }
-  .cote-a-cote { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-size: 12px; }
+  .cote-a-cote { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-size: var(--t-12); }
   .etiquette { font-weight: bold; color: var(--c-structure); margin-bottom: 2px; }
   .ligne-ecr { font-variant-numeric: tabular-nums; }
-  .aides-vues { font-weight: normal; font-size: 12px; color: var(--c-texte-2); }
+  .aides-vues { font-weight: normal; font-size: var(--t-12); color: var(--c-texte-2); }
   .tete-bilan { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
   .aide-bilan { margin: 0; padding: 10px 18px 0; }
-  .faute-commune { margin-top: 6px; padding: 6px 10px; border-left: 3px solid var(--c-accent); background: var(--c-alerte-fond); font-size: 12px; border-radius: 4px; }
+  .faute-commune { margin-top: 6px; padding: 6px 10px; border-left: 3px solid var(--c-avert-trait); background: var(--c-alerte-fond); font-size: var(--t-12); border-radius: var(--r-1); }
   .reussite { margin-bottom: 4px; }
-  .jauge { display: flex; height: 6px; border-radius: 3px; background: var(--c-bordure-3); overflow: hidden; }
+  .jauge { display: flex; height: 6px; border-radius: var(--r-1); background: var(--c-bordure-3); overflow: hidden; }
   .jauge i { display: block; height: 100%; background: var(--c-ok); }
   .jauge i.faible { background: var(--c-accent); }
   .erreur summary { cursor: pointer; }
   .erreur + .erreur { margin-top: 3px; }
-  .eleves { font-size: 12px; color: var(--c-texte-2); padding: 2px 0 4px 14px; }
+  .eleves { font-size: var(--t-12); color: var(--c-texte-2); padding: 2px 0 4px 14px; }
 </style>

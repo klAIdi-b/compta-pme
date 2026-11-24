@@ -4,7 +4,6 @@
 
 import type { FormatQuestion, ModeleOperation } from '../engine/exercices-courts';
 import type { TypeCompte } from '../engine/plan';
-import { LECON_BILAN, LECON_COMPTES, type PartieLecon } from './lecons';
 
 export type NiveauApprendre = 'CFC1' | 'CFC2' | 'MP';
 
@@ -22,8 +21,6 @@ export interface ModuleApprendre {
   objectif: string;
   /** Points essentiels, repris de la théorie validée. */
   rappel: string[];
-  /** Leçon vulgarisée, avec exemples (src/data/lecons.ts) ; sinon seul « L'essentiel » est affiché. */
-  lecon?: PartieLecon[];
   /** Chapitre de théorie correspondant (aucun pour les notions sans chapitre). */
   chapitre?: string;
   /** Modèle utilisé pour l'exemple travaillé (modules d'écritures) ; sinon, un calcul généré sert d'exemple. */
@@ -94,7 +91,6 @@ export const MODULES: ModuleApprendre[] = [
   {
     id: 'bilan',
     niveau: 'CFC1',
-    lecon: LECON_BILAN,
     titre: 'Le bilan : actif ou passif',
     objectif: "Classer chaque compte à l'actif ou au passif et reconnaître les quatre variations du bilan.",
     rappel: [
@@ -113,7 +109,6 @@ export const MODULES: ModuleApprendre[] = [
   {
     id: 'comptes',
     niveau: 'CFC1',
-    lecon: LECON_COMPTES,
     titre: 'Débit et crédit : opérations du bilan',
     objectif: 'Passer une écriture simple entre deux comptes du bilan et calculer le solde d\'un compte.',
     rappel: [

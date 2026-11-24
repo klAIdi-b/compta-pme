@@ -49,7 +49,7 @@
 {/if}
 
 <style>
-  .legende { margin: -8px 0 14px; font-size: 13px; }
+  .legende { margin: -8px 0 14px; font-size: var(--t-13); }
   .un { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 16px; align-items: start; }
   .liste { max-height: calc(100vh - 190px); max-height: calc(100dvh - 190px); overflow-y: auto; }
   .liste button {
@@ -61,7 +61,13 @@
   .liste button.sel { background: var(--c-selection); font-weight: bold; }
   .n { font-weight: bold; }
   .lib { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .solde { color: var(--c-texte-2); font-size: 12px; }
+  .solde { color: var(--c-texte-2); font-size: var(--t-12); }
   .mosaique { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px; }
   @media (max-width: 1100px) { .un { grid-template-columns: 220px minmax(0, 1fr); } }
+  /* Téléphone : la liste des comptes au-dessus, le compte choisi dessous. */
+  @media (max-width: 700px) {
+    .un { grid-template-columns: minmax(0, 1fr); }
+    .liste { max-height: 232px; }
+    .mosaique { grid-template-columns: minmax(0, 1fr); }
+  }
 </style>

@@ -1,5 +1,6 @@
 <!-- Espace enseignant, onglet « Simulateur » : liste des parties et aiguillage vers les écrans (maquette S2 validée). -->
 <script lang="ts">
+  import { dialogue } from '../../dialogue.svelte';
   import { simulations } from '../../simulation.svelte';
   import { situationGroupe } from '../../../engine/simulation/situation';
   import type { Decisions, Imprevu } from '../../../engine/simulation/types';
@@ -30,7 +31,7 @@
     try {
       const e = importerPartie(f.texte);
       const existe = simulations.trouver(e.id);
-      if (existe && !confirm(`La partie « ${e.nom} » existe déjà dans ce navigateur. La remplacer par celle du fichier ?`)) return;
+      if (existe && !(await dialogue.demander({ titre: `Remplacer la partie « ${e.nom} » ?`, texte: ['Elle existe déjà dans ce navigateur. Celle du fichier prendra sa place.'], confirmer: 'Remplacer la partie', danger: true }))) return;
       simulations.ajouter(e);
       message = `Partie « ${e.nom} » importée.`;
     } catch (err) {
@@ -44,9 +45,9 @@
     telecharger(nomFichier(['simulation', e.nom], EXT_SIMULATION), exporterPartie($state.snapshot(e) as typeof e));
   }
 
-  function supprimer(id: string) {
+  async function supprimer(id: string) {
     const e = simulations.trouver(id);
-    if (e && confirm(`Supprimer la partie « ${e.nom} » de ce navigateur ? Exportez-la d'abord si vous voulez la garder.`)) {
+    if (e && (await dialogue.demander({ titre: `Supprimer la partie « ${e.nom} » ?`, texte: ["Elle sera retirée de ce navigateur. Exportez-la d'abord si vous voulez la garder."], confirmer: 'Supprimer la partie', danger: true }))) {
       simulations.supprimer(id);
     }
   }
@@ -130,7 +131,7 @@
 <style>
   .barre { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
   .actions { display: flex; gap: 14px; justify-content: flex-end; flex-wrap: wrap; }
-  .petit { font-size: 12px; }
+  .petit { font-size: var(--t-12); }
   .aide { margin-top: 10px; }
   .info { margin: 0 0 14px; }
 </style>

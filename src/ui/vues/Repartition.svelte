@@ -88,6 +88,6 @@
   .donnees, .tableau { width: auto; min-width: 560px; margin: 8px 14px 12px; }
   .donnees td { border-bottom: 1px solid var(--c-bordure-2); }
   .tableau td { border-bottom: none; padding: 4px 8px; vertical-align: top; }
-  .faux { font-size: 12px; color: var(--c-alerte-texte); font-weight: bold; text-align: right; }
+  .faux { font-size: var(--t-12); color: var(--c-erreur); font-weight: bold; text-align: right; }
   .note { margin-top: 0; }
 </style>

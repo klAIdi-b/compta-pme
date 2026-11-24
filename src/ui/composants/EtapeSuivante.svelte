@@ -91,7 +91,7 @@
   }
   .attente { border-top-color: var(--c-accent); }
   .texte { flex: 1; min-width: 0; }
-  .btn { flex: none; font-size: 15px; padding: 10px 18px; }
+  .btn { flex: none; font-size: var(--t-15); padding: 10px 18px; }
   @media (max-width: 1100px) {
     .parcours { margin: 16px -16px -16px; padding: 12px 16px; bottom: -16px; flex-wrap: wrap; }
   }

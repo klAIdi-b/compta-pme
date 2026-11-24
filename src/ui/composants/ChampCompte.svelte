@@ -245,20 +245,20 @@
 
 <style>
   .champ-compte { position: relative; }
-  .intitule { font-size: 12px; color: var(--c-texte-2); padding: 2px 2px 0; min-height: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .intitule { font-size: var(--t-12); color: var(--c-texte-2); padding: 2px 2px 0; min-height: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .intitule.erreur { color: var(--c-negatif); white-space: normal; }
   .liste {
     position: fixed; z-index: 50; overflow-y: auto; overscroll-behavior: contain;
-    background: #fff; border: 1px solid var(--c-bordure); border-radius: 8px; box-shadow: 0 8px 24px rgba(16, 24, 40, 0.16);
+    background: #fff; border: 1px solid var(--c-bordure); border-radius: var(--r-3); box-shadow: 0 8px 24px rgba(16, 24, 40, 0.16);
   }
   .groupe {
     position: sticky; top: 0; background: var(--c-fond-2); color: var(--c-structure);
-    font-weight: bold; font-size: 12px; padding: 5px 10px; border-bottom: 1px solid var(--c-bordure-2);
+    font-weight: bold; font-size: var(--t-12); padding: 5px 10px; border-bottom: 1px solid var(--c-bordure-2);
   }
   .option { padding: 7px 12px; display: flex; gap: 10px; cursor: pointer; justify-content: space-between; }
   .nom { min-width: 0; }
   .option:hover { background: var(--c-zebra); }
   .option.sel { background: var(--c-selection); }
-  .n { font-size: 12px; color: var(--c-texte-2); flex: none; }
+  .n { font-size: var(--t-12); color: var(--c-texte-2); flex: none; }
   .aucun { padding: 10px; color: var(--c-texte-2); }
 </style>

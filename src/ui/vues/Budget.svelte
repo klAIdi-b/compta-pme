@@ -4,6 +4,7 @@
   appréciation, cause principale et recommandation. En entraînement, chaque champ est contrôlé dès qu'il est rempli.
 -->
 <script lang="ts">
+  import { dialogue } from '../dialogue.svelte';
   import { etat } from '../etat.svelte';
   import {
     calculBudget, champsComparer, champsPreparer, ficheBudgetVide, ID_RESULTAT, ID_TOTAL_CHARGES, ID_TOTAL_PRODUITS,
@@ -30,11 +31,14 @@
    */
   const budgetFige = $derived(donnees.preparer && !entrainement && fiche.comparer.ouvert === '1');
 
-  function ouvrirComparer() {
+  async function ouvrirComparer() {
     if (donnees.preparer && !entrainement && fiche.comparer.ouvert !== '1') {
-      const ok = confirm(
-        "Le budget validé par la direction va s'afficher pour la comparaison.\n\nVous ne pourrez plus modifier votre propre budget. Continuer ?",
-      );
+      const ok = await dialogue.demander({
+        titre: 'Passer à la comparaison ?',
+        texte: ["Le budget validé par la direction va s'afficher pour la comparaison.", 'Vous ne pourrez plus modifier votre propre budget.'],
+        confirmer: 'Afficher le budget validé',
+        annuler: 'Revoir mon budget',
+      });
       if (!ok) return;
       fiche.comparer.ouvert = '1';
     }
@@ -188,13 +192,13 @@
   .total td { font-weight: bold; }
   .controle { width: 90px; }
   .juste { color: var(--c-ok); font-weight: bold; }
-  .faux { color: var(--c-alerte-texte); font-weight: bold; }
+  .faux { color: var(--c-erreur); font-weight: bold; }
   .consigne { margin: 0 0 6px; }
-  .petit { font-size: 12px; }
+  .petit { font-size: var(--t-12); }
   .defile { overflow-x: auto; }
   .interpretation { display: grid; gap: 12px; }
   .interpretation label { display: flex; flex-direction: column; gap: 6px; font-weight: bold; }
   .ligne-champ { display: flex; gap: 12px; align-items: center; font-weight: normal; }
   .interpretation select { min-width: 320px; }
-  .interpretation textarea { font: inherit; font-weight: normal; padding: 6px 8px; border: 1px solid var(--c-bordure); border-radius: 6px; }
+  .interpretation textarea { font: inherit; font-weight: normal; padding: 6px 8px; border: 1px solid var(--c-bordure); border-radius: var(--r-2); }
 </style>

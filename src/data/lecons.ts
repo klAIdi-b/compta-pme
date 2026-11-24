@@ -3,6 +3,9 @@
 // expliquée avec les mots de tous les jours, un exemple chiffré, le piège fréquent, ce qu'il faut retenir.
 // Les règles reprennent la théorie validée (chapitres « Le bilan » et « Les comptes ») : rien de nouveau n'est inventé.
 
+import { LECONS_CFC } from './lecons-cfc';
+import { LECONS_MP } from './lecons-mp';
+
 export interface PartieLecon {
   titre: string;
   /** Explication en langage courant, un paragraphe par élément. */
@@ -183,3 +186,6 @@ export const LECON_COMPTES: PartieLecon[] = [
     retenir: 'Le solde final d’une année devient le solde initial de la suivante.',
   },
 ];
+
+/** Leçon de chaque module du parcours Apprendre, par identifiant de module. */
+export const LECONS: Record<string, PartieLecon[]> = { bilan: LECON_BILAN, comptes: LECON_COMPTES, ...LECONS_CFC, ...LECONS_MP };

@@ -157,10 +157,10 @@
   section { margin-bottom: 16px; }
   h2 { padding: 10px 14px; border-bottom: 1px solid var(--c-bordure-2); }
   .entete-relecture { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; justify-content: space-between; }
-  .barre { display: inline-block; width: 200px; height: 10px; border-radius: 5px; background: var(--c-bordure-2); overflow: hidden; vertical-align: middle; margin-left: 10px; }
+  .barre { display: inline-block; width: 200px; height: 10px; border-radius: var(--r-1); background: var(--c-bordure-2); overflow: hidden; vertical-align: middle; margin-left: 10px; }
   .barre span { display: block; height: 100%; background: var(--c-ok); }
   .aide { padding: 0 14px 12px; margin: 0; max-width: 900px; }
-  .petit { font-size: 12px; }
+  .petit { font-size: var(--t-12); }
   .case { width: 90px; white-space: nowrap; vertical-align: top; }
   .case label { display: inline-flex; gap: 6px; align-items: center; }
   td { vertical-align: top; }

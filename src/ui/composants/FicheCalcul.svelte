@@ -85,7 +85,7 @@
   h2 { padding: 10px 14px; border-bottom: 1px solid var(--c-bordure-2); }
   .fort td:first-child { font-weight: bold; }
   .saisie { display: flex; align-items: center; gap: 6px; }
-  .unite { width: 28px; color: var(--c-texte-2); font-size: 12px; }
+  .unite { width: 28px; color: var(--c-texte-2); font-size: var(--t-12); }
   .juste { color: var(--c-ok); font-weight: bold; }
-  .faux { color: var(--c-alerte-texte); font-weight: bold; }
+  .faux { color: var(--c-erreur); font-weight: bold; }
 </style>

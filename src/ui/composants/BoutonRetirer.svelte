@@ -30,10 +30,10 @@
 </button>
 
 <style>
-  .retirer { border: none; background: none; color: var(--c-texte-2); font-size: 18px; cursor: pointer; padding: 6px 4px; }
+  .retirer { border: none; background: none; color: var(--c-texte-2); font-size: var(--t-17); cursor: pointer; padding: 6px 4px; }
   .retirer:hover { color: var(--c-negatif); }
   .retirer.arme {
-    font-size: 12px; font-weight: bold; color: var(--c-negatif); border: 1px solid var(--c-negatif); border-radius: 6px;
+    font-size: var(--t-12); font-weight: bold; color: var(--c-negatif); border: 1px solid var(--c-negatif); border-radius: var(--r-2);
     padding: 5px 8px; background: var(--c-fond); white-space: nowrap;
   }
 </style>

@@ -32,7 +32,7 @@
 {#each affiches as c}
   <section class="carte compte">
     <h2><span class="num">{c.numero}</span> {c.intitule}</h2>
-    <table>
+    <table class="empile">
       <thead>
         <tr>
           <th style="width:96px">Date</th>
@@ -47,20 +47,20 @@
       <tbody>
         {#each c.lignes as l, i}
           <tr class:zebre={i % 2 === 1}>
-            <td class="num">{l.date ? dt(l.date) : dt(d.debut)}</td>
-            <td class="num">{l.piece ?? ''}</td>
-            <td>{l.nature === 'ouverture' ? libelles.initialLong : l.libelle}</td>
-            <td class="num">{l.contrepartie ?? ''}</td>
-            <td class="montant">{l.sens === 'D' ? m(l.montant) : ''}</td>
-            <td class="montant">{l.sens === 'C' ? m(l.montant) : ''}</td>
-            <td class="montant">{solde(l.soldeProgressif)}</td>
+            <td class="num" data-etiquette="Date">{l.date ? dt(l.date) : dt(d.debut)}</td>
+            <td class="num" data-etiquette="Pièce">{l.piece ?? ''}</td>
+            <td class="large">{l.nature === 'ouverture' ? libelles.initialLong : l.libelle}</td>
+            <td class="num" data-etiquette="Contrepartie">{l.contrepartie ?? ''}</td>
+            <td class="montant" data-etiquette="Débit">{l.sens === 'D' ? m(l.montant) : ''}</td>
+            <td class="montant" data-etiquette="Crédit">{l.sens === 'C' ? m(l.montant) : ''}</td>
+            <td class="montant" data-etiquette="Solde">{solde(l.soldeProgressif)}</td>
           </tr>
         {/each}
         <tr class="total">
-          <td colspan="4">Totaux et solde</td>
-          <td class="montant">{m(c.totalDebit)}</td>
-          <td class="montant">{m(c.totalCredit)}</td>
-          <td class="montant">{solde(c.solde)}</td>
+          <td colspan="4" class="large">Totaux et solde</td>
+          <td class="montant" data-etiquette="Débit">{m(c.totalDebit)}</td>
+          <td class="montant" data-etiquette="Crédit">{m(c.totalCredit)}</td>
+          <td class="montant" data-etiquette="Solde">{solde(c.solde)}</td>
         </tr>
       </tbody>
     </table>
@@ -71,7 +71,8 @@
 
 <style>
   .filtre { display: flex; align-items: center; gap: 8px; }
-  .filtre select { width: 300px; }
+  .filtre select { width: 300px; max-width: 100%; }
+  @media (max-width: 700px) { .filtre { width: 100%; } .filtre select { flex: 1; min-width: 0; width: auto; } }
   .compte { margin-bottom: 16px; }
-  .note { font-size: 12px; }
+  .note { font-size: var(--t-12); }
 </style>

@@ -613,9 +613,9 @@
   .dates { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; grid-column: span 2; }
   .case { align-self: center; }
   textarea.champ { resize: vertical; font: inherit; }
-  .petit { font-size: 12px; }
+  .petit { font-size: var(--t-12); }
   .deux { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-  h3 { font-size: 13px; color: var(--c-structure); margin: 0 0 6px; }
+  h3 { font-size: var(--t-13); color: var(--c-structure); margin: 0 0 6px; }
   .bilan td, .ops td { border: none; padding: 3px 4px; }
   .pied-bilan { display: flex; justify-content: space-between; padding: 6px 4px; border-top: 1px solid var(--c-texte); margin-top: 4px; }
   .cellule-retirer { width: 30px; text-align: right; white-space: nowrap; }
@@ -629,9 +629,9 @@
   .outils-comptes input { max-width: 320px; }
   .classes { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; max-height: 420px; overflow-y: auto; }
   fieldset { border: 1px solid var(--c-bordure-2); padding: 6px 10px 8px; margin: 0; }
-  legend { font-size: 12px; font-weight: bold; color: var(--c-structure); padding: 0 4px; }
+  legend { font-size: var(--t-12); font-weight: bold; color: var(--c-structure); padding: 0 4px; }
   .compte { display: flex; gap: 6px; align-items: baseline; padding: 2px 0; cursor: pointer; }
   .compte.hors span:first-of-type { font-style: italic; color: var(--c-texte-2); }
-  .numero { font-size: 11px; color: var(--c-texte-2); font-variant-numeric: tabular-nums; }
+  .numero { font-size: var(--t-12); color: var(--c-texte-2); font-variant-numeric: tabular-nums; }
   @media (max-width: 1100px) { .grille { grid-template-columns: 1fr 1fr; } .deux { grid-template-columns: 1fr; } }
 </style>

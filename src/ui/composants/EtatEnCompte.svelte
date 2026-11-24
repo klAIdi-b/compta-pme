@@ -59,9 +59,9 @@
   .etat { display: grid; grid-template-columns: 1fr 1fr; }
   .colonne { display: flex; flex-direction: column; min-width: 0; }
   .separee { border-left: 1px solid var(--c-bordure-2); }
-  .tete { color: var(--c-structure); font-weight: bold; padding: 12px 14px; font-size: 15px; border-bottom: 2px solid var(--c-structure); }
+  .tete { color: var(--c-structure); font-weight: var(--graisse-fort); padding: 12px 14px; font-size: var(--t-15); border-bottom: 2px solid var(--c-structure); }
   .corps { flex: 1; padding: 6px 0; }
-  .groupe { font-weight: bold; color: var(--c-structure); padding: 10px 14px 4px; }
+  .groupe { font-weight: var(--graisse-fort); color: var(--c-structure); padding: 10px 14px 4px; }
   .poste { display: grid; grid-template-columns: 48px minmax(0, 1fr) 110px 110px; padding: 4px 14px; }
   .sans-numeros .poste { grid-template-columns: 0 minmax(0, 1fr) 110px 110px; }
   .sans-numeros .n { visibility: hidden; }
@@ -76,5 +76,14 @@
   @media (max-width: 1100px) {
     .poste { grid-template-columns: 40px minmax(0, 1fr) 90px 90px; }
     .sans-numeros .poste { grid-template-columns: 0 minmax(0, 1fr) 90px 90px; }
+  }
+  /* Téléphone : l'actif puis le passif en pleine largeur ; les montants gardent leur place à droite. */
+  @media (max-width: 700px) {
+    .etat { grid-template-columns: minmax(0, 1fr); }
+    .separee { border-left: 0; border-top: 8px solid var(--c-fond-page); }
+    .poste { grid-template-columns: 40px minmax(0, 1fr) auto auto; column-gap: 8px; padding: 6px 14px; }
+    .sans-numeros .poste { grid-template-columns: 0 minmax(0, 1fr) auto auto; column-gap: 0; }
+    .sans-numeros .lib { padding-right: 8px; }
+    .lib { overflow-wrap: anywhere; }
   }
 </style>

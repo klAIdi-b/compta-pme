@@ -1,0 +1,587 @@
+<!doctype html>
+<html lang="fr-CH">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex" />
+<title>Compta PME · design system (proposition)</title>
+<style>
+/* ===========================================================================
+   DESIGN TOKENS — proposition du 24.11.2026, à valider avant application.
+   Trois niveaux : valeurs brutes, rôles, composants. Seuls les rôles sont
+   utilisés dans les composants.
+   =========================================================================== */
+:root {
+  /* --- Couleurs : valeurs --- */
+  --bleu-900: #0f2742;
+  --bleu-800: #163a5a;
+  --bleu-700: #1f4e78;   /* primaire de la charte */
+  --bleu-200: #d6e4f0;   /* fond secondaire de la charte */
+  --bleu-100: #eaf1f8;
+  --bleu-50:  #f4f8fc;
+  --orange-700: #a8420f;
+  --orange-600: #c4501a; /* accent assombri : texte blanc conforme AA */
+  --orange-500: #e8601c; /* accent de la charte */
+  --orange-50:  #fdf0e8;
+  --gris-900: #1b2430;
+  --gris-600: #56616f;
+  --gris-500: #6f7b8a;
+  --gris-400: #8793a2;
+  --gris-300: #c3ccd7;
+  --gris-200: #dfe5ec;
+  --gris-100: #eef1f5;
+  --gris-50:  #f6f7f9;
+  --blanc: #ffffff;
+  --vert-700: #1d6b3a;
+  --vert-50:  #e6f3ea;
+  --rouge-700: #b00020;
+  --rouge-50:  #fdecee;
+  --ambre-800: #7a5200;
+  --ambre-500: #c98a00;
+  --ambre-50:  #fff5db;
+
+  /* --- Couleurs : rôles --- */
+  --c-primaire: var(--bleu-700);          /* structure, liens, titres de colonnes */
+  --c-primaire-fort: var(--bleu-800);
+  --c-encre: var(--bleu-900);             /* titres */
+  --c-texte: var(--gris-900);
+  --c-texte-2: var(--gris-600);           /* texte secondaire */
+  --c-fond-page: var(--gris-50);
+  --c-surface: var(--blanc);
+  --c-surface-2: var(--bleu-200);         /* sélection, ligne active */
+  --c-surface-3: var(--bleu-50);          /* lignes alternées, en-têtes */
+  --c-bordure: var(--gris-400);           /* champs et boutons : 3 : 1 au moins sur blanc */
+  --c-bordure-2: var(--gris-200);         /* tableaux, cartes */
+  --c-action: var(--orange-600);          /* fond du bouton principal (texte blanc) */
+  --c-action-survol: var(--orange-700);
+  --c-accent: var(--orange-500);          /* focus, repère d'action, jamais de texte sur fond blanc */
+  --c-succes: var(--vert-700);    --c-succes-fond: var(--vert-50);
+  --c-erreur: var(--rouge-700);   --c-erreur-fond: var(--rouge-50);
+  --c-alerte: var(--ambre-800);   --c-alerte-fond: var(--ambre-50);  --c-alerte-trait: var(--ambre-500);
+  --c-info: var(--bleu-700);      --c-info-fond: var(--bleu-100);
+  --c-desactive-fond: var(--gris-100);  --c-desactive-texte: var(--gris-600);
+
+  /* --- Typographie --- */
+  --police: 'Inter Variable', 'Inter', 'Segoe UI Variable Text', 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvetica Neue', sans-serif;
+  --t-12: 0.75rem;    /* mentions, numéros de compte */
+  --t-13: 0.8125rem;  /* en-têtes de tableaux, étiquettes */
+  --t-14: 0.875rem;   /* tableaux, texte secondaire */
+  --t-15: 0.9375rem;  /* texte courant */
+  --t-17: 1.0625rem;  /* titres de section */
+  --t-20: 1.25rem;    /* titres de carte importants */
+  --t-26: 1.625rem;   /* titre d'écran */
+  --graisse-normal: 400; --graisse-moyen: 550; --graisse-fort: 650;
+  --interligne-serre: 1.25; --interligne: 1.5;
+
+  /* --- Espacements (base 4 px) --- */
+  --e-1: 4px; --e-2: 8px; --e-3: 12px; --e-4: 16px; --e-5: 24px; --e-6: 32px; --e-7: 48px;
+
+  /* --- Rayons, ombres, traits --- */
+  --r-1: 4px;    /* champs, pastilles carrées, cellules */
+  --r-2: 6px;    /* boutons, messages */
+  --r-3: 8px;    /* cartes, panneaux */
+  --r-rond: 999px;
+  --ombre-1: 0 1px 2px rgba(15, 39, 66, 0.08);                      /* éléments posés */
+  --ombre-2: 0 6px 20px rgba(15, 39, 66, 0.14), 0 1px 3px rgba(15, 39, 66, 0.08); /* listes, dialogues */
+  --focus: 0 0 0 2px var(--blanc), 0 0 0 4px var(--c-accent);
+
+  /* --- Grille --- */
+  --l-lateral: 232px;
+  --l-contenu: 1180px;
+  --gouttiere: var(--e-5);
+  --h-cible: 40px;        /* hauteur des boutons et des champs à la souris */
+  --h-cible-tactile: 44px;
+  /* Points de rupture (rappel, non utilisables dans @media) : 600, 900, 1200 px */
+}
+@media (pointer: coarse) { :root { --h-cible: var(--h-cible-tactile); } }
+
+/* ===========================================================================
+   BASE
+   =========================================================================== */
+* { box-sizing: border-box; }
+html { font-size: 16px; }
+body { margin: 0; font-family: var(--police); font-size: var(--t-15); line-height: var(--interligne); color: var(--c-texte); background: var(--c-fond-page); -webkit-font-smoothing: antialiased; font-feature-settings: 'cv11', 'ss01'; }
+h1, h2, h3 { color: var(--c-encre); line-height: var(--interligne-serre); margin: 0; }
+h1 { font-size: var(--t-26); font-weight: var(--graisse-fort); letter-spacing: -0.015em; }
+h2 { font-size: var(--t-17); font-weight: var(--graisse-fort); }
+h3 { font-size: var(--t-15); font-weight: var(--graisse-fort); }
+p { margin: 0 0 var(--e-3); }
+.num { font-variant-numeric: tabular-nums lining-nums; }
+.discret { color: var(--c-texte-2); }
+:focus-visible { outline: none; box-shadow: var(--focus); border-radius: var(--r-1); }
+
+/* ===========================================================================
+   COMPOSANTS
+   =========================================================================== */
+/* Boutons */
+.btn { font: inherit; font-weight: var(--graisse-moyen); min-height: var(--h-cible); padding: 0 var(--e-4); border-radius: var(--r-2); border: 1px solid var(--c-bordure); background: var(--c-surface); color: var(--c-primaire); cursor: pointer; display: inline-flex; align-items: center; gap: var(--e-2); white-space: nowrap; }
+.btn:hover, .btn.est-survol { background: var(--c-surface-3); border-color: var(--gris-500); }
+.btn:active, .btn.est-enfonce { background: var(--c-surface-2); }
+.btn.est-focus { box-shadow: var(--focus); }
+.btn-principal { background: var(--c-action); border-color: var(--c-action); color: var(--blanc); }
+.btn-principal:hover, .btn-principal.est-survol { background: var(--c-action-survol); border-color: var(--c-action-survol); }
+.btn-principal:active, .btn-principal.est-enfonce { background: #8f370b; border-color: #8f370b; }
+.btn-danger { color: var(--c-erreur); }
+.btn-danger:hover, .btn-danger.est-survol { background: var(--c-erreur-fond); border-color: var(--c-erreur); }
+.btn[disabled], .btn[aria-disabled='true'] { background: var(--c-desactive-fond); border-color: var(--c-desactive-fond); color: var(--c-desactive-texte); cursor: not-allowed; }
+.btn-discret { border-color: transparent; background: transparent; }
+.btn-petit { min-height: 32px; padding: 0 var(--e-3); font-size: var(--t-14); }
+.btn .tourne { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,.45); border-top-color: #fff; border-radius: 50%; animation: tourne .7s linear infinite; }
+@keyframes tourne { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .btn .tourne { animation: none; border-top-color: rgba(255,255,255,.45); } }
+.lien { color: var(--c-primaire); text-decoration: underline; text-underline-offset: 3px; background: none; border: 0; font: inherit; padding: var(--e-1) 0; min-height: 24px; cursor: pointer; }
+.lien:hover { color: var(--c-primaire-fort); text-decoration-thickness: 2px; }
+
+/* Champs */
+.groupe-champ { display: grid; gap: var(--e-1); }
+.groupe-champ label { font-size: var(--t-13); font-weight: var(--graisse-moyen); color: var(--c-texte-2); }
+.champ { font: inherit; width: 100%; min-height: var(--h-cible); padding: 0 var(--e-3); border: 1px solid var(--c-bordure); border-radius: var(--r-1); background: var(--c-surface); color: var(--c-texte); }
+.champ::placeholder { color: var(--c-texte-2); }
+.champ:hover, .champ.est-survol { border-color: var(--gris-500); }
+.champ:focus, .champ.est-focus { outline: none; border-color: var(--c-primaire); box-shadow: 0 0 0 3px rgba(31, 78, 120, 0.2); }
+.champ.montant { text-align: right; font-variant-numeric: tabular-nums; }
+.champ[aria-invalid='true'] { border-color: var(--c-erreur); background: var(--c-erreur-fond); }
+.champ[aria-invalid='true']:focus { box-shadow: 0 0 0 3px rgba(176, 0, 32, 0.18); }
+.champ[disabled] { background: var(--c-desactive-fond); color: var(--c-desactive-texte); cursor: not-allowed; }
+.aide { font-size: var(--t-13); color: var(--c-texte-2); }
+.erreur-champ { font-size: var(--t-13); color: var(--c-erreur); font-weight: var(--graisse-moyen); }
+
+/* Messages */
+.message { display: grid; grid-template-columns: auto 1fr; gap: var(--e-3); padding: var(--e-3) var(--e-4); border-radius: var(--r-2); border: 1px solid; border-left-width: 4px; background: var(--c-surface); }
+.message .picto { width: 20px; height: 20px; margin-top: 1px; }
+.message b { display: block; }
+.message p { margin: 0; }
+.message.succes { border-color: var(--c-succes); background: var(--c-succes-fond); color: #124526; }
+.message.erreur { border-color: var(--c-erreur); background: var(--c-erreur-fond); color: #7a0016; }
+.message.alerte { border-color: var(--c-alerte-trait); background: var(--c-alerte-fond); color: var(--c-alerte); }
+.message.info   { border-color: var(--c-info); background: var(--c-info-fond); color: var(--bleu-800); }
+.message .actions { margin-top: var(--e-2); display: flex; gap: var(--e-2); flex-wrap: wrap; }
+
+/* Pastilles de statut */
+.statut { display: inline-flex; align-items: center; gap: 6px; padding: 2px 8px; border-radius: var(--r-1); font-size: var(--t-13); font-weight: var(--graisse-moyen); white-space: nowrap; }
+.statut::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+.statut.juste { background: var(--c-succes-fond); color: var(--c-succes); }
+.statut.revoir { background: var(--c-erreur-fond); color: var(--c-erreur); }
+.statut.incomplet { background: var(--c-alerte-fond); color: var(--c-alerte); }
+.statut.neutre { background: var(--gris-100); color: var(--c-texte-2); }
+
+/* Tableaux */
+.cadre-tableau { border: 1px solid var(--c-bordure-2); border-radius: var(--r-3); background: var(--c-surface); overflow: hidden; }
+table { border-collapse: collapse; width: 100%; font-size: var(--t-14); }
+th { text-align: left; font-size: var(--t-13); font-weight: var(--graisse-moyen); color: var(--c-texte-2); background: var(--c-surface-3); padding: var(--e-2) var(--e-3); border-bottom: 1px solid var(--c-bordure-2); white-space: nowrap; }
+td { padding: var(--e-2) var(--e-3); border-bottom: 1px solid var(--gris-100); vertical-align: top; }
+tbody tr:nth-child(even) td { background: #fafbfd; }
+tbody tr:hover td, tbody tr.est-survol td { background: var(--bleu-100); }
+tbody tr.est-choisi td { background: var(--c-surface-2); }
+th.montant, td.montant { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+/* Débit et crédit : un filet vertical sépare les deux colonnes, comme dans un livre comptable. */
+.col-debit { border-left: 1px solid var(--c-bordure-2); }
+.col-credit { border-left: 1px solid var(--c-bordure-2); border-right: 1px solid var(--c-bordure-2); }
+th.col-debit, th.col-credit { color: var(--c-primaire); }
+tr.total td { font-weight: var(--graisse-fort); border-top: 1px solid var(--c-texte); border-bottom: 3px double var(--c-texte); background: var(--c-surface) !important; }
+td .no { display: block; font-size: var(--t-12); color: var(--c-texte-2); font-variant-numeric: tabular-nums; }
+.negatif { color: var(--c-erreur); }
+.vide { padding: var(--e-6) var(--e-4); text-align: center; color: var(--c-texte-2); }
+
+/* Onglets */
+.onglets { display: flex; gap: var(--e-1); border-bottom: 1px solid var(--c-bordure-2); }
+.onglets button { font: inherit; font-weight: var(--graisse-moyen); min-height: var(--h-cible); padding: 0 var(--e-4); border: 0; border-bottom: 3px solid transparent; margin-bottom: -1px; background: none; color: var(--c-texte-2); cursor: pointer; }
+.onglets button:hover, .onglets button.est-survol { color: var(--c-primaire); background: var(--c-surface-3); }
+.onglets button[aria-selected='true'] { color: var(--c-primaire); border-bottom-color: var(--c-primaire); }
+.onglets button[disabled] { color: var(--gris-400); cursor: not-allowed; }
+
+/* Panneau */
+.panneau { background: var(--c-surface); border: 1px solid var(--c-bordure-2); border-radius: var(--r-3); }
+.panneau > header { padding: var(--e-3) var(--e-4); border-bottom: 1px solid var(--c-bordure-2); display: flex; justify-content: space-between; align-items: center; gap: var(--e-3); }
+.panneau > .corps { padding: var(--e-4); }
+
+/* ===========================================================================
+   MISE EN PAGE DE CETTE MAQUETTE
+   =========================================================================== */
+.doc { max-width: var(--l-contenu); margin: 0 auto; padding: var(--e-6) var(--gouttiere) var(--e-7); }
+.doc > header { margin-bottom: var(--e-6); }
+.doc section { margin-top: var(--e-7); }
+.doc section > h2 { font-size: var(--t-20); padding-bottom: var(--e-2); border-bottom: 2px solid var(--c-primaire); margin-bottom: var(--e-4); }
+.doc h3.sous { margin: var(--e-5) 0 var(--e-2); color: var(--c-texte-2); font-size: var(--t-13); text-transform: uppercase; letter-spacing: .04em; }
+.grille { display: grid; gap: var(--e-4); }
+.g2 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+.g4 { grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
+.pastille { border: 1px solid var(--c-bordure-2); border-radius: var(--r-3); overflow: hidden; background: var(--c-surface); }
+.pastille .teinte { height: 56px; display: flex; align-items: flex-end; padding: 6px 10px; font-size: var(--t-13); font-weight: var(--graisse-moyen); }
+.pastille .lib { padding: var(--e-2) var(--e-3); font-size: var(--t-13); }
+.pastille .lib b { display: block; font-size: var(--t-14); }
+.pastille code { font-size: var(--t-12); }
+.rangee { display: flex; flex-wrap: wrap; gap: var(--e-3); align-items: center; }
+.etiq { font-size: var(--t-12); color: var(--c-texte-2); display: block; margin-top: 4px; }
+.etat { text-align: center; }
+table.contrastes td, table.contrastes th { font-size: var(--t-13); }
+.oui { color: var(--c-succes); font-weight: var(--graisse-fort); } .non { color: var(--c-erreur); font-weight: var(--graisse-fort); }
+code { background: var(--gris-100); padding: 1px 5px; border-radius: 3px; font-size: .9em; }
+.echelle div { display: flex; align-items: baseline; gap: var(--e-4); padding: var(--e-2) 0; border-bottom: 1px solid var(--gris-100); }
+.echelle code { min-width: 150px; }
+.barres span { display: inline-block; height: 16px; background: var(--c-surface-2); border: 1px solid var(--c-primaire); vertical-align: middle; margin-right: var(--e-2); }
+
+/* --- Page type : le journal --- */
+.ecran { border: 1px solid var(--gris-300); border-radius: var(--r-3); overflow-x: auto; background: var(--c-fond-page); box-shadow: var(--ombre-2); }
+.appli { display: grid; grid-template-columns: var(--l-lateral) 1fr; min-height: 720px; min-width: 1130px; }
+.lateral { background: var(--bleu-900); color: #dbe6f1; padding: var(--e-4) var(--e-3); display: flex; flex-direction: column; gap: var(--e-1); }
+.lateral .marque { color: #fff; font-weight: var(--graisse-fort); padding: var(--e-1) var(--e-2) var(--e-4); font-size: var(--t-17); }
+.lateral .rubrique { font-size: var(--t-12); text-transform: uppercase; letter-spacing: .06em; color: #8fa6bd; padding: var(--e-3) var(--e-2) var(--e-1); }
+.lateral a { color: inherit; text-decoration: none; display: flex; align-items: center; gap: var(--e-3); min-height: 36px; padding: 0 var(--e-2); border-radius: var(--r-1); font-size: var(--t-14); }
+.lateral a:hover { background: rgba(255,255,255,.07); }
+.lateral a[aria-current] { background: rgba(255,255,255,.12); color: #fff; font-weight: var(--graisse-moyen); box-shadow: inset 3px 0 0 var(--c-accent); }
+.lateral .rang { width: 20px; height: 20px; border-radius: 50%; border: 1px solid #6f89a3; display: grid; place-items: center; font-size: 11px; font-variant-numeric: tabular-nums; }
+.lateral .fait .rang { background: #2c8a52; border-color: #2c8a52; color: #fff; }
+.lateral .bas { margin-top: auto; display: grid; gap: var(--e-2); }
+.lateral .bas .btn { background: transparent; color: #fff; border-color: #58728c; justify-content: center; }
+.zone { display: flex; flex-direction: column; min-width: 0; }
+.entete { background: var(--c-surface); border-bottom: 1px solid var(--c-bordure-2); padding: 0 var(--e-5); min-height: 52px; display: flex; align-items: center; gap: var(--e-4); font-size: var(--t-14); }
+.entete .fil b { color: var(--c-encre); }
+.entete .droite { margin-left: auto; display: flex; align-items: center; gap: var(--e-4); }
+.jauge { width: 120px; height: 6px; background: var(--gris-200); border-radius: 3px; overflow: hidden; }
+.jauge i { display: block; height: 100%; width: 13%; background: var(--c-primaire); }
+.contenu { padding: var(--e-5); display: grid; gap: var(--e-4); align-content: start; }
+.titre-ecran { display: flex; align-items: baseline; gap: var(--e-3); flex-wrap: wrap; }
+.operation { background: var(--c-info-fond); border-bottom: 1px solid var(--c-bordure-2); padding: var(--e-3) var(--e-4); }
+.saisie { display: grid; grid-template-columns: 112px 64px 1.4fr 1fr 1fr 130px; gap: var(--e-2); padding: var(--e-4); align-items: end; }
+.pied-saisie { display: flex; align-items: center; gap: var(--e-4); padding: var(--e-3) var(--e-4); border-top: 1px solid var(--c-bordure-2); background: var(--c-surface-3); flex-wrap: wrap; }
+.equilibre { display: flex; gap: var(--e-5); font-size: var(--t-14); }
+.equilibre b { font-variant-numeric: tabular-nums; font-size: var(--t-17); display: block; }
+.etat-saisie { font-size: var(--t-14); font-weight: var(--graisse-moyen); }
+.etat-saisie.ok { color: var(--c-succes); } .etat-saisie.ko { color: var(--c-erreur); }
+.pied-saisie .fin { margin-left: auto; display: flex; gap: var(--e-2); }
+.verdict { margin: 0 var(--e-4) var(--e-4); }
+
+/* Téléphone */
+.telephones { display: flex; gap: var(--e-5); flex-wrap: wrap; align-items: flex-start; }
+.telephone { width: 360px; border: 1px solid var(--gris-300); border-radius: 22px; overflow: hidden; background: var(--c-fond-page); box-shadow: var(--ombre-2); --h-cible: 44px; }
+.telephone .barre { background: var(--c-surface); border-bottom: 1px solid var(--c-bordure-2); min-height: 52px; display: flex; align-items: center; gap: var(--e-3); padding: 0 var(--e-3); font-size: var(--t-14); }
+.telephone .barre .menu { width: 44px; height: 44px; border: 0; background: none; display: grid; place-items: center; cursor: pointer; }
+.telephone .barre .menu i { width: 18px; height: 2px; background: var(--c-encre); box-shadow: 0 6px 0 var(--c-encre), 0 -6px 0 var(--c-encre); }
+.telephone .corps { padding: var(--e-4); display: grid; gap: var(--e-3); }
+.telephone h1 { font-size: var(--t-20); }
+.pile { display: grid; gap: var(--e-3); }
+.pile .deux { display: grid; grid-template-columns: 1fr 96px; gap: var(--e-2); }
+.fiche-ecriture { background: var(--c-surface); border: 1px solid var(--c-bordure-2); border-radius: var(--r-3); padding: var(--e-3); display: grid; gap: var(--e-2); font-size: var(--t-14); }
+.fiche-ecriture .tete { display: flex; justify-content: space-between; align-items: center; gap: var(--e-2); }
+.fiche-ecriture dl { margin: 0; display: grid; grid-template-columns: auto 1fr auto; gap: 2px var(--e-3); }
+.fiche-ecriture dt { color: var(--c-texte-2); font-size: var(--t-13); }
+.fiche-ecriture dd { margin: 0; }
+.fiche-ecriture dd.m { text-align: right; font-variant-numeric: tabular-nums; }
+.bilan-mobile h3 { padding: var(--e-2) var(--e-3); background: var(--c-surface-3); border-bottom: 1px solid var(--c-bordure-2); color: var(--c-primaire); }
+.bilan-mobile .groupe { padding: var(--e-2) var(--e-3) 0; font-weight: var(--graisse-moyen); font-size: var(--t-13); color: var(--c-texte-2); }
+.bilan-mobile .ligne { display: flex; justify-content: space-between; gap: var(--e-3); padding: 6px var(--e-3); font-size: var(--t-14); }
+.bilan-mobile .ligne span:last-child { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.bilan-mobile .ligne.st { border-top: 1px solid var(--c-bordure-2); font-weight: var(--graisse-moyen); }
+.bilan-mobile .ligne.tot { border-top: 1px solid var(--c-texte); border-bottom: 3px double var(--c-texte); font-weight: var(--graisse-fort); }
+
+
+</style>
+</head>
+<body>
+<div class="doc">
+  <header>
+    <p class="discret" style="margin:0">Compta PME · étape 2 de l'amélioration de l'interface · proposition du 24.11.2026</p>
+    <h1>Design system</h1>
+    <p style="max-width:70ch;margin-top:8px">Cette page montre les variables de style proposées (couleurs, typographie, espacements), les composants de base avec tous leurs états, puis une page type : le journal, sur ordinateur et sur téléphone. Rien n'est encore appliqué au logiciel.</p>
+  </header>
+
+  <section id="couleurs">
+    <h2>1. Couleurs et rôles</h2>
+    <div class="grille g4" id="pastilles"></div>
+
+    <h3 class="sous">Contrastes mesurés (WCAG 2.2 AA : 4,5 pour le texte, 3 pour les grands textes et les éléments d'interface)</h3>
+    <div class="cadre-tableau"><table class="contrastes"><thead><tr><th>Usage</th><th>Texte</th><th>Fond</th><th class="montant">Rapport</th><th>Texte courant</th><th>Interface</th></tr></thead><tbody id="contrastes"></tbody></table></div>
+    <div class="message alerte" style="margin-top:16px">
+      <svg class="picto" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 3l8 14H2z"/><path d="M10 8v4M10 14.5v.5"/></svg>
+      <div><b>L'orange de la charte ne peut pas porter de texte blanc.</b><p>Blanc sur #E8601C ne passe pas le seuil de 4,5 (voir le tableau). Proposition, identique à ce qui existe aujourd'hui : le fond du bouton principal utilise l'orange assombri #C4501A ; l'orange #E8601C reste réservé au focus clavier et au repère de la rubrique active.</p></div>
+    </div>
+  </section>
+
+  <section id="typo">
+    <h2>2. Typographie</h2>
+    <p style="max-width:75ch">Police proposée : <b>Inter</b> (libre, conçue pour l'écran, chiffres tabulaires), intégrée au logiciel pour fonctionner hors ligne. Tant qu'elle n'est pas installée, cette page s'affiche avec la police du système. Sept tailles au lieu de vingt aujourd'hui, jamais moins de 12 px.</p>
+    <div class="echelle">
+      <div><code>--t-26 · 26 px</code><span style="font-size:var(--t-26);font-weight:650;color:var(--c-encre)">Journal · titre d'écran</span></div>
+      <div><code>--t-20 · 20 px</code><span style="font-size:var(--t-20);font-weight:650;color:var(--c-encre)">Titre de section importante</span></div>
+      <div><code>--t-17 · 17 px</code><span style="font-size:var(--t-17);font-weight:650;color:var(--c-encre)">Nouvelle écriture · titre de panneau</span></div>
+      <div><code>--t-15 · 15 px</code><span style="font-size:var(--t-15)">Texte courant : Achat de marchandises à crédit chez un fournisseur.</span></div>
+      <div><code>--t-14 · 14 px</code><span style="font-size:var(--t-14)">Tableaux et texte secondaire : Créances clients</span></div>
+      <div><code>--t-13 · 13 px</code><span style="font-size:var(--t-13);color:var(--c-texte-2);font-weight:550">En-têtes de colonnes et étiquettes de champs</span></div>
+      <div><code>--t-12 · 12 px</code><span style="font-size:var(--t-12);color:var(--c-texte-2)">Mentions et numéros de compte : 1100</span></div>
+    </div>
+    <h3 class="sous">Chiffres tabulaires : les montants s'alignent au centime</h3>
+    <div class="cadre-tableau" style="max-width:320px"><table><tbody>
+      <tr><td>Caisse</td><td class="montant">3'500.00</td></tr>
+      <tr><td>Banque</td><td class="montant">128'111.10</td></tr>
+      <tr><td>Découvert</td><td class="montant negatif">−1'234.50</td></tr>
+      <tr class="total"><td>Total</td><td class="montant">130'376.60</td></tr>
+    </tbody></table></div>
+  </section>
+
+  <section id="espaces">
+    <h2>3. Espacements, rayons, ombres, grille</h2>
+    <div class="grille g2">
+      <div>
+        <h3 class="sous" style="margin-top:0">Espacements (multiples de 4 px)</h3>
+        <div class="barres">
+          <p><span style="width:4px"></span><code>--e-1</code> 4 px</p><p><span style="width:8px"></span><code>--e-2</code> 8 px</p><p><span style="width:12px"></span><code>--e-3</code> 12 px</p><p><span style="width:16px"></span><code>--e-4</code> 16 px</p><p><span style="width:24px"></span><code>--e-5</code> 24 px</p><p><span style="width:32px"></span><code>--e-6</code> 32 px</p><p><span style="width:48px"></span><code>--e-7</code> 48 px</p>
+        </div>
+      </div>
+      <div>
+        <h3 class="sous" style="margin-top:0">Rayons et ombres</h3>
+        <div class="rangee">
+          <div class="etat"><div style="width:72px;height:48px;background:#fff;border:1px solid var(--c-bordure);border-radius:var(--r-1)"></div><span class="etiq">--r-1 · 4 px<br>champs</span></div>
+          <div class="etat"><div style="width:72px;height:48px;background:#fff;border:1px solid var(--c-bordure);border-radius:var(--r-2)"></div><span class="etiq">--r-2 · 6 px<br>boutons</span></div>
+          <div class="etat"><div style="width:72px;height:48px;background:#fff;border:1px solid var(--c-bordure);border-radius:var(--r-3)"></div><span class="etiq">--r-3 · 8 px<br>panneaux</span></div>
+          <div class="etat"><div style="width:72px;height:48px;background:#fff;border-radius:var(--r-3);box-shadow:var(--ombre-1)"></div><span class="etiq">--ombre-1<br>posé</span></div>
+          <div class="etat"><div style="width:72px;height:48px;background:#fff;border-radius:var(--r-3);box-shadow:var(--ombre-2)"></div><span class="etiq">--ombre-2<br>listes, dialogues</span></div>
+        </div>
+        <p class="discret" style="margin-top:16px;font-size:var(--t-14)">Trois rayons au lieu de douze. Les panneaux sont délimités par un filet, sans ombre : seuls les éléments qui passent au-dessus du contenu (liste des comptes, dialogue) portent une ombre.</p>
+        <h3 class="sous">Grille</h3>
+        <p style="font-size:var(--t-14)">Barre latérale 232 px · contenu 1180 px au plus · gouttière 24 px (16 px sous 600 px). Ruptures à 600, 900 et 1200 px. Cibles : 40 px à la souris, 44 px au doigt.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="composants">
+    <h2>4. Composants et états</h2>
+
+    <h3 class="sous">Boutons</h3>
+    <div class="rangee">
+      <div class="etat"><button class="btn btn-principal">Valider l'écriture</button><span class="etiq">principal</span></div>
+      <div class="etat"><button class="btn btn-principal est-survol">Valider l'écriture</button><span class="etiq">survol</span></div>
+      <div class="etat"><button class="btn btn-principal est-focus">Valider l'écriture</button><span class="etiq">focus clavier</span></div>
+      <div class="etat"><button class="btn btn-principal est-enfonce">Valider l'écriture</button><span class="etiq">enfoncé</span></div>
+      <div class="etat"><button class="btn btn-principal" disabled>Valider l'écriture</button><span class="etiq">désactivé</span></div>
+      <div class="etat"><button class="btn btn-principal" aria-busy="true"><span class="tourne"></span>Création du PDF…</button><span class="etiq">en cours</span></div>
+    </div>
+    <div class="rangee" style="margin-top:16px">
+      <div class="etat"><button class="btn">Annuler</button><span class="etiq">secondaire</span></div>
+      <div class="etat"><button class="btn est-survol">Annuler</button><span class="etiq">survol</span></div>
+      <div class="etat"><button class="btn est-focus">Annuler</button><span class="etiq">focus</span></div>
+      <div class="etat"><button class="btn" disabled>Annuler</button><span class="etiq">désactivé</span></div>
+      <div class="etat"><button class="btn btn-danger">Supprimer l'écriture</button><span class="etiq">danger</span></div>
+      <div class="etat"><button class="btn btn-discret btn-petit">Autres actions ▾</button><span class="etiq">discret, petit</span></div>
+      <div class="etat"><button class="lien">Voir la solution</button><span class="etiq">lien (24 px au moins)</span></div>
+    </div>
+    <p class="discret" style="font-size:var(--t-14);margin-top:12px">Un seul bouton principal par écran. Essayez la touche Tab sur cette page : le focus est un double anneau blanc et orange, visible sur fond clair comme sur fond sombre.</p>
+
+    <h3 class="sous">Champs</h3>
+    <div class="grille g4">
+      <div class="groupe-champ"><label for="c1">Libellé</label><input id="c1" class="champ" placeholder="Texte de l'écriture" /><span class="aide">Repos, avec texte d'aide</span></div>
+      <div class="groupe-champ"><label for="c2">Compte au débit</label><input id="c2" class="champ est-focus" value="Achats de marchandises" /><span class="aide">Focus</span></div>
+      <div class="groupe-champ"><label for="c3">Montant CHF</label><input id="c3" class="champ montant" aria-invalid="true" aria-describedby="e3" value="48oo" /><span class="erreur-champ" id="e3">Montant non reconnu. Exemple : 4800 ou 4'800.00</span></div>
+      <div class="groupe-champ"><label for="c4">Pièce</label><input id="c4" class="champ" disabled value="2" /><span class="aide">Désactivé</span></div>
+    </div>
+
+    <h3 class="sous">Messages</h3>
+    <div class="grille g2">
+      <div class="message succes" role="status"><svg class="picto" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="10" cy="10" r="8"/><path d="M6 10.5l2.7 2.7L14 7.5"/></svg><div><b>Juste.</b><p>Opération 1 comptabilisée. Passez à l'opération 2.</p></div></div>
+      <div class="message erreur" role="alert"><svg class="picto" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="10" cy="10" r="8"/><path d="M7 7l6 6M13 7l-6 6"/></svg><div><b>À revoir : le débit et le crédit sont inversés.</b><p>Les comptes sont les bons, mais pas du bon côté.</p><div class="actions"><button class="btn btn-petit">Corriger l'écriture</button><button class="lien">Voir la solution</button></div></div></div>
+      <div class="message alerte"><svg class="picto" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 3l8 14H2z"/><path d="M10 8v4M10 14.5v.5"/></svg><div><b>Copie jamais exportée.</b><p>Votre travail n'existe que dans ce navigateur.</p></div></div>
+      <div class="message info"><svg class="picto" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="10" cy="10" r="8"/><path d="M10 9v5M10 6v.5"/></svg><div><b>Bilan provisoire.</b><p>L'exercice n'est pas bouclé : le bénéfice figure dans les capitaux propres.</p></div></div>
+    </div>
+    <p class="discret" style="font-size:var(--t-14);margin-top:12px">Chaque état a une couleur, un pictogramme et un mot : l'information ne repose jamais sur la couleur seule.</p>
+
+    <h3 class="sous">Statuts</h3>
+    <div class="rangee"><span class="statut juste">Juste</span><span class="statut revoir">À revoir</span><span class="statut incomplet">Incomplète</span><span class="statut neutre">Pas encore saisie</span></div>
+
+    <h3 class="sous">Onglets</h3>
+    <div class="onglets" role="tablist"><button role="tab" aria-selected="true">Ouverture</button><button role="tab" aria-selected="false">Actuel</button><button role="tab" aria-selected="false" class="est-survol">Survol</button><button role="tab" aria-selected="false" disabled>Après bouclement</button></div>
+
+    <h3 class="sous">Tableau : débit et crédit séparés par un filet</h3>
+    <div class="cadre-tableau"><table>
+      <thead><tr><th>Date</th><th>Pièce</th><th>Libellé</th><th class="col-debit">Débit</th><th class="col-credit">Crédit</th><th class="montant">Montant</th><th>Correction</th></tr></thead>
+      <tbody>
+        <tr><td class="num">05.01.2026</td><td class="num">1</td><td>Achat de marchandises à crédit</td><td class="col-debit">Achats de marchandises<span class="no">4200</span></td><td class="col-credit">Dettes fournisseurs<span class="no">2000</span></td><td class="montant">4'800.00</td><td><span class="statut juste">Juste</span></td></tr>
+        <tr class="est-survol"><td class="num">08.01.2026</td><td class="num">2</td><td>Ventes au comptant (ligne survolée)</td><td class="col-debit">Caisse<span class="no">1000</span></td><td class="col-credit">Ventes de marchandises<span class="no">3200</span></td><td class="montant">12'350.00</td><td><span class="statut juste">Juste</span></td></tr>
+        <tr class="est-choisi"><td class="num">12.01.2026</td><td class="num">3</td><td>Loyer de janvier (ligne choisie)</td><td class="col-debit">Banque (n/avoir)<span class="no">1020</span></td><td class="col-credit">Loyers<span class="no">6000</span></td><td class="montant">1'850.00</td><td><span class="statut revoir">À revoir</span></td></tr>
+      </tbody>
+    </table></div>
+    <h3 class="sous">État vide</h3>
+    <div class="cadre-tableau"><p class="vide"><b>Aucune écriture pour l'instant.</b><br>Lisez l'opération 1 ci-dessus, puis saisissez sa date, son libellé, les comptes et le montant.</p></div>
+  </section>
+
+  <section id="page-type">
+    <h2>5. Page type : le journal</h2>
+    <p style="max-width:75ch">Trois corrections de l'audit sont visibles ici : le verdict s'affiche juste sous la saisie, le bouton « Valider » dit pourquoi il est grisé, et chaque écriture n'a plus qu'un bouton visible (« Modifier »), les autres actions étant dans un menu.</p>
+    <h3 class="sous">Ordinateur (cadre de 1130 px : faites défiler vers la droite sur un petit écran)</h3>
+    <div class="ecran" tabindex="0" role="group" aria-label="Maquette du journal sur ordinateur">
+      <div class="appli">
+        <nav class="lateral" aria-label="Navigation (maquette)">
+          <div class="marque">Compta PME</div>
+          <div class="rubrique">Votre parcours</div>
+          <a href="#page-type" class="fait"><span class="rang">✓</span>Votre mission</a>
+          <a href="#page-type" aria-current="page"><span class="rang">2</span>Journal</a>
+          <a href="#page-type"><span class="rang">3</span>Balance</a>
+          <a href="#page-type"><span class="rang">4</span>Compte de résultat</a>
+          <a href="#page-type"><span class="rang">5</span>Bilan</a>
+          <a href="#page-type"><span class="rang">6</span>Bouclement</a>
+          <div class="rubrique">Outils</div>
+          <a href="#page-type">Comptes</a><a href="#page-type">Grand livre</a><a href="#page-type">Théorie</a>
+          <div class="bas"><button class="btn">Exporter ma copie</button></div>
+        </nav>
+        <div class="zone">
+          <div class="entete">
+            <span class="fil"><b>Cycles du Léman</b> · Journal</span>
+            <span class="statut neutre" style="background:var(--c-surface-2);color:var(--c-primaire)">CFC · niveau 1 · Entraînement</span>
+            <span class="droite"><span class="num">2 / 15 pièces</span><span class="jauge"><i></i></span><span class="discret">Léa Martin · 2CFC1</span></span>
+          </div>
+          <div class="contenu">
+            <div class="titre-ecran"><h1>Journal</h1><span class="discret">2 écritures validées · opération 3 sur 15</span></div>
+
+            <div class="panneau">
+              <header><h2>Nouvelle écriture</h2><button class="lien">Raccourcis clavier</button></header>
+              <div class="operation"><b>Opération 3.</b> Paiement du loyer de janvier par la banque, 1'850.00.</div>
+              <div class="saisie">
+                <div class="groupe-champ"><label for="p1">Date</label><input id="p1" class="champ num" value="12.01.2026" /></div>
+                <div class="groupe-champ"><label for="p2">Pièce</label><input id="p2" class="champ num" value="3" /></div>
+                <div class="groupe-champ"><label for="p3">Libellé</label><input id="p3" class="champ" value="Loyer de janvier" /></div>
+                <div class="groupe-champ"><label for="p4">Compte au débit</label><input id="p4" class="champ" value="Loyers" /></div>
+                <div class="groupe-champ"><label for="p5">Compte au crédit</label><input id="p5" class="champ" placeholder="Nom du compte…" /></div>
+                <div class="groupe-champ"><label for="p6">Montant CHF</label><input id="p6" class="champ montant" value="1'850.00" /></div>
+              </div>
+              <div class="pied-saisie">
+                <div class="equilibre"><span>Total au débit<b>1'850.00</b></span><span>Total au crédit<b>0.00</b></span></div>
+                <span class="etat-saisie ko" id="raison">Il manque 1'850.00 au crédit : choisissez le compte au crédit.</span>
+                <span class="fin"><button class="btn">Annuler</button><button class="btn btn-principal" disabled aria-describedby="raison">Valider l'écriture</button></span>
+              </div>
+            </div>
+
+            <div class="message erreur" role="alert">
+              <svg class="picto" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="10" cy="10" r="8"/><path d="M7 7l6 6M13 7l-6 6"/></svg>
+              <div><b>Opération 2 à revoir : le débit et le crédit sont inversés.</b><p>Les comptes sont les bons, mais pas du bon côté. Pourquoi ? Une vente au comptant fait entrer de l'argent : la caisse augmente, au débit.</p>
+              <div class="actions"><button class="btn btn-petit">Corriger l'écriture 2</button><button class="lien">Voir la solution</button><button class="lien">Revoir la théorie : Les comptes</button></div></div>
+            </div>
+
+            <div class="panneau">
+              <header><h2>Écritures validées</h2><span class="discret" style="font-size:var(--t-14)">1 juste · 1 à revoir</span></header>
+              <table>
+                <thead><tr><th>Date</th><th>Pièce</th><th>Libellé</th><th class="col-debit">Débit</th><th class="col-credit">Crédit</th><th class="montant">Montant</th><th>Correction</th><th></th></tr></thead>
+                <tbody>
+                  <tr><td class="num">05.01.2026</td><td class="num">1</td><td>Achat de marchandises à crédit</td><td class="col-debit">Achats de marchandises<span class="no">4200</span></td><td class="col-credit">Dettes fournisseurs<span class="no">2000</span></td><td class="montant">4'800.00</td><td><span class="statut juste">Juste</span></td><td style="white-space:nowrap"><button class="btn btn-petit">Modifier</button> <button class="btn btn-petit btn-discret" aria-label="Autres actions pour l'écriture 1">⋯</button></td></tr>
+                  <tr><td class="num">08.01.2026</td><td class="num">2</td><td>Ventes au comptant</td><td class="col-debit">Ventes de marchandises<span class="no">3200</span></td><td class="col-credit">Caisse<span class="no">1000</span></td><td class="montant">12'350.00</td><td><span class="statut revoir">À revoir</span></td><td style="white-space:nowrap"><button class="btn btn-petit">Modifier</button> <button class="btn btn-petit btn-discret" aria-label="Autres actions pour l'écriture 2">⋯</button></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="sous">Téléphone (360 px) : la saisie empilée, les écritures en fiches, le bilan en une colonne</h3>
+    <div class="telephones">
+      <div class="telephone">
+        <div class="barre"><button class="menu" aria-label="Menu"><i></i></button><b>Journal</b><span style="margin-left:auto" class="num discret">2 / 15</span></div>
+        <div class="corps">
+          <div class="panneau">
+            <div class="operation" style="border-radius:8px 8px 0 0"><b>Opération 3.</b> Paiement du loyer de janvier par la banque, 1'850.00.</div>
+            <div class="corps pile" style="padding:12px">
+              <div class="deux"><div class="groupe-champ"><label for="m1">Date</label><input id="m1" class="champ num" value="12.01.2026" /></div><div class="groupe-champ"><label for="m2">Pièce</label><input id="m2" class="champ num" value="3" /></div></div>
+              <div class="groupe-champ"><label for="m3">Libellé</label><input id="m3" class="champ" value="Loyer de janvier" /></div>
+              <div class="groupe-champ"><label for="m4">Compte au débit</label><input id="m4" class="champ" value="Loyers" /></div>
+              <div class="groupe-champ"><label for="m5">Compte au crédit</label><input id="m5" class="champ" placeholder="Nom du compte…" /></div>
+              <div class="groupe-champ"><label for="m6">Montant CHF</label><input id="m6" class="champ montant" inputmode="decimal" value="1'850.00" /></div>
+              <span class="etat-saisie ko">Il manque 1'850.00 au crédit.</span>
+              <button class="btn btn-principal" style="justify-content:center" disabled>Valider l'écriture</button>
+            </div>
+          </div>
+          <div class="fiche-ecriture">
+            <div class="tete"><b>2 · Ventes au comptant</b><span class="statut revoir">À revoir</span></div>
+            <dl><dt>Débit</dt><dd>Ventes de marchandises</dd><dd class="m">12'350.00</dd><dt>Crédit</dt><dd>Caisse</dd><dd class="m">12'350.00</dd></dl>
+            <span style="color:var(--c-erreur);font-size:var(--t-13)">Le débit et le crédit sont inversés.</span>
+            <div class="rangee"><button class="btn btn-petit" style="min-height:44px">Corriger</button><button class="lien" style="min-height:44px">Voir la solution</button></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="telephone">
+        <div class="barre"><button class="menu" aria-label="Menu"><i></i></button><b>Bilan au 05.01.2026</b></div>
+        <div class="corps">
+          <div class="panneau bilan-mobile">
+            <h3>Actif</h3>
+            <div class="groupe">Actifs circulants</div>
+            <div class="ligne"><span>Caisse</span><span>3'500.00</span></div>
+            <div class="ligne"><span>Poste (CP)</span><span>4'200.00</span></div>
+            <div class="ligne"><span>Banque (n/avoir)</span><span>28'000.00</span></div>
+            <div class="ligne"><span>Créances clients</span><span>2'300.00</span></div>
+            <div class="ligne"><span>Stock de marchandises</span><span>18'000.00</span></div>
+            <div class="ligne st"><span>Total des actifs circulants</span><span>56'000.00</span></div>
+            <div class="groupe">Actifs immobilisés</div>
+            <div class="ligne"><span>Mobilier et installations</span><span>15'000.00</span></div>
+            <div class="ligne"><span>Véhicules</span><span>22'000.00</span></div>
+            <div class="ligne st"><span>Total des actifs immobilisés</span><span>37'000.00</span></div>
+            <div class="ligne tot"><span>Total de l'actif</span><span>93'000.00</span></div>
+          </div>
+          <div class="panneau bilan-mobile">
+            <h3>Passif</h3>
+            <div class="groupe">Capitaux étrangers à court terme</div>
+            <div class="ligne"><span>Dettes fournisseurs</span><span>2'800.00</span></div>
+            <div class="groupe">Capitaux étrangers à long terme</div>
+            <div class="ligne"><span>Emprunt bancaire à long terme</span><span>30'000.00</span></div>
+            <div class="groupe">Capitaux propres</div>
+            <div class="ligne"><span>Capital</span><span>55'400.00</span></div>
+            <div class="ligne"><span><i>Bénéfice de l'exercice</i></span><span>4'800.00</span></div>
+            <div class="ligne tot"><span>Total du passif</span><span>93'000.00</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+// Pastilles de couleur et contrastes calculés par la page elle-même (formule WCAG).
+const css = getComputedStyle(document.documentElement);
+const v = (n) => css.getPropertyValue(n).trim();
+const hex = (n) => { const d = document.createElement('i'); d.style.color = `var(${n})`; document.body.append(d); const c = getComputedStyle(d).color.match(/\d+/g).map(Number); d.remove(); return c; };
+const lum = ([r, g, b]) => { const f = (x) => { x /= 255; return x <= 0.03928 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4; }; return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b); };
+const rapport = (a, b) => { const [x, y] = [lum(hex(a)), lum(hex(b))].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05); };
+const code = (n) => '#' + hex(n).map((x) => x.toString(16).padStart(2, '0')).join('').toUpperCase();
+
+const ROLES = [
+  ['--c-primaire', 'Primaire', 'Structure, liens, colonnes débit et crédit'],
+  ['--c-action', 'Action', 'Fond du bouton principal, un par écran'],
+  ['--c-accent', 'Accent', 'Focus clavier, rubrique active'],
+  ['--c-surface-2', 'Fond secondaire', 'Sélection, ligne choisie'],
+  ['--c-encre', 'Encre', 'Titres, barre latérale'],
+  ['--c-texte', 'Texte', 'Texte courant'],
+  ['--c-texte-2', 'Texte secondaire', 'Étiquettes, mentions'],
+  ['--c-fond-page', 'Fond de page', 'Derrière les panneaux'],
+  ['--c-succes', 'Succès', 'Écriture juste, totaux égaux'],
+  ['--c-erreur', 'Erreur', 'À revoir, saisie invalide, solde négatif'],
+  ['--c-alerte', 'Avertissement', 'Copie non exportée, écriture incomplète'],
+  ['--c-info', 'Information', 'Consignes, bilan provisoire'],
+];
+document.getElementById('pastilles').innerHTML = ROLES.map(([n, nom, role]) => {
+  const clair = lum(hex(n)) > 0.4;
+  return `<div class="pastille"><div class="teinte" style="background:var(${n});color:${clair ? '#1b2430' : '#fff'}">${code(n)}</div><div class="lib"><b>${nom}</b>${role}<br><code>${n}</code></div></div>`;
+}).join('');
+
+const PAIRES = [
+  ['Texte courant', '--c-texte', '--c-surface'],
+  ['Texte secondaire', '--c-texte-2', '--c-surface'],
+  ['Texte secondaire sur le fond de page', '--c-texte-2', '--c-fond-page'],
+  ['Texte secondaire sur en-tête de tableau', '--c-texte-2', '--c-surface-3'],
+  ['Lien, bouton secondaire', '--c-primaire', '--c-surface'],
+  ['Primaire sur fond secondaire', '--c-primaire', '--c-surface-2'],
+  ['Bouton principal (blanc sur action)', '--blanc', '--c-action'],
+  ['Blanc sur l\'orange de la charte', '--blanc', '--c-accent'],
+  ['Anneau de focus sur blanc', '--c-accent', '--c-surface', true],
+  ['Succès : texte', '--c-succes', '--c-succes-fond'],
+  ['Erreur : texte', '--c-erreur', '--c-erreur-fond'],
+  ['Avertissement : texte', '--c-alerte', '--c-alerte-fond'],
+  ['Information : texte', '--bleu-800', '--c-info-fond'],
+  ['Désactivé : texte', '--c-desactive-texte', '--c-desactive-fond'],
+  ['Bordure de champ et de bouton', '--c-bordure', '--c-surface', true],
+  ['Texte indicatif dans un champ', '--c-texte-2', '--c-surface'],
+  ['Barre latérale : texte', '--bleu-200', '--bleu-900'],
+];
+document.getElementById('contrastes').innerHTML = PAIRES.map(([usage, a, b, interface]) => {
+  const r = rapport(a, b);
+  return `<tr><td>${usage}</td><td><code>${code(a)}</code></td><td><code>${code(b)}</code></td><td class="montant">${r.toFixed(2).replace('.', ',')} : 1</td><td class="${interface ? '' : r >= 4.5 ? 'oui' : 'non'}">${interface ? 'sans objet' : r >= 4.5 ? 'conforme' : 'insuffisant'}</td><td class="${r >= 3 ? 'oui' : 'non'}">${r >= 3 ? 'conforme' : 'insuffisant'}</td></tr>`;
+}).join('');
+</script>
+</body>
+</html>

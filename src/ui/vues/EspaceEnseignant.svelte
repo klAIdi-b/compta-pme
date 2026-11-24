@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { dialogue } from '../dialogue.svelte';
   import { enseignant, nouvelIdentifiant } from '../enseignant.svelte';
   import { etat } from '../etat.svelte';
   import { exercicesDemo } from '../../data/demos';
@@ -128,8 +129,9 @@
     enseignant.ouvert = false;
   }
 
-  function supprimer(ex: Exercice) {
-    if (confirm(`Supprimer l'exercice « ${ex.titre || 'sans titre'} » de ce navigateur ?`)) enseignant.supprimer(ex.id);
+  async function supprimer(ex: Exercice) {
+    const ok = await dialogue.demander({ titre: `Supprimer l'exercice « ${ex.titre || 'sans titre'} » ?`, texte: ['Il sera retiré de ce navigateur.'], confirmer: "Supprimer l'exercice", danger: true });
+    if (ok) enseignant.supprimer(ex.id);
   }
 
   function changerCode(e: SubmitEvent) {
@@ -308,11 +310,11 @@
 
 <style>
   .sauvegarde { align-items: center; flex-wrap: wrap; }
-  .alerte-texte { color: var(--c-alerte-texte, #B34A12); font-weight: bold; }
+  .alerte-texte { color: var(--c-alerte-texte, var(--c-alerte-texte)); font-weight: bold; }
   .page { min-height: 100%; }
   .bandeau-haut { background: #fff; border-bottom: 1px solid var(--c-bordure-2); padding: 0 28px; height: 60px; display: flex; align-items: center; gap: 18px; }
-  .logo { color: var(--c-texte); font-weight: bold; font-size: 15px; display: flex; align-items: center; gap: 10px; }
-  .logo::before { content: 'CP'; width: 28px; height: 28px; border-radius: 7px; background: var(--c-action); color: #fff; display: grid; place-items: center; font-size: 12px; }
+  .logo { color: var(--c-texte); font-weight: bold; font-size: var(--t-15); display: flex; align-items: center; gap: 10px; }
+  .logo::before { content: 'CP'; width: 28px; height: 28px; border-radius: var(--r-2); background: var(--c-action); color: #fff; display: grid; place-items: center; font-size: var(--t-12); }
   .titre-espace { color: var(--c-texte-2); flex: 1; }
   .fermer { color: var(--c-structure); }
   .contenu { max-width: 1200px; margin: 0 auto; padding: 24px 16px; }
@@ -321,9 +323,9 @@
   td.actions { margin: 0; }
   .barre { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; align-items: center; }
   .modele { width: 360px; }
-  .petit { font-size: 12px; }
+  .petit { font-size: var(--t-12); }
   .aide { margin-top: 10px; }
-  .a-corriger { font-size: 12px; font-weight: bold; color: var(--c-alerte-texte); }
+  .a-corriger { font-size: var(--t-12); font-weight: bold; color: var(--c-alerte-texte); }
   .info { margin: 0 0 14px; }
   p.alerte { margin: 12px 0 0; }
 </style>

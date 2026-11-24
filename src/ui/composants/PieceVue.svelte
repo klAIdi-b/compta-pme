@@ -70,19 +70,19 @@
 <style>
   .piece {
     background: #fff; border: 1px solid #b8c2cc; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-    padding: 16px 18px; max-width: 640px; font-size: 13px; color: #222;
+    padding: 16px 18px; max-width: 640px; font-size: var(--t-13); color: #222;
   }
   .piece.etroite { max-width: 360px; }
   header { display: flex; justify-content: space-between; gap: 16px; border-bottom: 1px solid #d5dbe1; padding-bottom: 8px; }
   .titre-piece { text-align: right; }
-  .titre { font-weight: bold; letter-spacing: 0.04em; font-size: 14px; }
+  .titre { font-weight: bold; letter-spacing: 0.04em; font-size: var(--t-14); }
   .destinataire { margin: 10px 0 10px 50%; }
   p { margin: 8px 0; line-height: 1.45; }
   table { margin-top: 8px; }
-  th { background: #eef2f6; color: #222; font-size: 12px; }
+  th { background: #eef2f6; color: #222; font-size: var(--t-12); }
   td { padding: 4px 8px; }
   .totaux { margin: 8px 0 0 auto; max-width: 300px; }
   .totaux div { display: flex; justify-content: space-between; gap: 12px; padding: 2px 0; }
   .totaux .fort { font-weight: bold; border-top: 1px solid #222; padding-top: 4px; }
-  footer { margin-top: 10px; font-size: 12px; color: #555; border-top: 1px dashed #c9d1d9; padding-top: 6px; }
+  footer { margin-top: 10px; font-size: var(--t-12); color: #555; border-top: 1px dashed #c9d1d9; padding-top: 6px; }
 </style>

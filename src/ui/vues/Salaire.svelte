@@ -96,8 +96,8 @@
 <style>
   .fiche td { border-bottom: none; padding: 4px 8px; vertical-align: top; }
   .fiche tr.brut td { background: var(--c-selection); }
-  .retirer { border: none; background: none; color: var(--c-texte-2); font-size: 18px; cursor: pointer; padding: 6px 4px; }
-  .faux { font-size: 12px; color: var(--c-alerte-texte); font-weight: bold; padding-top: 2px; }
+  .retirer { border: none; background: none; color: var(--c-texte-2); font-size: var(--t-17); cursor: pointer; padding: 6px 4px; }
+  .faux { font-size: var(--t-12); color: var(--c-erreur); font-weight: bold; padding-top: 2px; }
   .actions { display: flex; gap: 14px; align-items: center; padding: 10px 14px; border-top: 1px solid var(--c-bordure-2); }
   .note { margin-top: 12px; }
 </style>

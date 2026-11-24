@@ -29,5 +29,5 @@
 
 <style>
   .manuel { display: inline-flex; gap: 6px; align-items: center; }
-  .manuel input { width: 340px; max-width: 60vw; font-size: 12px; }
+  .manuel input { width: 340px; max-width: 60vw; font-size: var(--t-12); }
 </style>

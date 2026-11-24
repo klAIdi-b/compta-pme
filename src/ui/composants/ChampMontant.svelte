@@ -53,5 +53,5 @@
 {#if invalide}<div class="erreur">Montant invalide, ex. 1'250.50</div>{/if}
 
 <style>
-  .erreur { font-size: 12px; color: var(--c-negatif); padding-top: 2px; text-align: right; }
+  .erreur { font-size: var(--t-12); color: var(--c-negatif); padding-top: 2px; text-align: right; }
 </style>

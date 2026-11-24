@@ -92,8 +92,8 @@
   h2 { padding: 10px 14px; border-bottom: 1px solid var(--c-bordure-2); }
   select { width: 100%; }
   .pied { padding: 8px 14px; margin: 0; }
-  .petit { font-size: 12px; }
+  .petit { font-size: var(--t-12); }
   .numero { margin-left: 6px; }
   .juste { color: var(--c-ok); font-weight: bold; }
-  .faux { color: var(--c-alerte-texte); font-weight: bold; }
+  .faux { color: var(--c-erreur); font-weight: bold; }
 </style>

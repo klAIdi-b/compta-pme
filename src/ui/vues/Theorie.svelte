@@ -70,10 +70,10 @@
 
 <style>
   .avis { margin: -6px 0 12px; }
-  .petit { font-size: 12px; }
+  .petit { font-size: var(--t-12); }
   .sommaire { margin: 0; padding: 10px 14px 14px 36px; }
   .sommaire li { padding: 6px 0; }
-  .sommaire li span { display: block; font-size: 13px; }
+  .sommaire li span { display: block; font-size: var(--t-13); }
   .lien-chapitre {
     border: none; background: none; padding: 0; font: inherit; font-weight: bold; color: var(--c-structure);
     cursor: pointer; text-align: left;
@@ -82,6 +82,6 @@
   .fil { display: flex; gap: 16px; align-items: center; margin-bottom: 10px; }
   .chapitre p, .chapitre li { max-width: 80ch; line-height: 1.5; }
   .resume { font-style: italic; color: var(--c-texte-2); margin-top: 0; }
-  .bases { font-size: 13px; }
+  .bases { font-size: var(--t-13); }
   .suivants { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
 </style>

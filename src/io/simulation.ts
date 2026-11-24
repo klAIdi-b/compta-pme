@@ -81,7 +81,7 @@ export function importerPartie(texte: string): PartieEnregistree {
 // L'enseignant distribue une « situation » par groupe ; le groupe l'ouvre dans Compta PME, décide, et renvoie un
 // fichier de décisions. Aucun nom d'élève : seulement le nom de l'entreprise et le numéro du tour.
 
-export const EXT_SITUATION = '.compta-situation.json';
+export { EXT_SITUATION } from './simulation-extensions';
 export const EXT_DECISIONS = '.compta-decisions.json';
 const FORMAT_SITUATION = 'compta-pme/simulation-situation';
 const FORMAT_DECISIONS = 'compta-pme/simulation-decisions';

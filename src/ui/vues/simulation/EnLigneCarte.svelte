@@ -162,12 +162,12 @@
   .plein { grid-column: 1 / -1; }
   .champ-bloc { display: grid; gap: 6px; }
   .large { flex: 1; min-width: 260px; }
-  .lib { font-size: 12.5px; font-weight: bold; color: var(--c-texte-2); }
-  .aide { font-size: 12px; color: var(--c-texte-2); margin: 0; }
+  .lib { font-size: var(--t-12); font-weight: bold; color: var(--c-texte-2); }
+  .aide { font-size: var(--t-12); color: var(--c-texte-2); margin: 0; }
   .ligne { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
   .ligne .champ { flex: 1; min-width: 260px; }
-  .code { font-size: 18px; }
-  .code b { font-size: 28px; letter-spacing: 0.12em; color: var(--c-nuit); margin-left: 10px; }
+  .code { font-size: var(--t-17); }
+  .code b { font-size: var(--t-26); letter-spacing: 0.12em; color: var(--c-nuit); margin-left: 10px; }
   .codes td { vertical-align: middle; }
   .info, .alerte { margin: 0; }
   @media (max-width: 760px) { .grille { grid-template-columns: 1fr; } }
