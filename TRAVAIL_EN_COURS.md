@@ -132,3 +132,4 @@ règle ni compte inventé, texte original, rien de validé n'est retiré, nouvea
 - 24.11.2026 — Leçons gardées telles quelles (choix de l'enseignant). Dans un module, lien vers le chapitre de théorie (nouvel
   onglet) à la place du chapitre déplié ; exemples de la théorie changés dans sept chapitres pour ne plus répéter ceux des
   leçons. Publié sur la prévisualisation ; fusion dans `main` sur accord.
+- 24.11.2026 — Lien vers la théorie et nouveaux exemples fusionnés dans `main` sur l'accord de l'enseignant.
