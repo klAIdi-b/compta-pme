@@ -74,6 +74,11 @@ describe('théorie enrichie (modèle du 24.11.2026)', () => {
     expect(enrichis.filter((c) => c.niveau === 'CFC2').map((c) => c.id)).toEqual(['tva', 'amortissements', 'transitoires', 'creances', 'salaires', 'facturation', 'budget', 'couts']);
   });
 
+  it('les treize chapitres de maturité sont enrichis, dont la comptabilité analytique, et plus aucun chapitre ne reste sans enrichissement', () => {
+    expect(enrichis.filter((c) => c.niveau === 'MP').map((c) => c.id)).toEqual(['monnaies', 'proprietaire', 'societes', 'provisions', 'titres', 'immeubles', 'interets', 'evaluation', 'resultat-degres', 'flux', 'seuil', 'analytique', 'analyse']);
+    expect(enrichis).toHaveLength(CHAPITRES.length);
+  });
+
   it('aucun bloc validé n’est perdu : chacun est repris tel quel dans un chapitre enrichi', () => {
     const texte = JSON.stringify(CHAPITRES);
     for (const c of CHAPITRES_VALIDES) for (const s of c.sections) for (const b of s.blocs) expect(texte.includes(JSON.stringify(b)), `${c.id} — ${s.titre}`).toBe(true);

@@ -7,6 +7,7 @@ import type { Niveau } from '../engine/plan';
 import { RATIOS } from '../engine/analyse';
 import { enrichirCfc1 } from './theorie-cfc1';
 import { enrichirCfc2 } from './theorie-cfc2';
+import { enrichirMp } from './theorie-mp';
 
 /** Passe à true une fois le contenu relu et validé par l'enseignant (retire la mention « proposé »). */
 export const THEORIE_VALIDEE = true;
@@ -2354,7 +2355,7 @@ export const CHAPITRES_VALIDES: Chapitre[] = [
  * Chapitres affichés : les chapitres validés, enrichis année par année (modèle du 24.11.2026). Les chapitres enrichis
  * gardent toutes les sections validées et portent `aRelire` jusqu'à la validation de l'enseignant.
  */
-export const CHAPITRES: Chapitre[] = enrichirCfc2(enrichirCfc1(CHAPITRES_VALIDES));
+export const CHAPITRES: Chapitre[] = enrichirMp(enrichirCfc2(enrichirCfc1(CHAPITRES_VALIDES)));
 
 export function chapitresDuNiveau(niveau: Niveau): Chapitre[] {
   const ordre: Niveau[] = ['CFC1', 'CFC2', 'MP'];

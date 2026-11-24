@@ -149,13 +149,16 @@ test('théorie enrichie : chapitre lisible à 360 px, réponses masquées au cla
   expect(axe.violations.map((v) => `${v.id} (${v.nodes.length})`)).toEqual([]);
 });
 
-test('théorie enrichie de 2ème CFC : les huit chapitres tiennent à 360 px, sans défaut d’accessibilité', async ({ page }) => {
+for (const [annee, chapitres] of [
+  ['2ème CFC', ['TVA', 'Amortissements', 'Actifs et passifs transitoires', 'Pertes sur créances', 'Salaires', 'Facturation et paiements', 'Budget et analyse', 'Marge contributive']],
+  ['Maturité professionnelle', ['Monnaies étrangères', 'Rémunération du propriétaire', 'Sociétés', 'Provisions', 'Titres et produits', 'Immeubles', 'Intérêts, frais bancaires', "Principes d'évaluation", 'Compte de résultat à plusieurs', 'Tableau des flux', 'Seuil de rentabilité', 'Comptabilité analytique', 'Analyse du bilan']],
+] as const) test(`théorie enrichie, ${annee} : chaque chapitre tient à 360 px, sans défaut d’accessibilité`, async ({ page }) => {
+  test.setTimeout(180_000);
   const { default: AxeBuilder } = await import('@axe-core/playwright');
   await page.setViewportSize({ width: 360, height: 740 });
   await page.goto('./');
   await page.getByRole('navigation', { name: 'Rubriques' }).getByRole('button', { name: 'Théorie' }).click();
-  await page.getByRole('group', { name: 'Votre année' }).getByRole('button', { name: '2ème CFC' }).click();
-  const chapitres = ['TVA', 'Amortissements', 'Actifs et passifs transitoires', 'Pertes sur créances', 'Salaires', 'Facturation et paiements', 'Budget et analyse', 'Marge contributive'];
+  await page.getByRole('group', { name: 'Votre année' }).getByRole('button', { name: annee }).click();
   for (const titre of chapitres) {
     await page.locator('.sommaire li button').filter({ hasText: titre }).click();
     await expect(page.getByRole('heading', { level: 2 }).filter({ hasText: titre })).toBeVisible();

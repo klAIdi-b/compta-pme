@@ -329,7 +329,7 @@ function MODULES_CALCUL(): ModuleApprendre[] {
     calcul('analytique', 'MP', 'Comptabilité analytique',
       'Répartir les charges indirectes (avec un centre auxiliaire), calculer un coût d’unité d’œuvre et un prix de revient complet.',
       ['Répartition primaire sur les centres, puis secondaire : le centre auxiliaire est réparti sur les centres principaux.', 'Coût d’une unité d’œuvre = total du centre ÷ nombre d’unités.', 'Prix de revient = coût de production + frais d’administration et de vente.'],
-      ['analytique'], ['MP 9.2', 'MP 9.3', 'CFC c6.ep1a']),
+      ['analytique'], ['MP 9.2', 'MP 9.3', 'CFC c6.ep1a'], 'analytique'),
     calcul('normes', 'MP', 'Comptes de groupe et normes',
       'Situer les normes de présentation des comptes et le principe de la consolidation.',
       ['Swiss GAAP RPC (Suisse), IFRS (international), US GAAP (États-Unis) visent une image fidèle.', 'Consolidation : les comptes des sociétés du groupe sont réunis ; les opérations internes au groupe sont éliminées.'],

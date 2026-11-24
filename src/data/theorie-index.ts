@@ -39,6 +39,7 @@ export const SOMMAIRE: EntreeSommaire[] = [
   { id: 'resultat-degres', titre: 'Compte de résultat à plusieurs degrés', niveau: 'MP' },
   { id: 'flux', titre: 'Tableau des flux de trésorerie', niveau: 'MP' },
   { id: 'seuil', titre: 'Seuil de rentabilité', niveau: 'MP' },
+  { id: 'analytique', titre: 'Comptabilité analytique', niveau: 'MP' },
   { id: 'analyse', titre: 'Analyse du bilan et du compte de résultat', niveau: 'MP' },
 ];
 

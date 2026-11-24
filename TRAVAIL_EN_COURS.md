@@ -111,9 +111,12 @@ règle ni compte inventé, texte original, rien de validé n'est retiré, nouvea
 - [ ] G3. Relecture de la 1ère CFC par l'enseignant.
 - [x] G4. 2ème CFC (TVA selon la maquette, amortissements, transitoires, créances, salaires ; chapitres à créer :
   facturation, budget, marge contributive et répartition des coûts).
-- [ ] G5. Maturité professionnelle.
+- [x] G5. Maturité professionnelle.
 - [ ] G6. Vérification finale, puis fusion dans `main` après accord explicite ; raccourcir ensuite les leçons.
 
 - 24.11.2026 — G1 et G2 faites. Reste G3 : attendre la relecture de la 1ère CFC avant de rédiger la 2ème CFC.
 - 24.11.2026 — G4 faite après l'accord « Oui, 2ème CFC » : huit chapitres dans `src/data/theorie-cfc2.ts`, publiés sur la
   prévisualisation. Reste : relecture de la 1ère et de la 2ème CFC par l'enseignant (G3), puis maturité (G5) sur son accord.
+- 24.11.2026 — G5 faite après l'accord « Oui, maturité » : treize chapitres dans `src/data/theorie-mp.ts`, publiés sur la
+  prévisualisation. Les 30 chapitres sont enrichis et marqués « À relire ». Reste G3 (relecture des trois années par
+  l'enseignant) et G6 (vérification finale, fusion dans `main` sur accord explicite, puis leçons raccourcies).
