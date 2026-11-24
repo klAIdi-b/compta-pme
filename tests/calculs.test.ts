@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { MODULES } from '../src/data/apprendre';
+import { MODELES, MODULES, modeleParId } from '../src/data/apprendre';
 import { plan } from '../src/data/plan';
 import { champJuste, GENERATEURS, genererCalcul, valeurLisible, type ChampCalcul } from '../src/engine/calculs';
 import { estJuste, genererSerie, hasard } from '../src/engine/exercices-courts';
@@ -11,7 +11,7 @@ describe('calculs générés', () => {
   it('chaque générateur donne, sur 300 graines, des réponses finies, justes à leur propre saisie et expliquées', () => {
     for (const id of Object.keys(GENERATEURS)) {
       for (let g = 1; g <= 300; g++) {
-        const q = genererCalcul(id, hasard(g), { plan });
+        const q = genererCalcul(id, hasard(g), { plan, modeles: MODELES });
         if (q.format === 'qcm') {
           expect(q.reponse).toBeGreaterThanOrEqual(0);
           expect(q.reponse).toBeLessThan(q.choix.length);
@@ -41,7 +41,7 @@ describe('calculs générés', () => {
     for (const m of MODULES.filter((x) => x.calculs)) {
       for (const id of m.calculs!) expect(GENERATEURS[id], `${m.id} ${id}`).toBeDefined();
       expect(m.plan?.length, m.id).toBeGreaterThan(0);
-      const serie = genererSerie({ plan, modeles: [], comptes: [], types: [], calculs: m.calculs }, m.formats, 10, 42);
+      const serie = genererSerie({ plan, modeles: m.modeles.map(modeleParId), comptes: [], types: [], calculs: m.calculs }, m.formats, 10, 42);
       expect(serie).toHaveLength(10);
       expect(serie.every((q) => q.format === 'calcul' || q.format === 'qcm')).toBe(true);
     }
@@ -66,5 +66,14 @@ describe('crédit au prorata', () => {
     expect(credit(q, { format: 'calcul', valeurs })).toBe(1);
     valeurs[0] = '1';
     expect(credit(q, { format: 'calcul', valeurs })).toBeCloseTo((q.champs.length - 1) / q.champs.length);
+  });
+});
+
+describe('classer la pièce', () => {
+  it('chaque opération proposée a un classeur, cohérent avec la règle 2000 / 2010 et le compte privé', async () => {
+    const { classeurDe } = await import('../src/engine/calculs');
+    expect([classeurDe('4200'), classeurDe('1530'), classeurDe('6000'), classeurDe('2850'), classeurDe('1020'), classeurDe('1509')]).toEqual([0, 1, 2, 3, -1, -1]);
+    const mod = MODULES.find((x) => x.id === 'classer-pieces')!;
+    for (const id of mod.modeles) expect(classeurDe(modeleParId(id).debit), id).toBeGreaterThanOrEqual(0);
   });
 });

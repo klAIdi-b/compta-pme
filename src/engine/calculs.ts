@@ -597,9 +597,40 @@ function normes(h: Hasard): QuestionQcm {
 
 export interface ContexteCalcul {
   plan: readonly Compte[];
+  /** Modèles d'opérations du module (pour « classer la pièce »). */
+  modeles?: readonly { texte: string; debit: string; min: number; max: number; pas: number }[];
+}
+
+// ---------- CFC 1 : classer une pièce avant de la comptabiliser ----------
+
+export const SUJET_TRI = 'Classer la pièce';
+export const CLASSEURS = ['Marchandises à revendre', 'Investissement (bien durable)', "Charge de l'entreprise", 'Privé (propriétaire)'];
+const EXPLICATIONS_TRI = [
+  "Des marchandises achetées pour être revendues : c'est un achat de marchandises.",
+  "Un bien qui sert durablement à l'entreprise (machine, véhicule, mobilier, ordinateur) est un actif immobilisé : il figure au bilan.",
+  "Une dépense consommée pendant l'exercice pour faire fonctionner l'entreprise est une charge.",
+  "Ce que le propriétaire prend ou paie pour sa vie privée va dans son compte privé, pas dans les charges de l'entreprise.",
+];
+
+/** Classeur d'une opération d'après le compte débité, ou -1 si elle ne se classe pas ainsi. */
+export function classeurDe(debit: string): number {
+  if (debit === '4200') return 0;
+  if (/^1[4-7]/.test(debit) && !debit.endsWith('9')) return 1;
+  if (debit === '2850') return 3;
+  if (/^[56]/.test(debit)) return 2;
+  return -1;
+}
+
+function trier(h: Hasard, x: ContexteCalcul): QuestionQcm {
+  const candidats = (x.modeles ?? []).filter((mo) => classeurDe(mo.debit) >= 0);
+  const mo = tirer(h, candidats);
+  const montant = (mo.min + entier(h, 0, Math.floor((mo.max - mo.min) / mo.pas)) * mo.pas) * 100;
+  const reponse = classeurDe(mo.debit);
+  return { format: 'qcm', sujet: SUJET_TRI, question: mo.texte.replace('{m}', m(montant)), choix: [...CLASSEURS], reponse, explication: EXPLICATIONS_TRI[reponse]! };
 }
 
 export const GENERATEURS: Record<string, (h: Hasard, x: ContexteCalcul) => QuestionGeneree> = {
+  trier,
   'livres-auxiliaires': livresAuxiliaires,
   'marge-contributive': margeContributive,
   'repartition-simple': repartitionSimple,

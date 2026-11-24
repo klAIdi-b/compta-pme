@@ -2,7 +2,7 @@
 <script lang="ts">
   import { etat } from '../etat.svelte';
   import { LIBELLES_NIVEAU_APPRENDRE, MODULES, modeleParId, type ModuleApprendre, type NiveauApprendre } from '../../data/apprendre';
-  import { champJuste, genererCalcul, valeurLisible, type QuestionGeneree } from '../../engine/calculs';
+  import { champJuste, genererCalcul, SUJET_TRI, valeurLisible, type QuestionGeneree } from '../../engine/calculs';
   import { genererEcriture } from '../../engine/ecritures-generees';
   import { CHAPITRES } from '../../data/theorie';
   import { plan } from '../../data/plan';
@@ -15,6 +15,9 @@
   import type { TypeCompte } from '../../engine/plan';
   import { enregistrerRevision, enregistrerSerie, lireProgression, type Progression } from '../../io/apprendre';
   import { aRevoir } from '../../engine/revision';
+  import { EXT_PROGRESSION, exporterProgression } from '../../io/progression';
+  import { nomFichier } from '../../io/fichiers';
+  import { telecharger } from '../fichiers-navigateur';
   import { dt } from '../format';
   import ChapitreTheorie from '../composants/ChapitreTheorie.svelte';
 
@@ -28,7 +31,7 @@
 
   let progression = $state<Progression>(lireProgression());
   let module = $state.raw<ModuleApprendre | null>(null);
-  let etape = $state<'decouvrir' | 'serie' | 'bilan'>('decouvrir');
+  let etape = $state<'decouvrir' | 'serie' | 'bilan' | 'projection'>('decouvrir');
   let theorieOuverte = $state(false);
 
   // Série en cours
@@ -57,7 +60,7 @@
   });
   const comptesTries = $derived(q && q.format === 'ecriture' ? [...q.comptes].sort((a, b) => nom(a).localeCompare(nom(b), 'fr')) : []);
   /** Exemple travaillé d'un module de calcul : une question générée avec ses réponses et son explication. */
-  const exempleCalcul = $derived<QuestionGeneree | null>(module?.calculs?.length ? genererCalcul(module.calculs[0]!, hasard(7), { plan }) : null);
+  const exempleCalcul = $derived<QuestionGeneree | null>(module?.calculs?.length ? genererCalcul(module.calculs[0]!, hasard(7), { plan, modeles: module.modeles.map(modeleParId) }) : null);
   const exempleComposee = $derived(module?.ecritures?.length ? genererEcriture(module.ecritures[0]!, hasard(7)) : null);
   const comptesModule = $derived(module ? [...module.comptes].sort((a, b) => nom(a).localeCompare(nom(b), 'fr')) : []);
   const NIVEAUX: NiveauApprendre[] = ['CFC1', 'CFC2', 'MP'];
@@ -128,6 +131,33 @@
     haut();
   }
 
+  // ---- Question au projecteur : la classe répond à main levée, l'enseignant révèle la réponse (aucun réseau). ----
+  let qProj = $state.raw<Question | null>(null);
+  let revele = $state(false);
+  function projeter() {
+    if (!module) return;
+    qProj = genererSerie(contexte(module), module.formats, 1, graine())[0] ?? null;
+    revele = false;
+    etape = 'projection';
+    haut();
+  }
+  interface VueProjection { consigne: string; enonce: string[]; tableau?: { entetes: string[]; lignes: string[][] }; choix: string[]; reponse: string[] }
+  const cotes = (l: { cote: string; compte: string; montant: number }) => `${l.cote === 'debit' ? 'Débit' : 'Crédit'} ${nom(l.compte)} ${m(l.montant)}`;
+  function vueProjection(x: Question): VueProjection {
+    switch (x.format) {
+      case 'classer': return { consigne: 'Dans quelle catégorie se trouve ce compte ?', enonce: [nom(x.compte)], choix: x.choix.map((t) => LIBELLE_TYPE[t]), reponse: [LIBELLE_TYPE[x.reponse]] };
+      case 'variation': return { consigne: "Quel est l'effet de cette opération sur le bilan ?", enonce: [x.texte], choix: x.choix, reponse: [x.choix[x.reponse]!] };
+      case 'ecriture': return { consigne: "Quelle est l'écriture ?", enonce: [x.texte], choix: [], reponse: [`Débit ${nom(x.reponse.debit)}`, `Crédit ${nom(x.reponse.credit)}`, ...raisonnement(plan, x.reponse.debit, x.reponse.credit)] };
+      case 'operation': return { consigne: 'Quelle opération correspond à cette écriture ?', enonce: [`Débit ${nom(x.debit)} / Crédit ${nom(x.credit)} · ${m(x.montant)}`], choix: x.choix, reponse: [x.choix[x.reponse]!] };
+      case 'erreur': return { consigne: 'Une seule de ces écritures est fausse. Laquelle ?', enonce: [], choix: x.lignes.map((l) => `${l.texte} → débit ${nom(l.debit)}, crédit ${nom(l.credit)}`), reponse: [`L'écriture fausse : ${x.lignes[x.reponse]!.texte}`] };
+      case 'solde': return { consigne: 'Quel est le solde final de ce compte ?', enonce: [nom(x.compte), `Solde initial ${m(x.initial)} · débits ${x.debits.map(m).join(', ') || '—'} · crédits ${x.credits.map(m).join(', ') || '—'}`], choix: [], reponse: [`${m(x.reponse.montant)}, solde ${x.reponse.cote === 'debiteur' ? 'débiteur' : 'créditeur'}`] };
+      case 'composee': return { consigne: 'Quels comptes pour cette écriture ?', enonce: [x.texte, ...x.lignes.map((l) => `${l.cote === 'debit' ? 'Débit' : 'Crédit'} … ${m(l.montant)}`)], choix: [], reponse: x.lignes.map(cotes) };
+      case 'calcul': return { consigne: x.sujet, enonce: [...x.enonce, ...x.champs.map((c) => `→ ${c.libelle} ?`)], tableau: x.tableau, choix: [], reponse: [...x.champs.map((c) => `${c.libelle} : ${valeurLisible(c)}`), ...x.explication] };
+      case 'qcm': return { consigne: x.sujet, enonce: [x.question], choix: x.choix, reponse: [x.choix[x.reponse]!, x.explication] };
+    }
+  }
+  const proj = $derived(qProj ? vueProjection(qProj) : null);
+
   function commencerSerie() {
     if (!module) return;
     questions = genererSerie(contexte(module), module.formats, NB, graine());
@@ -196,6 +226,23 @@
   );
   const reussi = $derived(justes >= seuilMaitrise(questions.length || NB));
 
+  // Envoi de la progression à l'enseignant : un fichier à rendre dans Google Classroom (rien ne passe en ligne).
+  const connu = etat.session?.eleve ?? Object.values(etat.autres)[0]?.eleve;
+  let prenomE = $state(connu?.prenom ?? '');
+  let nomE = $state(connu?.nom ?? '');
+  let classeE = $state(connu?.classe ?? '');
+  let envoye = $state(false);
+  function envoyerProgression(e: SubmitEvent) {
+    e.preventDefault();
+    if (!prenomE.trim() || !nomE.trim() || !classeE.trim()) return;
+    const eleve = { prenom: prenomE.trim(), nom: nomE.trim(), classe: classeE.trim() };
+    telecharger(
+      nomFichier([eleve.nom, eleve.prenom, eleve.classe, 'progression'], EXT_PROGRESSION),
+      exporterProgression({ eleve, exporteLe: new Date().toISOString(), progression: $state.snapshot(progression) }),
+    );
+    envoye = true;
+  }
+
   function fermer() {
     etat.apprendre = false;
   }
@@ -245,6 +292,19 @@
         {/each}
       </ol>
       {/each}
+      <details class="carte envoi">
+        <summary>Envoyer ma progression à l'enseignant</summary>
+        <form class="corps-carte" onsubmit={envoyerProgression}>
+          <p>Téléchargez votre fichier de progression, puis rendez-le dans le devoir Google Classroom.</p>
+          <div class="grille-envoi">
+            <label>Prénom <input class="champ" bind:value={prenomE} required autocomplete="given-name" /></label>
+            <label>Nom <input class="champ" bind:value={nomE} required autocomplete="family-name" /></label>
+            <label>Classe <input class="champ" bind:value={classeE} required placeholder="par ex. 1CFC3" /></label>
+            <button class="btn btn-principal" type="submit">Télécharger le fichier</button>
+          </div>
+          {#if envoye}<p class="ok" role="status">Fichier téléchargé : déposez-le dans le devoir Classroom.</p>{/if}
+        </form>
+      </details>
       <p class="discret petit">
         Votre progression reste dans ce navigateur. Les exercices complets (journal, bilan, bouclement) se trouvent sur
         la page d'accueil.
@@ -322,6 +382,7 @@
       {/if}
       <div class="actions-bas">
         {#if guidePossible}<button class="btn" onclick={commencerGuide}>S'entraîner avec aide (3 questions)</button>{/if}
+        <button class="btn" onclick={projeter}>Projeter une question pour la classe</button>
         <button class="btn btn-principal" onclick={commencerSerie}>Commencer la série de {NB} questions</button>
       </div>
     {:else if etape === 'serie' && q}
@@ -385,6 +446,21 @@
               </tbody>
             </table>
           {:else if q.format === 'qcm'}
+            {#if q.sujet === SUJET_TRI}
+              <p class="consigne">Dans quel classeur rangez-vous cette pièce ? Cliquez sur le classeur, ou glissez-y la pièce.</p>
+              <!-- svelte-ignore a11y_no_static_element_interactions -->
+              <div class="piece-a-classer" draggable={!corrigee} ondragstart={(e) => e.dataTransfer?.setData('text/plain', 'piece')}>{q.question}</div>
+              <div class="classeurs" role="radiogroup" aria-label="Classeur">
+                {#each q.choix as c, i}
+                  <button
+                    type="button" class="classeur" role="radio" aria-checked={choix === i} disabled={corrigee}
+                    onclick={() => (choix = i)}
+                    ondragover={(e) => e.preventDefault()}
+                    ondrop={(e) => { e.preventDefault(); if (!corrigee) choix = i; }}
+                  >{c}</button>
+                {/each}
+              </div>
+            {:else}
             <p class="consigne">{q.sujet}</p>
             <p class="enonce">{q.question}</p>
             <div class="choix-colonne" role="radiogroup" aria-label={q.question}>
@@ -392,6 +468,7 @@
                 <label class="option"><input type="radio" name="qcm" value={i} bind:group={choix} disabled={corrigee} /> {c}</label>
               {/each}
             </div>
+            {/if}
           {:else if q.format === 'classer'}
             <p class="consigne">Dans quelle catégorie se trouve ce compte ?</p>
             <p class="enonce">{nom(q.compte)}</p>
@@ -510,6 +587,29 @@
           <button class="btn btn-principal" onclick={continuer}>{rang < questions.length - 1 ? 'Question suivante' : 'Voir le résultat'}</button>
         {/if}
       </div>
+    {:else if etape === 'projection' && proj}
+      <nav class="fil"><button class="btn-lien" onclick={() => ouvrir(module)}>{module.titre}</button><span class="discret">Question pour la classe · réponse à main levée</span></nav>
+      <section class="carte projection">
+        <div class="corps-carte">
+          <p class="p-consigne">{proj.consigne}</p>
+          {#each proj.enonce as e}<p class="p-enonce">{e}</p>{/each}
+          {#if proj.tableau}
+            <table class="donnees"><thead><tr>{#each proj.tableau.entetes as t}<th>{t}</th>{/each}</tr></thead>
+              <tbody>{#each proj.tableau.lignes as l}<tr>{#each l as c, j}<td class:montant={j > 0}>{c}</td>{/each}</tr>{/each}</tbody></table>
+          {/if}
+          {#if proj.choix.length}
+            <ol class="p-choix" type="A">{#each proj.choix as c}<li>{c}</li>{/each}</ol>
+          {/if}
+          {#if revele}
+            <div class="retour ok p-reponse" role="status"><b>Réponse.</b>{#each proj.reponse as r}<div>{r}</div>{/each}</div>
+          {/if}
+        </div>
+      </section>
+      <div class="actions-bas">
+        {#if !revele}<button class="btn btn-principal btn-grand" onclick={() => (revele = true)}>Révéler la réponse</button>{/if}
+        <button class="btn" class:btn-principal={revele} onclick={projeter}>Question suivante</button>
+        <button class="btn" onclick={() => ouvrir(module)}>Terminer</button>
+      </div>
     {:else if etape === 'bilan'}
       <nav class="fil"><button class="btn-lien" onclick={() => ouvrir(null)}>Tous les modules</button></nav>
       {#if mode === 'revision'}
@@ -575,6 +675,30 @@
   .ligne-revision { display: flex; gap: 20px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
   .ligne-revision p { margin: 4px 0 0; max-width: 60ch; }
   .echeance { font-weight: normal; color: var(--c-texte-2); }
+  .envoi { margin: 18px 0 12px; }
+  .envoi summary { padding: 14px 20px; cursor: pointer; font-weight: 600; color: var(--c-structure); }
+  .envoi p { margin: 0 0 12px; }
+  .grille-envoi { display: grid; grid-template-columns: 1fr 1fr 160px auto; gap: 12px; align-items: end; }
+  .grille-envoi label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: 600; color: var(--c-texte-2); }
+  @media (max-width: 700px) { .grille-envoi { grid-template-columns: 1fr; } }
+  .piece-a-classer {
+    margin: 12px 0 16px; padding: 16px 18px; background: #fff; border: 1px solid #d5dce5; border-left: 5px solid var(--c-structure);
+    border-radius: 8px; box-shadow: var(--ombre-carte); font-size: 17px; font-weight: 600; cursor: grab; max-width: 70ch;
+  }
+  .classeurs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+  .classeur {
+    font: inherit; font-weight: 600; min-height: 84px; padding: 12px; border-radius: 12px; cursor: pointer; text-align: center;
+    background: var(--c-bleu-doux); color: var(--c-structure); border: 2px dashed #a9bfd6;
+  }
+  .classeur[aria-checked='true'] { background: var(--c-structure); color: #fff; border-style: solid; border-color: var(--c-structure); }
+  .classeur:disabled { cursor: default; opacity: 0.85; }
+  @media (max-width: 700px) { .classeurs { grid-template-columns: 1fr 1fr; } }
+  .projection .corps-carte { padding: 28px 32px; }
+  .p-consigne { font-size: 18px; color: var(--c-texte-2); margin: 0 0 10px; }
+  .p-enonce { font-size: clamp(22px, 2.6vw, 34px); font-weight: 700; color: var(--c-encre); line-height: 1.3; margin: 0 0 12px; }
+  .p-choix { font-size: clamp(18px, 2vw, 26px); line-height: 1.5; margin: 14px 0 0; padding-left: 1.6em; }
+  .p-choix li { margin-bottom: 8px; }
+  .p-reponse { font-size: clamp(18px, 2vw, 26px); line-height: 1.5; }
   h2.niveau { font-size: 15px; color: var(--c-structure); margin: 18px 0 8px; }
   .donnees { width: 100%; margin: 6px 0 12px; }
   .donnees td, .donnees th { padding: 6px 8px; }

@@ -23,7 +23,7 @@ test('accueil, journal, comptes, bilan, théorie et espace enseignant sans défa
   await page.getByLabel('Nom', { exact: true }).fill('Martin');
   await page.getByLabel('Classe').fill('2CFC1');
   await page.getByLabel('Rechercher un exercice').fill('outils');
-  await page.getByText(/Outils & Cie/).first().click();
+  await page.locator('#choisir-exercice').getByText(/Outils & Cie/).first().click();
   await page.getByRole('button', { name: 'Commencer' }).click();
   await controler(page, 'Tableau de bord');
   for (const vue of ['journal', 'comptes', 'balance', 'bilan', 'resultat', 'tva', 'theorie']) {
