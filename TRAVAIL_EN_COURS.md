@@ -89,3 +89,8 @@ Exception à la charte pour l'accueil seulement : voir CLAUDE.md, section « Int
   **seulement après son accord explicite**.
 
 - 24.11.2026 — F1 et F2 faites. Reste F3 : attendre l'accord de l'enseignant avant toute fusion dans `main`.
+- [x] F4. Onglets en haut (Accueil, Apprendre, Exercices, Évaluation) et pages séparées pour le choix d'un exercice et
+  l'évaluation (`composants/BandeauRubriques.svelte`, `etat.pageAccueil`), sur `apercu`.
+- [ ] F5. Onglet « Théorie » accessible depuis l'accueil (demande un choix de niveau) : à décider avec l'enseignant.
+
+- 24.11.2026 — F4 faite et publiée sur la prévisualisation. Restent F3 (accord pour la fusion) et F5.

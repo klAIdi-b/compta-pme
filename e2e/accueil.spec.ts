@@ -28,21 +28,47 @@ test('nouvel élève : une première écriture en un clic, puis le choix d’un 
   await page.getByRole('button', { name: 'Rejouer la démonstration' }).click();
   await expect(demo).toContainText("93'000.00");
   await page.getByRole('button', { name: 'Valider cette écriture' }).click();
-  await page.getByRole('button', { name: /Continuer avec une vraie entreprise/ }).click();
-  await expect(page.getByLabel('Rechercher un exercice')).toBeInViewport();
   // Les trois portes, le fil rouge et les accès sont toujours là.
   for (const nom of [/Apprendre une notion/, /M'exercer sur une entreprise/, /Faire une évaluation/]) await expect(page.getByRole('button', { name: nom })).toBeVisible();
   await expect(page.getByRole('heading', { name: /Suivre une entreprise : Cycles du Léman/ })).toBeVisible();
   await expect(page.getByRole('button', { name: "Guide d'utilisation" })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Espace enseignant' })).toBeVisible();
+  // L'action principale ouvre la page des exercices, en haut, et non plus le bas de l'accueil.
+  await page.getByRole('button', { name: /Continuer avec une vraie entreprise/ }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Choisir un exercice' })).toBeInViewport();
+  await expect(page.getByLabel('Rechercher un exercice')).toBeVisible();
+});
+
+test('onglets du bandeau : chaque rubrique a sa page, le bouton Retour ramène en arrière', async ({ page }) => {
+  await page.goto('./');
+  const rubriques = page.getByRole('navigation', { name: 'Rubriques' });
+  await expect(rubriques.getByRole('button', { name: 'Accueil' })).toHaveAttribute('aria-current', 'page');
+  await rubriques.getByRole('button', { name: 'Apprendre' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Apprendre pas à pas' })).toBeVisible();
+  await expect(page.getByRole('navigation', { name: 'Rubriques' }).getByRole('button', { name: 'Apprendre' })).toHaveAttribute('aria-current', 'page');
+  await page.getByRole('navigation', { name: 'Rubriques' }).getByRole('button', { name: 'Exercices' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Choisir un exercice' })).toBeVisible();
+  await page.getByRole('navigation', { name: 'Rubriques' }).getByRole('button', { name: 'Évaluation' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Faire une évaluation' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Ouvrir un exercice reçu…' })).toBeVisible();
+  await page.goBack();
+  await expect(page.getByRole('heading', { level: 1, name: 'Choisir un exercice' })).toBeVisible();
+  await page.goBack();
+  await expect(page.getByRole('heading', { level: 1, name: 'Apprendre pas à pas' })).toBeVisible();
+  await page.goBack();
+  await expect(page.getByRole('heading', { level: 1, name: 'Passez votre première écriture.' })).toBeVisible();
+  // Le nom du site ramène toujours à l'accueil.
+  await page.getByRole('navigation', { name: 'Rubriques' }).getByRole('button', { name: 'Exercices' }).click();
+  await page.getByTitle("Retour à la page d'accueil").click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Passez votre première écriture.' })).toBeVisible();
 });
 
 test('accueil au clavier et avec moins d’animations', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('./');
-  // Clavier : la première action s'atteint en quelques tabulations et se déclenche avec Entrée.
+  // Clavier : après le nom du site, les quatre onglets et les deux liens du bandeau, la première action.
   let atteint = false;
-  for (let i = 0; i < 6 && !atteint; i++) {
+  for (let i = 0; i < 9 && !atteint; i++) {
     await page.keyboard.press('Tab');
     atteint = await page.evaluate(() => document.activeElement?.textContent?.trim() === 'Valider cette écriture');
   }

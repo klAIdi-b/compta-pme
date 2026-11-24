@@ -13,6 +13,10 @@ import type { DernierExport } from '../io/fichiers';
 import type { Suivi } from '../engine/correction';
 import { aMettreDeCote, ecranAffiche, genreSession, peutOuvrirAccueil, vueEleve, type Ecran, type GenreSession } from './modes';
 
+/** Pages de l'accueil, et rubriques du bandeau (les mêmes, plus le parcours Apprendre). */
+export type PageAccueil = 'accueil' | 'exercices' | 'evaluation';
+export type Rubrique = PageAccueil | 'apprendre';
+
 export type Vue =
   | 'tableau'
   | 'journal'
@@ -130,6 +134,8 @@ class Etat {
   stockageIndisponible = $state(false);
   /** Accueil affiché par-dessus une session en cours (reprise ou choix d'un autre exercice). */
   accueilOuvert = $state(false);
+  /** Page affichée par l'accueil : l'accueil lui-même, le choix d'un exercice ou l'ouverture d'une évaluation. */
+  pageAccueil = $state<PageAccueil>('accueil');
   /** Opération à sélectionner à l'ouverture du journal (récapitulatif de l'avancement). */
   pieceCiblee = $state<string | null>(null);
   /** Dernière étape du parcours atteinte après le journal (non enregistrée) : le journal sait qu'il sert au bouclement. */
@@ -148,7 +154,14 @@ class Etat {
     // Arrivée sur le site (sans rubrique dans l'adresse) avec un travail en cours : l'accueil propose de le reprendre.
     const lienExercice = new URLSearchParams(location.search).has('exercice');
     if (this.genre === 'travail' && (lienExercice || !location.hash || location.hash === '#')) this.accueilOuvert = true;
+    // Lien direct d'un enseignant : la page des exercices s'ouvre, l'exercice déjà choisi.
+    if (lienExercice) this.pageAccueil = 'exercices';
     window.addEventListener('hashchange', () => (this.vue = vueDepuisAdresse()));
+    // Bouton Retour du navigateur entre les rubriques de l'accueil (sans effet à l'intérieur d'un exercice).
+    window.addEventListener('popstate', (e) => {
+      if (!this.apprendre && this.session && !this.accueilOuvert) return;
+      this.ouvrirRubrique((e.state as { rubrique?: Rubrique } | null)?.rubrique ?? 'accueil', false);
+    });
   }
 
   /** Genre de la session active (voir src/ui/modes.ts). */
@@ -302,7 +315,21 @@ class Etat {
   allerAccueil() {
     this.guide = null;
     this.apprendre = false;
+    this.pageAccueil = 'accueil';
     if (peutOuvrirAccueil(this.genre)) this.accueilOuvert = true;
+  }
+
+  /** Onglets du bandeau (Accueil, Apprendre, Exercices, Évaluation) ; `historique` : mémoriser pour le bouton Retour. */
+  ouvrirRubrique(r: Rubrique, historique = true) {
+    const avant: Rubrique = this.apprendre ? 'apprendre' : this.pageAccueil;
+    this.guide = null;
+    this.apprendre = r === 'apprendre';
+    if (r !== 'apprendre') {
+      this.pageAccueil = r;
+      if (peutOuvrirAccueil(this.genre)) this.accueilOuvert = true;
+    }
+    if (historique && r !== avant) history.pushState({ rubrique: r }, '');
+    window.scrollTo(0, 0);
   }
 
   /** Ferme l'aperçu et restaure le travail mis de côté. */

@@ -15,9 +15,11 @@
   import { dateHeure, normaliser } from '../format';
   import BarreAvancement from '../composants/BarreAvancement.svelte';
   import DemoEcriture from '../composants/DemoEcriture.svelte';
+  import BandeauRubriques from '../composants/BandeauRubriques.svelte';
   import { exerciceDuLien, oublierLien } from '../lien';
 
-  let { onEnseignant }: { onEnseignant: () => void } = $props();
+  /** Page affichée : l'accueil, le choix d'un exercice ou l'évaluation (onglets du bandeau). */
+  const page = $derived(etat.pageAccueil);
 
   // ---- Travail en cours (reprise) ----
   /** Session au moment de l'ouverture de l'accueil : sert seulement à préremplir le formulaire. */
@@ -64,7 +66,7 @@
       const ex = importerExercice(f.texte);
       importes = [ex, ...importes.filter((x) => x.id !== ex.id)];
       choix = ex.id;
-      typeListe = typeDe(ex);
+      montrer(typeDe(ex));
     } catch (e) {
       erreurImport = e instanceof ErreurFichier ? e.message : "Le fichier n'a pas pu être lu.";
     }
@@ -78,7 +80,11 @@
   /** Onglets de la liste (choix de l'enseignant le 18.11.2026) : l'évaluation regroupe formative et sommative. */
   type TypeListe = 'entrainement' | 'evaluation';
   const typeDe = (ex: Exercice): TypeListe => (ex.mode === 'entrainement' ? 'entrainement' : 'evaluation');
-  let typeListe = $state<TypeListe>(exLien ? typeDe(exLien) : 'entrainement');
+  /** La liste suit la page : entraînement sur « Exercices », formative et sommative sur « Évaluation ». */
+  const typeListe = $derived<TypeListe>(page === 'evaluation' ? 'evaluation' : 'entrainement');
+  const montrer = (t: TypeListe) => etat.ouvrirRubrique(t === 'evaluation' ? 'evaluation' : 'exercices');
+  // Lien direct vers une évaluation : la bonne page dès l'arrivée.
+  if (exLien && typeDe(exLien) === 'evaluation' && etat.pageAccueil === 'exercices') etat.pageAccueil = 'evaluation';
   let recherche = $state('');
   let voirExercices = $state(true);
   let voirDossiers = $state(true);
@@ -161,10 +167,9 @@
     .filter((x): x is { id: string; etape: string; ex: Exercice } => !!x.ex);
   function choisirFilRouge(ex: Exercice) {
     choisirFiliere(filiereDe(ex));
-    typeListe = typeDe(ex);
+    montrer(typeDe(ex));
     recherche = '';
     choix = ex.id;
-    listeOuverte = true;
     tick().then(() => formulaire?.querySelector('.identite')?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
   }
 
@@ -193,25 +198,14 @@
   });
 
   let formulaire = $state<HTMLFormElement | null>(null);
-  /** Téléphone avec un travail en cours : la liste des exercices reste repliée tant qu'on ne la demande pas. */
-  let listeOuverte = $state(!(etat.session && typeof window !== 'undefined' && window.matchMedia('(max-width: 700px)').matches) || !!exLien);
-  async function allerAuChoix(t: TypeListe) {
-    typeListe = t;
-    listeOuverte = true;
-    await tick();
-    formulaire?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
+  /** Portes de l'accueil : la page des exercices ou celle de l'évaluation s'ouvre, en haut. */
+  const allerAuChoix = (t: TypeListe) => montrer(t);
 </script>
 
 <div class="page">
-  <header class="bandeau-haut">
-    <span class="logo">Compta PME</span>
-    <nav class="nav-haut" aria-label="Liens utiles">
-      <button class="lien-haut" onclick={() => (etat.guide = 'eleve')}>Guide d'utilisation</button>
-      <button class="lien-haut" onclick={onEnseignant}>Espace enseignant</button>
-    </nav>
-  </header>
+  <BandeauRubriques actif={page} />
   <main class="contenu">
+    {#if page === 'accueil'}
     {#if enCours}
       <!-- L'élève revient : une seule action, reprendre (direction B de la maquette accueil-engageant). -->
       <section class="premier retour" aria-labelledby="titre-accueil">
@@ -246,12 +240,6 @@
           <button class="btn btn-principal btn-grand" onclick={() => etat.reprendre()}>Reprendre <span class="fleche" aria-hidden="true">→</span></button>
         </div>
       </section>
-    {:else if exLien}
-      <section class="hero" aria-labelledby="titre-accueil">
-        <p class="surtitre">CFC employé·e de commerce · Maturité professionnelle</p>
-        <h1 id="titre-accueil">{eleveConnu ? `Bon retour, ${eleveConnu.prenom}.` : 'Bienvenue sur Compta PME'}</h1>
-        <p class="accroche">Votre enseignant vous a donné un exercice : il est déjà choisi ci-dessous.</p>
-      </section>
     {:else}
       <!-- Nouvel élève : le logiciel en action, et une première écriture en un clic (direction A). -->
       <section class="premier" aria-labelledby="titre-accueil">
@@ -276,18 +264,6 @@
       </section>
     {/if}
 
-    {#if exLien}
-      <section class="carte lien" aria-labelledby="titre-lien">
-        <h2 id="titre-lien" class="tete-simple">Exercice donné par votre enseignant</h2>
-        <div class="corps-carte">
-          <strong>{exLien.titre}</strong> <span class="discret petit">· {etiquetteNiveau(exLien)}</span>
-          <p class="petit">Indiquez votre prénom, votre nom et votre classe plus bas, puis cliquez sur « {etat.sessionDe(exLien.id) ? 'Reprendre' : 'Commencer'} ».</p>
-        </div>
-      </section>
-    {:else if lienId}
-      <div class="alerte" role="alert">Ce lien ne correspond à aucun exercice du logiciel. Demandez un nouveau lien à votre enseignant, ou choisissez l'exercice dans la liste.</div>
-    {/if}
-
     {#if autres.length}
       <section class="carte" aria-labelledby="titre-autres">
         <h2 id="titre-autres" class="tete-simple">Vos autres exercices en cours</h2>
@@ -307,11 +283,10 @@
       </section>
     {/if}
 
-    {#if !exLien}
       <section class="choix-depart" aria-labelledby="titre-choix">
         <h2 id="titre-choix" class="titre-section">{enCours ? 'Ou bien, que voulez-vous faire ?' : 'Par où voulez-vous commencer ?'}</h2>
         <div class="portes">
-          <button class="porte" onclick={() => (etat.apprendre = true)}>
+          <button class="porte" onclick={() => etat.ouvrirRubrique('apprendre')}>
             <span class="porte-titre">Apprendre une notion</span>
             <span class="porte-texte">L'essentiel, un exemple travaillé et dix questions courtes, du bilan à la comptabilité analytique.</span>
             <span class="porte-meta">{maitrises > 0 ? `${maitrises} notion${maitrises > 1 ? 's' : ''} maîtrisée${maitrises > 1 ? 's' : ''} sur ${NB_MODULES}` : `${NB_MODULES} notions`}</span>
@@ -352,11 +327,31 @@
           <button class="btn-lien" onclick={ouvrirSituation}>ouvrir la situation de mon groupe</button>
         </p>
       </section>
+    {:else}
+    <!-- Pages « Exercices » et « Évaluation » : le choix en trois étapes, seul sur sa page. -->
+    <section class="hero tete-page" aria-labelledby="titre-accueil">
+      <p class="surtitre">{page === 'evaluation' ? 'Formative ou notée' : 'Entraînement, avec correction immédiate'}</p>
+      <h1 id="titre-accueil">{page === 'evaluation' ? 'Faire une évaluation' : 'Choisir un exercice'}</h1>
+      <p class="accroche">
+        {#if page === 'evaluation'}Ouvrez le fichier remis par votre enseignant, indiquez votre nom, puis commencez. À la fin, vous rendrez votre copie dans Google Classroom.
+        {:else}Choisissez votre formation, puis une entreprise. Votre travail s'enregistre dans ce navigateur : vous pouvez vous arrêter et reprendre plus tard.{/if}
+      </p>
+    </section>
+    {#if exLien}
+      <section class="carte lien" aria-labelledby="titre-lien">
+        <h2 id="titre-lien" class="tete-simple">Exercice donné par votre enseignant</h2>
+        <div class="corps-carte">
+          <strong>{exLien.titre}</strong> <span class="discret petit">· {etiquetteNiveau(exLien)}</span>
+          <p class="petit">Indiquez votre prénom, votre nom et votre classe plus bas, puis cliquez sur « {etat.sessionDe(exLien.id) ? 'Reprendre' : 'Commencer'} ».</p>
+        </div>
+      </section>
+    {:else if lienId}
+      <div class="alerte" role="alert">Ce lien ne correspond à aucun exercice du logiciel. Demandez un nouveau lien à votre enseignant, ou choisissez l'exercice dans la liste.</div>
     {/if}
 
     <form class="carte choisir" id="choisir-exercice" onsubmit={commencer} novalidate bind:this={formulaire}>
       <header class="tete-choisir">
-        <h2>{eleveConnu ? 'Choisir un autre exercice' : 'Choisir un exercice'}</h2>
+        <h2>{page === 'evaluation' ? 'Votre évaluation' : eleveConnu ? 'Choisir un autre exercice' : 'Les exercices'}</h2>
         <ol class="etapes-choix" aria-label="Étapes">
           <li class:fait={!!filiere}>Formation</li>
           <li class:fait={!!exChoisi}>Exercice</li>
@@ -364,16 +359,7 @@
         </ol>
       </header>
 
-      {#if !listeOuverte}
-        <div class="corps-carte">
-          <button type="button" class="btn" onclick={() => (listeOuverte = true)}>Afficher la liste des exercices</button>
-        </div>
-      {:else}
       <div class="corps-carte filtres">
-        <div class="onglets" role="group" aria-label="Type d'exercice">
-          <button type="button" aria-pressed={typeListe === 'entrainement'} onclick={() => (typeListe = 'entrainement')}>Entraînement</button>
-          <button type="button" aria-pressed={typeListe === 'evaluation'} onclick={() => (typeListe = 'evaluation')}>Évaluation</button>
-        </div>
         <div class="onglets" role="group" aria-label="Formation">
           {#each ['CFC', 'MP'] as const as f}
             <button type="button" aria-pressed={filiere === f} onclick={() => choisirFiliere(f)}>{LIBELLES_FILIERE[f]}</button>
@@ -487,8 +473,8 @@
           <button type="submit" class="btn btn-principal btn-grand">{etat.sessionDe(choix) ? 'Reprendre' : 'Commencer'}</button>
         </div>
       {/if}
-      {/if}
     </form>
+    {/if}
     <p class="pied-page discret petit">
       Compta PME · plan comptable PME suisse · aucune donnée envoyée en ligne.
     </p>
@@ -497,17 +483,10 @@
 
 <style>
   .page { min-height: 100%; }
-  .bandeau-haut {
-    position: sticky; top: 0; z-index: 10; background: var(--c-fond);
-    border-bottom: 1px solid var(--c-bordure-2); padding: 0 28px; height: 64px; display: flex; align-items: center; gap: 18px;
-  }
-  .logo { color: var(--c-encre); font-weight: 700; font-size: var(--t-17); display: flex; align-items: center; gap: 10px; letter-spacing: -0.01em; }
-  .logo::before { content: 'CP'; width: 32px; height: 32px; border-radius: var(--r-3); background: var(--c-action); color: #fff; display: grid; place-items: center; font-size: var(--t-13); }
-  .nav-haut { margin-left: auto; display: flex; gap: 6px; }
-  .lien-haut { font: inherit; font-weight: 600; border: 0; background: none; color: var(--c-structure); padding: 8px 12px; min-height: var(--h-cible); border-radius: var(--r-2); cursor: pointer; }
-  .lien-haut:hover { background: var(--c-bleu-doux); }
   .contenu { max-width: 1120px; margin: 0 auto; padding: 40px 20px 56px; }
   .hero { margin-bottom: 28px; }
+  .tete-page { margin-bottom: var(--e-5); }
+  .tete-page h1 { font-size: var(--t-26); max-width: none; }
   .surtitre { margin: 0 0 10px; font-size: var(--t-13); font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--c-action-fonce); }
   .hero h1, .premier h1 { font-size: var(--t-titre); line-height: 1.08; letter-spacing: -0.03em; max-width: 18ch; }
   /* Premier écran : le texte et une action à gauche, le logiciel en action (ou la reprise) à droite. */
@@ -568,7 +547,7 @@
   @media (max-width: 860px) { .etapes-fil { grid-template-columns: 1fr 1fr; } }
   @media (max-width: 520px) { .etapes-fil { grid-template-columns: 1fr; } }
   .aussi { margin: 14px 2px 0; color: var(--c-texte-2); }
-  .choisir { overflow: visible; margin-top: 28px; scroll-margin-top: 80px; }
+  .choisir { overflow: visible; scroll-margin-top: 80px; }
   .tete-choisir { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding: 18px 20px; border-bottom: 1px solid var(--c-bordure-3); }
   .tete-choisir h2 { font-size: var(--t-20); }
   .etapes-choix { list-style: none; display: flex; gap: 8px; margin: 0; padding: 0; counter-reset: e; flex-wrap: wrap; }
@@ -639,8 +618,6 @@
     .choisi-texte { white-space: normal; }
     .reprise-avancement :global(.barre) { max-width: 100%; flex: 1 1 160px; }
     .grille { grid-template-columns: 1fr; }
-    .bandeau-haut { padding: 0 16px; }
-    .lien-haut { padding: 8px 8px; font-size: var(--t-14); }
     .contenu { padding: 28px 16px 40px; }
     .accroche { font-size: var(--t-17); }
     .premier, .premier.retour { grid-template-columns: minmax(0, 1fr); gap: var(--e-4); padding-top: 0; margin-bottom: var(--e-5); }
@@ -648,7 +625,6 @@
     .actions-hero .btn { flex: 1 1 100%; justify-content: center; }
     .prochaine { padding: var(--e-4); }
   }
-  @media (max-width: 420px) { .nav-haut .lien-haut:first-child { display: none; } }
   @media (max-width: 960px) and (min-width: 641px) { .premier, .premier.retour { grid-template-columns: minmax(0, 1fr); } }
   @media (prefers-reduced-motion: reduce) {
     .porte:hover { transform: none; }

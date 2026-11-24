@@ -3,6 +3,7 @@ import { expect, test } from '@playwright/test';
 
 async function commencer(page: import('@playwright/test').Page, recherche: string, titre: RegExp) {
   await page.goto('./');
+  await page.getByRole('navigation', { name: 'Rubriques' }).getByRole('button', { name: 'Exercices' }).click();
   await page.getByLabel('Prénom').fill('Léa');
   await page.getByLabel('Nom', { exact: true }).fill('Martin');
   await page.getByLabel('Classe').fill('2CFC1');
@@ -46,7 +47,9 @@ test('un élève comptabilise, voit le retour et son avancement, puis reprend so
   await page.keyboard.press('Escape');
   await page.getByRole('button', { name: 'Compta PME' }).click();
   await expect(page.getByRole('heading', { name: 'Bon retour, Léa' })).toBeVisible();
+  await page.getByRole('navigation', { name: 'Rubriques' }).getByRole('button', { name: 'Exercices' }).click();
   await expect(page.locator('#choisir-exercice').getByText(/En cours · 2 \/ 15/)).toBeVisible();
+  await page.getByRole('navigation', { name: 'Rubriques' }).getByRole('button', { name: 'Accueil' }).click();
   await page.getByRole('button', { name: 'Reprendre' }).first().click();
   // L'élève retrouve la rubrique qu'il avait quittée.
   await expect(page.getByRole('heading', { name: 'Journal' })).toBeVisible();
@@ -87,6 +90,7 @@ test('la liste des comptes se manipule entièrement à la souris', async ({ page
 
 test('Échap ferme le récapitulatif des pièces et rend le focus au bouton', async ({ page }) => {
   await page.goto('./');
+  await page.getByRole('navigation', { name: 'Rubriques' }).getByRole('button', { name: 'Exercices' }).click();
   await page.getByLabel('Prénom').fill('Léa');
   await page.getByLabel('Nom', { exact: true }).fill('Martin');
   await page.getByLabel('Classe').fill('2CFC1');
@@ -232,9 +236,12 @@ test("l'élève modifie une écriture fausse : solution dès la 1re erreur, doub
 
 test("l'accueil sépare l'entraînement et l'évaluation", async ({ page }) => {
   await page.goto('./');
-  await page.getByRole('button', { name: 'Évaluation', exact: true }).click();
+  const rubriques = page.getByRole('navigation', { name: 'Rubriques' });
+  await rubriques.getByRole('button', { name: 'Évaluation' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Faire une évaluation' })).toBeVisible();
   await expect(page.getByText("Aucune évaluation pour l'instant.")).toBeVisible();
-  await page.getByRole('button', { name: 'Entraînement', exact: true }).click();
+  await rubriques.getByRole('button', { name: 'Exercices' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Choisir un exercice' })).toBeVisible();
   await page.getByLabel('Rechercher un exercice').fill('cycles');
   await page.locator('#choisir-exercice').getByText(/Cycles du Léman/).first().click();
   await expect(page.locator('.choisi-texte')).toContainText('Cycles du Léman');
@@ -346,14 +353,19 @@ test('téléphone : le menu se ferme avec Échap, rend le focus, et la liste des
       .map((x) => `${x.n} ${Math.round(x.r.width)}×${Math.round(x.r.height)}`),
   );
   expect(petits).toEqual([]);
-  // Accueil avec un travail en cours : la liste est repliée, « Reprendre » est tout de suite visible.
+  // Accueil avec un travail en cours : « Reprendre » est tout de suite visible.
   await menu.click();
   await page.keyboard.press('Escape');
   await page.getByTitle("Retour à la page d'accueil").click();
   await expect(page.getByRole('button', { name: 'Reprendre' }).first()).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Afficher la liste des exercices' })).toBeVisible();
+  // La liste des exercices n'est plus sur l'accueil : la page reste courte, la liste a sa propre page.
+  await expect(page.getByLabel('Rechercher un exercice')).toHaveCount(0);
   const hauteur = await page.evaluate(() => document.documentElement.scrollHeight);
-  expect(hauteur).toBeLessThan(3200);
+  expect(hauteur).toBeLessThan(2400);
   await page.getByRole('button', { name: /M'exercer sur une entreprise/ }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Choisir un exercice' })).toBeVisible();
   await expect(page.getByLabel('Rechercher un exercice')).toBeVisible();
+  // Le bouton Retour du navigateur ramène à l'accueil.
+  await page.goBack();
+  await expect(page.getByRole('heading', { level: 1, name: 'Bon retour, Léa.' })).toBeVisible();
 });
