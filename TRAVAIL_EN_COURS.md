@@ -109,9 +109,11 @@ règle ni compte inventé, texte original, rien de validé n'est retiré, nouvea
 - [x] G2. Modèle enrichi dans le code (nouveaux blocs, affichage, tests) et 1ère CFC : neuf chapitres
   (`src/data/theorie-cfc1.ts`).
 - [ ] G3. Relecture de la 1ère CFC par l'enseignant.
-- [ ] G4. 2ème CFC (TVA selon la maquette, amortissements, transitoires, créances, salaires ; chapitres à créer :
+- [x] G4. 2ème CFC (TVA selon la maquette, amortissements, transitoires, créances, salaires ; chapitres à créer :
   facturation, budget, marge contributive et répartition des coûts).
 - [ ] G5. Maturité professionnelle.
 - [ ] G6. Vérification finale, puis fusion dans `main` après accord explicite ; raccourcir ensuite les leçons.
 
 - 24.11.2026 — G1 et G2 faites. Reste G3 : attendre la relecture de la 1ère CFC avant de rédiger la 2ème CFC.
+- 24.11.2026 — G4 faite après l'accord « Oui, 2ème CFC » : huit chapitres dans `src/data/theorie-cfc2.ts`, publiés sur la
+  prévisualisation. Reste : relecture de la 1ère et de la 2ème CFC par l'enseignant (G3), puis maturité (G5) sur son accord.

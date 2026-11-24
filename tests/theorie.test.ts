@@ -70,6 +70,10 @@ describe('théorie enrichie (modèle du 24.11.2026)', () => {
     expect(enrichis.filter((c) => c.niveau === 'CFC1').map((c) => c.id)).toEqual(['cadre-legal', 'bilan', 'comptes', 'journal', 'credit', 'resultat', 'prive', 'marchandises', 'prix']);
   });
 
+  it('les huit chapitres de 2ème CFC sont enrichis, dont trois nouveaux placés après les salaires', () => {
+    expect(enrichis.filter((c) => c.niveau === 'CFC2').map((c) => c.id)).toEqual(['tva', 'amortissements', 'transitoires', 'creances', 'salaires', 'facturation', 'budget', 'couts']);
+  });
+
   it('aucun bloc validé n’est perdu : chacun est repris tel quel dans un chapitre enrichi', () => {
     const texte = JSON.stringify(CHAPITRES);
     for (const c of CHAPITRES_VALIDES) for (const s of c.sections) for (const b of s.blocs) expect(texte.includes(JSON.stringify(b)), `${c.id} — ${s.titre}`).toBe(true);

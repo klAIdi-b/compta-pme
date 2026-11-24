@@ -6,15 +6,17 @@
 // Texte original ; comptes du plan du cours ; montants en francs. Contenu À RELIRE par l'enseignant (aRelire).
 import type { Bloc, Chapitre, LigneExemple, PosteSchema, Section } from './theorie';
 
-const s = (debit: string, credit: string, montant: number): LigneExemple[] => [{ debit, credit, montant }];
-const D = (compte: string, montant: number): LigneExemple => ({ debit: compte, credit: null, montant });
-const C = (compte: string, montant: number): LigneExemple => ({ debit: null, credit: compte, montant });
-const P = (libelle: string, montant: number): PosteSchema => ({ libelle, montant });
-const p = (texte: string): Bloc => ({ type: 'p', texte });
+export const s = (debit: string, credit: string, montant: number): LigneExemple[] => [{ debit, credit, montant }];
+export const D = (compte: string, montant: number): LigneExemple => ({ debit: compte, credit: null, montant });
+export const C = (compte: string, montant: number): LigneExemple => ({ debit: null, credit: compte, montant });
+export const P = (libelle: string, montant: number): PosteSchema => ({ libelle, montant });
+export const p = (texte: string): Bloc => ({ type: 'p', texte });
 
-interface Enrichissement {
+export interface Enrichissement {
   titre?: string;
   resume?: string;
+  /** Bases légales vérifiées, à la place de celles du chapitre validé. */
+  bases?: string[];
   objectifs: string[];
   termes: { terme: string; definition: string }[];
   /** Sections validées à ne pas reprendre (déplacées dans un autre chapitre). */
@@ -31,9 +33,9 @@ interface Enrichissement {
 }
 
 const QUESTIONS_3 = ['Quels comptes sont touchés ?', 'De quel type est chacun ?', 'Augmente-t-il ou diminue-t-il ?'];
-const r3 = (a: string, b: string, c: string) => [`${QUESTIONS_3[0]} ${a}`, `${QUESTIONS_3[1]} ${b}`, `${QUESTIONS_3[2]} ${c}`];
+export const r3 = (a: string, b: string, c: string) => [`${QUESTIONS_3[0]} ${a}`, `${QUESTIONS_3[1]} ${b}`, `${QUESTIONS_3[2]} ${c}`];
 
-function enrichir(base: Chapitre, e: Enrichissement): Chapitre {
+export function enrichir(base: Chapitre, e: Enrichissement): Chapitre {
   const gardees = base.sections.filter((x) => !(e.sansSections ?? []).includes(x.titre));
   for (const titre of Object.keys(e.apres ?? {})) {
     if (!gardees.some((x) => x.titre === titre)) throw new Error(`Théorie ${base.id} : section « ${titre} » introuvable`);
@@ -42,6 +44,7 @@ function enrichir(base: Chapitre, e: Enrichissement): Chapitre {
     ...base,
     titre: e.titre ?? base.titre,
     resume: e.resume ?? base.resume,
+    bases: e.bases ?? base.bases,
     objectifs: e.objectifs,
     aRelire: true,
     sections: [
@@ -56,7 +59,7 @@ function enrichir(base: Chapitre, e: Enrichissement): Chapitre {
   };
 }
 
-const section = (base: Chapitre, titre: string): Section => {
+export const section = (base: Chapitre, titre: string): Section => {
   const x = base.sections.find((y) => y.titre === titre);
   if (!x) throw new Error(`Théorie ${base.id} : section « ${titre} » introuvable`);
   return x;
