@@ -172,4 +172,7 @@ Corrections faites une à une, sur accord de l'enseignant, d'abord sur `apercu`.
 - [x] Accueil, remarque de l'enseignant (25.11.2026) : « Commencer » sans prénom, nom ou classe amène l'élève au premier
   champ vide (défilement, curseur dans le champ, champs vides en rouge, message sous les champs) ; même chose pour la
   confirmation d'un autre élève. À commiter et publier sur accord.
+- [x] Bilan en direct, remarque de l'enseignant (25.11.2026) : « Perte provisoire » et « Bénéfice provisoire » à part,
+  effet de l'écriture décrit compte par compte (catégorie du cours) puis sur le résultat provisoire. À commiter et publier
+  sur accord.
 - [ ] Les autres actions de la vague 2 : en attente.

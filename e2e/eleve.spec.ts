@@ -41,7 +41,9 @@ test('un élève comptabilise, voit le retour et son avancement, puis reprend so
   const vivant = page.locator('.bilan-vivant');
   await expect(vivant.locator('summary')).toContainText("Actif 97'800.00 · Passif 97'800.00");
   await expect(vivant.locator('.bloc.perte')).toHaveCount(1);
-  await expect(vivant.locator('.effet')).toContainText("augmentent tous les deux de 4'800.00");
+  await expect(vivant.locator('.bloc.perte')).toContainText('Perte provisoire');
+  await expect(vivant.locator('.effet')).toContainText("Achats de marchandises (charge) +4'800.00 · Dettes fournisseurs (passif) +4'800.00.");
+  await expect(vivant.locator('.effet')).toContainText("Le résultat diminue de 4'800.00 : il passe d'un résultat nul à une perte provisoire de 4'800.00.");
   await expect(vivant).not.toContainText("n'est plus équilibré");
 
   // Opération 2 volontairement fausse (comptes inversés) : indice et lien vers la théorie.

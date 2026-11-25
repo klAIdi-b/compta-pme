@@ -22,13 +22,34 @@
   const variation = (k: BlocBilan) => k.montant - k.avant;
   const signe = (x: number) => (x > 0 ? `+${m(x)}` : x < 0 ? `−${m(-x)}` : m(0));
 
-  /** Effet de la dernière écriture, dans les mots du chapitre « Le bilan ». */
+  /** Résultat provisoire en mots : « une perte provisoire de 4'800.00 ». */
+  const resultatEnMots = (x: number) => (x > 0 ? `un bénéfice provisoire de ${m(x)}` : x < 0 ? `une perte provisoire de ${m(-x)}` : 'un résultat nul');
+  const depuis = (x: number) => (x > 0 ? `d'un bénéfice provisoire de ${m(x)}` : x < 0 ? `d'une perte provisoire de ${m(-x)}` : "d'un résultat nul");
+
+  /**
+   * Effet de la dernière écriture (remarque de l'enseignant du 25.11.2026) : d'abord chaque compte, dans les mots du
+   * cours (actif, passif, charge, produit) ; puis l'effet sur le résultat provisoire, ou sur le bilan si l'écriture ne
+   * touche que des comptes du bilan.
+   */
   const effet = $derived.by(() => {
     if (!derniere || !avant) return null;
-    const e = effetEcriture(b, avant);
-    if (e.genre === 'permutation') return 'Le total du bilan ne change pas : un poste augmente, un autre diminue du même montant (permutation).';
-    if (e.genre === 'ensemble') return `L'actif et le passif ${e.sens === 'hausse' ? 'augmentent' : 'diminuent'} tous les deux de ${m(e.montant)} : le bilan reste équilibré.`;
-    return `Actif ${signe(e.actif)}, passif ${signe(e.passif)} : vérifiez votre écriture, le bilan n'est plus équilibré.`;
+    const e = effetEcriture(derniere, d, b, avant);
+    const comptes = e.mouvements.map((x) => `${x.intitule} (${x.type}) ${signe(x.variation)}`).join(' · ');
+    let suite = '';
+    if (e.resultat.genre === 'change') {
+      const { avant: r0, apres: r1 } = e.resultat;
+      suite = `Le résultat ${r1 < r0 ? 'diminue' : 'augmente'} de ${m(Math.abs(r1 - r0))} : il passe ${depuis(r0)} à ${resultatEnMots(r1)}.`;
+      if (r1 < 0) suite += ' Tant que les charges passées dépassent les produits, le résultat provisoire est une perte ; il change à chaque charge ou produit.';
+    } else if (e.resultat.genre === 'vire') {
+      suite = `${e.resultat.montant > 0 ? 'Le bénéfice' : 'La perte'} de ${m(Math.abs(e.resultat.montant))} est viré${e.resultat.montant > 0 ? '' : 'e'} : ${e.resultat.montant > 0 ? 'il' : 'elle'} ne figure plus à part au bilan.`;
+    } else if (e.bilan?.genre === 'permutation') {
+      suite = 'Le total du bilan ne change pas : un poste augmente, un autre diminue du même montant (permutation).';
+    } else if (e.bilan?.genre === 'ensemble') {
+      suite = `L'actif et le passif ${e.bilan.sens === 'hausse' ? 'augmentent' : 'diminuent'} tous les deux de ${m(e.bilan.montant)} : le bilan reste équilibré.`;
+    } else if (e.bilan?.genre === 'desequilibre') {
+      suite = `Actif ${signe(e.bilan.actif)}, passif ${signe(e.bilan.passif)} : vérifiez votre écriture, le bilan n'est plus équilibré.`;
+    }
+    return { comptes, suite };
   });
 
   let ouvert = $state(etat.exercice.niveau === 'CFC1');
@@ -53,7 +74,7 @@
       {/each}
     </div>
     <p class="effet" role="status">
-      {#if effet}<b>Votre dernière écriture :</b> {effet}{:else}Passez une écriture : vous verrez ici son effet sur le bilan.{/if}
+      {#if effet}<b>Votre dernière écriture :</b> {effet.comptes}.{#if effet.suite}<br />{effet.suite}{/if}{:else}Passez une écriture : vous verrez ici son effet sur le bilan.{/if}
     </p>
   </div>
 </details>
@@ -79,6 +100,9 @@
   .ac { background: #2a6aa0; } .ai { background: var(--c-structure); }
   .ct { background: #b3541e; } .lt { background: #8f3f12; } .cp { background: var(--c-succes); }
   .perte { background: var(--c-erreur); }
+  .benefice { background: #2f7d4f; }
+  /* Résultat provisoire : bordure en tirets, il change à chaque charge ou produit. */
+  .perte, .benefice { outline: 2px dashed rgba(255, 255, 255, 0.75); outline-offset: -5px; }
   .effet { margin: 14px 0 0; }
   @media (max-width: 600px) {
     .bloc { flex-direction: column; align-items: flex-start; gap: 0; }
