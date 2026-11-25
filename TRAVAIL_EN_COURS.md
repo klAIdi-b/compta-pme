@@ -134,7 +134,7 @@ règle ni compte inventé, texte original, rien de validé n'est retiré, nouvea
   leçons. Publié sur la prévisualisation ; fusion dans `main` sur accord.
 - 24.11.2026 — Lien vers la théorie et nouveaux exemples fusionnés dans `main` sur l'accord de l'enseignant.
 
-# Suites de l'audit du 24.11.2026 (rapport `AUDIT_COMPTA_PME.md`, non commité)
+# Suites de l'audit du 24.11.2026 (rapport `AUDIT_COMPTA_PME.md`, commité le 25.11.2026 à la demande de l'enseignant)
 
 Corrections faites une à une, sur accord de l'enseignant, d'abord sur `apercu`.
 
