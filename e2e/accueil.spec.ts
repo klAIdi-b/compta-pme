@@ -133,3 +133,25 @@ for (const largeur of [360, 768, 1440]) {
     await expect(page.getByRole('heading', { name: /Votre mission/ })).toBeVisible();
   });
 }
+
+for (const [largeur, hauteur] of [[1440, 900], [360, 740]] as const) {
+  test(`« Commencer » sans les informations amène l’élève au champ manquant (${largeur} × ${hauteur})`, async ({ page }) => {
+    await page.setViewportSize({ width: largeur, height: hauteur });
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('./');
+    await page.getByRole('navigation', { name: 'Rubriques' }).getByRole('button', { name: 'Exercices' }).click();
+    await page.getByLabel('Rechercher un exercice').fill('cycles');
+    await page.locator('#choisir-exercice').getByText(/Cycles du Léman/).first().click();
+    // Le prénom est rempli, le nom et la classe manquent.
+    await page.getByLabel('Prénom').fill('Léa');
+    await page.getByRole('navigation', { name: 'Rubriques' }).scrollIntoViewIfNeeded();
+    await page.getByRole('button', { name: 'Commencer' }).click();
+    const nom = page.getByLabel('Nom', { exact: true });
+    await expect(nom).toBeFocused();
+    await expect(nom).toHaveAttribute('aria-invalid', 'true');
+    await expect(page.getByLabel('Prénom')).toHaveAttribute('aria-invalid', 'false');
+    await expect(nom).toBeInViewport();
+    await expect(page.locator('#erreurs-identite')).toContainText('Indiquez votre nom.');
+    await expect(page.locator('#erreurs-identite')).toBeInViewport();
+  });
+}

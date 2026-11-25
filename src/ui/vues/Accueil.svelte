@@ -130,6 +130,26 @@
   let confirmer = $state(false);
   const meme = (a: string, b: string) => normaliser(a.trim()) === normaliser(b.trim());
 
+  /** Défilement doux, sauf si l'élève a demandé moins de mouvement. */
+  const defilement = (): ScrollBehavior => (window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth');
+
+  /**
+   * « Commencer » sans les informations demandées (25.11.2026, remarque de l'enseignant) : l'élève est amené au
+   * premier champ vide, sinon il croit que le bouton ne fonctionne pas. Même chose pour la confirmation d'un autre élève.
+   */
+  async function montrerCeQuiManque() {
+    await tick();
+    const champ = (['prenom', 'nom', 'classe'] as const).find((id) => !({ prenom, nom, classe }[id]).trim());
+    if (champ) {
+      formulaire?.querySelector('.identite')?.scrollIntoView({ behavior: defilement(), block: 'center' });
+      document.getElementById(champ)?.focus({ preventScroll: true });
+      return;
+    }
+    const cible = formulaire?.querySelector('.confirmation, .alerte');
+    if (cible) cible.scrollIntoView({ behavior: defilement(), block: 'center' });
+    else if (!choix) document.getElementById('choisir-exercice')?.scrollIntoView({ behavior: defilement(), block: 'start' });
+  }
+
   function commencer(e: SubmitEvent) {
     e.preventDefault();
     const err: string[] = [];
@@ -139,10 +159,14 @@
     const ex = tous.find((x) => x.id === choix);
     if (!ex) err.push('Choisissez un exercice dans la liste.');
     erreurs = err;
-    if (err.length || !ex) return;
+    if (err.length || !ex) {
+      montrerCeQuiManque();
+      return;
+    }
     const autreEleve = eleveConnu && !(meme(eleveConnu.prenom, prenom) && meme(eleveConnu.nom, nom));
     if (autreEleve && !confirmer) {
       confirmer = true;
+      montrerCeQuiManque();
       return;
     }
     if (autreEleve) etat.quitter();
@@ -440,26 +464,26 @@
         <div class="grille">
           <div>
             <label class="bloc" for="prenom">Prénom</label>
-            <input id="prenom" class="champ" bind:value={prenom} autocomplete="given-name" />
+            <input id="prenom" class="champ" bind:value={prenom} autocomplete="given-name" aria-invalid={erreurs.length > 0 && !prenom.trim()} aria-describedby={erreurs.length ? 'erreurs-identite' : undefined} />
           </div>
           <div>
             <label class="bloc" for="nom">Nom</label>
-            <input id="nom" class="champ" bind:value={nom} autocomplete="family-name" />
+            <input id="nom" class="champ" bind:value={nom} autocomplete="family-name" aria-invalid={erreurs.length > 0 && !nom.trim()} aria-describedby={erreurs.length ? 'erreurs-identite' : undefined} />
           </div>
           <div>
             <label class="bloc" for="classe">Classe</label>
-            <input id="classe" class="champ" bind:value={classe} placeholder="par ex. 1CFC3" />
+            <input id="classe" class="champ" bind:value={classe} placeholder="par ex. 1CFC3" aria-invalid={erreurs.length > 0 && !classe.trim()} aria-describedby={erreurs.length ? 'erreurs-identite' : undefined} />
           </div>
         </div>
       </div>
 
       {#if erreurs.length}
-        <div class="alerte" role="alert" style="margin:0 20px 16px">
+        <div class="alerte" id="erreurs-identite" role="alert" style="margin:0 20px 16px">
           <ul>{#each erreurs as e}<li>{e}</li>{/each}</ul>
         </div>
       {/if}
       {#if confirmer && eleveConnu}
-        <div class="alerte" role="alert" style="margin:0 20px 16px">
+        <div class="alerte confirmation" role="alert" style="margin:0 20px 16px">
           Ce navigateur contient le travail de {eleveConnu.prenom} {eleveConnu.nom}. Si vous n'êtes pas cette personne, ce
           travail sera effacé pour laisser la place au vôtre. S'il doit être rendu, reprenez-le d'abord et cliquez sur
           « Exporter ma copie ».

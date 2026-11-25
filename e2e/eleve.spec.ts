@@ -41,7 +41,9 @@ test('un élève comptabilise, voit le retour et son avancement, puis reprend so
   const vivant = page.locator('.bilan-vivant');
   await expect(vivant.locator('summary')).toContainText("Actif 97'800.00 · Passif 97'800.00");
   await expect(vivant.locator('.bloc.perte')).toHaveCount(1);
-  await expect(vivant.locator('.effet')).toContainText("augmentent tous les deux de 4'800.00");
+  await expect(vivant.locator('.bloc.perte')).toContainText('Perte provisoire');
+  await expect(vivant.locator('.effet')).toContainText("Achats de marchandises (charge) +4'800.00 · Dettes fournisseurs (passif) +4'800.00.");
+  await expect(vivant.locator('.effet')).toContainText("Le résultat diminue de 4'800.00 : il passe d'un résultat nul à une perte provisoire de 4'800.00.");
   await expect(vivant).not.toContainText("n'est plus équilibré");
 
   // Opération 2 volontairement fausse (comptes inversés) : indice et lien vers la théorie.
@@ -392,3 +394,28 @@ test('une écriture saisie sous un numéro de pièce qui n’est pas une opérat
   await expect(alerte).toContainText('Pièce 3a');
   await expect(alerte).not.toContainText('Pièces');
 });
+
+for (const [largeur, hauteur] of [[1440, 900], [360, 740]] as const) {
+  test(`après « Valider », le verdict est à l’écran sans défiler (${largeur} × ${hauteur})`, async ({ page }) => {
+    await page.setViewportSize({ width: largeur, height: hauteur });
+    await commencer(page, 'cycles', /Cycles du Léman/);
+    await page.getByRole('button', { name: /Commencer la saisie|Continuer la saisie/ }).click();
+    const fermerVisite = page.getByRole('button', { name: /Passer|Fermer la visite|Terminer/ });
+    if (await fermerVisite.first().isVisible().catch(() => false)) await fermerVisite.first().click();
+    for (const [libelle, debit, credit, montant, attendu] of [
+      ['Achat de marchandises à crédit', '4200', '2000', '4800', 'Juste'],
+      ['Essai', '2000', '1020', '100', 'à revoir'],
+    ] as const) {
+      await saisir(page, libelle, debit, credit, montant);
+      const message = page.locator('.verdict .message').first();
+      await expect(message).toContainText(attendu);
+      if (attendu === 'Juste') await expect(message).toContainText('écriture correcte. Passez');
+      const boite = (await message.boundingBox())!;
+      // Le haut du message et sa première ligne sont dans la fenêtre.
+      expect(boite.y, `${libelle} : haut du verdict`).toBeGreaterThanOrEqual(0);
+      expect(boite.y + 24, `${libelle} : verdict sous la ligne de flottaison`).toBeLessThanOrEqual(hauteur);
+    }
+    // Le curseur est prêt pour l'écriture suivante.
+    await expect(page.locator('#saisie-libelle')).toBeFocused();
+  });
+}
