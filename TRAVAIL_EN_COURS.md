@@ -169,4 +169,7 @@ Corrections faites une à une, sur accord de l'enseignant, d'abord sur `apercu`.
   vente sans TVA, rabais sans TVA hors 235, prélèvement privé non compté). À commiter et publier sur accord.
 - [x] Vague 2, verdict visible (25.11.2026) : le verdict est placé au-dessus de la grille de saisie et ramené à l'écran
   après « Valider » s'il n'y est pas ; espace manquante corrigée (« correcte. Passez »). À commiter et publier sur accord.
+- [x] Accueil, remarque de l'enseignant (25.11.2026) : « Commencer » sans prénom, nom ou classe amène l'élève au premier
+  champ vide (défilement, curseur dans le champ, champs vides en rouge, message sous les champs) ; même chose pour la
+  confirmation d'un autre élève. À commiter et publier sur accord.
 - [ ] Les autres actions de la vague 2 : en attente.
