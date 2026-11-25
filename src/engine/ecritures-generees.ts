@@ -45,11 +45,7 @@ const tva: Generateur[] = [
     return q('TVA', `Décompte de TVA du trimestre : TVA due ${fr(due)}, impôt préalable sur marchandises ${fr(ip1)}, sur autres charges ${fr(ip2)}. Virez l'impôt préalable et le solde dû à l'AFC.`,
       [D('2200', due), C('1170', ip1), C('1171', ip2), C('2205', due - ip1 - ip2)]);
   },
-  (h) => {
-    const ht = cent(h, 20, 100); const ttc = ht + tvaSurHT(ht, TVA); const esc = Math.round(ttc * 2 / 100 / 5) * 5; const t = tvaSurTTC(esc, TVA);
-    return q('TVA', `Le client paie par la banque une facture de ${fr(ttc)} (TVA 8,1 % comprise) en déduisant un escompte de 2 %, soit ${fr(esc)} TVA comprise, dont ${fr(t)} de TVA.`,
-      [D('1020', ttc - esc), D('3209', esc - t), D('2200', t), C('1100', ttc)]);
-  },
+  // Escompte avec correction de la TVA : retiré de la 2ème CFC le 25.11.2026 (enseigné en maturité seulement).
 ];
 
 // ---------- CFC 2 : amortissements ----------
@@ -58,7 +54,7 @@ const amortissements: Generateur[] = [
   (h) => { const a = cent(h, 5, 40); return q('Amortissements', `Amortissement des machines selon la méthode indirecte : ${fr(a)}.`, [D('6800', a), C('1509', a)]); },
   (h) => { const a = cent(h, 5, 30); return q('Amortissements', `Amortissement des véhicules selon la méthode indirecte : ${fr(a)}.`, [D('6800', a), C('1539', a)]); },
   (h) => { const a = cent(h, 2, 15); return q('Amortissements', `Amortissement du mobilier selon la méthode directe : ${fr(a)}.`, [D('6800', a), C('1510', a)]); },
-  (h) => { const a = cent(h, 2, 12); return q('Amortissements', `Amortissement direct des machines de bureau (ordinateurs) : ${fr(a)}.`, [D('6800', a), C('1520', a)]); },
+  (h) => { const a = cent(h, 2, 12); return q('Amortissements', `Amortissement direct de l'infrastructure informatique (ordinateurs) : ${fr(a)}.`, [D('6800', a), C('1521', a)]); },
   (h) => { const a = cent(h, 3, 10); const b = cent(h, 3, 20); return q('Amortissements', `Amortissements indirects : mobilier ${fr(a)}, véhicules ${fr(b)}.`, [D('6800', a + b), C('1519', a), C('1539', b)]); },
 ];
 

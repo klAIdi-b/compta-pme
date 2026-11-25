@@ -1,4 +1,5 @@
-// Dossier CFC, niveau 2 (TVA), tiré des cas du manuel E&S 2022, vol. 2, ch. 14 (exercices 14.9 et 14.10) : droits
+// Dossier de maturité, niveau 1 (passé de la 2ème CFC le 25.11.2026 : escomptes avec correction de la TVA, enseignés
+// en maturité seulement), TVA, tiré des cas du manuel E&S 2022, vol. 2, ch. 14 (exercices 14.9 et 14.10) : droits
 // d'utilisation obtenus par l'enseignant (09.11.2026), cas reformulés. Montants hors taxe du livre, TVA aux taux en
 // vigueur (8,1 % et 2,6 %, arrondi aux 5 centimes). Entreprises, personnes et numéros fictifs.
 import { avisBancaire, facture, noteCredit, noteInterne, ticket } from '../../engine/pieces';
@@ -98,9 +99,9 @@ export const dossierElectromenager = construireDossier(
   {
     id: 'dossier-cfc2-electromenager-du-rhone-tva',
     titre: 'Électroménager du Rhône — dossier de pièces, TVA, escomptes et remises',
-    niveau: 'CFC2',
-    filiere: 'CFC',
-    difficulte: 2,
+    niveau: 'MP',
+    filiere: 'MP',
+    difficulte: 1,
     sujets: [
       'TVA au net (8,1 % et 2,6 %)',
       'Escompte obtenu et accordé avec correction de la TVA',
@@ -128,9 +129,9 @@ export const dossierElectromenager = construireDossier(
   },
   [
     { date: '2026-01-12', piece: e1.piece, lignes: [D('4200', e1.ht), D('1170', e1.tva), C('2000', e1.ttc)] },
-    { date: '2026-01-19', piece: e2.piece, lignes: [D('1520', e2.ht), D('1171', e2.tva), C('2010', e2.ttc)] },
+    { date: '2026-01-19', piece: e2.piece, lignes: [D('1521', e2.ht), D('1171', e2.tva), C('2010', e2.ttc)] },
     { date: '2026-01-20', piece: e3.piece, lignes: [D('2000', e1.ttc), C('1020', e3.total), C('4209', escompteAchatHT), C('1170', escompteAchatTVA)] },
-    { date: '2026-01-24', piece: e4.piece, lignes: [D('2010', e4.montant), C('1520', f(190)), C('1171', f(15.4))] },
+    { date: '2026-01-24', piece: e4.piece, lignes: [D('2010', e4.montant), C('1521', f(190)), C('1171', f(15.4))] },
     { date: '2026-01-26', piece: e5.piece, lignes: S('2010', '1020', e5.total) },
     { date: '2026-03-12', piece: e6.piece, lignes: [D('1100', e6.ttc), C('3200', e6.ht), C('2200', e6.tva)] },
     { date: '2026-03-15', piece: e7.piece, lignes: [D('1020', e7.total), D('3209', escompteVenteHT), D('2200', escompteVenteTVA), C('1100', e6.ttc)] },

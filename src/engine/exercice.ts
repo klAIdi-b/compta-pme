@@ -261,7 +261,10 @@ export function avecCorrigeAJour(enregistre: Exercice, catalogue: readonly Exerc
   if (!c || !c.corrige || !enregistre.corrige || c.mode !== enregistre.mode) return enregistre;
   const memeEnonce =
     c.operations.length === enregistre.operations.length &&
-    c.operations.every((o, i) => o.numero === enregistre.operations[i]!.numero && o.texte === enregistre.operations[i]!.texte);
+    c.operations.every((o, i) => o.numero === enregistre.operations[i]!.numero && o.texte === enregistre.operations[i]!.texte) &&
+    // Un corrigé repris doit correspondre au bilan d'ouverture que l'élève a sous les yeux (comptes renumérotés, 25.11.2026).
+    JSON.stringify(c.ouvertureActif) === JSON.stringify(enregistre.ouvertureActif) &&
+    JSON.stringify(c.ouverturePassif) === JSON.stringify(enregistre.ouverturePassif);
   if (!memeEnonce || JSON.stringify(c.corrige) === JSON.stringify(enregistre.corrige)) return enregistre;
   return { ...enregistre, corrige: c.corrige };
 }

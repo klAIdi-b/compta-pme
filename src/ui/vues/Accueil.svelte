@@ -160,7 +160,6 @@
   // Entreprise fil rouge : les exercices de Cycles du Léman dans l'ordre, de la 1re à la 2e année.
   const FIL_ROUGE = [
     { id: 'demo-cfc1-cycles-du-leman', etape: 'Le premier trimestre : journal, bilan, bouclement' },
-    { id: 'dossier-cfc2-cycles-du-leman-facturation', etape: 'Les factures et les paiements de mars' },
     { id: 'budget-cfc2-cycles-du-leman-journee', etape: 'Le budget de la Journée du vélo électrique' },
     { id: 'budget-cfc2-cycles-du-leman-trimestre', etape: 'Le budget du 2e trimestre et les comptes' },
   ]

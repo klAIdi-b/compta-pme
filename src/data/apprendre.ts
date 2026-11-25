@@ -235,13 +235,13 @@ function ecritures(
 function MODULES_CALCUL(): ModuleApprendre[] {
   return [
     ecritures('tva-ecritures', 'CFC2', 'TVA : comptabilisation au net',
-      'Comptabiliser achats, ventes, charges, investissements, escomptes et décompte de TVA selon la méthode au net.',
+      'Comptabiliser achats, ventes, charges, investissements et décompte de TVA selon la méthode au net.',
       ['Ventes : la TVA due va au crédit de TVA due ; achats : l’impôt préalable va au débit (marchandises et services, ou investissements et autres charges).', 'Décompte : l’impôt préalable est viré en diminution de la TVA due, le solde va à la dette envers l’AFC.', 'Un escompte corrige aussi la TVA.'],
       ['tva'], ['2ème CFC (E&S Partie VIII)', 'MP 3.2'], 'tva', ['1000', '1020', '1100', '1170', '1171', '1530', '2000', '2200', '2205', '3200', '3209', '4200', '6400']),
     ecritures('amortissements-ecritures', 'CFC2', 'Amortissements : méthode directe ou indirecte',
       'Choisir les comptes de l’amortissement direct et indirect.',
       ['Méthode directe : Amortissements au débit, compte de l’immobilisation au crédit.', 'Méthode indirecte : Amortissements au débit, fonds d’amortissements cumulés (xxx9) au crédit ; l’immobilisation garde sa valeur d’acquisition.'],
-      ['amortissements'], ['2ème CFC', 'MP 5.2'], 'amortissements', ['1500', '1509', '1510', '1519', '1520', '1530', '1539', '6800'], 30),
+      ['amortissements'], ['2ème CFC', 'MP 5.2'], 'amortissements', ['1500', '1509', '1510', '1519', '1520', '1521', '1530', '1539', '6800'], 30),
     ecritures('transitoires-ecritures', 'CFC2', 'Actifs et passifs transitoires',
       'Régulariser charges et produits à la clôture, puis les extourner à la réouverture.',
       ['Charge payée d’avance : Actifs transitoires au débit, la charge au crédit.', 'Charge à payer (pas encore facturée ou payée) : la charge au débit, Passifs transitoires au crédit.', 'À la réouverture, on extourne : écriture inverse.'],

@@ -46,7 +46,7 @@ const attendus: Record<string, { resultat: number; soldes: Record<string, number
   // Amortissements 58'869.00 (perte, aucune autre opération de résultat).
   'manuel-cfc3-imprimerie-mont-blanc-amortissements': {
     resultat: -58869,
-    soldes: { '1500': 198000, '1509': -88500, '1549': -9600, '1510': 16000, '1520': 6480, '1530': 1, '1020': 32000 },
+    soldes: { '1500': 198000, '1509': -88500, '1549': -9600, '1510': 16000, '1521': 6480, '1530': 1, '1020': 32000 },
   },
   // Charges de l'exercice : assurances 3'000, réparations 3'900 + 6'000, salaires 32'000, intérêt 2'300.
   'manuel-cfc3-truffaz-transports-transitoires': {
@@ -57,7 +57,7 @@ const attendus: Record<string, { resultat: number; soldes: Record<string, number
   'manuel-cfc4-lambert-horlogerie-cloture': {
     resultat: 379920,
     soldes: {
-      '1020': 390000, '1010': 7700, '1100': 350000, '1109': -17500, '1200': 360000, '1510': 24000, '1520': 14000,
+      '1020': 390000, '1010': 7700, '1100': 350000, '1109': -17500, '1200': 360000, '1510': 24000, '1521': 14000,
       '1539': -27000, '1609': -47200, '1300': 1700, '2300': -26380, '2000': -95000, '2850': -31400,
     },
   },

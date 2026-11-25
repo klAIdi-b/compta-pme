@@ -147,4 +147,20 @@ Corrections faites une à une, sur accord de l'enseignant, d'abord sur `apercu`.
 - [x] E4. Pièce hors énoncé : une écriture de bouclement se reconnaît à ses comptes (compte de résultat, ou virement entre
   privé et capital) ; toute autre pièce hors énoncé reste dans les comptes et est signalée à l'élève (journal) et à
   l'enseignant (détail de la copie, `CorrectionCopie.piecesHorsEnonce`). Fait le 24.11.2026, à commiter et publier sur accord.
-- [ ] E3, E5 à E9 et les autres actions du rapport : en attente des décisions de l'enseignant.
+- [x] E5. Répartition : des tantièmes sont refusés sans un dividende d'au moins 5 % du capital (art. 677 CO) ; message
+  plus clair quand la perte reportée dépasse le bénéfice. Fait le 25.11.2026, à commiter et publier sur accord.
+- [x] E6. Imprimerie du Mandement : passif transitoire d'ouverture porté de 900.00 à 2'700.00 (électricité d'octobre à
+  décembre), capital d'ouverture de 66'800.00 à 65'000.00, opération 2 et son corrigé à 2'700.00, bénéfice de 30'000.00 à
+  31'800.00. Fait le 25.11.2026, à commiter et publier sur accord.
+- [x] E9. Classée sans suite le 25.11.2026 : l'enseignant garde la comparaison au centime sur la fiche Facturation
+  (« Garder le centime ») ; la fiche sert à vérifier l'arrondi de la TVA aux 5 centimes. Aucun changement de code.
+- [x] E3. Règle de l'enseignant (25.11.2026) : tout le matériel informatique en 1521. Mont-Blanc (ouverture et op. 6),
+  Lambert (ouverture et op. 13), Zéphyr (op. 2), Électroménager du Rhône (pièces 2 et 4), Atelier Zufferey (station de
+  travail, amortissement partagé 1520 / 1521), modèle d'amortissement d'Apprendre. Une session commencée ne reprend le
+  corrigé à jour que si le bilan d'ouverture est inchangé (`avecCorrigeAJour`). À commiter et publier sur accord.
+- [x] E7. Décision de l'enseignant (25.11.2026) : escompte avec correction de la TVA en maturité seulement. Modèle retiré
+  du module Apprendre de 2ème CFC ; leçon TVA de 2ème CFC (partie 6 sur le rabais obtenu) ; dossiers Électroménager du
+  Rhône et Cycles du Léman (facturation) passés en maturité niveau 1 (« Passer en maturité »), identifiants inchangés ;
+  facturation retirée du fil rouge de l'accueil ; chapitre Facturation de la théorie sans « Pour s'exercer ».
+  À commiter et publier sur accord (avec E3, E5, E6).
+- [ ] E8 et les autres actions du rapport : en attente.
