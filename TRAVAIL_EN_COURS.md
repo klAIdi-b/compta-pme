@@ -176,6 +176,9 @@ Corrections faites une à une, sur accord de l'enseignant, d'abord sur `apercu`.
   effet de l'écriture décrit compte par compte (catégorie du cours) puis sur le résultat provisoire. À commiter et publier
   sur accord.
 - [x] Vague 2, statut « Juste avec la solution » (25.11.2026) : verdict, statuts, en-tête, barre et accueil ; essais faux et
-  solution vue dans le détail d'une copie. Reste de l'action : le raisonnement en trois questions sous la solution. À
-  commiter et publier sur accord.
+  solution vue dans le détail d'une copie. Fusionné dans main le 25.11.2026.
+- [x] Raisonnement en trois questions sous la solution du journal (25.11.2026) : `src/engine/raisonnement.ts`
+  (`raisonnementEcriture`, écritures simples et composées, d'après le solde de chaque compte ; même texte que l'exemple
+  travaillé d'Apprendre) ; pas de raisonnement automatique pour les comptes correctifs 1xx9, 3209, 4209, 3805, 4280,
+  2970 ni pour le bouclement. À commiter et publier sur accord.
 - [ ] Les autres actions de la vague 2 : en attente.
