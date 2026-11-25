@@ -208,6 +208,16 @@
     erreurs = [];
   }
 
+  let zoneVerdict = $state<HTMLDivElement | undefined>();
+  /** Après une validation, le verdict doit être lu sans défiler : on le ramène en haut de la zone visible si besoin. */
+  function montrerVerdict() {
+    const el = zoneVerdict;
+    if (!el || !el.firstElementChild) return;
+    const r = el.getBoundingClientRect();
+    const haut = el.closest('main')?.getBoundingClientRect().top ?? 0;
+    if (r.top < haut || r.top > window.innerHeight - 80) el.scrollIntoView({ block: 'start' });
+  }
+
   async function valider() {
     const iso = lireDate(date, annee(d.debut));
     if (!iso) {
@@ -235,7 +245,8 @@
     verdict = { cle: cle(p), piece: p };
     reinitialiser();
     await tick();
-    document.getElementById('saisie-libelle')?.focus();
+    document.getElementById('saisie-libelle')?.focus({ preventScroll: true });
+    montrerVerdict();
   }
 
   function champs(): HTMLElement[] {
@@ -425,6 +436,45 @@
 {#if vueEleve(etat.genre)}<BilanVivant />{/if}
 <div class="mise-en-page">
   <div class="colonne-principale">
+    <!-- Verdict de la dernière écriture validée, au-dessus de la saisie (25.11.2026, audit) : après « Valider », il est
+         ramené à l'écran s'il n'y est pas ; l'énoncé de l'opération suivante et la grille viennent juste dessous. -->
+    <div class="verdict" bind:this={zoneVerdict} role="status" aria-live="polite" aria-atomic="true">
+      {#if verdict}
+        {@const kc = verdict.cle}
+        {@const st = statut(kc)}
+        {@const eV = d.ecritures.find((x) => x.id === derniereParPiece.get(kc))}
+        {@const nomV = kc === PIECE_BOUCLEMENT ? 'Écritures de bouclement' : `${operations.find((o) => o.numero === kc)?.piece ? 'Pièce' : 'Opération'} ${kc}`}
+        {#if !retour || !st || st === 'manquante'}
+          {#if eV}
+            <div class="message information">{@render picto('information')}<div><b>Écriture {verdict.piece} enregistrée.</b></div></div>
+          {/if}
+        {:else if st === 'juste'}
+          {@const suite = prochaineOperation()}
+          <div class="message succes">
+            {@render picto('succes')}
+            <div><b>Juste.</b> {nomV} : écriture correcte.{#if suite}{' '}Passez à l'opération {suite.numero}.{/if}</div>
+          </div>
+        {:else if st === 'incomplete'}
+          <div class="message avert">{@render picto('avert')}<div><b>{nomV} : incomplète.</b><p>{INDICES.incomplete}</p></div></div>
+        {:else}
+          {@const typique = st === 'compte' || st === 'compte_classe' || st === 'erronee' ? erreurTypiqueDe(kc) : null}
+          <div class="message erreur">
+            {@render picto('erreur')}
+            <div>
+              <b>{nomV} : à revoir.</b>
+              <p>{INDICES[st]}{kc === PIECE_BOUCLEMENT ? ' (Écritures de bouclement prises ensemble.)' : ''}</p>
+              {#if typique}<p class="pourquoi-verdict"><b>Pourquoi ?</b> {typique.explication}</p>{/if}
+              <div class="actions-message">
+                {#if eV && modifiable(eV)}<button class="btn btn-petit" onclick={() => modifier(eV)}>Corriger l'écriture</button>{/if}
+                {@render liensAide(kc, st)}
+              </div>
+              {@render solutionDetail(kc)}
+            </div>
+          </div>
+        {/if}
+      {/if}
+    </div>
+
     {#if etat.verrouille}
       <section class="carte formative-fin" aria-label="Évaluation formative terminée">
         <h2>Évaluation formative terminée</h2>
@@ -584,44 +634,6 @@
       </div>
     </section>
     {/if}
-
-    <!-- Verdict de la dernière écriture validée, juste sous la saisie : l'élève voit tout de suite s'il s'est trompé. -->
-    <div class="verdict" role="status" aria-live="polite" aria-atomic="true">
-      {#if verdict}
-        {@const kc = verdict.cle}
-        {@const st = statut(kc)}
-        {@const eV = d.ecritures.find((x) => x.id === derniereParPiece.get(kc))}
-        {@const nomV = kc === PIECE_BOUCLEMENT ? 'Écritures de bouclement' : `${operations.find((o) => o.numero === kc)?.piece ? 'Pièce' : 'Opération'} ${kc}`}
-        {#if !retour || !st || st === 'manquante'}
-          {#if eV}
-            <div class="message information">{@render picto('information')}<div><b>Écriture {verdict.piece} enregistrée.</b></div></div>
-          {/if}
-        {:else if st === 'juste'}
-          {@const suite = prochaineOperation()}
-          <div class="message succes">
-            {@render picto('succes')}
-            <div><b>Juste.</b> {nomV} : écriture correcte.{#if suite} Passez à l'opération {suite.numero}.{/if}</div>
-          </div>
-        {:else if st === 'incomplete'}
-          <div class="message avert">{@render picto('avert')}<div><b>{nomV} : incomplète.</b><p>{INDICES.incomplete}</p></div></div>
-        {:else}
-          {@const typique = st === 'compte' || st === 'compte_classe' || st === 'erronee' ? erreurTypiqueDe(kc) : null}
-          <div class="message erreur">
-            {@render picto('erreur')}
-            <div>
-              <b>{nomV} : à revoir.</b>
-              <p>{INDICES[st]}{kc === PIECE_BOUCLEMENT ? ' (Écritures de bouclement prises ensemble.)' : ''}</p>
-              {#if typique}<p class="pourquoi-verdict"><b>Pourquoi ?</b> {typique.explication}</p>{/if}
-              <div class="actions-message">
-                {#if eV && modifiable(eV)}<button class="btn btn-petit" onclick={() => modifier(eV)}>Corriger l'écriture</button>{/if}
-                {@render liensAide(kc, st)}
-              </div>
-              {@render solutionDetail(kc)}
-            </div>
-          </div>
-        {/if}
-      {/if}
-    </div>
 
     {#if horsEnonce.length}
       <div class="message avert hors-enonce" role="status">
@@ -832,8 +844,8 @@
   .jauge i { display: block; height: 100%; border-radius: var(--r-1); background: var(--c-structure); transition: width 0.2s ease; }
   .etat-equilibre { text-align: center; max-width: 300px; }
   .attente { color: var(--c-texte-2); font-size: var(--t-14); }
-  .verdict { margin-top: 16px; }
-  .verdict:empty { margin-top: 0; }
+  .verdict { margin-bottom: 16px; scroll-margin-top: var(--e-3); }
+  .verdict:empty { margin-bottom: 0; }
   .verdict .message b { font-weight: var(--graisse-fort); }
   .verdict .message p { margin-top: 2px; }
   .pourquoi-verdict { margin-top: 6px !important; }

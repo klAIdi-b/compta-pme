@@ -392,3 +392,28 @@ test('une écriture saisie sous un numéro de pièce qui n’est pas une opérat
   await expect(alerte).toContainText('Pièce 3a');
   await expect(alerte).not.toContainText('Pièces');
 });
+
+for (const [largeur, hauteur] of [[1440, 900], [360, 740]] as const) {
+  test(`après « Valider », le verdict est à l’écran sans défiler (${largeur} × ${hauteur})`, async ({ page }) => {
+    await page.setViewportSize({ width: largeur, height: hauteur });
+    await commencer(page, 'cycles', /Cycles du Léman/);
+    await page.getByRole('button', { name: /Commencer la saisie|Continuer la saisie/ }).click();
+    const fermerVisite = page.getByRole('button', { name: /Passer|Fermer la visite|Terminer/ });
+    if (await fermerVisite.first().isVisible().catch(() => false)) await fermerVisite.first().click();
+    for (const [libelle, debit, credit, montant, attendu] of [
+      ['Achat de marchandises à crédit', '4200', '2000', '4800', 'Juste'],
+      ['Essai', '2000', '1020', '100', 'à revoir'],
+    ] as const) {
+      await saisir(page, libelle, debit, credit, montant);
+      const message = page.locator('.verdict .message').first();
+      await expect(message).toContainText(attendu);
+      if (attendu === 'Juste') await expect(message).toContainText('écriture correcte. Passez');
+      const boite = (await message.boundingBox())!;
+      // Le haut du message et sa première ligne sont dans la fenêtre.
+      expect(boite.y, `${libelle} : haut du verdict`).toBeGreaterThanOrEqual(0);
+      expect(boite.y + 24, `${libelle} : verdict sous la ligne de flottaison`).toBeLessThanOrEqual(hauteur);
+    }
+    // Le curseur est prêt pour l'écriture suivante.
+    await expect(page.locator('#saisie-libelle')).toBeFocused();
+  });
+}

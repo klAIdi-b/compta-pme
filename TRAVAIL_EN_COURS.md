@@ -167,4 +167,6 @@ Corrections faites une à une, sur accord de l'enseignant, d'abord sur `apercu`.
   produit d'immeuble, produit exceptionnel) compte en 200 et au taux, sa contre-prestation étant le montant TVA comprise
   des liquidités ou créances moins la TVA ; commentaire d'en-tête à jour ; limites écrites dans le moteur (220 pour toute
   vente sans TVA, rabais sans TVA hors 235, prélèvement privé non compté). À commiter et publier sur accord.
-- [ ] Les autres actions du rapport (vague 2) : en attente.
+- [x] Vague 2, verdict visible (25.11.2026) : le verdict est placé au-dessus de la grille de saisie et ramené à l'écran
+  après « Valider » s'il n'y est pas ; espace manquante corrigée (« correcte. Passez »). À commiter et publier sur accord.
+- [ ] Les autres actions de la vague 2 : en attente.
