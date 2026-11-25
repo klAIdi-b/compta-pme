@@ -428,6 +428,10 @@ test('une écriture juste trouvée après « Voir la solution » est signalée c
   // Opération 1 fausse (côtés inversés), puis la solution, puis la correction.
   await saisir(page, 'Achat', '2000', '4200', '4800');
   await page.getByRole('button', { name: 'Voir la solution' }).first().click();
+  // Sous la solution, le raisonnement en trois questions.
+  const raisonnement = page.locator('.verdict .solution-detail .raisonnement').first();
+  await expect(raisonnement).toContainText('Comptes touchés : Achats de marchandises et Dettes fournisseurs.');
+  await expect(raisonnement).toContainText('compte de charge, il augmente');
   await page.getByRole('button', { name: "Corriger l'écriture" }).first().click();
   const deb = page.getByLabel('Compte au débit, ligne 1');
   await deb.fill('4200');

@@ -7,6 +7,7 @@
   import { ajouterEcriture, estExtournee, extourner, modifierEcriture, nouvelId, supprimerEcriture } from '../../engine/journal';
   import { diagnostiquer, ecrituresRetenues, enregistrerTentative, solutionDisponible, INDICES, type Diagnostic } from '../../engine/correction';
   import { erreurTypique } from '../../engine/erreurs-typiques';
+  import { raisonnementEcriture } from '../../engine/raisonnement';
   import { SOMMAIRE } from '../../data/theorie-index';
   import type { Dossier, Ecriture } from '../../engine/dossier';
   import { bouclementCorrige, corrigeBouclement, diagnostiquerBouclement, piecesHorsEnonce, PIECE_BOUCLEMENT } from '../../engine/correction-bouclement';
@@ -407,6 +408,14 @@
           {/each}
         </tbody>
       </table>
+      <!-- Raisonnement en trois questions (audit du 24.11.2026) : comprendre la solution, pas seulement la recopier. -->
+      {#if kc !== PIECE_BOUCLEMENT}
+        {@const etapes = raisonnementEcriture(d.plan, solution.lignes)}
+        {#if etapes}
+          <p class="raisonnement-titre">Le raisonnement : quels comptes, de quel type, augmentent-ils ou diminuent-ils ?</p>
+          <ol class="raisonnement">{#each etapes as e}<li>{e}</li>{/each}</ol>
+        {/if}
+      {/if}
     </div>
   {/if}
 {/snippet}
@@ -926,6 +935,8 @@
   .solution { margin-left: 8px; font-weight: bold; }
   .solution-detail { margin-top: 6px; padding: 6px 10px; border-left: 4px solid var(--c-structure); background: var(--c-selection); font-size: var(--t-13); }
   .solution-detail table { margin-top: 4px; width: auto; }
+  .raisonnement-titre { margin: 8px 0 2px; font-weight: 600; }
+  .raisonnement { margin: 0; padding-left: 22px; }
   .solution-detail td { border: none; padding: 2px 14px 2px 0; background: none !important; }
   .mention { font-size: var(--t-12); color: var(--c-texte-2); font-style: italic; margin-left: 4px; }
 

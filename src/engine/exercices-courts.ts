@@ -7,6 +7,9 @@ import { formatMontant, type Centimes } from './money';
 import type { Compte, TypeCompte } from './plan';
 import { champJuste, genererCalcul, type QuestionCalcul, type QuestionQcm } from './calculs';
 import { genererEcriture, type QuestionComposee } from './ecritures-generees';
+import { etapeRaisonnement, sensVariation } from './raisonnement';
+
+export { sensVariation };
 
 /** Modèle d'opération : texte avec le montant, écriture simple attendue (comptes du corrigé d'un exercice validé). */
 export interface ModeleOperation {
@@ -102,12 +105,6 @@ export function variationBilan(plan: readonly Compte[], debit: string, credit: s
   if (d === 'actif' && c === 'actif') return 2;
   if (d === 'passif' && c === 'passif') return 3;
   return null;
-}
-
-/** Augmentation ou diminution d'un compte inscrit au débit ou au crédit (règle du chapitre « Les comptes »). */
-export function sensVariation(type: TypeCompte, cote: 'debit' | 'credit'): 'augmente' | 'diminue' {
-  const augmenteAuDebit = type === 'actif' || type === 'charge';
-  return (cote === 'debit') === augmenteAuDebit ? 'augmente' : 'diminue';
 }
 
 // ---------- Génération ----------
@@ -301,25 +298,12 @@ export const seuilMaitrise = (n: number) => Math.ceil(n * 0.8);
 
 // ---------- Exemple travaillé ----------
 
-const NOM_TYPE: Record<TypeCompte, string> = {
-  actif: "compte d'actif",
-  passif: 'compte de passif',
-  charge: 'compte de charge',
-  produit: 'compte de produit',
-  bouclement: 'compte de bouclement',
-};
-
 /**
  * Raisonnement pas à pas d'une écriture simple, selon la méthode du chapitre « Les comptes » : quels comptes,
  * de quel type, augmente ou diminue, donc débit ou crédit.
  */
 export function raisonnement(plan: readonly Compte[], debit: string, credit: string): string[] {
   const nom = (n: string) => plan.find((c) => c.numero === n)?.intitule ?? n;
-  const ligne = (n: string, cote: 'debit' | 'credit') => {
-    const t = typeDe(plan, n);
-    const v = sensVariation(t, cote);
-    const ici = cote === 'debit' ? 'au débit' : 'au crédit';
-    return `${nom(n)} : ${NOM_TYPE[t]}, il ${v} ; ${v === 'augmente' ? (t === 'actif' || t === 'charge' ? 'un tel compte augmente au débit' : 'un tel compte augmente au crédit') : (t === 'actif' || t === 'charge' ? 'un tel compte diminue au crédit' : 'un tel compte diminue au débit')} → ${ici}.`;
-  };
+  const ligne = (n: string, cote: 'debit' | 'credit') => etapeRaisonnement(nom(n), typeDe(plan, n), cote);
   return [`Comptes touchés : ${nom(debit)} et ${nom(credit)}.`, ligne(debit, 'debit'), ligne(credit, 'credit')];
 }
