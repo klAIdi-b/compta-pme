@@ -241,7 +241,7 @@ export const propImprimerie: Exercice = {
     "de l'an dernier, rattacher chaque charge au bon exercice et calculer les amortissements de chaque immobilisation.",
   operations: [
     { numero: '1', date: '2026-01-01', texte: "Extourne de l'actif transitoire au 31.12.2025 : prime d'assurance payée d'avance, 1'200.00." },
-    { numero: '2', date: '2026-01-01', texte: "Extourne du passif transitoire au 31.12.2025 : électricité de décembre 2025 à payer, 900.00." },
+    { numero: '2', date: '2026-01-01', texte: "Extourne du passif transitoire au 31.12.2025 : électricité d'octobre à décembre 2025 à payer, 2'700.00." },
     { numero: '3', date: '2026-01-20', texte: "Paiement par la banque de la facture d'électricité d'octobre à décembre 2025, 2'700.00." },
     { numero: '4', date: '2026-04-01', texte: "Achat d'une machine d'impression numérique, payée par la banque, 24'000.00." },
     { numero: '5', date: '2026-05-15', texte: "Vente à crédit d'étiquettes et d'imprimés, 46'000.00." },
@@ -260,12 +260,12 @@ export const propImprimerie: Exercice = {
     { numero: '13', date: '2026-12-31', texte: 'Amortissement des véhicules : 25 % dégressif de la valeur comptable au 01.01.' },
   ],
   ouvertureActif: montants({ '1020': 28000, '1100': 9000, '1300': 1200, '1500': 80000, '1510': 12000, '1530': 36000 }),
-  ouverturePassif: montants({ '1509': 32000, '1539': 9000, '2000': 7500, '2300': 900, '2400': 50000, '2800': 66800 }),
+  ouverturePassif: montants({ '1509': 32000, '1539': 9000, '2000': 7500, '2300': 2700, '2400': 50000, '2800': 65000 }),
   mode: 'entrainement',
   parametres: { ...parametresBase, tvaMethode: 'net', ficheSalaire: false, calculatriceTva: false },
   corrige: [
     { piece: '1', lignes: s('6300', '1300', 1200) },
-    { piece: '2', lignes: s('2300', '6400', 900) },
+    { piece: '2', lignes: s('2300', '6400', 2700) },
     { piece: '3', lignes: s('6400', '1020', 2700) },
     { piece: '4', lignes: s('1500', '1020', 24000) },
     { piece: '5', lignes: s('1100', '3200', 46000) },

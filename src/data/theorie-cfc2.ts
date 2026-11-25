@@ -3,7 +3,7 @@
 // rubriques existantes du logiciel : facturation et paiements, budget et écarts, marge contributive et répartition des coûts.
 // Texte original ; comptes du plan du cours disponibles en 2ème CFC ; règles du projet (CLAUDE.md) et du moteur
 // (src/engine/facturation.ts, budget.ts, calculs.ts). Contenu validé par l'enseignant le 24.11.2026.
-// Non traité ici, en attente de la décision de l'enseignant : l'escompte avec correction de la TVA (classé en maturité).
+// Non traité ici : l'escompte avec correction de la TVA, enseigné en maturité seulement (décision de l'enseignant du 25.11.2026).
 import type { Chapitre } from './theorie';
 import { C, D, P, enrichir, p, r3, s } from './theorie-cfc1';
 
@@ -515,7 +515,7 @@ export function enrichirCfc2(chapitres: Chapitre[]): Chapitre[] {
             { question: "Facture de 540.50 TVA comprise, 2 % d'escompte. Combien paie-t-on dans le délai ?", reponse: 'Escompte : 10.81, arrondi à 10.80. À payer : 529.70.' },
             { question: "Un client paie avec l'escompte trois jours après le délai. Que fait-on ?", reponse: "On encaisse ce qu'il a versé et le solde reste dû : l'escompte n'est pas accepté." },
           ],
-          liens: { exercices: ['dossier-cfc2-cycles-du-leman-facturation'] },
+          liens: {},
         },
       ),
 

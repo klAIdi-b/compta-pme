@@ -91,21 +91,18 @@ export const LECONS_CFC: Record<string, PartieLecon[]> = {
       questions: [{ question: "TVA due 2'430.00, impôt préalable total 1'180.00. Combien l'entreprise verse-t-elle ?", reponse: "2'430.00 − 1'180.00 = 1'250.00." }],
     },
     {
-      titre: '6. Un escompte ou un rabais corrige aussi la TVA',
+      titre: '6. Un rabais obtenu corrige aussi la TVA',
       texte: [
-        "Si le client paie moins que prévu grâce à un escompte, la vente est plus petite : la TVA due aussi. On corrige donc les deux, dans la même écriture que le paiement.",
-        "Le raisonnement est le même pour un escompte obtenu d'un fournisseur : l'achat est plus petit, l'impôt préalable à récupérer aussi.",
+        "Si le fournisseur accorde un rabais sur des marchandises déjà facturées, l'achat est plus petit : l'impôt préalable à récupérer aussi. On corrige donc les deux, dans la même écriture.",
+        "L'escompte pour paiement rapide, avec sa correction de la TVA, est vu en maturité professionnelle.",
       ],
       exemples: [
-        ex("Un client règle une facture de 5'405.00 TTC sous déduction de 2 % d'escompte.", {
-          lignes: ["Escompte TTC : 5'405.00 × 2 % = 108.10, dont 100.00 hors taxe et 8.10 de TVA.", "Montant reçu : 5'405.00 − 108.10 = 5'296.90."],
-          tableau: T(['Débit', 'Crédit'], ["Banque 5'296.90 et Déductions accordées 100.00 et TVA due 8.10", "Créances clients 5'405.00"]),
-        }),
-        ex("Nous payons une facture de marchandises de 5'405.00 TTC sous déduction de 2 % d'escompte.", {
-          tableau: T(['Débit', 'Crédit'], ["Dettes fournisseurs 5'405.00", "Banque 5'296.90 et Déductions obtenues 100.00 et IP s/marchandises et services 8.10"]),
+        ex("Des marchandises reçues sont défectueuses : le fournisseur accorde un rabais de 540.50 TVA comprise.", {
+          lignes: ["Rabais TVA comprise : 540.50, dont 500.00 hors taxe et 40.50 de TVA (8,1 %)."],
+          tableau: T(['Débit', 'Crédit'], ["Dettes fournisseurs 540.50", "Achats de marchandises 500.00 et IP s/marchandises et services 40.50"]),
         }),
       ],
-      retenir: 'Escompte accordé : Déductions accordées et TVA due au débit. Escompte obtenu : Déductions obtenues et impôt préalable au crédit.',
+      retenir: "Rabais obtenu : la dette diminue du montant TVA comprise ; l'achat et l'impôt préalable diminuent chacun de leur part.",
     },
   ],
 

@@ -25,7 +25,7 @@ const attendus: Record<string, { resultat: number; soldes: Record<string, number
   'prop-cfc1-bouquinerie-du-bourg': { resultat: 5425, soldes: { '1020': 20245, '1000': 10640, '2850': 640 } },
   'prop-cfc1-atelier-lumen': { resultat: 7750, soldes: { '1020': 15360, '1010': 790, '1100': 9400 } },
   'prop-cfc2-electro-saleve-tva': { resultat: 29550, soldes: { '1020': 9285, '2200': 0, '1170': 0, '1171': 0, '2205': 0 } },
-  'prop-cfc2-imprimerie-mandement': { resultat: 30000, soldes: { '1020': 15200, '1300': 1800, '2300': -750, '1509': -41800, '1510': 9600, '1539': -15750 } },
+  'prop-cfc2-imprimerie-mandement': { resultat: 31800, soldes: { '1020': 15200, '1300': 1800, '2300': -750, '1509': -41800, '1510': 9600, '1539': -15750 } },
   'prop-cfc2-sport-evasion-creances': { resultat: 20350, soldes: { '1020': 49650, '1100': 20000, '1108': 0, '1109': -1000 } },
   'prop-cfc2-jardins-morel-salaires': { resultat: 11410.6, soldes: { '1020': 19911.4, '1140': 0, '2170': -1100.8, '2171': 0 } },
   'prop-mp-novaterm-sa': { resultat: 115510, soldes: { '1020': 276072.5, '2970': -15500, '2950': -44500, '1060': 30000, '2205': 0, '2230': 0 } },

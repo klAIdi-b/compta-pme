@@ -165,10 +165,11 @@ const m2p7 = facture({
 });
 const m2p8 = avisBancaire({ sens: 'debit', banque: BANQUE, titulaire: atelier, compte: compteAtelier, date: '2026-12-31',
   operations: [{ designation: 'Frais de tenue de compte et de cartes, année 2026', montant: f(120) }] });
-const machinesFin = f(8000) + m2p7.ttc;
-const amortMachines = Math.round(machinesFin * 25 / 100);
-const m2p9 = noteZ('2026-12-31', 'NI-12a', 'AMORTISSEMENT DES MACHINES DE BUREAU',
-  'Amortir les machines de bureau de 25 % de leur valeur comptable au 31.12, achat d’octobre compris, sans prorata. Méthode directe.');
+const amortBureau = Math.round(f(8000) * 25 / 100);
+const amortInformatique = Math.round(m2p7.ttc * 25 / 100);
+const amortMachines = amortBureau + amortInformatique;
+const m2p9 = noteZ('2026-12-31', 'NI-12a', "AMORTISSEMENT DES MACHINES DE BUREAU ET DE L'INFORMATIQUE",
+  'Amortir les machines de bureau et l’infrastructure informatique de 25 % de leur valeur comptable au 31.12, station de travail achetée en octobre comprise, sans prorata. Méthode directe.');
 const m2p10 = noteZ('2026-12-31', 'NI-12b', 'HONORAIRES À FACTURER',
   "Les plans d'exécution de la villa Morand sont terminés depuis le 20 décembre, mais la facture ne partira qu'en janvier. Les honoraires correspondants s'élèvent à 5'000.00 et appartiennent à l'exercice 2026.");
 const salaireProprietaire = f(84000);
@@ -208,14 +209,14 @@ export const dossierZufferey = construireDossier(
   },
   [
     { date: '2026-09-30', piece: m2p6.piece, lignes: S('2850', '1020', m2p6.total) },
-    { date: '2026-10-05', piece: m2p7.piece, lignes: S('1520', '2010', m2p7.ttc) },
+    { date: '2026-10-05', piece: m2p7.piece, lignes: S('1521', '2010', m2p7.ttc) },
     { date: '2026-11-30', piece: m2p1.piece, lignes: S('1100', '3400', f(142000)) },
     { date: '2026-12-15', piece: m2p2.piece, lignes: S('1100', '3400', m2p2.ttc) },
     { date: '2026-12-20', piece: m2p3.piece, lignes: S('1020', '1100', m2p3.total) },
     { date: '2026-12-20', piece: m2p4.piece, lignes: S('6000', '1020', m2p4.total) },
     { date: '2026-12-20', piece: m2p5.piece, lignes: S('2850', '1020', m2p5.total) },
     { date: '2026-12-31', piece: m2p8.piece, lignes: S('6900', '1020', m2p8.total) },
-    { date: '2026-12-31', piece: m2p9.piece, lignes: S('6800', '1520', amortMachines) },
+    { date: '2026-12-31', piece: m2p9.piece, lignes: [D('6800', amortMachines), C('1520', amortBureau), C('1521', amortInformatique)] },
     { date: '2026-12-31', piece: m2p10.piece, lignes: S('1300', '3400', f(5000)) },
     { date: '2026-12-31', piece: m2p11.piece, lignes: S('5200', '2850', salaireProprietaire) },
     { date: '2026-12-31', piece: m2p12.piece, lignes: S('6900', '2850', interetCapital) },

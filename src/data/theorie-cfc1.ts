@@ -53,7 +53,7 @@ export function enrichir(base: Chapitre, e: Enrichissement): Chapitre {
       ...(e.sections ?? []),
       { titre: 'Erreurs fréquentes', blocs: [{ type: 'erreurs', items: e.erreurs }] },
       { titre: 'Vérifiez vos connaissances', blocs: [{ type: 'questions', items: e.questions }] },
-      { titre: "Pour s'exercer", blocs: [{ type: 'liens', ...e.liens }] },
+      ...(e.liens.module || e.liens.exercices?.length ? [{ titre: "Pour s'exercer", blocs: [{ type: 'liens' as const, ...e.liens }] }] : []),
     ],
   };
 }

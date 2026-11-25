@@ -1,4 +1,5 @@
-// Dossier CFC, niveau 2 : facturation et paiements (plan d'études CFC, 2e année, c5.ep3a et c5.ep5a). Maquette
+// Dossier de maturité, niveau 1 (passé de la 2ème CFC le 25.11.2026 : il comptabilise des escomptes avec correction
+// de la TVA, enseignés en maturité seulement). Facturation et paiements (plan d'études CFC, 2e année, c5.ep3a et c5.ep5a). Maquette
 // validée le 23.11.2026. L'élève établit trois factures, paie trois factures de fournisseurs par ordre de paiement,
 // contrôle les paiements de ses clients, puis passe les écritures. Entreprises, IBAN et références fictifs.
 import {
@@ -174,9 +175,9 @@ export const dossierFacturationLeman = construireDossier(
   {
     id: 'dossier-cfc2-cycles-du-leman-facturation',
     titre: 'Cycles du Léman — facturation et paiements de mars',
-    niveau: 'CFC2',
-    filiere: 'CFC',
-    difficulte: 2,
+    niveau: 'MP',
+    filiere: 'MP',
+    difficulte: 1,
     sujets: ['Établir une facture', 'Ordre de paiement', 'Contrôle des paiements', 'Escompte avec correction de la TVA'],
     raisonSociale: 'Cycles du Léman',
     formeJuridique: 'raison individuelle',
@@ -187,7 +188,7 @@ export const dossierFacturationLeman = construireDossier(
       'établissez les factures, remplissez les ordres de paiement et contrôlez les paiements des clients au 31 mars. ' +
       "Comptabilisez ensuite chaque pièce au journal. Un escompte corrige aussi la TVA. Arrondissez la TVA et les escomptes aux 5 centimes.",
     situation:
-      "Vous êtes en deuxième année d'apprentissage chez Cycles du Léman, le magasin de vélos de Sandra Rochat à Carouge. " +
+      "Vous travaillez au bureau de Cycles du Léman, le magasin de vélos de Sandra Rochat à Carouge. " +
       "Depuis le début de l'année, c'est vous qui vous occupez des factures.\n\n" +
       "En mars, trois clients ont passé commande : à vous d'établir leurs factures. Il faut aussi payer trois factures de " +
       "fournisseurs, en profitant de l'escompte quand c'est encore possible. Le 31 mars, Sandra vous demande de contrôler " +

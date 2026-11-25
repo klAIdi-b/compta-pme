@@ -41,6 +41,20 @@ describe('répartition du bénéfice (art. 672 CO révisé)', () => {
     expect(attributionReserveLegale({ ...base, reserveLegaleBenefice: chf(150000), reserveLegaleCapital: chf(100000) })).toBe(0);
   });
 
+  it('tantièmes : refusés sans un dividende d’au moins 5 % (art. 677 CO), acceptés à 5 %', () => {
+    const r = repartir({ ...base, tauxDividende: 200 });
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.erreur).toContain('art. 677 CO');
+    expect(repartir({ ...base, tauxDividende: 500 }).ok).toBe(true);
+    // Sans tantièmes, un dividende inférieur à 5 % reste permis.
+    expect(repartir({ ...base, tauxDividende: 200, tantiemes: 0 }).ok).toBe(true);
+  });
+
+  it('perte reportée supérieure au bénéfice, sans attribution : le message le dit', () => {
+    const r = repartir({ ...base, reporte: chf(-150000), tauxDividende: 0, tantiemes: 0, reservesLibres: 0 });
+    expect(r).toEqual({ ok: false, erreur: "La perte reportée dépasse le bénéfice de l'exercice : il n'y a rien à répartir." });
+  });
+
   it('société holding : plafond à 20 %', () => {
     expect(attributionReserveLegale({ ...base, holding: true, reserveLegaleBenefice: chf(99000) })).toBe(chf(1000));
   });

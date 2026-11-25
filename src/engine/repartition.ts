@@ -5,6 +5,8 @@
 //   jusqu'à ce que celle-ci, additionnée à la réserve légale issue du capital, atteigne 50 % du capital
 //   inscrit au registre du commerce (20 % pour une société holding).
 // - Viennent ensuite les dividendes, les tantièmes et les réserves libres ; le solde reste reporté.
+// - Des tantièmes ne peuvent être attribués qu'après un dividende d'au moins 5 % (art. 677 CO, vérifié sur Fedlex,
+//   état au 01.01.2026 ; un taux supérieur prévu par les statuts n'est pas géré).
 // - Impôt anticipé : 35 % du dividende brut, retenu au paiement.
 // Montants arrondis aux 5 centimes.
 
@@ -12,6 +14,8 @@ import type { Centimes } from './money';
 import { arrondi5 } from './money';
 
 export const TAUX_IMPOT_ANTICIPE = 35; // %
+/** Dividende minimal, en centièmes de pour cent du capital, avant toute attribution de tantièmes (art. 677 CO). */
+export const DIVIDENDE_MINIMAL_TANTIEMES = 500;
 
 export interface DonneesRepartition {
   /** Bénéfice de l'exercice (positif). */
@@ -54,10 +58,17 @@ export function attributionReserveLegale(d: Pick<DonneesRepartition, 'benefice' 
 
 export function repartir(d: DonneesRepartition): ResultatRepartition {
   const disponible = d.benefice + d.reporte;
+  if (d.tantiemes > 0 && d.tauxDividende < DIVIDENDE_MINIMAL_TANTIEMES) {
+    return { ok: false, erreur: "Des tantièmes ne peuvent être attribués qu'après un dividende d'au moins 5 % du capital (art. 677 CO)." };
+  }
   const reserveLegale = attributionReserveLegale(d);
   const dividendes = arrondi5(Math.round((d.capital * d.tauxDividende) / 10000));
   const nouveauReporte = disponible - reserveLegale - dividendes - d.tantiemes - d.reservesLibres;
   if (nouveauReporte < 0) {
+    // Aucune attribution demandée : c'est la perte reportée qui dépasse le bénéfice.
+    if (reserveLegale + dividendes + d.tantiemes + d.reservesLibres === 0) {
+      return { ok: false, erreur: "La perte reportée dépasse le bénéfice de l'exercice : il n'y a rien à répartir." };
+    }
     return {
       ok: false,
       erreur:

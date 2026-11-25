@@ -97,8 +97,9 @@ test('classer les pièces : exemple, classeurs et question projetée pour la cla
 
 test('fil rouge sur l’accueil et onglet Progression de l’espace enseignant', async ({ page }) => {
   await page.goto('./');
-  await page.getByRole('button', { name: /Les factures et les paiements de mars/ }).click();
-  await expect(page.locator('.choisi-texte')).toContainText('facturation et paiements de mars');
+  await expect(page.getByRole('button', { name: /Les factures et les paiements de mars/ })).toHaveCount(0);
+  await page.getByRole('button', { name: /Le budget de la Journée du vélo électrique/ }).click();
+  await expect(page.locator('.choisi-texte')).toContainText('budget de la Journée du vélo électrique');
 });
 
 test('leçon d’un module et navigation en bas de page', async ({ page }) => {

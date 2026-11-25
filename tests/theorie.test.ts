@@ -92,7 +92,9 @@ describe('théorie enrichie (modèle du 24.11.2026)', () => {
     for (const c of enrichis) {
       expect(c.objectifs?.length, c.id).toBeGreaterThanOrEqual(2);
       const types = new Set<string>(blocs(c).map((b) => b.type));
-      for (const t of ['definitions', 'erreurs', 'questions', 'liens']) expect(types.has(t), `${c.id} — ${t}`).toBe(true);
+      // Facturation : le seul dossier de facturation est passé en maturité le 25.11.2026 (escompte avec correction de la TVA).
+      const SANS_EXERCICE = ['facturation'];
+      for (const t of ['definitions', 'erreurs', 'questions', ...(SANS_EXERCICE.includes(c.id) ? [] : ['liens'])]) expect(types.has(t), `${c.id} — ${t}`).toBe(true);
       expect(types.has('exemple') || types.has('contraste'), `${c.id} — exemple ou contraste`).toBe(true);
       for (const b of blocs(c)) {
         if (b.type !== 'questions') continue;
