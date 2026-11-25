@@ -48,6 +48,34 @@ describe('formulaire officiel de décompte TVA', () => {
     expect(champs).toEqual(['200', '220', '235', '289', '299', '303b', '303i', '399', '400', '405', '479', '500']);
   });
 
+  it('cession d’une immobilisation avec TVA (hors classe 3) : comptée en 200 et en 303, concorde avec la TVA due', () => {
+    let d = creerDossier(demoCfc2, plan);
+    const passer = (id: string, lignes: { debit: string | null; credit: string | null; montant: number }[]) => {
+      const r = ajouterEcriture(d, { id, date: '2026-02-10', piece: id, libelle: 'x', lignes });
+      if (!r.ok) throw new Error(r.erreurs.join());
+      d = r.valeur;
+    };
+    // Vente d'une machine avec bénéfice : 10'000.00 + TVA 810.00, valeur comptable 8'000.00.
+    passer('C1', [
+      { debit: '1020', credit: null, montant: chf(10810) },
+      { debit: null, credit: '1500', montant: chf(8000) },
+      { debit: null, credit: '8510', montant: chf(2000) },
+      { debit: null, credit: '2200', montant: chf(810) },
+    ]);
+    // Vente d'une machine avec perte, à crédit : 5'000.00 + TVA 405.00, valeur comptable 6'000.00.
+    passer('C2', [
+      { debit: '1100', credit: null, montant: chf(5405) },
+      { debit: '8500', credit: null, montant: chf(1000) },
+      { debit: null, credit: '1500', montant: chf(6000) },
+      { debit: null, credit: '2200', montant: chf(405) },
+    ]);
+    const f = formulaireTva(d);
+    expect(f.c200).toBe(chf(15000));
+    expect(f.parTaux).toEqual([expect.objectContaining({ chiffre: '303', base: chf(15000), impot: chf(1215) })]);
+    expect(f.c399).toBe(chf(1215));
+    expect(f.c220).toBe(0);
+  });
+
   it("ignore les écritures du décompte déjà passé et donne 510 quand l'impôt préalable dépasse", () => {
     let d = creerDossier(demoCfc2, plan);
     const lignes = [

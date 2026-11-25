@@ -1,5 +1,5 @@
 // Formulaire officiel de décompte TVA (méthode effective), demande de l'enseignant du 23.11.2026.
-// Chiffres du formulaire de l'AFC depuis 2024 (structure à faire confirmer par l'enseignant sur le formulaire officiel) :
+// Chiffres du formulaire de l'AFC depuis 2024 (structure confirmée le 24.11.2026 sur le formulaire officiel 0550) :
 //   200 total des contre-prestations ; 220 prestations exonérées (exportations) ; 235 diminutions de la
 //   contre-prestation (rabais, escomptes) ; 289 total des déductions ; 299 contre-prestation imposable (200 − 289) ;
 //   303 / 313 / 343 prestations imposables et impôt aux taux de 8,1 / 2,6 / 3,8 % ; 399 total de l'impôt dû ;
@@ -9,6 +9,13 @@
 // Les montants viennent des écritures de l'élève (méthode au net), sans les écritures du décompte lui-même :
 // chaque vente est rattachée à un taux d'après le rapport TVA due ÷ chiffre d'affaires de son écriture ; une vente
 // sans TVA due est une prestation exonérée (exportation). Pas de correction de TVA sur les pertes sur créances (cours).
+// Vente hors classe 3 (25.11.2026, erreur E8 de l'audit) : une écriture qui crédite la TVA due sans chiffre d'affaires
+// de la classe 3 (cession d'une immobilisation, produit d'immeuble soumis par option, produit exceptionnel) compte
+// aussi : sa contre-prestation hors taxe = montant TVA comprise porté au débit des liquidités ou des créances (10xx,
+// 11xx) moins la TVA due. Le formulaire concorde ainsi avec le compte TVA due.
+// Limites connues, non traitées : une vente sans TVA est toujours classée en 220 (exportation), jamais en prestation
+// exclue du champ de l'impôt ; un rabais ou un escompte sans correction de la TVA (sur une exportation) n'entre pas
+// en 235 ; un prélèvement privé de marchandises avec TVA n'est pas compté.
 
 import type { ChampAttendu } from './champs';
 import { ecrituresRetenues } from './correction';
@@ -26,6 +33,9 @@ function compteCA(d: Dossier, n: string): boolean {
   if (!n.startsWith('3') || ['3209', '3210', '3720', '3805'].includes(n)) return false;
   return d.plan.find((c) => c.numero === n)?.type === 'produit';
 }
+
+/** Liquidités et créances (10xx, 11xx) : leur débit est le montant TVA comprise reçu ou à recevoir. */
+const liquiditeOuCreance = (n: string) => n.startsWith('10') || n.startsWith('11');
 
 /** Écriture du décompte (virement de l'impôt préalable ou du solde vers la dette envers l'AFC) : ignorée. */
 function estDecompte(e: Ecriture): boolean {
@@ -77,16 +87,20 @@ export function formulaireTva(d: Dossier): FormulaireTva {
     let tvaCredit = 0;
     let diminution = 0;
     let tvaDebit = 0;
+    let encaisse = 0;
     for (const l of e.lignes) {
       if (l.credit && compteCA(d, l.credit)) ca += l.montant;
       if (l.credit === '2200') tvaCredit += l.montant;
       if (l.debit && (l.debit === '3209' || compteCA(d, l.debit))) diminution += l.montant;
       if (l.debit === '2200') tvaDebit += l.montant;
+      if (l.debit && liquiditeOuCreance(l.debit)) encaisse += l.montant;
       if (l.debit === '1170') ip1170 += l.montant;
       if (l.credit === '1170') ip1170 -= l.montant;
       if (l.debit === '1171') ip1171 += l.montant;
       if (l.credit === '1171') ip1171 -= l.montant;
     }
+    // Vente hors classe 3 avec TVA due : contre-prestation hors taxe = montant TVA comprise − TVA.
+    if (ca === 0 && tvaCredit > 0 && encaisse - tvaCredit > 0) ca = encaisse - tvaCredit;
     if (ca > 0) {
       c200 += ca;
       const t = tvaCredit > 0 ? tauxProche(tvaCredit, ca) : null;
