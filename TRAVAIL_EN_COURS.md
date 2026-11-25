@@ -163,4 +163,8 @@ Corrections faites une à une, sur accord de l'enseignant, d'abord sur `apercu`.
   Rhône et Cycles du Léman (facturation) passés en maturité niveau 1 (« Passer en maturité »), identifiants inchangés ;
   facturation retirée du fil rouge de l'accueil ; chapitre Facturation de la théorie sans « Pour s'exercer ».
   À commiter et publier sur accord (avec E3, E5, E6).
-- [ ] E8 et les autres actions du rapport : en attente.
+- [x] E8. Formulaire TVA (25.11.2026) : une vente avec TVA due créditée hors classe 3 (cession d'une immobilisation,
+  produit d'immeuble, produit exceptionnel) compte en 200 et au taux, sa contre-prestation étant le montant TVA comprise
+  des liquidités ou créances moins la TVA ; commentaire d'en-tête à jour ; limites écrites dans le moteur (220 pour toute
+  vente sans TVA, rabais sans TVA hors 235, prélèvement privé non compté). À commiter et publier sur accord.
+- [ ] Les autres actions du rapport (vague 2) : en attente.
