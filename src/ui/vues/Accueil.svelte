@@ -248,7 +248,7 @@
             </div>
             {#if correction}
               <div class="legende">
-                <span><span class="pastille juste"></span>{av.justes} justes</span>
+                <span><span class="pastille juste"></span>{av.justes} {av.justes > 1 ? 'justes' : 'juste'}{#if av.avecSolution} (dont {av.avecSolution} avec la solution){/if}</span>
                 <span><span class="pastille revoir"></span>{av.aRevoir} à revoir</span>
                 <span><span class="pastille saisie"></span>{av.incompletes} incomplètes</span>
                 <span>{av.nonSaisies} pas encore saisies</span>

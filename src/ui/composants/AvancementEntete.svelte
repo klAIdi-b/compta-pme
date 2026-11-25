@@ -46,7 +46,7 @@
         <div class="tete">
           <strong>Récapitulatif</strong>
           <span class="discret">
-            {#if correction}{a.justes} justes · {a.aRevoir} à revoir · {a.incompletes} incomplètes · {a.nonSaisies} à faire
+            {#if correction}{a.justes} justes{#if a.avecSolution} (dont {a.avecSolution} avec la solution){/if} · {a.aRevoir} à revoir · {a.incompletes} incomplètes · {a.nonSaisies} à faire
             {:else}{a.saisies} saisies · {a.nonSaisies} à faire (évaluation : pas de correction pendant le travail){/if}
           </span>
           <button class="fermer" aria-label="Fermer le récapitulatif" onclick={() => (ouvert = false)}>×</button>
@@ -57,7 +57,7 @@
               <button onclick={() => ouvrir(o.numero)}>
                 <span class="num">{o.numero}</span>
                 <span class="texte">{texte(o.numero)}</span>
-                <span class={`statut ${o.statut}`}>{LIBELLES[o.statut]}</span>
+                <span class={`statut ${o.statut}`} class:avec-solution={o.avecSolution}>{o.avecSolution ? 'Juste avec la solution' : LIBELLES[o.statut]}</span>
               </button>
             </li>
           {/each}
@@ -92,6 +92,7 @@
   .texte { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .statut { font-size: var(--t-12); font-weight: bold; white-space: nowrap; }
   .statut.juste { color: var(--c-ok); }
+  .statut.juste.avec-solution { color: var(--c-texte-2); }
   .statut.revoir { color: var(--c-erreur); }
   .statut.incomplete, .statut.saisie { color: var(--c-texte-2); }
   .statut.manquante { color: var(--c-texte-2); font-weight: normal; }

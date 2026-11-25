@@ -6,7 +6,7 @@ import { fonctionsExercice, type Exercice } from '../src/engine/exercice';
 import { avecParcours, etapesParcours, etatJournal, rangParcours } from '../src/ui/parcours';
 
 const av = (p: Partial<Avancement>): Avancement => ({
-  total: 5, saisies: 5, justes: 5, aRevoir: 0, incompletes: 0, nonSaisies: 0, parOperation: [], ...p,
+  total: 5, saisies: 5, justes: 5, avecSolution: 0, aRevoir: 0, incompletes: 0, nonSaisies: 0, parOperation: [], ...p,
 });
 
 describe('parcours après le journal', () => {

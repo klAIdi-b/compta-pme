@@ -419,3 +419,27 @@ for (const [largeur, hauteur] of [[1440, 900], [360, 740]] as const) {
     await expect(page.locator('#saisie-libelle')).toBeFocused();
   });
 }
+
+test('une écriture juste trouvée après « Voir la solution » est signalée comme telle', async ({ page }) => {
+  await commencer(page, 'cycles', /Cycles du Léman/);
+  await page.getByRole('button', { name: /Commencer la saisie|Continuer la saisie/ }).click();
+  const fermerVisite = page.getByRole('button', { name: /Passer|Fermer la visite|Terminer/ });
+  if (await fermerVisite.first().isVisible().catch(() => false)) await fermerVisite.first().click();
+  // Opération 1 fausse (côtés inversés), puis la solution, puis la correction.
+  await saisir(page, 'Achat', '2000', '4200', '4800');
+  await page.getByRole('button', { name: 'Voir la solution' }).first().click();
+  await page.getByRole('button', { name: "Corriger l'écriture" }).first().click();
+  const deb = page.getByLabel('Compte au débit, ligne 1');
+  await deb.fill('4200');
+  await deb.press('Tab');
+  const cre = page.getByLabel('Compte au crédit, ligne 1');
+  await cre.fill('2000');
+  await cre.press('Tab');
+  await page.getByRole('button', { name: 'Enregistrer la modification' }).click();
+  await expect(page.locator('.verdict .message')).toContainText('Juste avec la solution.');
+  await expect(page.locator('.statut.juste-solution').first()).toContainText('Juste avec la solution');
+  // L'en-tête le dit aussi.
+  await page.getByRole('button', { name: /pièces/ }).click();
+  await expect(page.getByRole('dialog', { name: 'Récapitulatif des pièces' })).toContainText('dont 1 avec la solution');
+});
+
