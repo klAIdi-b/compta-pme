@@ -115,6 +115,14 @@
 
   /** Lignes d'écriture lisibles : « Débit Banque (1020) · Crédit Ventes (3200) · 1'000.00 ». */
   /** Aides au bouclement consultées par l'élève (information, sans effet sur les points). */
+  /** Entraînement : essais faux et solution vue pour une opération (audit du 24.11.2026). */
+  function texteTentatives(copie: { suivi?: Record<string, { essais: number; solutionVue: boolean }> }, piece: string): string {
+    const t = copie.suivi?.[piece];
+    if (!t || (!t.essais && !t.solutionVue)) return '';
+    const essais = t.essais ? `${t.essais} essai${t.essais > 1 ? 's' : ''} faux` : '';
+    return [essais, t.solutionVue ? 'solution vue' : ''].filter(Boolean).join(' · ');
+  }
+
   function texteAides(copie: Copie): string {
     const aides = copie.suivi?.[PIECE_BOUCLEMENT]?.aides ?? {};
     const parties = Object.entries(aides)
@@ -211,6 +219,7 @@
                         <td style="width:220px" class:faux={o.diagnostic !== 'juste'}>
                           {LIBELLES_DIAGNOSTIC[o.diagnostic]}
                           {#if o.piece === PIECE_BOUCLEMENT && texteAides(l.copie)}<div class="aides-vues">{texteAides(l.copie)}</div>{/if}
+                          {#if texteTentatives(l.copie, o.piece)}<div class="aides-vues">{texteTentatives(l.copie, o.piece)}</div>{/if}
                         </td>
                         <td class="montant" style="width:80px">{fmt(o.points)} / {fmt(o.max)}</td>
                       </tr>

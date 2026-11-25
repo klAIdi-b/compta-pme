@@ -175,4 +175,7 @@ Corrections faites une à une, sur accord de l'enseignant, d'abord sur `apercu`.
 - [x] Bilan en direct, remarque de l'enseignant (25.11.2026) : « Perte provisoire » et « Bénéfice provisoire » à part,
   effet de l'écriture décrit compte par compte (catégorie du cours) puis sur le résultat provisoire. À commiter et publier
   sur accord.
+- [x] Vague 2, statut « Juste avec la solution » (25.11.2026) : verdict, statuts, en-tête, barre et accueil ; essais faux et
+  solution vue dans le détail d'une copie. Reste de l'action : le raisonnement en trois questions sous la solution. À
+  commiter et publier sur accord.
 - [ ] Les autres actions de la vague 2 : en attente.

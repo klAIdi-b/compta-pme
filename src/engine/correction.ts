@@ -163,11 +163,13 @@ export interface Avancement {
   total: number;
   saisies: number;
   justes: number;
+  /** Parmi les justes : écritures passées après « Voir la solution » (audit du 24.11.2026). */
+  avecSolution: number;
   aRevoir: number;
   incompletes: number;
   nonSaisies: number;
   /** Statut de chaque opération de l'énoncé, dans l'ordre. « saisie » : écrite, sans correction (évaluation). */
-  parOperation: { numero: string; statut: StatutOperation }[];
+  parOperation: { numero: string; statut: StatutOperation; avecSolution?: boolean }[];
 }
 
 /**
@@ -178,6 +180,7 @@ export function avancement(
   operations: readonly { numero: string }[],
   ecritures: readonly Ecriture[],
   corrige: readonly EcritureCorrigee[] | null,
+  suivi: Suivi = {},
 ): Avancement {
   const retenues = ecrituresRetenues(ecritures);
   const pieces = new Set(retenues.map((e) => e.piece));
@@ -188,6 +191,8 @@ export function avancement(
     if (!c) return { numero: o.numero, statut: 'saisie' as StatutOperation };
     const d = diagnostiquer(retenues, c);
     const statut: StatutOperation = d === 'juste' ? 'juste' : d === 'incomplete' ? 'incomplete' : d === 'manquante' ? 'manquante' : 'revoir';
+    // Juste, mais trouvée après « Voir la solution » : on le dit, sans la compter comme une erreur.
+    if (statut === 'juste' && suivi[o.numero]?.solutionVue) return { numero: o.numero, statut, avecSolution: true };
     return { numero: o.numero, statut };
   });
   const compte = (s: StatutOperation) => parOperation.filter((x) => x.statut === s).length;
@@ -196,6 +201,7 @@ export function avancement(
     total: operations.length,
     saisies: operations.length - nonSaisies,
     justes: compte('juste'),
+    avecSolution: parOperation.filter((x) => x.avecSolution).length,
     aRevoir: compte('revoir'),
     incompletes: compte('incomplete'),
     nonSaisies,

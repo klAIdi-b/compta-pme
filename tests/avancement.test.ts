@@ -38,6 +38,15 @@ describe("avancement de l'élève", () => {
     expect(a.parOperation[1]!.statut).toBe('manquante');
   });
 
+  it('juste après « Voir la solution » : comptée juste, mais signalée à part', () => {
+    const a = avancement(ops, d.ecritures, c, { '1': { essais: 1, dernier: 'juste', solutionVue: true } });
+    expect(a.justes).toBe(1);
+    expect(a.avecSolution).toBe(1);
+    expect(a.parOperation[0]).toEqual({ numero: '1', statut: 'juste', avecSolution: true });
+    // Sans solution vue, rien n'est signalé.
+    expect(avancement(ops, d.ecritures, c, { '1': { essais: 2, dernier: 'juste', solutionVue: false } }).avecSolution).toBe(0);
+  });
+
   it('sans corrigé (évaluation) : seulement « saisie »', () => {
     const a = avancement(ops, d.ecritures, null);
     expect(a.parOperation[0]!.statut).toBe('saisie');

@@ -99,10 +99,12 @@
     return retour ? (suivi[p]?.dernier ?? null) : null;
   }
 
-  const libelleStatut = (x: Diagnostic | null) =>
-    x === 'juste' ? 'Juste' : x === 'incomplete' ? 'Incomplète' : x && x !== 'manquante' ? 'À revoir' : '';
-  const classeStatut = (x: Diagnostic | null) =>
-    x === 'juste' ? 'juste' : x === 'incomplete' ? 'neutre' : x && x !== 'manquante' ? 'revoir' : '';
+  /** Juste, mais après « Voir la solution » : statut distinct, en mots et non par la couleur seule (audit du 24.11.2026). */
+  const avecSolution = (p: string) => statut(p) === 'juste' && !!suivi[p]?.solutionVue;
+  const libelleStatut = (x: Diagnostic | null, p?: string) =>
+    x === 'juste' ? (p && avecSolution(p) ? 'Juste avec la solution' : 'Juste') : x === 'incomplete' ? 'Incomplète' : x && x !== 'manquante' ? 'À revoir' : '';
+  const classeStatut = (x: Diagnostic | null, p?: string) =>
+    x === 'juste' ? (p && avecSolution(p) ? 'juste-solution' : 'juste') : x === 'incomplete' ? 'neutre' : x && x !== 'manquante' ? 'revoir' : '';
 
   /** Chapitre de théorie lié à une opération, d'après les comptes de son corrigé. */
   /** Raccourcis clavier : affichés d'emblée tant qu'aucune écriture n'est validée, puis repliés. */
@@ -448,6 +450,12 @@
           {#if eV}
             <div class="message information">{@render picto('information')}<div><b>Écriture {verdict.piece} enregistrée.</b></div></div>
           {/if}
+        {:else if st === 'juste' && avecSolution(kc)}
+          {@const suite = prochaineOperation()}
+          <div class="message information">
+            {@render picto('information')}
+            <div><b>Juste avec la solution.</b> {nomV} : écriture correcte, passée après avoir vu la solution.{#if suite}{' '}Essayez l'opération {suite.numero} sans l'ouvrir.{/if}</div>
+          </div>
         {:else if st === 'juste'}
           {@const suite = prochaineOperation()}
           <div class="message succes">
@@ -695,7 +703,7 @@
                   {#if retour}
                     <td class="t-correction">
                       {#if j === 0 && !extournee && !e.extourneDe && !e.automatique}
-                        <span class={`statut ${classeStatut(statut(cle(e.piece)))}`}>{libelleStatut(statut(cle(e.piece)))}</span>
+                        <span class={`statut ${classeStatut(statut(cle(e.piece)), cle(e.piece))}`}>{libelleStatut(statut(cle(e.piece)), cle(e.piece))}</span>
                       {/if}
                     </td>
                   {/if}
@@ -771,7 +779,7 @@
               <span class="no">{o.numero}</span>
               <span class="texte">{o.texte}</span>
               {#if retour && statut(o.numero) && statut(o.numero) !== 'manquante'}
-                <span class={`etat statut ${classeStatut(statut(o.numero))}`}>{libelleStatut(statut(o.numero))}</span>
+                <span class={`etat statut ${classeStatut(statut(o.numero), o.numero)}`}>{libelleStatut(statut(o.numero), o.numero)}</span>
               {:else if saisies.has(o.numero)}<span class="etat">Saisie</span>{/if}
             </button>
           </li>
@@ -908,6 +916,7 @@
   .statut { font-size: var(--t-12); font-weight: var(--graisse-fort); white-space: nowrap; display: inline-flex; align-items: center; gap: 5px; padding: 2px 8px; border-radius: var(--r-1); }
   .statut:not(:empty)::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
   .statut.juste { color: var(--c-succes); background: var(--c-succes-fond); }
+  .statut.juste-solution { color: var(--c-texte-2); background: #eef2f6; border: 1px dashed var(--c-succes); white-space: normal; line-height: 1.25; }
   .statut.revoir { color: var(--c-erreur); background: var(--c-erreur-fond); }
   .statut.neutre { color: var(--c-texte-2); background: #eef2f6; }
   tr.ligne-retour td { padding-top: 0; }
