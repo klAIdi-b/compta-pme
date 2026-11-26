@@ -224,8 +224,16 @@
             onclick={() => {
               const m = exercicesDemo.find((x) => x.id === modeleId);
               if (m) {
-                const v = enseignant.creerVariante($state.snapshot(m) as Exercice);
-                message = `Variante d'évaluation « ${v.titre} » créée dans vos exercices : relisez-la (situation, textes), puis exportez-la pour les élèves.`;
+                try {
+                  const { exercice: v, avertissements } = enseignant.creerVariante($state.snapshot(m) as Exercice);
+                  message =
+                    [...avertissements, ''].join(' ') +
+                    `Variante d'évaluation « ${v.titre} » créée dans vos exercices : relisez-la (situation, textes), puis exportez-la pour les élèves. ` +
+                    "Attention : elle garde les opérations et les comptes de l'exercice public, et ses montants sont ceux de l'exercice multipliés par un même nombre. " +
+                    'Un élève qui a fait ou ouvert l’exercice d’entraînement peut retrouver le corrigé : réservez-la à une épreuve surveillée et modifiez au moins quelques opérations.';
+                } catch (e) {
+                  message = e instanceof Error ? e.message : String(e);
+                }
               }
             }}>Variante d'évaluation</button
           >

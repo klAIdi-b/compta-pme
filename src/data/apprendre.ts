@@ -224,24 +224,30 @@ function calcul(
   return { id, niveau, titre, objectif, rappel, chapitre, calculs, plan, modeles: [], comptes: [], types: [], formats: ['calcul'], duree };
 }
 
-/** Module d'écritures composées générées (CFC 2 et MP). */
+/**
+ * Module d'écritures composées générées (CFC 2 et MP). Avec `calculs` (second audit, 26.11.2026), la série mêle les
+ * écritures et le calcul de leurs montants : le minimum par type de question s'applique alors aux deux.
+ */
 function ecritures(
   id: string, niveau: NiveauApprendre, titre: string, objectif: string, rappel: string[], familles: string[], plan: string[],
-  chapitre: string, comptes: string[], duree = 45,
+  chapitre: string, comptes: string[], duree = 45, calculs?: string[],
 ): ModuleApprendre {
-  return { id, niveau, titre, objectif, rappel, chapitre, ecritures: familles, plan, modeles: [], comptes, types: [], formats: ['composee'], duree };
+  return {
+    id, niveau, titre, objectif, rappel, chapitre, ecritures: familles, plan, modeles: [], comptes, types: [],
+    formats: calculs?.length ? ['composee', 'calcul', 'composee'] : ['composee'], duree, ...(calculs?.length ? { calculs } : {}),
+  };
 }
 
 function MODULES_CALCUL(): ModuleApprendre[] {
   return [
     ecritures('tva-ecritures', 'CFC2', 'TVA : comptabilisation au net',
       'Comptabiliser achats, ventes, charges, investissements et décompte de TVA selon la méthode au net.',
-      ['Ventes : la TVA due va au crédit de TVA due ; achats : l’impôt préalable va au débit (marchandises et services, ou investissements et autres charges).', 'Décompte : l’impôt préalable est viré en diminution de la TVA due, le solde va à la dette envers l’AFC.', 'Un escompte corrige aussi la TVA.'],
-      ['tva'], ['2ème CFC (E&S Partie VIII)', 'MP 3.2'], 'tva', ['1000', '1020', '1100', '1170', '1171', '1530', '2000', '2200', '2205', '3200', '3209', '4200', '6400']),
+      ['Ventes : la TVA due va au crédit de TVA due ; achats : l’impôt préalable va au débit (marchandises et services, ou investissements et autres charges).', 'Décompte : l’impôt préalable est viré en diminution de la TVA due, le solde va à la dette envers l’AFC.', 'Un rabais accordé ou obtenu après facturation corrige aussi la TVA.', 'Calcul : TVA arrondie aux 5 centimes.'],
+      ['tva'], ['2ème CFC (E&S Partie VIII)', 'MP 3.2'], 'tva', ['1000', '1020', '1100', '1170', '1171', '1530', '2000', '2200', '2205', '3200', '4200', '6400'], 45, ['tva-calcul']),
     ecritures('amortissements-ecritures', 'CFC2', 'Amortissements : méthode directe ou indirecte',
       'Choisir les comptes de l’amortissement direct et indirect.',
       ['Méthode directe : Amortissements au débit, compte de l’immobilisation au crédit.', 'Méthode indirecte : Amortissements au débit, fonds d’amortissements cumulés (xxx9) au crédit ; l’immobilisation garde sa valeur d’acquisition.'],
-      ['amortissements'], ['2ème CFC', 'MP 5.2'], 'amortissements', ['1500', '1509', '1510', '1519', '1520', '1521', '1530', '1539', '6800'], 30),
+      ['amortissements'], ['2ème CFC', 'MP 5.2'], 'amortissements', ['1500', '1509', '1510', '1519', '1520', '1521', '1530', '1539', '6800'], 30, ['amortissement-calcul']),
     ecritures('transitoires-ecritures', 'CFC2', 'Actifs et passifs transitoires',
       'Régulariser charges et produits à la clôture, puis les extourner à la réouverture.',
       ['Charge payée d’avance : Actifs transitoires au débit, la charge au crédit.', 'Charge à payer (pas encore facturée ou payée) : la charge au débit, Passifs transitoires au crédit.', 'À la réouverture, on extourne : écriture inverse.'],
@@ -249,11 +255,17 @@ function MODULES_CALCUL(): ModuleApprendre[] {
     ecritures('creances-ecritures', 'CFC2', 'Pertes sur créances et ducroire',
       'Comptabiliser une perte, une créance douteuse, un règlement partiel, l’ajustement du ducroire et une récupération.',
       ['Perte définitive : Pertes sur créances au débit, Créances clients au crédit (pas de correction de TVA dans le cours).', 'Créance douteuse : virée de Créances clients à Créances douteuses.', 'Ducroire : on ajuste la différence ; une créance amortie l’an passé puis récupérée est un produit exceptionnel.'],
-      ['creances'], ['2ème CFC', 'MP 3.1', 'MP 5.3'], 'creances', ['1020', '1100', '1108', '1109', '3805', '8510'], 30),
+      ['creances'], ['2ème CFC', 'MP 3.1', 'MP 5.3'], 'creances', ['1020', '1100', '1108', '1109', '3805', '8510'], 30, ['ducroire-calcul']),
     ecritures('salaires-ecritures', 'CFC2', 'Salaires et charges sociales',
       'Comptabiliser le salaire, les retenues, les charges de l’employeur, les paiements aux assurances et une avance.',
       ['Salaire : brut au débit de Salaires ; retenues au crédit des dettes envers les assurances ; net au crédit de la banque.', 'Charges sociales de l’employeur : au débit de Charges sociales, au crédit des dettes envers les assurances.'],
-      ['salaires'], ['CFC c6.ep2a', 'MP 4.1'], 'salaires', ['1020', '1140', '2170', '2171', '5200', '5270'], 30),
+      ['salaires'], ['CFC c6.ep2a', 'MP 4.1'], 'salaires', ['1020', '1140', '2170', '2171', '5200', '5270'], 30, ['salaire-net']),
+    ecritures('synthese-cfc2', 'CFC2', 'Synthèse : les écritures de clôture',
+      'Reconnaître de quel chapitre relève une opération de clôture (TVA, amortissement, transitoire, créance, salaire), calculer son montant et la comptabiliser.',
+      ['Lisez l’indice qui dit de quel chapitre relève l’opération, faites le calcul, puis choisissez les comptes.', 'Les règles sont celles des cinq modules précédents : rien de nouveau, mais mélangé.'],
+      ['tva', 'amortissements', 'transitoires', 'creances', 'salaires'], ['2ème CFC'], 'transitoires',
+      ['1000', '1020', '1100', '1108', '1109', '1140', '1170', '1171', '1300', '1500', '1509', '1510', '1519', '1520', '1521', '1530', '1539', '2000', '2170', '2171', '2200', '2205', '2300', '3200', '3805', '4200', '5200', '5270', '6000', '6100', '6300', '6400', '6800', '6900', '8510'],
+      45, ['tva-calcul', 'amortissement-calcul', 'ducroire-calcul', 'salaire-net']),
     ecritures('societes-ecritures', 'MP', 'Société anonyme : capital et bénéfice',
       'Comptabiliser la fondation, la libération, l’augmentation du capital avec agio, la répartition du bénéfice et le paiement du dividende.',
       ['Souscription : Actionnaires au débit, Capital-actions au crédit ; libération : la banque au débit, Actionnaires au crédit.', 'L’agio va aux réserves légales issues du capital.', 'Répartition depuis le bénéfice reporté ; dividende payé sous déduction de l’impôt anticipé de 35 %.'],
@@ -312,7 +324,7 @@ function MODULES_CALCUL(): ModuleApprendre[] {
       ['cession', 'changement-methode'], ['MP 5.2'], 'amortissements'),
     calcul('perte-capital', 'MP', 'Perte de capital et surendettement',
       'Reconnaître une perte de capital et un surendettement d’après le bilan d’une SA.',
-      ['Perte de capital (art. 725a CO) : actifs − dettes couvrent moins de la moitié du capital-actions et des réserves légales.', 'Surendettement (art. 725b CO) : les dettes ne sont plus couvertes par les actifs.'],
+      ['Perte de capital (art. 725a CO) : actifs − dettes couvrent moins de la moitié du capital-actions et des réserves légales non remboursables aux actionnaires.', 'Surendettement (art. 725b CO) : les dettes ne sont plus couvertes par les actifs.'],
       ['perte-capital'], ['MP 5.6'], 'societes', 30),
     calcul('titres-immeubles', 'MP', 'Bordereaux et rendements',
       'Établir un bordereau d’achat d’obligations et calculer le rendement d’un titre ou d’un immeuble.',

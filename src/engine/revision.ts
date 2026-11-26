@@ -33,3 +33,29 @@ export function aRevoir<T extends { revision?: EtatRevision }>(progression: Reco
     .sort((a, b) => a[1].revision!.prochaine.localeCompare(b[1].revision!.prochaine))
     .map(([id]) => id);
 }
+
+// ---------- États d'une notion (second audit, 26.11.2026) ----------
+
+/** Révisions réussies, à des jours distincts, pour qu'une notion soit « confirmée ». */
+export const CONFIRMATIONS = 2;
+
+export type EtatNotion = 'aFaire' | 'enCours' | 'reussieUneFois' | 'confirmee' | 'aRaviver';
+
+export const LIBELLES_ETAT_NOTION: Record<EtatNotion, string> = {
+  aFaire: 'À faire',
+  enCours: 'En cours',
+  reussieUneFois: 'Réussie une fois',
+  confirmee: 'Confirmée',
+  aRaviver: 'À raviver',
+};
+
+/**
+ * État d'une notion : réussie une fois (série réussie), confirmée (deux révisions réussies à des jours distincts),
+ * à raviver (dernière révision ratée : aucune réussite n'est retirée, la notion revient dès le lendemain).
+ */
+export function etatNotion(p?: { maitrise: boolean; confirmations?: number; aRaviver?: boolean }): EtatNotion {
+  if (!p) return 'aFaire';
+  if (!p.maitrise) return 'enCours';
+  if (p.aRaviver) return 'aRaviver';
+  return (p.confirmations ?? 0) >= CONFIRMATIONS ? 'confirmee' : 'reussieUneFois';
+}

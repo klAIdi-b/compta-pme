@@ -8,6 +8,8 @@
 // - montants arrondis au centime, sauf indication ; un résultat se contrôle à 5 centimes près (pour cent à 0,1).
 
 import { formatMontant, type Centimes } from './money';
+import { tvaSurHT, tvaSurTTC } from './tva';
+import { montantRetenue } from './salaire';
 import type { Compte } from './plan';
 import type { Hasard } from './exercices-courts';
 
@@ -65,7 +67,8 @@ const nb = (libelle: string, attendu: number, tolerance = 0): ChampCalcul => ({ 
 
 /** Contrôle d'un champ saisi (texte). */
 export function champJuste(c: ChampCalcul, saisie: string | undefined): boolean {
-  const t = (saisie ?? '').trim().replace(/[−–]/g, '-').replace(/['\s]/g, '').replace(',', '.').replace('%', '');
+  // Apostrophes droite et typographique, espaces (insécables comprises) et mention « CHF » acceptées.
+  const t = (saisie ?? '').trim().replace(/[−–]/g, '-').replace(/chf|fr\./gi, '').replace(/['’‘\s  ]/g, '').replace(',', '.').replace('%', '');
   if (t === '') return false;
   if (c.type === 'choix') return t === String(c.attendu);
   const v = Number(t);
@@ -248,8 +251,13 @@ function compteCourant(h: Hasard): QuestionCalcul {
   const j1 = entier(h, 1, 3) * 30;
   const j2 = entier(h, 1, 2) * 30;
   const j3 = 180 - j1 - j2;
-  const soldes = [entier(h, 20, 80), entier(h, 30, 120), entier(h, 10, 90)].map((x) => x * 100000);
   const jours = [j1, j2, j3];
+  const base = [entier(h, 20, 80), entier(h, 30, 120), entier(h, 10, 90)];
+  // Intérêt de plus de 200 francs : sinon, l'intérêt d'un avoir de client est exonéré de l'impôt anticipé
+  // (art. 5 al. 1 let. c LIA). Les soldes sont multipliés par un entier jusqu'à dépasser ce seuil.
+  const brutDe = (sl: number[]) => Math.round((sl.reduce((t, x, k) => t + ((x / 100) * jours[k]!) / 100, 0) * taux * 100) / 360);
+  const facteur = Math.max(1, Math.ceil(20001 / Math.max(1, brutDe(base.map((x) => x * 100000)))));
+  const soldes = base.map((x) => x * 100000 * facteur);
   const nombres = soldes.map((s, k) => (s / 100) * jours[k]! / 100);
   const total = nombres.reduce((t, x) => t + x, 0);
   const brut = Math.round((total * taux * 100) / 360);
@@ -257,7 +265,7 @@ function compteCourant(h: Hasard): QuestionCalcul {
   return {
     format: 'calcul',
     sujet: 'Compte courant et méthode des nombres',
-    enonce: [`Compte courant bancaire créditeur, taux d'intérêt ${fr(taux, 2)} %, impôt anticipé 35 %. Bouclement au 30.06 (180 jours).`, 'Calculez les nombres, l’intérêt brut, l’impôt anticipé et l’intérêt net crédité.'],
+    enonce: [`Compte courant bancaire créditeur, taux d'intérêt ${fr(taux, 2)} %, impôt anticipé 35 %. Bouclement au 30.06 (180 jours). L’intérêt dépasse 200.00 : l’impôt anticipé est dû.`, 'Calculez les nombres, l’intérêt brut, l’impôt anticipé et l’intérêt net crédité.'],
     tableau: { entetes: ['Période', 'Solde créditeur', 'Jours'], lignes: soldes.map((s, k) => [`Période ${k + 1}`, m(s), String(jours[k])]) },
     champs: [
       ...nombres.map((x, k) => nb(`Nombre de la période ${k + 1}`, Math.round(x), 1)),
@@ -588,9 +596,139 @@ const QUESTIONS_NORMES: Omit<QuestionQcm, 'format' | 'sujet'>[] = [
   { question: 'Pourquoi les normes comme les Swiss GAAP RPC ou les IFRS limitent-elles les réserves latentes ?', choix: ['Pour donner une image fidèle (true and fair view)', 'Pour réduire les impôts', 'Pour augmenter le bénéfice'], reponse: 0, explication: 'Ces normes visent une image fidèle de la situation financière, ce que les réserves latentes faussent.' },
 ];
 
+/** Choix présentés dans un ordre tiré au hasard : la bonne réponse n'est plus souvent la première (second audit). */
 function normes(h: Hasard): QuestionQcm {
   const q = tirer(h, QUESTIONS_NORMES);
-  return { format: 'qcm', sujet: 'Comptes de groupe et normes', ...q };
+  const ordre = melanger(h, q.choix.map((_, i) => i));
+  return { format: 'qcm', sujet: 'Comptes de groupe et normes', ...q, choix: ordre.map((i) => q.choix[i]!), reponse: ordre.indexOf(q.reponse) };
+}
+
+// ---------- 2ème CFC : les calculs des écritures de clôture (second audit, 26.11.2026, à relire) ----------
+const frT = (x: number) => (Number.isInteger(x) ? String(x) : fr(x));
+// Règles du cours (CLAUDE.md) : TVA arrondie aux 5 centimes ; amortissement constant sur la valeur d'acquisition,
+// dégressif sur la valeur comptable, au prorata des mois d'utilisation la première année ; ducroire ajusté par la
+// différence avec le ducroire existant ; retenues de salaire = base × taux donné, arrondies aux 5 centimes.
+
+/** TVA d'une facture (hors taxe vers TTC) ou TVA comprise dans un prix TTC. */
+function tvaCalcul(h: Hasard): QuestionCalcul {
+  const taux = tirer(h, [81, 81, 26]);
+  const tx = `${(taux / 10).toFixed(1).replace('.', ',')} %`;
+  if (h() < 0.5) {
+    const ht = entier(h, 40, 900) * 1000 + entier(h, 0, 19) * 5;
+    const tva = tvaSurHT(ht, taux);
+    return {
+      format: 'calcul',
+      sujet: 'TVA',
+      enonce: [`Facture de ${m(ht)} hors taxe, TVA ${tx}.`, 'Calculez la TVA (arrondie aux 5 centimes) et le total TTC.'],
+      champs: [chf('TVA', tva), chf('Total TTC', ht + tva)],
+      explication: [`TVA = ${m(ht)} × ${tx} = ${m(tva)}, arrondie aux 5 centimes.`, `TTC = ${m(ht)} + ${m(tva)} = ${m(ht + tva)}.`],
+    };
+  }
+  const ttc = entier(h, 40, 900) * 1000 + entier(h, 0, 19) * 5;
+  const tva = tvaSurTTC(ttc, taux);
+  const base = 100 + taux / 10;
+  return {
+    format: 'calcul',
+    sujet: 'TVA',
+    enonce: [`Ticket de ${m(ttc)}, TVA ${tx} comprise.`, 'Calculez la TVA comprise (arrondie aux 5 centimes) et le montant hors taxe.'],
+    champs: [chf('TVA comprise', tva), chf('Montant hors taxe', ttc - tva)],
+    explication: [
+      `TVA comprise = ${m(ttc)} × ${fr(taux / 10)} ÷ ${fr(base)} = ${m(tva)}, arrondie aux 5 centimes.`,
+      `Hors taxe = ${m(ttc)} − ${m(tva)} = ${m(ttc - tva)}.`,
+    ],
+  };
+}
+
+/** Amortissement de l'année : constant sur la valeur d'acquisition ou dégressif sur la valeur comptable. */
+function amortissementCalcul(h: Hasard): QuestionCalcul {
+  const bien = tirer(h, ['un véhicule', 'une machine', 'du mobilier', 'une installation']);
+  const acquisition = entier(h, 12, 90) * 100000;
+  const degressif = h() < 0.5;
+  const taux = degressif ? tirer(h, [20, 25, 30, 40]) : tirer(h, [10, 12.5, 20, 25]);
+  if (!degressif) {
+    const mois = tirer(h, [12, 12, 9, 6, 4]);
+    const annuel = Math.round((acquisition * taux) / 100);
+    const amort = Math.round((annuel * mois) / 12);
+    return {
+      format: 'calcul',
+      sujet: 'Amortissements',
+      enonce: [
+        `${bien[0]!.toUpperCase()}${bien.slice(1)} acheté${bien.startsWith('une') ? 'e' : ''} ${m(acquisition)}, amortissement constant de ${frT(taux)} % par an sur la valeur d'acquisition.`,
+        mois === 12 ? "Utilisé toute l'année." : `Mis en service il y a ${mois} mois au 31.12 : prorata de ${mois} mois.`,
+        "Calculez l'amortissement de l'année et la valeur comptable au 31.12.",
+      ],
+      champs: [chf("Amortissement de l'année", amort), chf('Valeur comptable au 31.12', acquisition - amort)],
+      explication: [
+        `Amortissement annuel = ${m(acquisition)} × ${frT(taux)} % = ${m(annuel)}.`,
+        ...(mois === 12 ? [] : [`Prorata : ${m(annuel)} × ${mois} ÷ 12 = ${m(amort)}.`]),
+        `Valeur comptable = ${m(acquisition)} − ${m(amort)} = ${m(acquisition - amort)}.`,
+      ],
+    };
+  }
+  const vc = Math.round((acquisition * entier(h, 40, 90)) / 100 / 1000) * 1000;
+  const amort = Math.round((vc * taux) / 100);
+  return {
+    format: 'calcul',
+    sujet: 'Amortissements',
+    enonce: [
+      `${bien[0]!.toUpperCase()}${bien.slice(1)} acheté${bien.startsWith('une') ? 'e' : ''} ${m(acquisition)}, valeur comptable au 01.01 : ${m(vc)}.`,
+      `Amortissement dégressif de ${frT(taux)} % par an sur la valeur comptable, utilisé toute l'année.`,
+      "Calculez l'amortissement de l'année et la valeur comptable au 31.12.",
+    ],
+    champs: [chf("Amortissement de l'année", amort), chf('Valeur comptable au 31.12', vc - amort)],
+    explication: [
+      `Dégressif : le taux s'applique à la valeur comptable, pas à la valeur d'acquisition. ${m(vc)} × ${frT(taux)} % = ${m(amort)}.`,
+      `Valeur comptable = ${m(vc)} − ${m(amort)} = ${m(vc - amort)}.`,
+    ],
+  };
+}
+
+/** Ajustement du ducroire au 31.12 : ducroire nécessaire moins ducroire existant. */
+function ducroireCalcul(h: Hasard): QuestionCalcul {
+  const creances = entier(h, 30, 250) * 100000;
+  const taux = 5;
+  const necessaire = Math.round((creances * taux) / 100);
+  let ancien = Math.round((entier(h, 20, 150) * 100000 * taux) / 100);
+  if (ancien === necessaire) ancien += 50000;
+  const ecart = necessaire - ancien;
+  const SENS = ['Augmentation : Pertes sur créances au débit, Ducroire au crédit', 'Diminution : Ducroire au débit, Pertes sur créances au crédit'];
+  return {
+    format: 'calcul',
+    sujet: 'Ducroire',
+    enonce: [
+      `Créances clients au 31.12 : ${m(creances)}. Ducroire de ${taux} % des créances clients.`,
+      `Ducroire existant (au bilan d'ouverture) : ${m(ancien)}.`,
+      "Calculez le ducroire nécessaire et l'ajustement à comptabiliser.",
+    ],
+    champs: [chf('Ducroire nécessaire', necessaire), chf('Ajustement', Math.abs(ecart)), { libelle: "Sens de l'ajustement", type: 'choix', attendu: ecart > 0 ? 0 : 1, choix: SENS }],
+    explication: [
+      `Ducroire nécessaire = ${m(creances)} × ${taux} % = ${m(necessaire)}.`,
+      `Ajustement = ${m(necessaire)} − ${m(ancien)} = ${m(ecart)} : ${ecart > 0 ? 'le ducroire augmente' : 'le ducroire diminue'} de ${m(Math.abs(ecart))}.`,
+      'On ne passe que la différence avec le ducroire existant.',
+    ],
+  };
+}
+
+/** Salaire net : brut moins les retenues (taux donnés), chaque retenue arrondie aux 5 centimes. */
+function salaireNet(h: Hasard): QuestionCalcul {
+  const brut = entier(h, 38, 95) * 10000;
+  const lpp = entier(h, 12, 40) * 500;
+  const avs = montantRetenue(brut, 530);
+  const ac = montantRetenue(brut, 110);
+  const net = brut - avs - ac - lpp;
+  return {
+    format: 'calcul',
+    sujet: 'Salaires',
+    enonce: [
+      `Salaire brut du mois : ${m(brut)}. Retenues : AVS/AI/APG 5,3 %, AC 1,1 % (taux donnés), LPP ${m(lpp)} (montant donné par la caisse).`,
+      'Calculez chaque retenue (arrondie aux 5 centimes) et le salaire net.',
+    ],
+    champs: [chf('Retenue AVS/AI/APG', avs), chf('Retenue AC', ac), chf('Salaire net', net)],
+    explication: [
+      `AVS/AI/APG = ${m(brut)} × 5,3 % = ${m(avs)} ; AC = ${m(brut)} × 1,1 % = ${m(ac)}.`,
+      `Net = ${m(brut)} − ${m(avs)} − ${m(ac)} − ${m(lpp)} = ${m(net)}.`,
+    ],
+  };
 }
 
 // ---------- Registre ----------
@@ -622,7 +760,10 @@ export function classeurDe(debit: string): number {
 }
 
 function trier(h: Hasard, x: ContexteCalcul): QuestionQcm {
-  const candidats = (x.modeles ?? []).filter((mo) => classeurDe(mo.debit) >= 0);
+  const tous = (x.modeles ?? []).filter((mo) => classeurDe(mo.debit) >= 0);
+  // Classeur tiré d'abord, puis une pièce de ce classeur : les réponses sont équilibrées (second audit, 26.11.2026).
+  const classeur = tirer(h, [...new Set(tous.map((mo) => classeurDe(mo.debit)))]);
+  const candidats = tous.filter((mo) => classeurDe(mo.debit) === classeur);
   const mo = tirer(h, candidats);
   const montant = (mo.min + entier(h, 0, Math.floor((mo.max - mo.min) / mo.pas)) * mo.pas) * 100;
   const reponse = classeurDe(mo.debit);
@@ -649,6 +790,10 @@ export const GENERATEURS: Record<string, (h: Hasard, x: ContexteCalcul) => Quest
   'flux-direct': fluxDirect,
   analytique,
   normes,
+  'tva-calcul': tvaCalcul,
+  'amortissement-calcul': amortissementCalcul,
+  'ducroire-calcul': ducroireCalcul,
+  'salaire-net': salaireNet,
 };
 
 export function genererCalcul(id: string, h: Hasard, x: ContexteCalcul): QuestionGeneree {

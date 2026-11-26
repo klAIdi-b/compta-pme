@@ -7,7 +7,7 @@
   import { CHAPITRES } from '../../data/theorie';
   import { plan } from '../../data/plan';
   import {
-    bilanSerie, credit as partReussie, estJuste, NOM_FORMAT, genererSerie, montantModele, hasard, raisonnement, seuilMaitrise, texteOperation, VARIATIONS,
+    bilanSerie, credit as partReussie, estJuste, NOM_FORMAT, genererSerie, montantModele, hasard, questionsRevision, raisonnement, revisionReussie, seuilMaitrise, texteOperation, VARIATIONS,
     type Question, type Reponse,
   } from '../../engine/exercices-courts';
   import { erreurTypique } from '../../engine/erreurs-typiques';
@@ -16,7 +16,7 @@
   import { LECONS, exemplesDe } from '../../data/lecons';
   import BandeauRubriques from '../composants/BandeauRubriques.svelte';
   import { enregistrerRevision, enregistrerSerie, lireProgression, reprendreProgression, type Progression } from '../../io/apprendre';
-  import { aRevoir } from '../../engine/revision';
+  import { aRevoir, etatNotion, LIBELLES_ETAT_NOTION } from '../../engine/revision';
   import { EXT_PROGRESSION, exporterProgression, importerProgression } from '../../io/progression';
   import { choisirFichiers } from '../fichiers-navigateur';
   import { ErreurFichier } from '../../io/fichiers';
@@ -69,6 +69,12 @@
   const exempleComposee = $derived(module?.ecritures?.length ? genererEcriture(module.ecritures[0]!, hasard(7)) : null);
   const comptesModule = $derived(module ? [...module.comptes].sort((a, b) => nom(a).localeCompare(nom(b), 'fr')) : []);
   const NIVEAUX: NiveauApprendre[] = ['CFC1', 'CFC2', 'MP'];
+  /**
+   * Année de l'élève (second audit, 26.11.2026) : celle de son exercice en cours, sinon la maturité si c'est la formation
+   * mémorisée, sinon la 1ère CFC. Les années précédentes restent visibles (matière des révisions), les suivantes repliées.
+   */
+  const niveauEleve: NiveauApprendre = etat.session ? etat.exercice.niveau : etat.prefs.filiere === 'MP' ? 'MP' : 'CFC1';
+  const replie = (niv: NiveauApprendre) => NIVEAUX.indexOf(niv) > NIVEAUX.indexOf(niveauEleve);
   // Ordre affiché dans la liste : par formation, puis dans l'ordre du cours.
   const ORDRE = NIVEAUX.flatMap((niv) => MODULES.filter((x) => x.niveau === niv));
   const indexModule = $derived(module ? ORDRE.indexOf(module) : -1);
@@ -180,11 +186,18 @@
     lancer('guide');
   }
 
-  /** Révision du jour : une question par notion à confirmer (cinq au plus), notions mélangées. */
+  /**
+   * Révision du jour : deux questions par notion à confirmer (cinq notions au plus), de formats tirés au hasard ; la
+   * révision d'une notion n'est réussie que si ses deux questions sont entièrement justes (second audit, 26.11.2026).
+   */
+  let partsRevision: Record<string, number[]> = {};
   function commencerRevision() {
-    modulesRevision = dus.slice(0, 5);
-    if (!modulesRevision.length) return;
-    questions = modulesRevision.map((mod) => genererSerie(contexte(mod), mod.formats, 1, graine())[0]!);
+    const notions = dus.slice(0, 5);
+    if (!notions.length) return;
+    const paires = notions.map((mod) => ({ mod, qs: questionsRevision(contexte(mod), mod.formats, graine()) }));
+    modulesRevision = paires.flatMap((p) => p.qs.map(() => p.mod));
+    questions = paires.flatMap((p) => p.qs);
+    partsRevision = {};
     module = modulesRevision[0]!;
     lancer('revision');
   }
@@ -214,7 +227,12 @@
     justes += part;
     parts = [...parts, { format: q.format, part }];
     corrigee = true;
-    if (mode === 'revision') progression = enregistrerRevision(progression, module!.id, part >= 0.75);
+    if (mode === 'revision') {
+      const id = module!.id;
+      partsRevision[id] = [...(partsRevision[id] ?? []), part];
+      const attendues = modulesRevision.filter((x) => x.id === id).length;
+      if (partsRevision[id]!.length === attendues) progression = enregistrerRevision(progression, id, revisionReussie(partsRevision[id]!));
+    }
   }
 
   function continuer() {
@@ -279,6 +297,26 @@
   }
 </script>
 
+{#snippet listeModules(niv: NiveauApprendre)}
+      <ol class="modules">
+        {#each MODULES.filter((x) => x.niveau === niv) as mod, i (mod.id)}
+          {@const p = progression[mod.id]}
+          {@const en = etatNotion(p)}
+          <li class="carte module">
+            <span class="rang" aria-hidden="true">{i + 1}</span>
+            <div class="texte">
+              <button class="lien-module" onclick={() => ouvrir(mod)}>{mod.titre}</button>
+              <span class="discret">{mod.objectif}</span>
+            </div>
+            <span class="etat" class:maitrise={en === "confirmee" || en === "reussieUneFois"}>
+              {#if en === 'confirmee'}Confirmée{#if p?.revision}<span class="echeance">&nbsp;· prochaine révision le {dt(p.revision.prochaine).slice(0, 5)}</span>{/if}{:else if en === 'reussieUneFois' || en === 'aRaviver'}{LIBELLES_ETAT_NOTION[en]}{#if p?.revision}<span class="echeance">&nbsp;· {en === 'aRaviver' ? 'à revoir' : 'à confirmer'} le {dt(p.revision.prochaine).slice(0, 5)}{#if en === 'reussieUneFois'}&nbsp;({p.confirmations ?? 0} révision{(p.confirmations ?? 0) > 1 ? 's' : ''} réussie{(p.confirmations ?? 0) > 1 ? 's' : ''} sur 2){/if}</span>{/if}{:else if p}Dernier score {pts(p.dernier ?? p.meilleur)} / {p.dernierSur ?? p.sur}{#if p.dernier !== undefined && p.dernier !== p.meilleur}<span class="echeance">&nbsp;· meilleur {pts(p.meilleur)}</span>{/if}{:else}À faire{/if}
+            </span>
+          </li>
+        {/each}
+      </ol>
+{/snippet}
+
+
 {#snippet navigationModules()}
   <nav class="nav-modules" aria-label="Autres modules">
     {#if precedent}
@@ -312,29 +350,22 @@
           <div class="corps-carte ligne-revision">
             <div>
               <h2>Révision du jour</h2>
-              <p>{dus.length} notion{dus.length > 1 ? 's' : ''} à confirmer : {Math.min(dus.length, 5)} question{Math.min(dus.length, 5) > 1 ? 's' : ''}, quelques minutes. Se souvenir quelques jours plus tard, c'est ce qui fait retenir.</p>
+              <p>{dus.length} notion{dus.length > 1 ? 's' : ''} à confirmer : {Math.min(dus.length, 5) * 2} questions, deux par notion, quelques minutes. Se souvenir quelques jours plus tard, c'est ce qui fait retenir.</p>
             </div>
             <button class="btn btn-principal" onclick={commencerRevision}>Commencer la révision</button>
           </div>
         </section>
       {/if}
       {#each NIVEAUX as niv (niv)}
-      <h2 class="niveau">{LIBELLES_NIVEAU_APPRENDRE[niv]}</h2>
-      <ol class="modules">
-        {#each MODULES.filter((x) => x.niveau === niv) as mod, i (mod.id)}
-          {@const p = progression[mod.id]}
-          <li class="carte module">
-            <span class="rang" aria-hidden="true">{i + 1}</span>
-            <div class="texte">
-              <button class="lien-module" onclick={() => ouvrir(mod)}>{mod.titre}</button>
-              <span class="discret">{mod.objectif}</span>
-            </div>
-            <span class="etat" class:maitrise={p?.maitrise}>
-              {#if p?.maitrise && (!p.revision || p.revision.rang > 0)}Maîtrisé{#if p.revision}<span class="echeance">&nbsp;· prochaine révision le {dt(p.revision.prochaine).slice(0, 5)}</span>{/if}{:else if p?.maitrise && p.revision}Réussie une fois<span class="echeance">&nbsp;· à confirmer le {dt(p.revision.prochaine).slice(0, 5)}</span>{:else if p}Meilleur score {pts(p.meilleur)} / {p.sur}{:else}À faire{/if}
-            </span>
-          </li>
-        {/each}
-      </ol>
+      {#if replie(niv)}
+        <details class="niveau-replie">
+          <summary><h2 class="niveau">{LIBELLES_NIVEAU_APPRENDRE[niv]}</h2></summary>
+          {@render listeModules(niv)}
+        </details>
+      {:else}
+        <h2 class="niveau">{LIBELLES_NIVEAU_APPRENDRE[niv]}</h2>
+        {@render listeModules(niv)}
+      {/if}
       {/each}
       <details class="carte envoi">
         <summary>Envoyer ou reprendre ma progression</summary>
@@ -699,6 +730,10 @@
                   Solde final : {m(q.reponse.montant)}, {q.reponse.cote === 'debiteur' ? 'débiteur' : 'créditeur'}. Total du côté le plus fort − total de l'autre côté.
                 {/if}
               {/if}
+              <!-- Explication de la réponse, juste ou fausse (second audit, 26.11.2026) : le raisonnement, pas seulement la réponse. -->
+              {#if (q.format === 'classer' || q.format === 'variation' || q.format === 'operation' || q.format === 'erreur') && q.pourquoi?.length}
+                <ol class="raisonnement">{#each q.pourquoi as e}<li>{e}</li>{/each}</ol>
+              {/if}
             </div>
           {/if}
         </div>
@@ -740,7 +775,11 @@
         <section class="carte">
           <div class="corps-carte">
             <p class="score"><b>{pts(justes)} points sur {questions.length}.</b></p>
-            <p>Les notions réussies vous seront redemandées plus tard ; les autres reviennent dès demain.</p>
+            <p>
+              Une notion est confirmée quand ses deux questions sont entièrement justes, deux jours différents. Les notions
+              réussies aujourd'hui vous seront redemandées plus tard ; les autres sont « à raviver » et reviennent dès
+              demain, sans rien perdre de ce que vous avez déjà réussi.
+            </p>
           </div>
         </section>
         <div class="actions-bas"><button class="btn btn-principal" onclick={() => ouvrir(null)}>Retour aux modules</button></div>
@@ -954,4 +993,6 @@
     .grille-ecriture { grid-template-columns: 1fr; }
     .montant-donne { text-align: left; }
   }
+  .niveau-replie > summary { cursor: pointer; list-style: revert; }
+  .niveau-replie > summary h2 { display: inline; }
 </style>

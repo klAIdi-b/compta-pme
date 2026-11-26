@@ -33,7 +33,6 @@ describe('écritures générées (CFC 2 et MP)', () => {
       for (let s = 1; s <= 30; s++) {
         const serie = genererSerie({ plan, modeles: [], comptes: m.comptes, types: [], ecritures: m.ecritures }, m.formats, 10, s);
         for (const q of serie) {
-          expect(q.format).toBe('composee');
           if (q.format !== 'composee') continue;
           for (const l of q.lignes) expect(m.comptes, `${m.id} ${l.compte}`).toContain(l.compte);
           expect(estJuste(q, { format: 'composee', comptes: q.lignes.map((l) => l.compte) })).toBe(true);

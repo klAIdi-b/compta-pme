@@ -3,6 +3,7 @@
   import { etat } from '../etat.svelte';
   import { lireProgression } from '../../io/apprendre';
   import { MODULES } from '../../data/apprendre';
+  import { aRevoir } from '../../engine/revision';
   import { estDossier, exercicesDemo } from '../../data/demos';
   import { classerExercices, etiquetteNiveau, filiereDe, LIBELLES_FILIERE, LIBELLES_MODE, type Exercice, type Filiere } from '../../engine/exercice';
   import { EXT_COPIE, EXT_EXERCICE, ErreurFichier, importerCopie, importerExercice, statutExport, type Copie } from '../../io/fichiers';
@@ -256,7 +257,10 @@
 
   // Parcours « Apprendre » : notions maîtrisées dans ce navigateur (relu à chaque ouverture de l'accueil).
   const NB_MODULES = MODULES.length;
-  const maitrises = Object.values(lireProgression()).filter((p) => p.maitrise).length;
+  const progressionApprendre = lireProgression();
+  const maitrises = Object.values(progressionApprendre).filter((p) => p.maitrise).length;
+  /** Notions dont la révision est due : rappel sur l'accueil, l'élève n'a pas à y penser (second audit, 26.11.2026). */
+  const revisionsDues = aRevoir(progressionApprendre, new Date().toISOString().slice(0, 10)).length;
   const nbEntrainement = exercicesDemo.filter((e) => e.mode === 'entrainement').length;
 
   // Portes d'entrée : l'exercice ou l'évaluation ouvre la liste, déjà filtrée, et la fait défiler à l'écran.
@@ -392,7 +396,7 @@
           <button class="porte" onclick={() => etat.ouvrirRubrique('apprendre')}>
             <span class="porte-titre">Apprendre une notion</span>
             <span class="porte-texte">L'essentiel, un exemple travaillé et dix questions courtes, du bilan à la comptabilité analytique.</span>
-            <span class="porte-meta">{maitrises > 0 ? `${maitrises} notion${maitrises > 1 ? 's' : ''} maîtrisée${maitrises > 1 ? 's' : ''} sur ${NB_MODULES}` : `${NB_MODULES} notions`}</span>
+            <span class="porte-meta">{maitrises > 0 ? `${maitrises} notion${maitrises > 1 ? 's' : ''} réussie${maitrises > 1 ? 's' : ''} sur ${NB_MODULES}` : `${NB_MODULES} notions`}{revisionsDues > 0 ? ` · ${revisionsDues} à revoir aujourd’hui` : ''}</span>
             <span class="porte-action">{maitrises > 0 ? 'Continuer le parcours' : 'Ouvrir le parcours'} <span class="fleche" aria-hidden="true">→</span></span>
           </button>
           <button class="porte" onclick={() => allerAuChoix('entrainement')}>

@@ -199,8 +199,8 @@ export function enrichirMp(chapitres: Chapitre[]): Chapitre[] {
               {
                 type: 'contraste',
                 cas: [
-                  { titre: 'Perte de capital (art. 725a CO)', texte: ['Les actifs, déduction faite des dettes, ne couvrent plus la moitié du capital-actions et des réserves légales.'] },
-                  { titre: 'Surendettement (art. 725b CO)', texte: ['Les dettes ne sont plus couvertes par les actifs : les fonds propres sont négatifs.'] },
+                  { titre: 'Perte de capital (art. 725a CO)', texte: ['Les actifs, déduction faite des dettes, ne couvrent plus la moitié du capital-actions et des réserves légales (issues du capital et du bénéfice) qui ne sont pas remboursables aux actionnaires.'] },
+                  { titre: 'Surendettement (art. 725b CO)', texte: ['Les dettes ne sont plus couvertes par les actifs : les fonds propres sont négatifs. Dans ce cas, le conseil d’administration établit des comptes intermédiaires à la valeur d’exploitation et à la valeur de liquidation ; dans ce cours, on retient seulement des fonds propres négatifs.'] },
                 ],
               },
               {
@@ -220,7 +220,7 @@ export function enrichirMp(chapitres: Chapitre[]): Chapitre[] {
         erreurs: [
           { erreur: 'Calculer les 5 % avant de compenser la perte reportée.', correction: 'La perte reportée est déduite d’abord ; les 5 % se calculent sur ce qui reste.' },
           { erreur: "Créditer le capital-actions de l'agio.", correction: "Le capital-actions ne reçoit que la valeur nominale ; l'agio va aux Réserves légales issues du capital." },
-          { erreur: "Porter les frais de fondation à l'actif.", correction: "Ce sont des charges de l'exercice : compte FAO." },
+          { erreur: "Porter les frais de fondation à l'actif.", correction: "Ce sont des charges de l'exercice : compte FAO. Dans ce cours, les frais d'émission d'actions vont aussi en charge ; le CO (art. 671 al. 1 ch. 1) permet de les déduire de l'agio versé aux réserves légales issues du capital." },
           { erreur: 'Verser le dividende entier aux actionnaires.', correction: "La société retient 35 % d'impôt anticipé, qu'elle doit à l'AFC." },
           { erreur: 'Virer le bénéfice au capital-actions.', correction: 'Dans une société, le résultat est viré à Bénéfice reporté.' },
         ],

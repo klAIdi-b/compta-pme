@@ -362,6 +362,40 @@ export const LECONS_CFC: Record<string, PartieLecon[]> = {
   ],
 
   // --------------------------------------------------------------------------------- Livres auxiliaires
+  // ------------------------------------------- Synthèse de clôture (second audit, 26.11.2026, à relire)
+  'synthese-cfc2': [
+    {
+      titre: "1. Reconnaître l'écriture avant de la passer",
+      texte: [
+        "À la clôture, la difficulté n'est plus la règle de chaque chapitre : c'est de savoir de quel chapitre relève l'opération. Les écritures se ressemblent, il faut donc lire l'indice qui les distingue.",
+        "Cette série mêle la TVA, les amortissements, les transitoires, les créances et les salaires. Elle paraît plus difficile qu'une série d'un seul chapitre : c'est normal, et c'est justement ce qui fait progresser.",
+      ],
+      exemple: ex("Les indices qui décident du type d'écriture :", {
+        tableau: T(
+          ['Indice dans la pièce ou la note', "Type d'écriture"],
+          ['« TVA comprise », « TVA 8,1 % », « décompte du trimestre »', 'TVA : impôt préalable ou TVA due, puis décompte'],
+          ["« usure », « taux d'amortissement », « valeur comptable »", 'Amortissement, direct ou indirect selon la méthode demandée'],
+          ["« payé d'avance pour l'an prochain », « pas encore facturé »", 'Transitoire : actif ou passif selon le cas'],
+          ['« faillite », « acte de défaut de biens », « risque de perte estimé »', 'Perte sur créance, créance douteuse ou ajustement du ducroire'],
+          ['« salaire brut », « retenues », « part de l’employeur »', 'Salaire et charges sociales'],
+        ),
+      }),
+    },
+    {
+      titre: '2. Calculer, puis comptabiliser',
+      texte: [
+        "Dans les écritures de clôture, le montant se calcule presque toujours : TVA arrondie aux 5 centimes, amortissement au prorata, différence de ducroire, retenues. Faites le calcul d'abord, sur une ligne, puis choisissez les comptes.",
+      ],
+      methode: [
+        "TVA : hors taxe × taux, ou TTC × taux ÷ (100 + taux), arrondie aux 5 centimes.",
+        "Amortissement constant : valeur d'acquisition × taux ; dégressif : valeur comptable × taux ; au prorata des mois la première année.",
+        'Ducroire : ducroire nécessaire − ducroire existant ; on ne passe que la différence.',
+        'Salaire : chaque retenue = brut × taux donné, arrondie aux 5 centimes ; net = brut − retenues.',
+      ],
+      retenir: "À la clôture, lisez l'indice qui dit de quel chapitre relève l'opération, faites le calcul, puis seulement choisissez les comptes.",
+    },
+  ],
+
   'livres-auxiliaires': [
     {
       titre: '1. Un compte pour tous, un compte pour chacun',

@@ -356,8 +356,9 @@ export const GUIDE: PartieGuide[] = [
                 'le lien sur la plateforme de la classe : les élèves arrivent directement sur l’exercice.',
               'Les élèves indiquent leur nom et leur classe, travaillent, puis cliquent sur « Exporter ma copie » et vous ' +
                 'remettent le fichier.',
-              'Évaluation : « Variante d’évaluation » crée dans vos exercices une copie aux montants différents, en mode ' +
-                'évaluation. Relisez-la, exportez-la pour les élèves ; son corrigé reste chez vous.',
+              'Évaluation : « Variante d’évaluation » crée dans vos exercices une copie dont tous les montants sont ' +
+                'multipliés par un même nombre ; les opérations et les comptes ne changent pas. Modifiez au moins quelques ' +
+                'opérations, faites passer l’épreuve en classe, puis exportez-la pour les élèves ; son corrigé reste chez vous.',
               'Correction : onglet « Copies », importez les fichiers reçus (notes, erreurs, CSV, PDF).',
               'Sauvegardez vos exercices et partagez la sauvegarde avec vos collègues.',
             ],
@@ -365,8 +366,10 @@ export const GUIDE: PartieGuide[] = [
           {
             type: 'retenir',
             texte:
-              'Les exercices et dossiers fournis avec le logiciel ont des corrigés publics : utilisez-les pour l’entraînement. ' +
-              'Pour une évaluation notée, utilisez une variante ou un exercice que vous avez créé.',
+              'Les exercices et dossiers fournis avec le logiciel ont des corrigés publics : utilisez-les pour l’entraînement ' +
+              'et l’évaluation formative. Une variante seule ne suffit pas pour une note : l’élève qui connaît l’exercice ' +
+              'public retrouve les comptes et divise les montants. Pour une évaluation notée, utilisez un exercice que vous ' +
+              'avez créé, ou une variante dont vous avez modifié plusieurs opérations, en classe et sous surveillance.',
           },
         ],
       },
@@ -401,7 +404,9 @@ export const GUIDE: PartieGuide[] = [
               'Exercices : vos exercices (création, modification, import, export).',
               'Dossiers : les dossiers de pièces comptables prêts à distribuer (PDF élève, corrigé PDF, fichiers d’exercice).',
               'Copies : correction automatique des copies rendues par les élèves, notes et statistiques de la classe.',
-              'Relecture : liste de tout le contenu proposé (théorie, exercices, dossiers, niveaux des comptes) à valider ou à commenter.',
+              'Progression : tableau des notions d’Apprendre, d’après les fichiers de progression rendus par les élèves.',
+              'Simulateur : préparer et animer une partie du simulateur d’entreprise (voir « Le simulateur d’entreprise »).',
+              'Relecture : liste de tout le contenu (théorie, exercices, dossiers, niveaux des comptes) à commenter.',
               'Paramètres : changement du code d’accès.',
             ],
           },
@@ -424,14 +429,14 @@ export const GUIDE: PartieGuide[] = [
               'Informations générales : titre, raison sociale, forme juridique, dates de l’exercice, formation (CFC ou ' +
                 'maturité), niveau de difficulté, mode (entraînement ou évaluation), sujets traités (un par ligne), ' +
                 'introduction et situation de départ présentée à l’élève.',
-              '« Comptes et fonctions » (CFC 1re, CFC 2e, MP) fixe les comptes et les fonctions disponibles (TVA, fiches…). ' +
+              '« Comptes et fonctions » (1ère CFC, 2ème CFC, maturité) fixe les comptes et les fonctions disponibles (TVA, fiches…). ' +
                 'Dans « Comptes de l’exercice », cochez ou décochez ensuite les comptes proposés aux élèves.',
               "Bilan d'ouverture : choisissez les comptes et tapez les montants ; l'équilibre actif = passif est contrôlé.",
               "Opérations de l'énoncé : pour chacune, un numéro, une date, le texte et les points en évaluation. Le numéro " +
                 "de l'opération est le numéro de pièce que l'élève inscrit dans le journal.",
               'Options : SI/SF ou San/Spb dans les comptes en T, bouclement par le compte 9000 ou intégration à la ' +
                 'réouverture, correction des écritures de bouclement, TVA au net ou au brut, fiche « Décompte de salaire », ' +
-                'calculatrice de TVA, modification directe des écritures validées, répartition du bénéfice (sociétés).',
+                'calculatrice de TVA, répartition du bénéfice (sociétés).',
               '« Saisir le corrigé dans le journal » : passez les écritures exactement comme un élève, puis enregistrez le ' +
                 'corrigé. Votre éventuel travail d’élève est mis de côté puis restauré.',
               'Vérifiez le cadre « Contrôle de l’exercice » en bas de page : il liste ce qui manque. Quand il indique ' +
@@ -560,19 +565,24 @@ export const GUIDE: PartieGuide[] = [
           {
             type: 'p',
             texte:
-              'Le parcours « Apprendre pas à pas » compte sept modules pour la 1ère CFC : le bilan, débit et crédit, ' +
+              'Le parcours « Apprendre pas à pas » compte huit modules pour la 1ère CFC : le bilan, débit et crédit, ' +
               'charges et produits, factures, dettes et créances, le compte privé, achats et ventes de marchandises, ' +
-              'puis une synthèse. Chaque module correspond à un chapitre de la théorie.',
+              'une synthèse, puis « Classer les pièces ». La 2ème CFC a en plus une synthèse des écritures de clôture. ' +
+              'Chaque module correspond à un chapitre de la théorie.',
           },
           {
             type: 'etapes',
             items: [
+              '5 minutes, en début d’heure : faites ouvrir la « Révision du jour » (deux questions par notion à confirmer).',
               '5 minutes, en classe entière : projetez l’objectif et « L’essentiel » du module ; ouvrez la théorie si besoin.',
               '10 minutes : déroulez l’exemple travaillé au projecteur en faisant répondre la classe aux trois questions ' +
                 '(quels comptes, de quel type, augmente ou diminue).',
-              '15 à 25 minutes, individuellement : chaque élève fait une série ; ceux qui n’atteignent pas 8 sur 10 recommencent ' +
-                '(nouvelle série). Circulez auprès de ceux qui échouent deux fois.',
-              '5 minutes : faites le point à main levée (qui a maîtrisé ?) et annoncez le module suivant.',
+              '15 à 25 minutes, individuellement : l’entraînement guidé (trois questions avec une aide qui diminue), puis une ' +
+                'série. La notion est réussie à 8 points sur 10, avec au moins la moitié des points dans chaque type de ' +
+                'question ; sinon, nouvelle série. Circulez auprès de ceux qui échouent deux fois.',
+              '5 minutes : projetez une question pour la classe (« Projeter une question »), faites répondre chacun en même ' +
+                'temps sur une ardoise ou une carte A, B, C, D, puis révélez la réponse. Évitez le « qui a réussi ? » à main ' +
+                'levée, qui expose les élèves en difficulté.',
               'Après les modules 1 à 5, donnez un exercice complet de niveau 1 (par exemple Cycles du Léman) ; après le module 6, ' +
                 'un exercice avec marchandises. Le journal terminé, le logiciel guide l’élève jusqu’au bouclement.',
             ],
@@ -581,7 +591,9 @@ export const GUIDE: PartieGuide[] = [
             type: 'retenir',
             texte:
               'Les séries sont générées : deux voisins n’ont pas les mêmes questions, et un élève peut s’entraîner autant qu’il le faut. ' +
-              'La progression reste dans le navigateur de l’élève (aucune donnée en ligne).',
+              'La progression reste dans le navigateur de l’élève (aucune donnée en ligne). Une notion réussie une fois devient ' +
+              '« confirmée » après deux révisions réussies, deux jours différents ; une révision ratée la rend « à raviver », ' +
+              'sans rien retirer.',
           },
         ],
       },
@@ -593,8 +605,9 @@ export const GUIDE: PartieGuide[] = [
             type: 'liste',
             items: [
               'Onglet « Progression » : importez les fichiers de progression rendus par les élèves. Le tableau montre, pour ' +
-                'chaque élève et chaque notion, « M » (maîtrisé), le meilleur score ou « – » (pas commencé), et le nombre ' +
-                'd’élèves qui maîtrisent chaque notion.',
+                'chaque élève et chaque notion, « C » (confirmée), « R » (réussie une fois), « À » (à raviver), le meilleur ' +
+                'score ou « – » (pas commencé). Ce fichier est rempli par l’élève : il renseigne sur son travail, il ne ' +
+                'prouve pas la maîtrise et ne doit pas servir à noter.',
               '« Projeter une question pour la classe » (dans chaque module d’Apprendre) affiche une question en grand : ' +
                 'la classe répond à main levée, puis vous révélez la réponse et l’explication.',
             ],
@@ -657,8 +670,32 @@ export const GUIDE: PartieGuide[] = [
             type: 'retenir',
             texte:
               "Vos avis restent dans ce navigateur et sont inclus dans votre sauvegarde. Ils ne changent pas ce que voient les " +
-              "élèves : transmettez le fichier de remarques pour que le contenu officiel soit corrigé et que la mention " +
-              "« proposé » disparaisse.",
+              "élèves : transmettez le fichier de remarques pour que le contenu officiel soit corrigé.",
+          },
+        ],
+      },
+      {
+        id: 'simulateur',
+        titre: 'Le simulateur d’entreprise',
+        blocs: [
+          {
+            type: 'p',
+            texte:
+              'Des groupes d’élèves dirigent chacun une entreprise sur un marché commun : à chaque tour (un mois ou un ' +
+              'trimestre), ils décident des achats, du prix et de la publicité ; le logiciel calcule les ventes et le ' +
+              'résultat, et la comptabilité est saisie par les élèves ou passée automatiquement, selon votre choix.',
+          },
+          {
+            type: 'etapes',
+            items: [
+              'Onglet « Simulateur » : créez une partie (niveau, nombre de tours, durée d’un tour, secteurs, groupes).',
+              'Sans connexion : chaque groupe vous remet son fichier de décisions ; vous l’importez, puis vous jouez le tour ' +
+                'et rendez à chaque groupe le fichier de sa situation.',
+              'En ligne (facultatif) : il faut un projet Supabase à vous ; les étapes sont décrites dans le document ' +
+                '« simulateur-mise-en-ligne » du dépôt. Seules des données de jeu anonymes sont échangées.',
+              'Imprévus : vous pouvez déclencher une hausse d’un fournisseur ou un client insolvable pendant la partie.',
+              'Projection : le classement entre groupes s’affiche par défaut ; débattez-en après la partie.',
+            ],
           },
         ],
       },
@@ -670,7 +707,9 @@ export const GUIDE: PartieGuide[] = [
             type: 'p',
             texte:
               "Le logiciel fonctionne entièrement dans le navigateur. Aucune donnée d'élève n'est envoyée sur internet : les " +
-              'échanges se font uniquement par fichiers. Les copies importées dans l’onglet « Copies » ne sont pas ' +
+              'échanges se font uniquement par fichiers. Seule exception : la partie en ligne du simulateur d’entreprise, si ' +
+              'vous la lancez, échange des données de jeu anonymes (code de partie, nom d’équipe, décisions, résultats), ' +
+              'jamais un nom d’élève, une écriture ou une note. Les copies importées dans l’onglet « Copies » ne sont pas ' +
               'enregistrées : conservez les fichiers reçus. Vider les données du navigateur efface vos exercices : gardez ' +
               'toujours la version enseignant de chacun.',
           },

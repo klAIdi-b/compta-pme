@@ -351,8 +351,8 @@ export const propJardinsMorel: Exercice = {
   debut: '2026-01-01',
   fin: '2026-12-31',
   introduction:
-    "Thierry Morel exploite en raison individuelle l'entreprise de paysagisme Jardins Morel, à Bernex. L'entreprise " +
-    "n'est pas assujettie à la TVA. Elle emploie Kevin, jardinier (salaire brut 5'400.00 par mois), et Sofia, employée " +
+    "Thierry Morel exploite en raison individuelle l'entreprise de paysagisme Jardins Morel, à Bernex. Pour cet exercice, " +
+    "la TVA est laissée de côté. Elle emploie Kevin, jardinier (salaire brut 5'400.00 par mois), et Sofia, employée " +
     "de bureau à mi-temps (salaire brut 2'600.00 par mois). Retenues sur les salaires : AVS/AI/APG/AC 6,4 % ; LPP selon " +
     "le certificat de la caisse de pension, Kevin 210.00 et Sofia 95.00 par mois. L'employeur verse les mêmes montants " +
     `que les employés (AVS/AI/APG/AC 6,4 % et LPP). ${CONSIGNE} Les montants sont arrondis aux 5 centimes.`,

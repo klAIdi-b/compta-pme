@@ -196,3 +196,12 @@ Corrections faites une à une, sur accord de l'enseignant, d'abord sur `apercu`.
   guide « Rendre son travail » complété. Non fait : progression Apprendre rattachée à un nom d'élève. À commiter et
   publier sur accord.
 - [ ] Les autres actions de la vague 2 : en attente.
+
+# Suites du second audit (rapport `AUDIT_COMPTA_PME_2.md`, 26.11.2026)
+
+- [x] 26.11.2026 : les cinq problèmes principaux corrigés d'une traite, à la demande de l'enseignant (« ne me demande pas
+  validation, fais tout d'une traite »), sur `apercu` : réponses justes refusées et messages faux, évaluation (formative
+  pour les dossiers fournis, fichier sans réponses, contrôles à l'import, maximum fixe), signal de maîtrise (révision à
+  deux questions, états confirmée et à raviver), retours (explications, calculs de 2ème CFC, synthèse de clôture),
+  conventions du cours. Détail dans `CLAUDE.md`. Reste : relecture de l'enseignant, puis fusion dans `main` sur son accord.
+- [ ] Points du rapport laissés à la décision de l'enseignant (section 8.3) : non traités.

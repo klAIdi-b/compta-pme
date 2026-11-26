@@ -80,7 +80,7 @@ export const dossierGarage = construireDossier(
     debut: '2026-01-01',
     fin: '2026-12-31',
     introduction:
-      "L'entreprise n'est pas assujettie à la TVA. Les réparations facturées aux clients sont des produits des travaux. " +
+      "Pour cet exercice, la TVA est laissée de côté. Les réparations facturées aux clients sont des produits des travaux. " +
       "Commencez par la fiche « Bilan d'ouverture », comptabilisez les douze pièces, puis passez les écritures de " +
       'bouclement au 31.12.2026 (aucune autre opération jusqu’à cette date).',
     situation:
@@ -206,7 +206,7 @@ export const dossierHifi = construireDossier(
     debut: '2026-01-01',
     fin: '2026-12-31',
     introduction:
-      "L'entreprise n'est pas assujettie à la TVA. Comptabilisez les douze pièces ; la dernière est l'inventaire de fin " +
+      "Pour cet exercice, la TVA est laissée de côté. Comptabilisez les douze pièces ; la dernière est l'inventaire de fin " +
       "d'exercice. Remplissez ensuite la fiche « Marge brute » d'après vos comptes, puis passez les écritures de " +
       'bouclement au 31.12.2026.',
     situation:

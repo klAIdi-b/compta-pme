@@ -24,3 +24,33 @@ export function dossierDeCopie(ex: Exercice, plan: Compte[], copie: Pick<Dossier
   }
   return ok(d);
 }
+
+/**
+ * Contrôles d'une copie importée par l'enseignant (second audit, 26.11.2026) : la copie est rejouée comme à la reprise,
+ * et son mode est comparé à celui de l'exercice. Rend les alertes à afficher (vide si tout est en ordre).
+ */
+export function alertesCopie(
+  ex: Exercice,
+  plan: Compte[],
+  copie: { mode?: Exercice['mode']; dossier: Pick<Dossier, 'debut' | 'fin' | 'ecritures'> },
+): string[] {
+  const alertes: string[] = [];
+  if (ex.mode !== 'entrainement' && copie.mode === 'entrainement') {
+    alertes.push("La copie a été faite en mode entraînement alors que l'exercice est une évaluation : le fichier d'exercice a sans doute été modifié.");
+  }
+  const r = dossierDeCopie(ex, plan, copie.dossier);
+  if (!r.ok) alertes.push(`Le journal de la copie ne passe pas les contrôles du logiciel (${r.erreurs.join(' ')}) : la copie a pu être modifiée à la main.`);
+  return alertes;
+}
+
+/** Groupes de copies dont les écritures sont identiques (mêmes pièces, comptes et montants, sans tenir compte des dates). */
+export function copiesIdentiques<T>(copies: readonly T[], ecritures: (c: T) => readonly { piece: string; lignes: unknown; automatique?: boolean }[]): T[][] {
+  const groupes = new Map<string, T[]>();
+  for (const c of copies) {
+    const e = ecritures(c).filter((x) => !x.automatique);
+    if (e.length === 0) continue;
+    const k = JSON.stringify(e.map((x) => [x.piece, x.lignes]));
+    groupes.set(k, [...(groupes.get(k) ?? []), c]);
+  }
+  return [...groupes.values()].filter((g) => g.length > 1);
+}

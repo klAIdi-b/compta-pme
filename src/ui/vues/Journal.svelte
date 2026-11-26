@@ -5,7 +5,7 @@
   import { vueEleve } from '../modes';
   import { comptesDisponibles } from '../../engine/dossier';
   import { ajouterEcriture, estExtournee, extourner, modifierEcriture, nouvelId, supprimerEcriture } from '../../engine/journal';
-  import { diagnostiquer, ecrituresRetenues, enregistrerTentative, solutionDisponible, INDICES, type Diagnostic } from '../../engine/correction';
+  import { diagnostiquer, ecrituresRetenues, enregistrerTentative, solutionDisponible, indiceNiveau2, INDICES, type Diagnostic } from '../../engine/correction';
   import { erreurTypique } from '../../engine/erreurs-typiques';
   import { raisonnementEcriture } from '../../engine/raisonnement';
   import { SOMMAIRE } from '../../data/theorie-index';
@@ -137,6 +137,28 @@
     if (ancien) etat.majSuivi({ ...suivi, [p]: { ...ancien, solutionVue: true } });
   }
 
+  /**
+   * Solution masquée pendant que l'élève corrige l'opération (second audit, 26.11.2026) : dès qu'une ligne de cette
+   * pièce est saisie dans la grille, la solution se cache, pour qu'il la retrouve de mémoire au lieu de la recopier.
+   * « Revoir la solution » la rouvre jusqu'à la validation suivante ; chaque fois est compté dans le suivi.
+   */
+  let solutionRevue = $state<string | null>(null);
+  function solutionMasquee(kc: string): boolean {
+    return kc !== PIECE_BOUCLEMENT && cle(piece) === kc && utiles.length > 0 && solutionRevue !== kc;
+  }
+  function revoirSolution(kc: string) {
+    solutionRevue = kc;
+    const ancien = suivi[kc];
+    if (ancien) etat.majSuivi({ ...suivi, [kc]: { ...ancien, revues: (ancien.revues ?? 0) + 1 } });
+  }
+  /** Indice du 2e niveau : la forme de l'écriture attendue, après une deuxième tentative fausse. */
+  function indice2(kc: string): string | null {
+    if (kc === PIECE_BOUCLEMENT) return null;
+    const s = suivi[kc];
+    const c = corrigeParPiece.get(kc);
+    return s && c && s.essais >= 2 && !s.solutionVue ? indiceNiveau2(c) : null;
+  }
+
   let editionId = $state<string | null>(null);
   let voirPiece = $state(true);
   /** Dernière pièce validée : son verdict s'affiche sous la saisie jusqu'à la validation suivante. */
@@ -200,6 +222,7 @@
 
   function reinitialiser() {
     editionId = null;
+    solutionRevue = null;
     // Pendant le bouclement, la grille propose l'étape suivante (B2 après B1…).
     const etape = etapeCourante;
     const suivante = etape ? etapes.slice(etapes.indexOf(etape) + 1).find((e) => !etapesFaites.has(e.piece)) : undefined;
@@ -394,7 +417,12 @@
 <!-- Solution d'une opération (ou écritures de bouclement attendues), une fois demandée par l'élève. -->
 {#snippet solutionDetail(kc: string)}
   {@const solution = suivi[kc]?.solutionVue ? solutionDe(kc) : null}
-  {#if solution}
+  {#if solution && solutionMasquee(kc)}
+    <p class="solution-masquee">
+      Solution masquée pendant votre correction : retrouvez l'écriture de mémoire.
+      <button class="btn-lien solution" onclick={() => revoirSolution(kc)}>Revoir la solution</button>
+    </p>
+  {:else if solution}
     <div class="solution-detail">
       <b>{kc === PIECE_BOUCLEMENT ? 'Écritures de bouclement attendues, d\'après vos comptes :' : `Solution de l'opération ${kc} :`}</b>
       <table>
@@ -472,7 +500,14 @@
             <div><b>Juste.</b> {nomV} : écriture correcte.{#if suite}{' '}Passez à l'opération {suite.numero}.{/if}</div>
           </div>
         {:else if st === 'incomplete'}
-          <div class="message avert">{@render picto('avert')}<div><b>{nomV} : incomplète.</b><p>{INDICES.incomplete}</p></div></div>
+          <div class="message avert">
+            {@render picto('avert')}
+            <div>
+              <b>{nomV} : incomplète.</b><p>{INDICES.incomplete}</p>
+              <div class="actions-message">{@render liensAide(kc, st)}</div>
+              {@render solutionDetail(kc)}
+            </div>
+          </div>
         {:else}
           {@const typique = st === 'compte' || st === 'compte_classe' || st === 'erronee' ? erreurTypiqueDe(kc) : null}
           <div class="message erreur">
@@ -480,6 +515,7 @@
             <div>
               <b>{nomV} : à revoir.</b>
               <p>{INDICES[st]}{kc === PIECE_BOUCLEMENT ? ' (Écritures de bouclement prises ensemble.)' : ''}</p>
+              {#if indice2(kc)}<p><b>Indice :</b> {indice2(kc)}</p>{/if}
               {#if typique}<p class="pourquoi-verdict"><b>Pourquoi ?</b> {typique.explication}</p>{/if}
               <div class="actions-message">
                 {#if eV && modifiable(eV)}<button class="btn btn-petit" onclick={() => modifier(eV)}>Corriger l'écriture</button>{/if}
@@ -748,10 +784,12 @@
                   <td class="vide-mobile"></td><td class="vide-mobile"></td>
                   <td colspan="6" class="t-retour">
                     {#if st === 'incomplete'}
-                      <div class="retour neutre">{INDICES.incomplete}</div>
+                      <div class="retour neutre">{INDICES.incomplete} {@render liensAide(kc, st)}</div>
+                      {@render solutionDetail(kc)}
                     {:else}
                       <div class="retour">
                         <b>Indice :</b> {INDICES[st]}
+                        {#if indice2(kc)}{indice2(kc)}{/if}
                         {kc === PIECE_BOUCLEMENT ? '(Écritures de bouclement prises ensemble.) ' : ''}
                         {modifAutorisee
                           ? "Modifiez l'écriture (bouton Modifier ou double-clic sur la ligne), ou supprimez-la."
@@ -933,6 +971,7 @@
   .retour.neutre { background: var(--c-fond-2); border-left-color: var(--c-bordure); color: var(--c-texte-2); }
   .retour.pourquoi { margin-top: 6px; background: var(--c-fond); border-left-color: var(--c-structure); }
   .solution { margin-left: 8px; font-weight: bold; }
+  .solution-masquee { margin: 6px 0 0; font-size: var(--t-13); color: var(--c-texte-2); }
   .solution-detail { margin-top: 6px; padding: 6px 10px; border-left: 4px solid var(--c-structure); background: var(--c-selection); font-size: var(--t-13); }
   .solution-detail table { margin-top: 4px; width: auto; }
   .raisonnement-titre { margin: 8px 0 2px; font-weight: 600; }

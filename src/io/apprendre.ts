@@ -17,6 +17,15 @@ export interface ProgressionModule {
   le: string;
   /** Révision espacée : prochaine échéance, dès que la notion est maîtrisée. */
   revision?: EtatRevision;
+  /** Révisions réussies à des jours distincts (« confirmée » à partir de deux). */
+  confirmations?: number;
+  /** Jour (AAAA-MM-JJ) de la dernière révision réussie. */
+  derniereConfirmation?: string;
+  /** Dernière révision ratée : la notion est « à raviver », sans rien perdre. */
+  aRaviver?: boolean;
+  /** Score de la dernière série (le progrès se lit sur le dernier score, pas seulement sur le meilleur). */
+  dernier?: number;
+  dernierSur?: number;
 }
 
 export type Progression = Record<string, ProgressionModule>;
@@ -38,6 +47,10 @@ export function enregistrerSerie(p: Progression, module: string, justes: number,
       series: (a?.series ?? 0) + 1,
       le: new Date().toISOString(),
       revision: a?.revision ?? (maitrise ? premiereRevision(new Date().toISOString().slice(0, 10)) : undefined),
+      ...(a?.confirmations ? { confirmations: a.confirmations, derniereConfirmation: a.derniereConfirmation } : {}),
+      ...(a?.aRaviver ? { aRaviver: true } : {}),
+      dernier: justes,
+      dernierSur: sur,
     },
   };
   ecrire(r, CLE_APPRENDRE);
@@ -48,7 +61,18 @@ export function enregistrerSerie(p: Progression, module: string, justes: number,
 export function enregistrerRevision(p: Progression, module: string, reussie: boolean): Progression {
   const a = p[module];
   if (!a?.revision) return p;
-  const r: Progression = { ...p, [module]: { ...a, revision: apresRevision(a.revision, reussie, new Date().toISOString().slice(0, 10)) } };
+  const jour = new Date().toISOString().slice(0, 10);
+  const confirme = reussie && a.derniereConfirmation !== jour;
+  const r: Progression = {
+    ...p,
+    [module]: {
+      ...a,
+      revision: apresRevision(a.revision, reussie, jour),
+      confirmations: (a.confirmations ?? 0) + (confirme ? 1 : 0),
+      ...(confirme ? { derniereConfirmation: jour } : {}),
+      aRaviver: !reussie,
+    },
+  };
   ecrire(r, CLE_APPRENDRE);
   return r;
 }
@@ -78,6 +102,19 @@ export function fusionnerProgression(ici: Progression, fichier: Progression): Pr
       le: a.le > b.le ? a.le : b.le,
       revision: revisions[0],
     };
+    // Champs ajoutés au second audit (26.11.2026), seulement s'ils existent : l'état le plus récent l'emporte pour
+    // « à raviver » et le dernier score ; les confirmations ne se perdent pas.
+    const recent = a.le > b.le ? a : b;
+    const confirmations = Math.max(a.confirmations ?? 0, b.confirmations ?? 0);
+    const derniere = [a.derniereConfirmation, b.derniereConfirmation].filter((x): x is string => !!x).sort().pop();
+    const m = r[id]!;
+    if (confirmations) m.confirmations = confirmations;
+    if (derniere) m.derniereConfirmation = derniere;
+    if (recent.aRaviver) m.aRaviver = true;
+    if (recent.dernier !== undefined) {
+      m.dernier = recent.dernier;
+      m.dernierSur = recent.dernierSur;
+    }
   }
   return r;
 }

@@ -104,7 +104,9 @@ export const dossierTerroirs = construireDossier(
     introduction:
       "Pour ce dossier, la TVA est laissée de côté. Les pièces en euros se comptabilisent en francs au cours indiqué : cours " +
       "vente pour un paiement à l'étranger, cours achat pour un encaissement. La différence de change est passée dans le " +
-      "compte de la marchandise. Les rabais et les escomptes ont leurs comptes de déductions.",
+      "compte de la marchandise. Les rabais et les escomptes ont leurs comptes de déductions. Par simplification, " +
+      "l'impôt anticipé retenu sur les intérêts est porté en Créances AFC, comme pour une société ; pour une raison " +
+      "individuelle, le propriétaire le récupère en pratique dans sa déclaration d'impôt (art. 30 LIA).",
     situation:
       "Terroirs du Monde est une épicerie fine de la Vieille-Ville de Genève, tenue par Sophie Marchand. Elle importe des " +
       "huiles et des vinaigres d'Italie, revend des produits suisses à des restaurants genevois et livre depuis peu une " +
@@ -192,7 +194,7 @@ export const dossierZufferey = construireDossier(
     debut: '2026-01-01',
     fin: '2026-12-31',
     introduction:
-      "L'atelier n'est pas assujetti à la TVA pour ce dossier. Le salaire du propriétaire et l'intérêt sur son capital sont " +
+      "Pour ce dossier, la TVA est laissée de côté. Le salaire du propriétaire et l'intérêt sur son capital sont " +
       "des écritures internes : la contrepartie est le compte Privé. Terminez par les écritures de bouclement, puis calculez " +
       "le revenu de l'entrepreneur (salaire + intérêt + bénéfice).",
     situation:

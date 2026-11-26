@@ -94,7 +94,9 @@ export const dossierConfiserie = construireDossier(
     introduction:
       'Les retenues sur le salaire sont portées dans le compte de dette de chaque assurance (AVS/AI/APG et AC à la même ' +
       'caisse de compensation) ; le salaire net est viré par la banque. Les charges de l’employeur sont comptabilisées en ' +
-      'charges sociales. Comptabilisez les dix pièces de juin et de début juillet.',
+      'charges sociales. Les cotisations LPP sont données sur les fiches : elles ont été calculées avec les montants de ' +
+      'la prévoyance professionnelle de 2022 (déduction de coordination de cette année-là), non avec ceux de 2026. ' +
+      'Comptabilisez les dix pièces de juin et de début juillet.',
     situation:
       "La Confiserie du Bourg-de-Four, dans la vieille ville, appartient à Nadia Favre. Quatre personnes y travaillent : " +
       "Daniela Rosset aux finances, Marc Blanc, chef comptable proche de la retraite, Géraldine Caloz au marketing à temps " +

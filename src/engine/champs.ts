@@ -13,15 +13,50 @@ export interface ChampAttendu {
    */
   type: 'chf' | 'pc' | 'nombre' | 'date' | 'texte' | 'compte' | 'choix';
   attendu: string | Centimes | number;
+  /** Montant : écart admis en centimes (0 par défaut, au centime). */
+  tolerance?: Centimes;
 }
 
-const normaliser = (s: string) => s.trim().replace(/\s+/g, ' ').toLocaleLowerCase('fr');
+/**
+ * Comparaison d'un texte (nom du bénéficiaire, désignation) sans compter l'orthographe : accents, majuscules,
+ * ponctuation et forme juridique ignorés, faute de frappe tolérée (règle de l'école : l'orthographe n'est pas évaluée).
+ */
+const FORMES = /\b(sa|sarl|ag|gmbh|snc|sc)\b/g;
+function simplifier(s: string): string {
+  return s
+    .toLocaleLowerCase('fr')
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[.,;:'’‘"«»()-]/g, ' ')
+    .replace(FORMES, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+function distance(a: string, b: string): number {
+  const p = Array.from({ length: b.length + 1 }, (_, j) => j);
+  for (let i = 1; i <= a.length; i++) {
+    let diag = p[0]!;
+    p[0] = i;
+    for (let j = 1; j <= b.length; j++) {
+      const haut = p[j]!;
+      p[j] = Math.min(p[j]! + 1, p[j - 1]! + 1, diag + (a[i - 1] === b[j - 1] ? 0 : 1));
+      diag = haut;
+    }
+  }
+  return p[b.length]!;
+}
+export function textesProches(saisie: string, attendu: string): boolean {
+  const a = simplifier(saisie);
+  const b = simplifier(attendu);
+  if (a === '' || b === '') return a === b;
+  return distance(a, b) <= Math.max(1, Math.floor(b.length / 10));
+}
 const sansEspaces = (s: string) => s.replace(/\s+/g, '').toUpperCase();
 /** Le signe moins typographique (−) est accepté comme un tiret. */
 const moins = (s: string) => s.replace(/[−–]/g, '-');
 
 function lireNombre(s: string): number | null {
-  const t = moins(s).replace(/['\s]/g, '').replace(',', '.').replace('%', '');
+  const t = moins(s).replace(/chf/gi, '').replace(/['’‘\s  ]/g, '').replace(',', '.').replace('%', '');
   if (t === '' || Number.isNaN(Number(t))) return null;
   return Number(t);
 }
@@ -31,8 +66,10 @@ export function controlerChamp(ch: ChampAttendu, saisie: string | undefined, ann
   const brut = (saisie ?? '').trim();
   if (brut === '') return null;
   switch (ch.type) {
-    case 'chf':
-      return lireMontant(moins(brut)) === ch.attendu;
+    case 'chf': {
+      const v = lireMontant(moins(brut).replace(/chf/gi, ''));
+      return v !== null && Math.abs(v - (ch.attendu as number)) <= (ch.tolerance ?? 0);
+    }
     case 'pc': {
       const n = lireNombre(brut);
       return n !== null && Math.abs(n - (ch.attendu as number)) <= 0.1 + 1e-9;
@@ -44,7 +81,7 @@ export function controlerChamp(ch: ChampAttendu, saisie: string | undefined, ann
     case 'date':
       return lireDate(brut, annee) === (ch.attendu as DateISO);
     case 'texte':
-      return normaliser(brut) === normaliser(String(ch.attendu));
+      return textesProches(brut, String(ch.attendu));
     case 'compte':
       return sansEspaces(brut) === sansEspaces(String(ch.attendu));
     case 'choix':
