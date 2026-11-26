@@ -296,6 +296,55 @@ export function credit(q: Question, r: Reponse): number {
 /** Seuil de maîtrise d'une série : 8 réponses justes sur 10 (arrondi au supérieur pour une autre longueur). */
 export const seuilMaitrise = (n: number) => Math.ceil(n * 0.8);
 
+/** Nom d'un format de question, tel qu'il est montré à l'élève dans le bilan d'une série. */
+export const NOM_FORMAT: Record<Question['format'], string> = {
+  classer: 'Classer un compte',
+  variation: 'Variation du bilan',
+  ecriture: "Passer l'écriture",
+  operation: "Retrouver l'opération",
+  erreur: "Trouver l'écriture fausse",
+  solde: "Solde d'un compte en T",
+  calcul: 'Calculs',
+  qcm: 'Questions à choix',
+  composee: 'Écritures composées',
+};
+
+export interface BilanFormat {
+  format: Question['format'];
+  points: number;
+  sur: number;
+  /** Minimum à atteindre dans ce format : la moitié de ses points. */
+  minimum: number;
+  atteint: boolean;
+}
+
+export interface BilanSerie {
+  points: number;
+  sur: number;
+  /** Formats de la série ; le minimum ne s'applique que si la série en mêle plusieurs. */
+  parFormat: BilanFormat[];
+  /** 8 points sur 10 et, dans une série à plusieurs formats, au moins la moitié des points de chaque format. */
+  reussie: boolean;
+}
+
+/**
+ * Bilan d'une série (audit du 24.11.2026, action 7) : la notion n'est réussie qu'avec le seuil de maîtrise et, quand
+ * la série mêle plusieurs formats, au moins la moitié des points dans chacun. On ne réussit donc pas une notion en
+ * passant les écritures sans savoir retrouver l'opération ou repérer une écriture fausse.
+ */
+export function bilanSerie(resultats: readonly { format: Question['format']; part: number }[]): BilanSerie {
+  const points = resultats.reduce((t, r) => t + r.part, 0);
+  const sur = resultats.length;
+  const formats = [...new Set(resultats.map((r) => r.format))];
+  const parFormat = formats.map((format) => {
+    const ici = resultats.filter((r) => r.format === format);
+    const p = ici.reduce((t, r) => t + r.part, 0);
+    const minimum = ici.length / 2;
+    return { format, points: p, sur: ici.length, minimum, atteint: formats.length < 2 || p >= minimum - 1e-9 };
+  });
+  return { points, sur, parFormat, reussie: sur > 0 && points >= seuilMaitrise(sur) - 1e-9 && parFormat.every((f) => f.atteint) };
+}
+
 // ---------- Exemple travaillé ----------
 
 /**

@@ -68,6 +68,21 @@ test('apprendre pas à pas : un module, son exemple, une question corrigée tout
   await expect(page.getByRole('button', { name: /Question suivante|Voir le résultat/ })).toBeVisible();
 });
 
+test('apprendre : une notion réussie une seule fois reste « à confirmer »', async ({ page }) => {
+  await page.goto('./');
+  await page.evaluate(() => {
+    const demain = new Date(Date.now() + 86_400_000).toISOString().slice(0, 10);
+    const dans3 = new Date(Date.now() + 3 * 86_400_000).toISOString().slice(0, 10);
+    const p = (rang: number, prochaine: string) => ({ meilleur: 9, sur: 10, maitrise: true, series: 1, le: new Date().toISOString(), revision: { rang, prochaine } });
+    localStorage.setItem('compta-pme:apprendre:v1', JSON.stringify({ bilan: p(0, demain), comptes: p(1, dans3) }));
+  });
+  await page.reload();
+  await page.getByRole('button', { name: /Ouvrir le parcours|Continuer le parcours/ }).click();
+  await expect(page.locator('.module', { hasText: 'Le bilan : actif ou passif' }).locator('.etat')).toContainText('Réussie une fois · à confirmer le');
+  await expect(page.locator('.module', { hasText: 'Débit et crédit : opérations du bilan' }).locator('.etat')).toContainText('Maîtrisé · prochaine révision le');
+  await expect(page.locator('.intro')).toContainText('au moins la moitié des points dans chaque type de question');
+});
+
 test('formulaire officiel de décompte TVA dans l’écran TVA', async ({ page }) => {
   await ouvrirParLien(page, 'demo-cfc2-papeterie-arve');
   await page.getByRole('link', { name: 'TVA' }).click();

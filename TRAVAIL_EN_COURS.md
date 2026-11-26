@@ -181,4 +181,10 @@ Corrections faites une à une, sur accord de l'enseignant, d'abord sur `apercu`.
   (`raisonnementEcriture`, écritures simples et composées, d'après le solde de chaque compte ; même texte que l'exemple
   travaillé d'Apprendre) ; pas de raisonnement automatique pour les comptes correctifs 1xx9, 3209, 4209, 3805, 4280,
   2970 ni pour le bouclement. À commiter et publier sur accord.
+- [x] Raisonnement sous la solution : fusionné dans main le 25.11.2026.
+- [x] Maîtrise avec un minimum par format (26.11.2026, action 7) : `bilanSerie` dans `exercices-courts.ts` (8 points sur
+  10 et, si la série mêle plusieurs formats, au moins la moitié des points de chaque format) ; bilan de la série avec
+  le tableau « Par type de question » et les formats sous le minimum ; liste des modules : « Réussie une fois · à
+  confirmer le … » tant qu'aucune révision n'est réussie, puis « Maîtrisé · prochaine révision le … ». Paliers
+  « Confirmée » et « Ancrée » non faits (gamification, mécanique 1). À commiter et publier sur accord.
 - [ ] Les autres actions de la vague 2 : en attente.

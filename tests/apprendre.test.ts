@@ -3,7 +3,7 @@ import { MODELES, MODULES, modeleParId } from '../src/data/apprendre';
 import { plan } from '../src/data/plan';
 import { exercicesDemo } from '../src/data/demos';
 import {
-  estJuste, genererSerie, raisonnement, seuilMaitrise, sensVariation, variationBilan, type ContexteSerie,
+  bilanSerie, estJuste, genererSerie, raisonnement, seuilMaitrise, sensVariation, variationBilan, type ContexteSerie,
 } from '../src/engine/exercices-courts';
 
 const contexte = (id: string): ContexteSerie => {
@@ -98,5 +98,32 @@ describe('exercices courts générés', () => {
     expect(r[1]).toContain('au débit');
     expect(r[2]).toContain('compte de passif');
     expect(seuilMaitrise(10)).toBe(8);
+  });
+
+  it('maîtrise : 8 points sur 10 et au moins la moitié des points dans chaque format de la série', () => {
+    type F = 'classer' | 'ecriture' | 'operation' | 'erreur';
+    const serie = (parts: [F, number][]) => bilanSerie(parts.map(([format, part]) => ({ format, part })));
+    // Série type d'un module de 1ère CFC : 4 écritures, 2 classer, 2 opérations, 2 écritures fausses.
+    const base: [F, number][] = [['ecriture', 1], ['ecriture', 1], ['ecriture', 1], ['ecriture', 1], ['classer', 1], ['classer', 1], ['operation', 1], ['operation', 1]];
+    // 8 sur 10, mais aucune écriture fausse trouvée : pas réussie.
+    const sansErreur = serie([...base, ['erreur', 0], ['erreur', 0]]);
+    expect(sansErreur.points).toBe(8);
+    expect(sansErreur.reussie).toBe(false);
+    expect(sansErreur.parFormat.filter((f) => !f.atteint)).toEqual([{ format: 'erreur', points: 0, sur: 2, minimum: 1, atteint: false }]);
+    // 8 sur 10 avec une écriture fausse trouvée sur deux : réussie.
+    const b2: [F, number][] = [...base];
+    b2[0] = ['ecriture', 0];
+    expect(serie([...b2, ['erreur', 1], ['erreur', 0]]).reussie).toBe(true);
+    // 7 sur 10 : pas réussie, même avec tous les minimums.
+    expect(serie([...b2, ['erreur', 0], ['erreur', 1]].map(([f, p], i) => [f, i === 1 ? 0 : p] as [F, number])).reussie).toBe(false);
+    // Une question à plusieurs étapes compte au prorata : 8,5 sur 10 suffit, un format à 1 point sur 2 aussi.
+    expect(serie([...base.slice(0, 7), ['operation', 0.5], ['erreur', 1], ['erreur', 0]]).reussie).toBe(true);
+    // 8,5 sur 10, mais 0,5 point sur 2 en « Retrouver l'opération » : pas réussie.
+    expect(serie([...base.slice(0, 6), ['operation', 0], ['operation', 0.5], ['erreur', 1], ['erreur', 1]]).reussie).toBe(false);
+    // Série d'un seul format : seul le total compte.
+    const unSeul = bilanSerie(Array.from({ length: 10 }, (_, i) => ({ format: 'calcul' as const, part: i < 8 ? 1 : 0 })));
+    expect(unSeul.reussie).toBe(true);
+    expect(unSeul.parFormat).toHaveLength(1);
+    expect(bilanSerie([]).reussie).toBe(false);
   });
 });
