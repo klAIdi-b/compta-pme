@@ -139,7 +139,9 @@ export function champsFormulaireTva(f: FormulaireTva): ChampAttendu[] {
     c('235', 'Diminutions de la contre-prestation (rabais, escomptes)', f.c235),
     c('289', 'Total des déductions (220 + 235)', f.c289),
     c('299', 'Contre-prestation imposable (200 − 289)', f.c299),
-    ...f.parTaux.flatMap((t) => [c(`${t.chiffre}b`, `${t.libelle} : prestations`, t.base), c(`${t.chiffre}i`, `${t.libelle} : impôt`, t.impot)]),
+    // Impôt par taux : le formulaire officiel le calcule sur les prestations déclarées, la comptabilité additionne des TVA
+    // arrondies aux 5 centimes ; les deux montants sont admis (tolérance de 5 centimes, second audit du 26.11.2026).
+    ...f.parTaux.flatMap((t) => [c(`${t.chiffre}b`, `${t.libelle} : prestations`, t.base), { ...c(`${t.chiffre}i`, `${t.libelle} : impôt`, t.impot), tolerance: 5 }]),
     c('399', "Total de l'impôt dû", f.c399),
     c('400', 'Impôt préalable sur le coût du matériel et des prestations de services', f.c400),
     c('405', "Impôt préalable sur les investissements et autres charges d'exploitation", f.c405),

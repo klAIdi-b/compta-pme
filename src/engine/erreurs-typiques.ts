@@ -73,8 +73,8 @@ const REGLES: Regle[] = [
     attendu: DETTE_FACTURE,
     saisi: CHARGE,
     explication:
-      "La charge a déjà été comptabilisée à la réception de la facture. Le paiement éteint la dette : on débite la dette, " +
-      "pas une deuxième fois la charge.",
+      "La facture a déjà été comptabilisée à sa réception (en charge, en achat ou à l'actif selon ce qu'elle concerne). " +
+      "Le paiement éteint la dette : on débite la dette, pas une deuxième fois le compte de la facture.",
     chapitre: 'credit',
   },
   {
@@ -154,6 +154,76 @@ const REGLES: Regle[] = [
     saisi: parmi('1200', '4200'),
     explication: 'Une vente de marchandises se comptabilise dans Ventes de marchandises, au prix de vente.',
     chapitre: 'marchandises',
+  },
+  // 2ème CFC (26.11.2026, second audit ; règles du cours relevées dans CLAUDE.md, textes à relire par l'enseignant).
+  {
+    id: 'impot-prealable-investissement',
+    sens: 'D',
+    attendu: parmi('1171'),
+    saisi: parmi('1170'),
+    explication:
+      "L'impôt préalable sur un investissement ou une autre charge d'exploitation va dans le compte 1171 ; le compte 1170 " +
+      'est réservé aux marchandises et aux prestations de services.',
+    chapitre: 'tva',
+  },
+  {
+    id: 'impot-prealable-marchandises',
+    sens: 'D',
+    attendu: parmi('1170'),
+    saisi: parmi('1171'),
+    explication:
+      "L'impôt préalable sur des marchandises ou des prestations de services va dans le compte 1170 ; le compte 1171 sert " +
+      'aux investissements et aux autres charges d\'exploitation.',
+    chapitre: 'tva',
+  },
+  {
+    id: 'amortissement-direct-au-lieu-indirect',
+    sens: 'C',
+    attendu: (x) => /^1[4-7]\d9$/.test(x),
+    saisi: IMMOBILISATION,
+    explication:
+      "Méthode indirecte : l'amortissement est crédité au fonds d'amortissements cumulés (compte en 9) ; la valeur " +
+      "d'acquisition reste inchangée dans le compte de l'immobilisation.",
+    chapitre: 'amortissements',
+  },
+  {
+    id: 'amortissement-indirect-au-lieu-direct',
+    sens: 'C',
+    attendu: IMMOBILISATION,
+    saisi: (x) => /^1[4-7]\d9$/.test(x),
+    explication:
+      "Méthode directe : l'amortissement est crédité directement au compte de l'immobilisation, sans fonds d'amortissements cumulés.",
+    chapitre: 'amortissements',
+  },
+  {
+    id: 'ducroire-en-creances',
+    sens: 'C',
+    attendu: parmi('1109'),
+    saisi: parmi('1100'),
+    explication:
+      'Le ducroire est une correction de valeur estimée : il se passe au compte Ducroire. Les créances clients ne ' +
+      'diminuent que pour une perte définitive.',
+    chapitre: 'creances',
+  },
+  {
+    id: 'actif-transitoire',
+    sens: 'D',
+    attendu: parmi('1300'),
+    saisi: parmi('2300'),
+    explication:
+      'Charge payée d\'avance ou produit à recevoir : c\'est un actif transitoire (1300). Le passif transitoire (2300) ' +
+      'sert aux charges à payer et aux produits reçus d\'avance.',
+    chapitre: 'transitoires',
+  },
+  {
+    id: 'passif-transitoire',
+    sens: 'C',
+    attendu: parmi('2300'),
+    saisi: parmi('1300'),
+    explication:
+      'Charge à payer ou produit reçu d\'avance : c\'est un passif transitoire (2300). L\'actif transitoire (1300) sert ' +
+      'aux charges payées d\'avance et aux produits à recevoir.',
+    chapitre: 'transitoires',
   },
 ];
 

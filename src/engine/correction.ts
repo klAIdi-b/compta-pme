@@ -19,7 +19,9 @@ export type Diagnostic =
   | 'juste'
   | 'manquante'
   | 'incomplete'
+  | 'nette'
   | 'inversee'
+  | 'inversee_compte'
   | 'tva_oubliee'
   | 'montant'
   | 'compte_classe'
@@ -30,13 +32,21 @@ export type Diagnostic =
 export const INDICES: Record<Diagnostic, string> = {
   juste: '',
   manquante: "Cette opération n'a pas encore été saisie.",
-  incomplete: "L'opération n'est pas encore complète : il manque une partie de l'écriture.",
+  incomplete:
+    "L'opération n'est pas encore complète : il manque une partie de l'écriture, ou un montant est trop faible " +
+    "(par exemple un montant net au lieu du montant brut). Si vous pensez avoir terminé, revoyez les montants et les comptes manquants.",
+  nette:
+    "Les soldes sont justes, mais l'écriture regroupe sur un même compte un mouvement au débit et un autre au crédit. " +
+    "Présentez séparément chaque mouvement (par exemple l'entrée du nouveau bien et la sortie de l'ancien).",
   inversee: 'Le débit et le crédit sont inversés.',
+  inversee_compte: "Le débit et le crédit sont inversés, et au moins un compte n'est pas le bon : vérifiez d'abord les côtés.",
   tva_oubliee: "La TVA n'a pas été comptabilisée.",
   montant: 'Les comptes sont justes, mais un montant ne correspond pas à l\'opération.',
   compte_classe: "Bonne classe de comptes, mais un compte n'est pas le bon.",
   compte: "Au moins un compte n'est pas le bon : demandez-vous quels comptes l'opération modifie.",
-  erronee: "L'écriture ne correspond pas à l'opération. Relisez l'énoncé.",
+  erronee:
+    "L'écriture ne correspond pas à l'opération : demandez-vous quels comptes elle modifie, de quel côté, et s'il manque " +
+    "un compte (une retenue, la TVA, un deuxième moyen de paiement…).",
 };
 
 /** Libellés courts pour la synthèse de l'enseignant. */
@@ -44,7 +54,9 @@ export const LIBELLES_DIAGNOSTIC: Record<Diagnostic, string> = {
   juste: 'Juste',
   manquante: 'Non saisie',
   incomplete: 'Incomplète',
+  nette: 'Mouvements regroupés',
   inversee: 'Débit et crédit inversés',
+  inversee_compte: 'Inversée, mauvais compte',
   tva_oubliee: 'TVA oubliée',
   montant: 'Montant erroné',
   compte_classe: 'Bonne classe, mauvais compte',
@@ -106,25 +118,65 @@ export function diagnostiquer(eleve: readonly Ecriture[], corrige: EcritureCorri
   // Mêmes comptes, mêmes côtés : seul un montant diffère.
   if (e.size === c.size && [...e.keys()].every((k) => c.has(k))) return 'montant';
 
+  // Mêmes soldes que le corrigé, mais un débit et un crédit d'un même compte regroupés (écriture nette).
+  if (egauxNets(e, c)) return 'nette';
+
   // Partie juste d'une opération décomposée en plusieurs écritures.
   if ([...e].every(([k, v]) => c.has(k) && v <= c.get(k)! + TOLERANCE)) return 'incomplete';
 
-  // Même structure, mais des comptes différents : on apparie par côté et par montant.
+  // Côtés inversés et un compte faux : on le dit, les côtés d'abord, quand l'inversion retrouve plus de comptes justes.
+  const communs = (a: Agregat) => [...a.keys()].filter((k) => c.has(k)).length;
+  const r = apparier(e, c);
+  const ri = apparier(inverser(e), c);
+  if (ri && (!r || communs(inverser(e)) > communs(e))) return 'inversee_compte';
+  if (r) return r;
+  return 'erronee';
+}
+
+/** Solde net par compte (débit positif). */
+function nets(a: Agregat): Map<string, Centimes> {
+  const r = new Map<string, Centimes>();
+  for (const [k, v] of a) r.set(compteDe(k), (r.get(compteDe(k)) ?? 0) + (sensDe(k) === 'D' ? v : -v));
+  return r;
+}
+
+/** Mêmes soldes nets, alors que le corrigé mouvemente un compte des deux côtés. */
+function egauxNets(e: Agregat, c: Agregat): boolean {
+  const deuxCotes = [...c.keys()].some((k) => sensDe(k) === 'D' && c.has(`${compteDe(k)}|C`));
+  if (!deuxCotes) return false;
+  const ne = nets(e);
+  const nc = nets(c);
+  const comptes = new Set([...ne.keys(), ...nc.keys()]);
+  return [...comptes].every((k) => Math.abs((ne.get(k) ?? 0) - (nc.get(k) ?? 0)) <= TOLERANCE);
+}
+
+/** Même structure, mais des comptes différents : on apparie par côté et par montant. */
+function apparier(e: Agregat, c: Agregat): 'compte' | 'compte_classe' | null {
   const enTrop = [...e].filter(([k]) => !c.has(k));
   const manquants = [...c].filter(([k]) => !e.has(k));
   const communsJustes = [...e].filter(([k]) => c.has(k)).every(([k, v]) => Math.abs(v - c.get(k)!) <= TOLERANCE);
-  if (communsJustes && enTrop.length === manquants.length) {
-    const libres = [...manquants];
-    let memeClasse = true;
-    for (const [k, v] of enTrop) {
-      const i = libres.findIndex(([k2, v2]) => sensDe(k2) === sensDe(k) && Math.abs(v2 - v) <= TOLERANCE);
-      if (i < 0) return 'erronee';
-      if (compteDe(libres[i]![0])[0] !== compteDe(k)[0]) memeClasse = false;
-      libres.splice(i, 1);
-    }
-    return memeClasse ? 'compte_classe' : 'compte';
+  if (!communsJustes || enTrop.length !== manquants.length || enTrop.length === 0) return null;
+  const libres = [...manquants];
+  let memeClasse = true;
+  for (const [k, v] of enTrop) {
+    const i = libres.findIndex(([k2, v2]) => sensDe(k2) === sensDe(k) && Math.abs(v2 - v) <= TOLERANCE);
+    if (i < 0) return null;
+    if (compteDe(libres[i]![0])[0] !== compteDe(k)[0]) memeClasse = false;
+    libres.splice(i, 1);
   }
-  return 'erronee';
+  return memeClasse ? 'compte_classe' : 'compte';
+}
+
+/**
+ * Indice du 2e niveau, montré après une nouvelle tentative fausse : la forme de l'écriture attendue (nombre de comptes
+ * au débit et au crédit), sans nommer les comptes ni les montants.
+ */
+export function indiceNiveau2(corrige: EcritureCorrigee): string {
+  const c = agreger(corrige.lignes);
+  const d = [...c.keys()].filter((k) => sensDe(k) === 'D').length;
+  const cr = [...c.keys()].filter((k) => sensDe(k) === 'C').length;
+  const n = (x: number) => `${x} compte${x > 1 ? 's' : ''}`;
+  return `L'écriture attendue touche ${n(d)} au débit et ${n(cr)} au crédit.`;
 }
 
 // ---------- Suivi des tentatives (entraînement) ----------
@@ -134,6 +186,8 @@ export interface SuiviOperation {
   essais: number;
   dernier: Diagnostic;
   solutionVue: boolean;
+  /** Nombre de fois où la solution, masquée pendant la correction, a été rouverte. */
+  revues?: number;
   /** Bouclement : niveau d'aide consulté par étape (1 la règle, 2 les comptes), information pour l'enseignant. */
   aides?: Record<string, number>;
 }
@@ -150,9 +204,12 @@ export function enregistrerTentative(suivi: Suivi, piece: string, d: Diagnostic)
   return { ...suivi, [piece]: { ...ancien, essais: ancien.essais + (faux ? 1 : 0), dernier: d } };
 }
 
-/** « Voir la solution » apparaît dès la première tentative fausse (choix de l'enseignant le 18.11.2026). */
+/**
+ * « Voir la solution » apparaît dès la première tentative fausse (choix de l'enseignant le 18.11.2026), et aussi quand
+ * l'opération est jugée incomplète : l'élève qui croit avoir fini n'est jamais privé de la solution.
+ */
 export function solutionDisponible(s: SuiviOperation | undefined): boolean {
-  return !!s && s.essais >= 1 && s.dernier !== 'juste';
+  return !!s && s.dernier !== 'juste' && (s.essais >= 1 || s.dernier === 'incomplete');
 }
 
 // ---------- Avancement de l'élève ----------

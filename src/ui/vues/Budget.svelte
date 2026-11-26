@@ -15,6 +15,20 @@
   import { m } from '../format';
 
   const donnees = $derived(etat.exercice.parametres.budget!);
+  /**
+   * Ordre d'affichage des causes, mélangé d'après l'identifiant de l'exercice (stable d'un affichage à l'autre) : la bonne
+   * cause n'est plus toujours la première de la liste (second audit, 26.11.2026). La valeur enregistrée reste l'indice.
+   */
+  const ordreCauses = $derived.by(() => {
+    let h = [...etat.exercice.id].reduce((x, ch) => (x * 31 + ch.charCodeAt(0)) >>> 0, 7);
+    const ordre = donnees.causes.map((_, i) => i);
+    for (let i = ordre.length - 1; i > 0; i--) {
+      h = (h * 1103515245 + 12345) >>> 0;
+      const j = h % (i + 1);
+      [ordre[i], ordre[j]] = [ordre[j]!, ordre[i]!];
+    }
+    return ordre;
+  });
   const entrainement = $derived(etat.retour);
   const ferme = $derived(etat.verrouille);
   const parComptes = $derived(donnees.postes.some((p) => p.comptes));
@@ -162,7 +176,7 @@
           <span class="ligne-champ">
             <select class="champ" disabled={ferme} bind:value={fiche.comparer.cause}>
               <option value="">Choisir…</option>
-              {#each donnees.causes as c, i}<option value={String(i)}>{c}</option>{/each}
+              {#each ordreCauses as i}<option value={String(i)}>{donnees.causes[i]}</option>{/each}
             </select>
             {#if eC}<span class:juste={eC === 'juste'} class:faux={eC === 'faux'}>{libelleEtat(eC)}</span>{/if}
           </span>

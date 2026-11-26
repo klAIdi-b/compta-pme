@@ -61,9 +61,11 @@
 
 <div class="avis-public" role="note">
   <b>Entraînement ou évaluation ?</b> Les dossiers fournis avec le logiciel et leurs corrigés sont publics : tout élève
-  peut les retrouver. Utilisez-les pour l'entraînement. Pour une évaluation notée, cliquez sur « Variante
-  d'évaluation » : une copie aux montants différents est créée dans vos exercices, en mode évaluation, et son corrigé
-  ne quitte pas votre navigateur.
+  peut les retrouver, et ouvrir la version d'entraînement dans un autre onglet pour voir la solution. Ils servent donc à
+  l'entraînement et à l'évaluation formative, jamais à une note. La « Variante d'évaluation » change les montants
+  (tous multipliés par un même nombre), pas les opérations ni les comptes : elle ne suffit pas non plus pour une note.
+  Pour une évaluation notée, créez un exercice à vous (ou modifiez plusieurs opérations de la variante) et faites-la
+  passer en classe, sous surveillance.
 </div>
 
 <p class="discret aide-haut">
@@ -88,7 +90,16 @@
               <strong>{ex.raisonSociale}</strong> <span class="badge niveau">{etiquetteNiveau(ex)}</span>
               <button class="btn-lien" onclick={() => apercu(ex)}>Aperçu</button>
               <BoutonLien exerciceId={ex.id} />
-              <button class="btn-lien" onclick={() => enseignant.creerVariante($state.snapshot(ex) as Exercice)}>Variante d'évaluation</button><br />
+              <button
+                class="btn-lien"
+                onclick={() => {
+                  try {
+                    erreur = enseignant.creerVariante($state.snapshot(ex) as Exercice).avertissements.join(' ');
+                  } catch (e) {
+                    erreur = e instanceof Error ? e.message : String(e);
+                  }
+                }}>Variante d'évaluation</button
+              ><br />
               <span class="discret petit">{(ex.sujets ?? []).join(' · ')}</span>
             </td>
             <td class="num">{ex.operations.length}</td>
@@ -100,7 +111,7 @@
                 {enCours === `${ex.id}:dossier` ? 'Création…' : 'Dossier PDF'}
               </button>
               <button class="btn" onclick={() => fichier(ex, 'entrainement')}>Fichier entraînement</button>
-              <button class="btn" onclick={() => fichier(ex, 'evaluation')}>Fichier évaluation</button>
+              <button class="btn" onclick={() => fichier(ex, 'evaluation')}>Fichier évaluation formative</button>
             </td>
             <td class="actions">
               <button class="btn btn-principal" disabled={enCours !== null} onclick={() => paquet(ex, 'enseignant')}>
@@ -120,8 +131,9 @@
 <p class="discret petit aide">
   Paquet élèves : dossier PDF et fichier d'entraînement, à déposer tel quel pour la classe. Paquet complet : en plus, le
   corrigé PDF, le fichier d'évaluation et sa version enseignant ; il contient les corrigés, à garder pour vous.
-  Fichier entraînement : corrigé encodé, retour immédiat. Fichier évaluation : sans corrigé, aucun retour pendant la
-  saisie ; les copies se corrigent dans l'onglet « Copies » (le corrigé y est déjà connu). Le corrigé PDF contient les
+  Fichier entraînement : corrigé encodé, retour immédiat. Fichier évaluation formative : aucun retour pendant la
+  saisie, correction affichée quand l'élève termine ; les copies se corrigent aussi dans l'onglet « Copies » (le corrigé
+  y est déjà connu). Le corrigé PDF contient les
   écritures de chaque pièce, le bouclement s'il est demandé et les états financiers.
 </p>
 

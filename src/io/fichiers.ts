@@ -63,6 +63,8 @@ interface FichierCopie {
   dossier: Dossier;
   suivi: Suivi;
   fiches?: unknown;
+  /** Évaluation formative terminée : la copie reprise reste fermée à la saisie. */
+  formativeTerminee?: boolean;
   exporteLe: string;
 }
 
@@ -75,6 +77,8 @@ export interface Copie {
   suivi: Suivi;
   /** Contenu des fiches de calcul (salaire, répartition, analyse). */
   fiches?: unknown;
+  /** Évaluation formative terminée (correction déjà vue) : une copie reprise reste fermée à la saisie. */
+  formativeTerminee?: boolean;
   exporteLe: string;
 }
 
@@ -114,10 +118,24 @@ export function decoderCorrige(s: string): EcritureCorrigee[] {
 
 // ---------- Exercice ----------
 
+/**
+ * Évaluation : les fiches ne doivent pas livrer leurs réponses dans le fichier de l'élève (second audit, 26.11.2026).
+ * Facture réellement payée par chaque crédit du relevé et indication de calcul du budget sont retirées ; l'enseignant
+ * corrige avec sa version, qui les garde.
+ */
+function sansReponses<T extends Omit<Exercice, 'corrige'>>(ex: T): T {
+  const p = ex.parametres;
+  const facturation = p.facturation?.controle
+    ? { ...p.facturation, controle: { ...p.facturation.controle, credits: p.facturation.controle.credits.map((c) => ({ ...c, facture: '' })) } }
+    : p.facturation;
+  const budget = p.budget ? { ...p.budget, postes: p.budget.postes.map(({ calcul: _calcul, ...reste }) => reste) } : undefined;
+  return { ...ex, parametres: { ...p, ...(facturation ? { facturation } : {}), ...(budget ? { budget } : {}) } };
+}
+
 /** Fichier distribué aux élèves : sans corrigé en évaluation, corrigé encodé en entraînement et en évaluation formative. */
 export function exporterExercice(ex: Exercice): string {
   const { corrige, ...sansCorrige } = ex;
-  const f: FichierExercice = { format: 'compta-pme/exercice', version: VERSION, exercice: sansCorrige };
+  const f: FichierExercice = { format: 'compta-pme/exercice', version: VERSION, exercice: ex.mode === 'evaluation' ? sansReponses(sansCorrige) : sansCorrige };
   if (ex.mode !== 'evaluation' && corrige?.length) f.corrigeEncode = encoderCorrige(corrige);
   return JSON.stringify(f, null, 2);
 }
@@ -296,6 +314,7 @@ export function importerCopie(texte: string): Copie {
     dossier: c.dossier,
     suivi: c.suivi ?? {},
     fiches: c.fiches,
+    formativeTerminee: c.formativeTerminee === true ? true : undefined,
     exporteLe: c.exporteLe,
   };
 }

@@ -87,7 +87,7 @@ export const dossierSaveurs = construireDossier(
     debut: '2026-01-01',
     fin: '2026-12-31',
     introduction:
-      "L'entreprise n'est pas assujettie à la TVA : comptabilisez les montants des pièces TVA comprise. Comptabilisez les " +
+      "Pour cet exercice, la TVA est laissée de côté : comptabilisez les montants des pièces TVA comprise. Comptabilisez les " +
       "douze pièces, puis passez les écritures de bouclement au 31.12.2026 (aucune autre opération jusqu'à cette date).",
     situation:
       "Vous commencez votre apprentissage chez Saveurs de Carouge, une petite épicerie fine de la rue Ancienne tenue par " +
@@ -184,7 +184,7 @@ export const dossierPolyglotte = construireDossier(
     debut: '2026-01-01',
     fin: '2026-12-31',
     introduction:
-      "L'entreprise n'est pas assujettie à la TVA : comptabilisez les montants des pièces TVA comprise. Les prestations " +
+      "Pour cet exercice, la TVA est laissée de côté : comptabilisez les montants des pièces TVA comprise. Les prestations " +
       "facturées sont des honoraires. Comptabilisez les douze pièces, puis passez les écritures de bouclement au 31.12.2026.",
     situation:
       "Mélanie Rochat a ouvert il y a trois ans son bureau, Traductions Polyglotte, au boulevard Carl-Vogt. Elle traduit des " +

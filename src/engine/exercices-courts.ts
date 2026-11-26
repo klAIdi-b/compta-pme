@@ -30,11 +30,11 @@ export type Question =
   | QuestionComposee
   | QuestionCalcul
   | QuestionQcm
-  | { format: 'classer'; compte: string; choix: TypeCompte[]; reponse: TypeCompte }
-  | { format: 'variation'; texte: string; choix: string[]; reponse: number }
+  | { format: 'classer'; compte: string; choix: TypeCompte[]; reponse: TypeCompte; pourquoi?: string[] }
+  | { format: 'variation'; texte: string; choix: string[]; reponse: number; pourquoi?: string[] }
   | { format: 'ecriture'; texte: string; montant: Centimes; comptes: string[]; reponse: { debit: string; credit: string } }
-  | { format: 'operation'; debit: string; credit: string; montant: Centimes; choix: string[]; reponse: number }
-  | { format: 'erreur'; lignes: { texte: string; debit: string; credit: string; montant: Centimes }[]; reponse: number }
+  | { format: 'operation'; debit: string; credit: string; montant: Centimes; choix: string[]; reponse: number; pourquoi?: string[] }
+  | { format: 'erreur'; lignes: { texte: string; debit: string; credit: string; montant: Centimes }[]; reponse: number; pourquoi?: string[] }
   | {
       format: 'solde';
       compte: string;
@@ -43,6 +43,17 @@ export type Question =
       credits: Centimes[];
       reponse: { montant: Centimes; cote: 'debiteur' | 'crediteur' };
     };
+
+const nomCompte = (plan: readonly Compte[], n: string) => plan.find((c) => c.numero === n)?.intitule ?? n;
+
+/** Rôle de chaque type de compte, dans les termes du rappel des modules « Le bilan » et « Charges et produits ». */
+const ROLE_TYPE: Record<TypeCompte, string> = {
+  actif: "compte d'actif : il dit à quoi les fonds ont servi (liquidités, créances, stock, immobilisations).",
+  passif: "compte de passif : il dit d'où viennent les fonds (capitaux étrangers, c'est-à-dire des dettes, et capitaux propres).",
+  charge: 'compte de charge : il diminue le bénéfice.',
+  produit: "compte de produit : il augmente le bénéfice.",
+  bouclement: 'compte de bouclement.',
+};
 
 /** Les quatre variations du bilan, dans les termes du chapitre « Le bilan ». */
 export const VARIATIONS = [
@@ -122,17 +133,34 @@ export interface ContexteSerie {
   ecritures?: readonly string[];
 }
 
+/**
+ * Réponses équilibrées (second audit, 26.11.2026) : on tire d'abord la réponse (le type de compte, la variation), puis
+ * un compte ou une opération qui la donne. Répondre toujours « Actif » ou toujours la même variation ne paie plus.
+ */
 function questionClasser(h: Hasard, x: ContexteSerie): Question {
   const candidats = x.comptes.filter((n) => x.types.includes(typeDe(x.plan, n)));
-  const compte = tirer(h, candidats);
-  return { format: 'classer', compte, choix: [...x.types], reponse: typeDe(x.plan, compte) };
+  const types = x.types.filter((t) => candidats.some((n) => typeDe(x.plan, n) === t));
+  const type = tirer(h, types);
+  const compte = tirer(h, candidats.filter((n) => typeDe(x.plan, n) === type));
+  const t = typeDe(x.plan, compte);
+  return { format: 'classer', compte, choix: [...x.types], reponse: t, pourquoi: [`${nomCompte(x.plan, compte)} : ${ROLE_TYPE[t]}`] };
 }
 
 function questionVariation(h: Hasard, x: ContexteSerie): Question | null {
-  const bilan = x.modeles.filter((m) => variationBilan(x.plan, m.debit, m.credit) !== null);
-  if (bilan.length === 0) return null;
+  const tous = x.modeles.filter((m) => variationBilan(x.plan, m.debit, m.credit) !== null);
+  if (tous.length === 0) return null;
+  const variations = [...new Set(tous.map((m) => variationBilan(x.plan, m.debit, m.credit)!))];
+  const v = tirer(h, variations);
+  const bilan = tous.filter((m) => variationBilan(x.plan, m.debit, m.credit) === v);
   const m = tirer(h, bilan);
-  return { format: 'variation', texte: texteOperation(m, montantModele(h, m)), choix: [...VARIATIONS], reponse: variationBilan(x.plan, m.debit, m.credit)! };
+  const r = variationBilan(x.plan, m.debit, m.credit)!;
+  return {
+    format: 'variation',
+    texte: texteOperation(m, montantModele(h, m)),
+    choix: [...VARIATIONS],
+    reponse: r,
+    pourquoi: [...raisonnement(x.plan, m.debit, m.credit), `Donc : ${VARIATIONS[r]}.`],
+  };
 }
 
 function questionEcriture(h: Hasard, x: ContexteSerie): Question {
@@ -157,6 +185,7 @@ function questionOperation(h: Hasard, x: ContexteSerie): Question | null {
     montant,
     choix: options.map((o) => texteOperation(o, montant)),
     reponse: options.indexOf(m),
+    pourquoi: [`L'écriture débite ${nomCompte(x.plan, m.debit)} et crédite ${nomCompte(x.plan, m.credit)}.`, ...raisonnement(x.plan, m.debit, m.credit).slice(1)],
   };
 }
 
@@ -179,12 +208,20 @@ function questionErreur(h: Hasard, x: ContexteSerie): Question | null {
   }
   if (choisis.length < 3) return null;
   const fausse = entier(h, choisis.length);
+  let defaut = '';
   const lignes = choisis.map((m, i) => {
     const montant = montantModele(h, m);
     const e = i === fausse ? falsifier(h, x, m) : { debit: m.debit, credit: m.credit };
+    if (i === fausse) defaut = e.debit === m.credit && e.credit === m.debit ? 'le débit et le crédit sont inversés' : "le moyen de paiement n'est pas le bon";
     return { texte: texteOperation(m, montant), debit: e.debit, credit: e.credit, montant };
   });
-  return { format: 'erreur', lignes, reponse: fausse };
+  const juste = choisis[fausse]!;
+  return {
+    format: 'erreur',
+    lignes,
+    reponse: fausse,
+    pourquoi: [`Opération ${fausse + 1} : ${defaut}.`, `Écriture juste : débit ${nomCompte(x.plan, juste.debit)}, crédit ${nomCompte(x.plan, juste.credit)}.`],
+  };
 }
 
 function questionSolde(h: Hasard, x: ContexteSerie): Question {
@@ -244,9 +281,18 @@ export function genererSerie(x: ContexteSerie, formats: readonly FormatQuestion[
   const h = hasard(graine);
   const tour: Tour = { rang: Math.floor(h() * 100) };
   const r: Question[] = [];
+  // Une même situation (énoncé sans ses montants) ne revient pas dans la série tant qu'on peut l'éviter : jusqu'à cinq
+  // nouveaux tirages (second audit, 26.11.2026 : sinon, la série se réussit en retenant quelques énoncés par cœur).
+  const vues = new Set<string>();
+  const signature = (q: Question) => JSON.stringify(q).replace(/\d/g, '');
   for (let i = 0; i < n; i++) {
     const f = formats[i % formats.length]!;
-    r.push(FABRIQUES[f](h, x, tour) ?? (x.modeles.length ? questionEcriture(h, x) : (questionCalcul(h, x, tour) ?? questionComposee(h, x, tour))!));
+    const fabriquer = () => FABRIQUES[f](h, x, tour) ?? (x.modeles.length ? questionEcriture(h, x) : (questionCalcul(h, x, tour) ?? questionComposee(h, x, tour))!);
+    let q = fabriquer();
+    // Classer un compte ou lire un solde : un compte peut revenir, ce n'est pas un énoncé à retenir par cœur.
+    if (f !== 'classer' && f !== 'solde') for (let essai = 0; essai < 5 && vues.has(signature(q)); essai++) q = fabriquer();
+    vues.add(signature(q));
+    r.push(q);
   }
   return melanger(h, r);
 }
@@ -344,6 +390,31 @@ export function bilanSerie(resultats: readonly { format: Question['format']; par
   });
   return { points, sur, parFormat, reussie: sur > 0 && points >= seuilMaitrise(sur) - 1e-9 && parFormat.every((f) => f.atteint) };
 }
+
+// ---------- Révision espacée ----------
+
+/** Formats où l'élève produit la réponse (au lieu de la reconnaître dans une liste). */
+const PRODUCTION: readonly FormatQuestion[] = ['ecriture', 'solde', 'calcul', 'composee'];
+
+/** Nombre de questions par notion dans la révision du jour. */
+export const QUESTIONS_PAR_REVISION = 2;
+
+/**
+ * Questions de révision d'une notion (second audit, 26.11.2026) : deux questions, de formats tirés au hasard parmi ceux
+ * du module, en privilégiant ceux où l'élève produit la réponse. La révision n'est réussie que si les deux sont
+ * entièrement justes (`revisionReussie`) : une réponse devinée ne suffit plus à confirmer une notion.
+ */
+export function questionsRevision(x: ContexteSerie, formats: readonly FormatQuestion[], graine: number): Question[] {
+  const h = hasard(graine);
+  const production = formats.filter((f) => PRODUCTION.includes(f));
+  const pool = [...new Set(production.length ? production : formats)];
+  const choisis = melanger(h, pool).slice(0, QUESTIONS_PAR_REVISION);
+  while (choisis.length < QUESTIONS_PAR_REVISION) choisis.push(tirer(h, pool));
+  return genererSerie(x, choisis, QUESTIONS_PAR_REVISION, graine + 1);
+}
+
+/** Révision d'une notion réussie : chaque question entièrement juste. */
+export const revisionReussie = (parts: readonly number[]) => parts.length > 0 && parts.every((p) => p >= 1 - 1e-9);
 
 // ---------- Exemple travaillé ----------
 

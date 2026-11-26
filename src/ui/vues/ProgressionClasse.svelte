@@ -7,6 +7,7 @@
   import { ErreurFichier } from '../../io/fichiers';
   import { EXT_PROGRESSION, importerProgression, type FichierProgression } from '../../io/progression';
   import { choisirFichiers } from '../fichiers-navigateur';
+  import { etatNotion, LIBELLES_ETAT_NOTION } from '../../engine/revision';
 
   let fichiers = $state<FichierProgression[]>([]);
   let messages = $state<string[]>([]);
@@ -58,7 +59,7 @@
       <table>
         <thead>
           <tr>
-            <th>Élève</th><th>Classe</th><th class="montant">Maîtrisées</th>
+            <th>Élève</th><th>Classe</th><th class="montant">Réussies (confirmées)</th>
             {#each modules as m, i}<th class="col-module" title={m.titre}>{i + 1}</th>{/each}
           </tr>
         </thead>
@@ -66,24 +67,35 @@
           {#each eleves as f, k (cle(f))}
             <tr class:zebre={k % 2 === 1}>
               <td>{f.eleve.nom} {f.eleve.prenom}</td><td>{f.eleve.classe}</td>
-              <td class="montant num">{maitrises(f)} / {modules.length}</td>
+              <td class="montant num">{maitrises(f)} / {modules.length} ({modules.filter((m) => etatNotion(f.progression[m.id]) === "confirmee").length})</td>
               {#each modules as m}
                 {@const p = f.progression[m.id]}
-                <td class="cellule" class:ok={p?.maitrise} class:encours={p && !p.maitrise} title={`${m.titre}${p ? ` : meilleur score ${points(p.meilleur)} / ${p.sur}, ${p.series} série${p.series > 1 ? 's' : ''}` : ' : pas commencé'}`}>
-                  {p?.maitrise ? 'M' : p ? points(p.meilleur) : '–'}
+                {@const en = etatNotion(p)}
+                <td
+                  class="cellule"
+                  class:ok={en === 'confirmee'}
+                  class:une-fois={en === 'reussieUneFois'}
+                  class:encours={en === 'enCours' || en === 'aRaviver'}
+                  title={`${m.titre} : ${LIBELLES_ETAT_NOTION[en]}${p ? `, meilleur score ${points(p.meilleur)} / ${p.sur}, ${p.series} série${p.series > 1 ? 's' : ''}, ${p.confirmations ?? 0} révision${(p.confirmations ?? 0) > 1 ? 's' : ''} réussie${(p.confirmations ?? 0) > 1 ? 's' : ''}` : ''}`}
+                >
+                  {en === 'confirmee' ? 'C' : en === 'reussieUneFois' ? 'R' : en === 'aRaviver' ? 'À' : p ? points(p.meilleur) : '–'}
                 </td>
               {/each}
             </tr>
           {/each}
           <tr class="total">
-            <td colspan="3">Élèves qui maîtrisent la notion (sur {fichiers.length})</td>
+            <td colspan="3">Élèves qui ont réussi la notion au moins une fois (sur {fichiers.length})</td>
             {#each modules as m}<td class="cellule num">{reussite(m.id)}</td>{/each}
           </tr>
         </tbody>
       </table>
     </div>
     <div class="corps-carte">
-      <p class="discret legende">M = maîtrisé · un nombre = meilleur score sur 10, notion pas encore maîtrisée · – = pas commencé.</p>
+      <p class="discret legende">
+        C = confirmée (série réussie et deux révisions réussies à des jours différents) · R = réussie une fois, pas encore
+        confirmée · À = à raviver (dernière révision ratée) · un nombre = meilleur score sur 10, notion pas encore réussie ·
+        – = pas commencé. Ce fichier est rempli par l'élève : il renseigne sur le travail, il ne prouve pas la maîtrise.
+      </p>
       <ol class="liste-modules">{#each modules as m}<li>{m.titre}</li>{/each}</ol>
     </div>
   {/if}
@@ -94,6 +106,7 @@
   .defile { overflow-x: auto; }
   .col-module, .cellule { text-align: center; width: 44px; }
   .cellule.ok { background: var(--c-ok-fond); color: var(--c-ok); font-weight: bold; }
+  .cellule.une-fois { color: var(--c-ok); }
   .cellule.encours { color: var(--c-alerte-texte); }
   .legende { margin: 0 0 8px; }
   .liste-modules { margin: 0; padding-left: 22px; columns: 2; font-size: var(--t-13); color: var(--c-texte-2); }

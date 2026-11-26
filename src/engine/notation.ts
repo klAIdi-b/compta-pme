@@ -104,7 +104,16 @@ export function corrigerCopie(ex: Exercice, d: Dossier, fiches?: { facturation?:
   if (bouclementCorrige(ex)) {
     const max = bareme[PIECE_BOUCLEMENT] ?? POINTS_BOUCLEMENT_PAR_DEFAUT;
     const c = corrigeBouclement(d, ex);
-    if (c && max > 0) operations.push(pointsOperation(ecritures, c, max, partiels));
+    // Second audit (26.11.2026) : le bouclement reste dans le maximum pour tous les élèves, et il ne rapporte des
+    // points qu'à partir de la moitié des opérations de l'énoncé saisies : sinon, un journal presque vide gagnerait
+    // les points du bouclement. Si les comptes de l'élève ne demandent aucun virement, rien n'est à faire : juste.
+    const saisies = new Set(ecrituresRetenues(d.ecritures).map((e) => e.piece));
+    const assez = ex.operations.filter((o) => saisies.has(o.numero)).length * 2 >= ex.operations.length;
+    if (max > 0) {
+      if (!assez) operations.push({ piece: PIECE_BOUCLEMENT, diagnostic: 'manquante', points: 0, max });
+      else if (c) operations.push(pointsOperation(ecritures, c, max, partiels));
+      else operations.push({ piece: PIECE_BOUCLEMENT, diagnostic: 'juste', points: max, max });
+    }
   }
   const documents = [
     ...(fiches && ex.parametres.facturation ? noterFacturation(ex.parametres.facturation, fiches.facturation, bareme) : []),

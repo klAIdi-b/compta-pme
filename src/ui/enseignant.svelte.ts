@@ -3,7 +3,7 @@
 import type { Exercice } from '../engine/exercice';
 import { CLE_ENSEIGNANT, ecrire, lire } from '../io/stockage';
 import type { Relecture } from '../io/relecture';
-import { varianteExercice } from '../engine/variante';
+import { varianteSure } from '../engine/variante';
 
 interface DonneesEnseignant {
   code: string | null;
@@ -54,13 +54,15 @@ class Enseignant {
    * Variante d'évaluation d'un exercice du logiciel : montants multipliés par 2 ou 3, mode évaluation, enregistrée dans
    * les exercices de l'enseignant (son corrigé n'est pas public). Ouvre l'éditeur sur la variante.
    */
-  creerVariante(ex: Exercice): Exercice {
+  creerVariante(ex: Exercice): { exercice: Exercice; avertissements: string[] } {
     const facteur = 2 + Math.floor(Math.random() * 2);
-    const v = varianteExercice(ex, facteur, nouvelIdentifiant());
+    const r = varianteSure(ex, facteur, nouvelIdentifiant());
+    if (!r.ok) throw new Error(r.erreurs.join(' '));
+    const v = r.valeur;
     this.enregistrer(v);
     this.onglet = 'exercices';
     this.edition = v.id;
-    return v;
+    return { exercice: v, avertissements: r.avertissements };
   }
 
   /** Met à jour l'avis de relecture d'un élément. */

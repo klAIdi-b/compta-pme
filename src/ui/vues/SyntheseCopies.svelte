@@ -17,6 +17,8 @@
   import { LIBELLES_DIAGNOSTIC } from '../../engine/correction';
   import { bouclementCorrige, PIECE_BOUCLEMENT } from '../../engine/correction-bouclement';
   import { EXT_COPIE, ErreurFichier, importerCopie, nomFichier, type Copie } from '../../io/fichiers';
+  import { alertesCopie, copiesIdentiques } from '../../engine/reprise';
+  import { plan } from '../../data/plan';
   import { choisirFichiers, telecharger, telechargerBlob } from '../fichiers-navigateur';
 
   const disponibles = $derived<Exercice[]>(
@@ -36,6 +38,23 @@
           .sort((a, b) => `${a.copie.eleve.nom} ${a.copie.eleve.prenom}`.localeCompare(`${b.copie.eleve.nom} ${b.copie.eleve.prenom}`, 'fr'))
       : [],
   );
+  /**
+   * Contrôles de chaque copie (second audit, 26.11.2026) : journal rejoué avec les contrôles du logiciel, mode comparé
+   * à celui de l'exercice, copies aux écritures identiques signalées.
+   */
+  const alertes = $derived.by(() => {
+    const r = new Map<string, string[]>();
+    if (!exercice) return r;
+    for (const l of lignes) r.set(l.cle, alertesCopie(exercice, plan, l.copie));
+    for (const g of copiesIdentiques(lignes, (l) => l.copie.dossier.ecritures)) {
+      const noms = g.map((l) => `${l.copie.eleve.prenom} ${l.copie.eleve.nom}`);
+      for (const l of g) {
+        const autres = noms.filter((n) => n !== `${l.copie.eleve.prenom} ${l.copie.eleve.nom}`);
+        r.set(l.cle, [...(r.get(l.cle) ?? []), `Écritures identiques à celles de : ${autres.join(', ')}.`]);
+      }
+    }
+    return r;
+  });
   /** Bilan de la classe par opération ; « à reprendre d'abord » trie par taux de réussite croissant. */
   let ordre = $state<'enonce' | 'reprendre'>('reprendre');
   /** Bilan de la classe par notion du cours : réussite, élèves à reprendre, erreur typique la plus fréquente. */
@@ -73,7 +92,11 @@
     // Une même copie importée deux fois remplace la précédente (même élève, même classe).
     const cle = (c: Copie) => `${c.eleve.nom}|${c.eleve.prenom}|${c.eleve.classe}`.toLowerCase();
     const parEleve = new Map(copies.map((c) => [cle(c), c]));
-    for (const c of nouvelles) parEleve.set(cle(c), c);
+    // Deux copies du même élève : on garde la plus récente, quel que soit l'ordre des fichiers.
+    for (const c of nouvelles) {
+      const ancienne = parEleve.get(cle(c));
+      if (!ancienne || (c.exporteLe ?? '') >= (ancienne.exporteLe ?? '')) parEleve.set(cle(c), c);
+    }
     copies = [...parEleve.values()];
     if (nouvelles.length) messages.push(`${nouvelles.length} copie${nouvelles.length > 1 ? 's' : ''} importée${nouvelles.length > 1 ? 's' : ''}.`);
   }
@@ -184,7 +207,10 @@
       <tbody>
         {#each lignes as l, i (l.cle)}
           <tr class:zebre={i % 2 === 1}>
-            <td>{l.copie.eleve.nom} {l.copie.eleve.prenom}</td>
+            <td>
+              {l.copie.eleve.nom} {l.copie.eleve.prenom}
+              {#each alertes.get(l.cle) ?? [] as a}<span class="alerte-copie">{a}</span>{/each}
+            </td>
             <td>{l.copie.eleve.classe}</td>
             <td class="montant">{fmt(l.correction.points)} / {fmt(l.correction.max)}</td>
             <td class="montant"><b>{l.correction.note.toFixed(1)}</b></td>
@@ -375,4 +401,5 @@
   .erreur summary { cursor: pointer; }
   .erreur + .erreur { margin-top: 3px; }
   .eleves { font-size: var(--t-12); color: var(--c-texte-2); padding: 2px 0 4px 14px; }
+  .alerte-copie { display: block; font-size: var(--t-12); color: var(--c-alerte-texte); }
 </style>

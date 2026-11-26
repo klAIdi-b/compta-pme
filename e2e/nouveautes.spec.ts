@@ -57,12 +57,18 @@ test('apprendre pas à pas : un module, son exemple, une question corrigée tout
   await page.getByRole('button', { name: /Ouvrir le parcours|Continuer le parcours/ }).click();
   await expect(page.getByRole('heading', { name: 'Apprendre pas à pas' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Maturité professionnelle' })).toBeVisible();
+  // Les années suivantes sont repliées (second audit, 26.11.2026) : on ouvre la 2ème CFC.
+  await page.getByText('2ème CFC et option Finances').click();
   await page.getByRole('button', { name: 'TVA : comptabilisation au net' }).click();
-  await expect(page.getByRole('heading', { name: 'Exemple travaillé' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Exemple travaillé' }).first()).toBeVisible();
   await page.getByRole('button', { name: /Commencer la série/ }).click();
+  // La série mêle écritures composées et calculs de TVA.
   const listes = page.locator('.composee select');
   const n = await listes.count();
   for (let i = 0; i < n; i++) await listes.nth(i).selectOption({ index: 1 });
+  const champs = page.locator('input.champ-calcul');
+  const k = await champs.count();
+  for (let i = 0; i < k; i++) await champs.nth(i).fill('1');
   await page.getByRole('button', { name: 'Vérifier' }).click();
   await expect(page.getByRole('status')).toContainText(/Juste|Pas tout à fait/);
   await expect(page.getByRole('button', { name: /Question suivante|Voir le résultat/ })).toBeVisible();
@@ -73,13 +79,13 @@ test('apprendre : une notion réussie une seule fois reste « à confirmer »', 
   await page.evaluate(() => {
     const demain = new Date(Date.now() + 86_400_000).toISOString().slice(0, 10);
     const dans3 = new Date(Date.now() + 3 * 86_400_000).toISOString().slice(0, 10);
-    const p = (rang: number, prochaine: string) => ({ meilleur: 9, sur: 10, maitrise: true, series: 1, le: new Date().toISOString(), revision: { rang, prochaine } });
-    localStorage.setItem('compta-pme:apprendre:v1', JSON.stringify({ bilan: p(0, demain), comptes: p(1, dans3) }));
+    const p = (rang: number, prochaine: string, confirmations = 0) => ({ meilleur: 9, sur: 10, maitrise: true, series: 1, le: new Date().toISOString(), revision: { rang, prochaine }, confirmations });
+    localStorage.setItem('compta-pme:apprendre:v1', JSON.stringify({ bilan: p(0, demain), comptes: p(2, dans3, 2) }));
   });
   await page.reload();
   await page.getByRole('button', { name: /Ouvrir le parcours|Continuer le parcours/ }).click();
   await expect(page.locator('.module', { hasText: 'Le bilan : actif ou passif' }).locator('.etat')).toContainText('Réussie une fois · à confirmer le');
-  await expect(page.locator('.module', { hasText: 'Débit et crédit : opérations du bilan' }).locator('.etat')).toContainText('Maîtrisé · prochaine révision le');
+  await expect(page.locator('.module', { hasText: 'Débit et crédit : opérations du bilan' }).locator('.etat')).toContainText('Confirmée · prochaine révision le');
   await expect(page.locator('.intro')).toContainText('au moins la moitié des points dans chaque type de question');
 });
 
@@ -225,6 +231,7 @@ test('théorie : choix de l’année et ouverture d’un chapitre au clavier, ta
 test('module d’Apprendre : le chapitre de théorie s’ouvre par un lien dans un nouvel onglet, sur la bonne année', async ({ page, context }) => {
   await page.goto('./');
   await page.getByRole('navigation', { name: 'Rubriques' }).getByRole('button', { name: 'Apprendre' }).click();
+  await page.getByText('2ème CFC et option Finances').click();
   await page.getByRole('button', { name: 'TVA : comptabilisation au net', exact: true }).click();
   // Le chapitre n'est plus déplié sous la leçon : un lien y mène.
   await expect(page.getByRole('button', { name: /Lire la théorie/ })).toHaveCount(0);

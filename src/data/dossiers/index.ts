@@ -21,9 +21,13 @@ export const DOSSIERS: Exercice[] = [
   dossierMeubles, dossierBoulangerie, dossierConfiserie, dossierFleurs, dossierTerroirs, dossierZufferey, dossierBrasserie, dossierLemanbio, dossierAteliers, dossierCartonnages, dossierOptique, dossierPrecimeca, dossierCarrosserie, dossierSports, dossierRhoneMobilite,
 ];
 
-/** Version d'évaluation d'un dossier : même contenu, aucun retour pendant la saisie, corrigé absent du fichier élève. */
+/**
+ * Version d'évaluation d'un dossier fourni : même contenu, aucun retour pendant la saisie. Le dossier et son corrigé sont
+ * publics : depuis le second audit (26.11.2026), cette version est une évaluation **formative**, jamais sommative.
+ * L'identifiant reste `…-evaluation`, pour que les copies déjà rendues se corrigent toujours.
+ */
 export function versionEvaluation(ex: Exercice): Exercice {
-  return { ...ex, id: `${ex.id}-evaluation`, titre: `${ex.titre} (évaluation)`, mode: 'evaluation' };
+  return { ...ex, id: `${ex.id}-evaluation`, titre: `${ex.titre} (évaluation formative)`, mode: 'formative' };
 }
 
 /** Versions d'évaluation, connues de l'espace enseignant pour corriger les copies. */

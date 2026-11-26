@@ -118,7 +118,7 @@ export const manuelVinotheque: Exercice = {
   debut: '2026-01-01',
   fin: '2026-12-31',
   introduction:
-    `L'entreprise n'est pas assujettie à la TVA. ${CONSIGNE} Après l'inventaire (opération 17), remplissez la fiche ` +
+    `Pour cet exercice, la TVA est laissée de côté. ${CONSIGNE} Après l'inventaire (opération 17), remplissez la fiche ` +
     "« Marge brute » d'après vos comptes, puis bouclez l'exercice. La fiche « Échelle des prix » se fait à part.",
   situation:
     "La Vinothèque des Pâquis, rue de Berne, appartient à Sofia Marchetti. Elle vend des vins suisses et italiens aux " +
@@ -216,7 +216,9 @@ export const manuelLacroix: Exercice = {
     {
       numero: '5',
       date: '2026-02-15',
-      texte: "Paiement par virement postal des factures d'électricité et de téléphone de janvier, non comptabilisées, 432.40 (TVA 8,1 % comprise).",
+      texte:
+        "Paiement par virement postal des factures de janvier, non comptabilisées : électricité 270.25 et téléphone 162.15, " +
+        'soit 432.40 (TVA 8,1 % comprise).',
     },
     { numero: '6', date: '2026-02-25', texte: "Achat de marchandises à crédit, 25'200.00 hors TVA (TVA 8,1 %)." },
     { numero: '7', date: '2026-02-28', texte: "Ventes du mois en espèces, 7'350.80 (TVA 8,1 % comprise)." },
@@ -250,7 +252,9 @@ export const manuelLacroix: Exercice = {
     { piece: '2', lignes: [D('1000', 6486), C('3200', 6000), C('2200', 486)] },
     { piece: '3', lignes: s('1010', '1000', 6000) },
     { piece: '4', lignes: [D('1000', 11891), C('3200', 11000), C('2200', 891)] },
-    { piece: '5', lignes: [D('6700', 400), D('1171', 32.4), C('1010', 432.4)] },
+    // Second audit (26.11.2026) : les deux factures sont données séparément, chacune dans son compte de nature
+    // (électricité 250.00 + 20.25 de TVA, téléphone 150.00 + 12.15 de TVA), comme dans la démo de 1ère CFC.
+    { piece: '5', lignes: [D('6400', 250), D('6510', 150), D('1171', 32.4), C('1010', 432.4)] },
     { piece: '6', lignes: [D('4200', 25200), D('1170', 2041.2), C('2000', 27241.2)] },
     { piece: '7', lignes: [D('1000', 7350.8), C('3200', 6800), C('2200', 550.8)] },
     { piece: '8', lignes: [D('2000', 540.5), C('4200', 500), C('1170', 40.5)] },
@@ -277,7 +281,7 @@ export const manuelBrodard: Exercice = {
   debut: '2026-01-01',
   fin: '2026-12-31',
   introduction:
-    "L'entreprise n'est pas assujettie à la TVA. Les frais de poursuite avancés sont à la charge du débiteur. Une " +
+    "Pour cet exercice, la TVA est laissée de côté. Les frais de poursuite avancés sont à la charge du débiteur. Une " +
     "créance amortie lors d'un exercice précédent et récupérée est un produit exceptionnel. " +
     `${CONSIGNE} Au 31.12, le ducroire est fixé à 5 % des créances clients (sans les créances douteuses).`,
   situation:
@@ -336,7 +340,7 @@ export const manuelMontBlanc: Exercice = {
   debut: '2026-01-01',
   fin: '2026-12-31',
   introduction:
-    "L'entreprise n'est pas assujettie à la TVA. Les machines et l'outillage sont amortis de façon indirecte (fonds " +
+    "Pour cet exercice, la TVA est laissée de côté. Les machines et l'outillage sont amortis de façon indirecte (fonds " +
     "d'amortissements cumulés), les autres immobilisations de façon directe. Le taux constant s'applique à la valeur " +
     "d'acquisition, le taux dégressif à la valeur comptable. " + CONSIGNE,
   situation:
@@ -385,7 +389,7 @@ export const manuelTruffaz: Exercice = {
   debut: '2026-01-01',
   fin: '2026-12-31',
   introduction:
-    "L'entreprise n'est pas assujettie à la TVA. Les opérations 1 à 5 ont eu lieu pendant l'année ; les opérations 6 à " +
+    "Pour cet exercice, la TVA est laissée de côté. Les opérations 1 à 5 ont eu lieu pendant l'année ; les opérations 6 à " +
     "14 sont les écritures transitoires du 31 décembre : chaque charge doit être rattachée à l'exercice qu'elle concerne. " +
     CONSIGNE,
   situation:
@@ -455,7 +459,7 @@ export const manuelLambert: Exercice = {
   debut: '2026-01-01',
   fin: '2026-12-31',
   introduction:
-    "L'entreprise n'est pas assujettie à la TVA. Les opérations 1 à 10 résument l'année ; les opérations 11 à 25 sont " +
+    "Pour cet exercice, la TVA est laissée de côté. Les opérations 1 à 10 résument l'année ; les opérations 11 à 25 sont " +
     "les écritures de clôture du 31 décembre. L'immeuble locatif est hors exploitation : ses charges, son amortissement " +
     "et ses intérêts vont en charges hors exploitation, ses loyers en produits hors exploitation. " +
     `${CONSIGNE} Bouclez ensuite l'exercice.`,
@@ -477,7 +481,7 @@ export const manuelLambert: Exercice = {
     { numero: '9', date: '2026-12-20', texte: "Récapitulatif de l'année : charges de l'immeuble locatif payées par la banque, 12'000.00." },
     { numero: '10', date: '2026-12-20', texte: "Récapitulatif de l'année : prélèvements de Patrick Lambert sur le compte bancaire, 40'000.00." },
     { numero: '11', date: '2026-12-31', texte: "Le stock final de montres, selon l'inventaire, est estimé à 360'000.00." },
-    { numero: '12', date: '2026-12-31', texte: 'Ajuster le ducroire pour qu’il atteigne le maximum admis fiscalement : 5 % des créances clients.' },
+    { numero: '12', date: '2026-12-31', texte: 'Ajuster le ducroire pour qu’il atteigne 5 % des créances clients.' },
     { numero: '13', date: '2026-12-31', texte: 'Amortissements directs : mobilier 20 % et infrastructure informatique 30 %, de la valeur au bilan.' },
     { numero: '14', date: '2026-12-31', texte: "Véhicules : amortissement indirect constant de 20 % de la valeur d'acquisition, 60'000.00." },
     { numero: '15', date: '2026-12-31', texte: "Immeuble locatif : amortissement indirect décroissant de 2 % de la valeur comptable." },

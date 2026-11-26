@@ -447,3 +447,21 @@ test('une écriture juste trouvée après « Voir la solution » est signalée c
   await expect(page.getByRole('dialog', { name: 'Récapitulatif des pièces' })).toContainText('dont 1 avec la solution');
 });
 
+
+test('la solution se masque pendant que l’élève corrige, puis se revoit à la demande', async ({ page }) => {
+  await commencer(page, 'cycles', /Cycles du Léman/);
+  await page.getByRole('button', { name: /Commencer la saisie|Continuer la saisie/ }).click();
+  const fermerVisite = page.getByRole('button', { name: /Passer|Fermer la visite|Terminer/ });
+  if (await fermerVisite.first().isVisible().catch(() => false)) await fermerVisite.first().click();
+
+  await saisir(page, 'Achat de marchandises', '4200', '1020', '4800');
+  const verdict = page.locator('.verdict');
+  await verdict.getByRole('button', { name: 'Voir la solution' }).click();
+  await expect(verdict.getByText("Solution de l'opération 1 :")).toBeVisible();
+  // L'élève corrige : la solution se cache pour qu'il retrouve l'écriture de mémoire.
+  await verdict.getByRole('button', { name: "Corriger l'écriture" }).click();
+  await expect(verdict.getByText('Solution masquée pendant votre correction')).toBeVisible();
+  await expect(verdict.getByText("Solution de l'opération 1 :")).toBeHidden();
+  await verdict.getByRole('button', { name: 'Revoir la solution' }).click();
+  await expect(verdict.getByText("Solution de l'opération 1 :")).toBeVisible();
+});

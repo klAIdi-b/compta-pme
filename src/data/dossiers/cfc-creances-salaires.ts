@@ -240,7 +240,7 @@ const d8p2 = ticket({
 const d8p3 = facture({
   emetteur: fleurs, destinataire: { nom: 'Hôtel des Bergues du Lac', adresse: ['Quai Wilson 18', '1201 Genève'] },
   numero: '2026-077', date: '2026-10-15', tauxTva: 26,
-  articles: [{ designation: 'Décoration florale du hall, octobre (forfait)', prixUnitaire: f(2500) }],
+  articles: [{ designation: 'Arrangements floraux livrés pour le hall, octobre', prixUnitaire: f(2500) }],
   mentions: ['Payable à 30 jours.', `IBAN ${compteFleurs}`],
 });
 const d8p4 = ficheSalaire({
@@ -261,7 +261,7 @@ const d8p7 = noteInterne({
   emetteur: fleurs, date: '2026-11-20', titre: 'PERTE SUR CRÉANCE', numero: 'NI-11',
   texte: [
     "Le restaurant La Treille, client depuis deux ans, a cessé son activité sans laisser d'adresse. Sa facture de " +
-      "1'200.00, comptabilisée l'an dernier, ne sera jamais payée. Il n'y a pas de correction de la TVA à faire sur cette perte.",
+      "1'200.00, comptabilisée l'an dernier, ne sera jamais payée. Dans ce cours, on ne corrige pas la TVA sur une perte sur créance (simplification : en pratique, la TVA due est réduite, art. 41 LTVA).",
   ],
   mentions: ['Signé : J. Mermoud'],
 });

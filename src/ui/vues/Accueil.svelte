@@ -3,9 +3,13 @@
   import { etat } from '../etat.svelte';
   import { lireProgression } from '../../io/apprendre';
   import { MODULES } from '../../data/apprendre';
+  import { aRevoir } from '../../engine/revision';
   import { estDossier, exercicesDemo } from '../../data/demos';
   import { classerExercices, etiquetteNiveau, filiereDe, LIBELLES_FILIERE, LIBELLES_MODE, type Exercice, type Filiere } from '../../engine/exercice';
-  import { EXT_EXERCICE, ErreurFichier, importerExercice, statutExport } from '../../io/fichiers';
+  import { EXT_COPIE, EXT_EXERCICE, ErreurFichier, importerCopie, importerExercice, statutExport, type Copie } from '../../io/fichiers';
+  import { dossierDeCopie } from '../../engine/reprise';
+  import { plan as planParDefaut } from '../../data/plan';
+  import { dialogue } from '../dialogue.svelte';
   import { choisirFichiers } from '../fichiers-navigateur';
   import { EXT_SITUATION } from '../../io/simulation-extensions';
   // Simulateur : le lecteur de fichier de situation (et le moteur du jeu qu'il entraîne) n'est chargé que si on s'en sert.
@@ -63,14 +67,90 @@
       }
       return;
     }
+    if (f.texte.includes('"compta-pme/copie"')) return lireCopie(f.texte);
     try {
       const ex = importerExercice(f.texte);
       importes = [ex, ...importes.filter((x) => x.id !== ex.id)];
       choix = ex.id;
+      // Copie en attente de son exercice : elle est reprise dès que l'exercice reçu est ouvert.
+      if (copieEnAttente?.exerciceId === ex.id) {
+        const c = copieEnAttente;
+        copieEnAttente = null;
+        infoImport = '';
+        return void reprendreCopie(c, ex);
+      }
       montrer(typeDe(ex));
     } catch (e) {
       erreurImport = e instanceof ErreurFichier ? e.message : "Le fichier n'a pas pu être lu.";
     }
+  }
+
+  // ---- Reprise d'une copie exportée (postes partagés, audit du 24.11.2026) ----
+  /** Copie d'un exercice reçu par fichier, en attente de ce fichier d'exercice. */
+  let copieEnAttente = $state<Copie | null>(null);
+  let infoImport = $state('');
+
+  async function ouvrirCopie() {
+    erreurImport = '';
+    const [f] = await choisirFichiers(`${EXT_COPIE},.json`);
+    if (f) await lireCopie(f.texte);
+  }
+
+  async function lireCopie(texte: string) {
+    erreurImport = '';
+    infoImport = '';
+    let c: Copie;
+    try {
+      c = importerCopie(texte);
+    } catch (e) {
+      erreurImport = e instanceof ErreurFichier ? e.message : "Le fichier n'a pas pu être lu.";
+      return;
+    }
+    const ex = tous.find((x) => x.id === c.exerciceId) ?? etat.sessionDe(c.exerciceId)?.exercice;
+    if (!ex) {
+      copieEnAttente = c;
+      infoImport = `Cette copie concerne « ${c.exerciceTitre} », un exercice remis par fichier. Ouvrez d'abord ce fichier avec « Ouvrir un exercice reçu… » : votre copie sera reprise aussitôt.`;
+      return;
+    }
+    await reprendreCopie(c, ex);
+  }
+
+  async function reprendreCopie(c: Copie, ex: Exercice) {
+    const r = dossierDeCopie(ex, planParDefaut, c.dossier);
+    if (!r.ok) {
+      erreurImport = r.erreurs.join(' ');
+      return;
+    }
+    const qui = `${c.eleve.prenom} ${c.eleve.nom}`.trim();
+    const autreEleve = eleveConnu && !(meme(eleveConnu.prenom, c.eleve.prenom) && meme(eleveConnu.nom, c.eleve.nom));
+    if (autreEleve) {
+      const oui = await dialogue.demander({
+        titre: `Reprendre la copie de ${qui} ?`,
+        texte: [
+          `Ce navigateur contient le travail de ${eleveConnu!.prenom} ${eleveConnu!.nom}. Il sera effacé pour laisser la place à cette copie.`,
+          "S'il doit être rendu, annulez, reprenez-le d'abord et cliquez sur « Exporter ma copie ».",
+        ],
+        confirmer: 'Effacer et reprendre la copie',
+        danger: true,
+      });
+      if (!oui) return;
+      etat.quitter();
+    } else {
+      const ici = etat.sessionDe(ex.id);
+      if (ici && ici.dossier.ecritures.some((e) => !e.automatique)) {
+        const oui = await dialogue.demander({
+          titre: 'Remplacer le travail de ce navigateur ?',
+          texte: [
+            `Ce navigateur contient déjà votre travail sur « ${ex.titre} ». Il sera remplacé par celui de la copie du ${dateHeure(c.exporteLe)}.`,
+          ],
+          confirmer: 'Remplacer par la copie',
+          danger: true,
+        });
+        if (!oui) return;
+      }
+    }
+    oublierLien();
+    etat.reprendreCopie(c.eleve, ex, r.valeur, c);
   }
 
   let filiere = $state<Filiere>(exLien ? filiereDe(exLien) : (etat.prefs.filiere ?? (depart ? filiereDe(depart.exercice) : 'CFC')));
@@ -177,7 +257,10 @@
 
   // Parcours « Apprendre » : notions maîtrisées dans ce navigateur (relu à chaque ouverture de l'accueil).
   const NB_MODULES = MODULES.length;
-  const maitrises = Object.values(lireProgression()).filter((p) => p.maitrise).length;
+  const progressionApprendre = lireProgression();
+  const maitrises = Object.values(progressionApprendre).filter((p) => p.maitrise).length;
+  /** Notions dont la révision est due : rappel sur l'accueil, l'élève n'a pas à y penser (second audit, 26.11.2026). */
+  const revisionsDues = aRevoir(progressionApprendre, new Date().toISOString().slice(0, 10)).length;
   const nbEntrainement = exercicesDemo.filter((e) => e.mode === 'entrainement').length;
 
   // Portes d'entrée : l'exercice ou l'évaluation ouvre la liste, déjà filtrée, et la fait défiler à l'écran.
@@ -313,7 +396,7 @@
           <button class="porte" onclick={() => etat.ouvrirRubrique('apprendre')}>
             <span class="porte-titre">Apprendre une notion</span>
             <span class="porte-texte">L'essentiel, un exemple travaillé et dix questions courtes, du bilan à la comptabilité analytique.</span>
-            <span class="porte-meta">{maitrises > 0 ? `${maitrises} notion${maitrises > 1 ? 's' : ''} maîtrisée${maitrises > 1 ? 's' : ''} sur ${NB_MODULES}` : `${NB_MODULES} notions`}</span>
+            <span class="porte-meta">{maitrises > 0 ? `${maitrises} notion${maitrises > 1 ? 's' : ''} réussie${maitrises > 1 ? 's' : ''} sur ${NB_MODULES}` : `${NB_MODULES} notions`}{revisionsDues > 0 ? ` · ${revisionsDues} à revoir aujourd’hui` : ''}</span>
             <span class="porte-action">{maitrises > 0 ? 'Continuer le parcours' : 'Ouvrir le parcours'} <span class="fleche" aria-hidden="true">→</span></span>
           </button>
           <button class="porte" onclick={() => allerAuChoix('entrainement')}>
@@ -457,6 +540,11 @@
         <button type="button" class="btn" onclick={ouvrirFichier}>Ouvrir un exercice reçu…</button>
         <span class="discret petit">Fichier {EXT_EXERCICE} remis par votre enseignant.</span>
       </div>
+      <div class="corps-carte ouvrir">
+        <button type="button" class="btn" onclick={ouvrirCopie}>Reprendre ma copie…</button>
+        <span class="discret petit">Fichier {EXT_COPIE} enregistré avec « Exporter ma copie » : pour continuer sur un autre ordinateur.</span>
+      </div>
+      {#if infoImport}<div class="message information" role="status" style="margin:0 20px 16px">{infoImport}</div>{/if}
       {#if erreurImport}<div class="alerte" role="alert" style="margin:0 20px 16px">{erreurImport}</div>{/if}
 
       <div class="corps-carte identite">
@@ -626,6 +714,7 @@
   .vide { padding: 18px 20px; color: var(--c-texte-2); margin: 0; }
   .petit { font-size: var(--t-13); }
   .ouvrir { display: flex; align-items: center; gap: 12px; border-top: 1px solid var(--c-bordure-2); flex-wrap: wrap; }
+  .ouvrir + .ouvrir { border-top: none; padding-top: 0; }
   .identite { border-top: 1px solid var(--c-bordure-2); background: var(--c-zebra); }
   .sous-titre { font-size: var(--t-15); margin: 0 0 12px; display: flex; gap: 8px; align-items: baseline; }
   .grille { display: grid; grid-template-columns: 1fr 1fr 180px; gap: 14px; }
