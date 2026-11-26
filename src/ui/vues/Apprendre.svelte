@@ -7,7 +7,7 @@
   import { CHAPITRES } from '../../data/theorie';
   import { plan } from '../../data/plan';
   import {
-    credit as partReussie, estJuste, genererSerie, montantModele, hasard, raisonnement, seuilMaitrise, texteOperation, VARIATIONS,
+    bilanSerie, credit as partReussie, estJuste, NOM_FORMAT, genererSerie, montantModele, hasard, raisonnement, seuilMaitrise, texteOperation, VARIATIONS,
     type Question, type Reponse,
   } from '../../engine/exercices-courts';
   import { erreurTypique } from '../../engine/erreurs-typiques';
@@ -39,6 +39,8 @@
   let questions = $state<Question[]>([]);
   let rang = $state(0);
   let justes = $state(0);
+  /** Part réussie de chaque question de la série, avec son format (minimum par format). */
+  let parts = $state<{ format: Question['format']; part: number }[]>([]);
   let corrigee = $state(false);
   let juste = $state(false);
   // Réponses en cours de saisie
@@ -130,6 +132,7 @@
     mode = m2;
     rang = 0;
     justes = 0;
+    parts = [];
     preparerQuestion();
     etape = 'serie';
     haut();
@@ -207,6 +210,7 @@
     juste = estJuste(q, r);
     const part = partReussie(q, r);
     justes += part;
+    parts = [...parts, { format: q.format, part }];
     corrigee = true;
     if (mode === 'revision') progression = enregistrerRevision(progression, module!.id, part >= 0.75);
   }
@@ -218,7 +222,7 @@
       preparerQuestion();
       return;
     }
-    if (mode === 'serie') progression = enregistrerSerie(progression, module!.id, justes, questions.length, justes >= seuilMaitrise(questions.length));
+    if (mode === 'serie') progression = enregistrerSerie(progression, module!.id, justes, questions.length, bilanSerie(parts).reussie);
     etape = 'bilan';
     haut();
   }
@@ -228,7 +232,10 @@
       ? erreurTypique([{ debit, credit, montant: q.montant }], [{ debit: q.reponse.debit, credit: q.reponse.credit, montant: q.montant }])
       : null,
   );
-  const reussi = $derived(justes >= seuilMaitrise(questions.length || NB));
+  const bilan = $derived(bilanSerie(parts));
+  const reussi = $derived(bilan.reussie);
+  /** Formats sous le minimum, alors que le total suffit : à expliquer à l'élève. */
+  const manques = $derived(bilan.parFormat.filter((f) => !f.atteint));
 
   // Envoi de la progression à l'enseignant : un fichier à rendre dans Google Classroom (rien ne passe en ligne).
   const connu = etat.session?.eleve ?? Object.values(etat.autres)[0]?.eleve;
@@ -276,8 +283,9 @@
       <div class="titre"><h1>Apprendre pas à pas</h1><span class="sous">CFC et maturité professionnelle</span></div>
       <p class="intro">
         Une notion à la fois, dans l'ordre du cours : vous lisez l'essentiel, vous suivez un exemple, puis vous vous
-        entraînez sur une série de {NB} questions courtes. Avec {seuilMaitrise(NB)} points sur {NB}, la notion est
-        maîtrisée. Chaque série est nouvelle : vous pouvez recommencer autant de fois que nécessaire.
+        entraînez sur une série de {NB} questions courtes. Avec {seuilMaitrise(NB)} points sur {NB}, et au moins la
+        moitié des points dans chaque type de question, la notion est réussie une fois ; la « Révision du jour » vous la
+        redemande ensuite pour la confirmer. Chaque série est nouvelle : vous pouvez recommencer autant de fois que nécessaire.
       </p>
       {#if dus.length}
         <section class="carte revision-jour">
@@ -302,7 +310,7 @@
               <span class="discret">{mod.objectif}</span>
             </div>
             <span class="etat" class:maitrise={p?.maitrise}>
-              {#if p?.maitrise}Maîtrisé{#if p.revision}<span class="echeance">&nbsp;· à confirmer le {dt(p.revision.prochaine).slice(0, 5)}</span>{/if}{:else if p}Meilleur score {pts(p.meilleur)} / {p.sur}{:else}À faire{/if}
+              {#if p?.maitrise && (!p.revision || p.revision.rang > 0)}Maîtrisé{#if p.revision}<span class="echeance">&nbsp;· prochaine révision le {dt(p.revision.prochaine).slice(0, 5)}</span>{/if}{:else if p?.maitrise && p.revision}Réussie une fois<span class="echeance">&nbsp;· à confirmer le {dt(p.revision.prochaine).slice(0, 5)}</span>{:else if p}Meilleur score {pts(p.meilleur)} / {p.sur}{:else}À faire{/if}
             </span>
           </li>
         {/each}
@@ -725,9 +733,31 @@
         <div class="corps-carte">
           <p class="score"><b>{pts(justes)} points sur {questions.length}.</b></p>
           {#if reussi}
-            <p class="ok">Notion maîtrisée. Vous pouvez passer à la suivante.</p>
+            <p class="ok">Notion réussie une fois. Vous pouvez passer à la suivante.</p>
+            <p>Elle vous sera redemandée dans la « Révision du jour » pour la confirmer.</p>
+          {:else if manques.length && bilan.points >= seuilMaitrise(questions.length) - 1e-9}
+            <p>Vous avez les points, mais il faut aussi au moins la moitié des points dans chaque type de question. À revoir :</p>
+            <ul class="manques">
+              {#each manques as f}<li>{NOM_FORMAT[f.format]} : {pts(f.points)} sur {f.sur}, il en faut {pts(f.minimum)}.</li>{/each}
+            </ul>
+            <p>Faites une nouvelle série : les questions et les montants changent.</p>
           {:else}
-            <p>Il faut {seuilMaitrise(questions.length)} points pour maîtriser la notion (une question en plusieurs étapes compte au prorata des étapes justes). Relisez l'essentiel et l'exemple, puis faites une nouvelle série : les questions et les montants changent.</p>
+            <p>Il faut {seuilMaitrise(questions.length)} points, et au moins la moitié des points dans chaque type de question, pour réussir la notion (une question en plusieurs étapes compte au prorata des étapes justes). Relisez l'essentiel et l'exemple, puis faites une nouvelle série : les questions et les montants changent.</p>
+          {/if}
+          {#if bilan.parFormat.length > 1}
+            <table class="par-format">
+              <caption>Par type de question</caption>
+              <thead><tr><th scope="col">Type</th><th scope="col" class="montant">Points</th><th scope="col" class="montant">Minimum</th></tr></thead>
+              <tbody>
+                {#each bilan.parFormat as f}
+                  <tr class:revoir={!f.atteint}>
+                    <th scope="row">{NOM_FORMAT[f.format]}</th>
+                    <td class="montant">{pts(f.points)} sur {f.sur}</td>
+                    <td class="montant">{pts(f.minimum)}{#if !f.atteint}<span class="sr"> (non atteint)</span>{/if}</td>
+                  </tr>
+                {/each}
+              </tbody>
+            </table>
           {/if}
         </div>
       </section>
@@ -886,6 +916,14 @@
   .pourquoi { margin: 6px 0 0; }
   .score { font-size: var(--t-17); }
   .ok { color: var(--c-ok); font-weight: bold; }
+  .manques { margin: 4px 0 8px; padding-left: 22px; }
+  .par-format { margin-top: var(--e-3); width: auto; border-collapse: collapse; }
+  .par-format caption { text-align: left; font-weight: 600; padding-bottom: 4px; }
+  .par-format th, .par-format td { padding: 4px 16px 4px 0; text-align: left; font-weight: normal; font-size: var(--t-15); color: var(--c-texte); background: none; }
+  .par-format thead th { font-size: var(--t-13); color: var(--c-texte-2); }
+  .par-format .montant { text-align: right; font-variant-numeric: tabular-nums; }
+  .par-format tr.revoir td, .par-format tr.revoir th { color: var(--c-erreur); font-weight: 600; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   @media (max-width: 700px) {
     .grille-ecriture { grid-template-columns: 1fr; }
     .montant-donne { text-align: left; }
