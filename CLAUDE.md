@@ -167,7 +167,8 @@ Trois exercices de démonstration (un par niveau, ~15 opérations, entreprise fi
 - Accueil : onglets « Entraînement » / « Évaluation » (formative et sommative) en plus du choix CFC / MP ; barre « Exercice choisi … Commencer » collée au bas de la liste.
 - Copie élève : prénom, nom, **classe**.
 - « Bonne classe mais mauvais compte » = même premier chiffre (classe du plan). Une opération incomplète (décomposition en cours) n'est pas comptée comme une erreur.
-- Formats : `.compta-exercice.json` (élèves ; corrigé absent en évaluation, encodé en entraînement), version enseignant (corrigé en clair), `.compta-copie.json`.
+- Formats : `.compta-exercice.json` (élèves ; corrigé absent en évaluation, encodé en entraînement), version enseignant (corrigé en clair), `.compta-copie.json`.
+- **Reprise d'un travail par fichier** (26.11.2026, audit) : « Reprendre ma copie… » sur la page Exercices de l'accueil ; le dossier n'est jamais repris tel quel du fichier : `dossierDeCopie` (`src/engine/reprise.ts`) repart du dossier de l'exercice et rejoue les écritures de l'élève avec les contrôles du journal (copie modifiée ou d'un autre exercice refusée ; copie postérieure à une réouverture refusée) ; copie d'un exercice reçu par fichier reprise dès que ce fichier est ouvert ; confirmation avant d'effacer le travail d'un autre élève ou de remplacer le sien ; la copie porte `formativeTerminee` (une formative terminée reste fermée). Apprendre : « Reprendre ma progression… » fusionne le fichier `.compta-progression.json` avec ce navigateur (`fusionnerProgression`).
 - Mode enseignant : code simple stocké dans le navigateur (`compta-pme:enseignant:v1`), sans prétention de sécurité.
 
 ## Pédagogie

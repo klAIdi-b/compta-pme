@@ -10,7 +10,7 @@ import { plan as planParDefaut } from '../data/plan';
 import { exercicesDemo } from '../data/demos';
 import { ecrire, lire } from '../io/stockage';
 import { chapitreDuLien } from './lien';
-import type { DernierExport } from '../io/fichiers';
+import { empreinteTravail, type DernierExport } from '../io/fichiers';
 import type { Suivi } from '../engine/correction';
 import { aMettreDeCote, ecranAffiche, genreSession, peutOuvrirAccueil, vueEleve, type Ecran, type GenreSession } from './modes';
 
@@ -273,6 +273,37 @@ class Etat {
     this.accueilOuvert = false;
     // L'élève découvre d'abord sa situation sur le tableau de bord ; l'enseignant va directement au journal.
     this.aller(role === 'eleve' ? 'tableau' : 'journal');
+  }
+
+  /**
+   * Reprise d'une copie exportée (poste partagé, autre ordinateur). Le dossier a déjà été reconstruit et contrôlé par
+   * `dossierDeCopie`. Le travail de ce navigateur sur le même exercice est remplacé ; l'exercice actif est mis en réserve.
+   */
+  reprendreCopie(
+    eleve: Eleve,
+    exercice: Exercice,
+    dossier: Dossier,
+    copie: { suivi: Suivi; fiches?: unknown; formativeTerminee?: boolean; exporteLe: string },
+  ) {
+    const actif = this.session;
+    if (actif && this.genre === 'travail' && actif.exercice.id !== exercice.id) this.autres[actif.exercice.id] = actif;
+    delete this.autres[exercice.id];
+    const fiches = (copie.fiches && typeof copie.fiches === 'object' ? copie.fiches : {}) as Fiches;
+    this.session = {
+      eleve,
+      exercice,
+      dossier,
+      archives: [],
+      suivi: copie.suivi ?? {},
+      role: 'eleve',
+      fiches,
+      // Le fichier repris est lui-même la dernière copie exportée.
+      dernierExport: { le: copie.exporteLe, empreinte: empreinteTravail(dossier, fiches) },
+      derniereActivite: new Date().toISOString(),
+      formativeTerminee: exercice.mode === 'formative' && copie.formativeTerminee ? true : undefined,
+    };
+    this.accueilOuvert = false;
+    this.aller('tableau');
   }
 
   /** Bouton « Commencer la saisie » : ouvre le journal, avec la visite guidée la première fois. */

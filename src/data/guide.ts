@@ -319,10 +319,18 @@ export const GUIDE: PartieGuide[] = [
               'depuis le dernier export (exportez-la à nouveau avant de la rendre), ou exportée à telle date et heure.',
           },
           {
+            type: 'p',
+            texte:
+              'Pour continuer sur un autre ordinateur : page « Exercices » de l’accueil, bouton « Reprendre ma copie… », ' +
+              'puis choisissez votre fichier .compta-copie.json. Pour un exercice reçu par fichier, ouvrez d’abord ce ' +
+              'fichier avec « Ouvrir un exercice reçu… ». Votre progression d’« Apprendre pas à pas » se reprend de la même ' +
+              'façon : « Envoyer ou reprendre ma progression », puis « Reprendre ma progression… ».',
+          },
+          {
             type: 'retenir',
             texte:
               "Votre travail n'existe que dans le navigateur de cet ordinateur. Exportez votre copie avant de changer " +
-              "d'ordinateur ou de vider l'historique du navigateur.",
+              "d'ordinateur ou de vider l'historique du navigateur : vous pourrez la reprendre ailleurs.",
           },
         ],
       },

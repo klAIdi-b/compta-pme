@@ -63,6 +63,8 @@ interface FichierCopie {
   dossier: Dossier;
   suivi: Suivi;
   fiches?: unknown;
+  /** Évaluation formative terminée : la copie reprise reste fermée à la saisie. */
+  formativeTerminee?: boolean;
   exporteLe: string;
 }
 
@@ -75,6 +77,8 @@ export interface Copie {
   suivi: Suivi;
   /** Contenu des fiches de calcul (salaire, répartition, analyse). */
   fiches?: unknown;
+  /** Évaluation formative terminée (correction déjà vue) : une copie reprise reste fermée à la saisie. */
+  formativeTerminee?: boolean;
   exporteLe: string;
 }
 
@@ -296,6 +300,7 @@ export function importerCopie(texte: string): Copie {
     dossier: c.dossier,
     suivi: c.suivi ?? {},
     fiches: c.fiches,
+    formativeTerminee: c.formativeTerminee === true ? true : undefined,
     exporteLe: c.exporteLe,
   };
 }

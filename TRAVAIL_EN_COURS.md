@@ -187,4 +187,12 @@ Corrections faites une à une, sur accord de l'enseignant, d'abord sur `apercu`.
   le tableau « Par type de question » et les formats sous le minimum ; liste des modules : « Réussie une fois · à
   confirmer le … » tant qu'aucune révision n'est réussie, puis « Maîtrisé · prochaine révision le … ». Paliers
   « Confirmée » et « Ancrée » non faits (gamification, mécanique 1). À commiter et publier sur accord.
+- [x] Maîtrise avec un minimum par format : fusionné dans main le 26.11.2026.
+- [x] Reprise d'un travail par fichier (26.11.2026, action 11 et constat 12 de l'enseignant auditeur) : accueil,
+  « Reprendre ma copie… » (`src/engine/reprise.ts`, `dossierDeCopie` : dossier reconstruit depuis l'exercice, écritures
+  de l'élève rejouées avec les contrôles du journal ; copie d'un exercice reçu par fichier mise en attente de ce fichier ;
+  confirmation avant d'effacer le travail d'un autre élève ou de remplacer le sien ; `etat.reprendreCopie`) ; la copie
+  porte `formativeTerminee` ; Apprendre, « Reprendre ma progression… » (`fusionnerProgression` dans `io/apprendre.ts`) ;
+  guide « Rendre son travail » complété. Non fait : progression Apprendre rattachée à un nom d'élève. À commiter et
+  publier sur accord.
 - [ ] Les autres actions de la vague 2 : en attente.

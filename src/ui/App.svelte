@@ -52,6 +52,7 @@
       dossier: s.dossier,
       suivi: s.suivi,
       fiches: s.fiches,
+      formativeTerminee: s.formativeTerminee || undefined,
     });
     telecharger(nomFichier([s.eleve.nom, s.eleve.prenom, s.eleve.classe, s.exercice.titre], EXT_COPIE), texte);
     s.dernierExport = { le: new Date().toISOString(), empreinte: empreinteTravail(s.dossier, $state.snapshot(s.fiches)) };

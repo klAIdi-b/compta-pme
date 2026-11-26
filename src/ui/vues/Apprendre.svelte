@@ -15,9 +15,11 @@
   import type { TypeCompte } from '../../engine/plan';
   import { LECONS, exemplesDe } from '../../data/lecons';
   import BandeauRubriques from '../composants/BandeauRubriques.svelte';
-  import { enregistrerRevision, enregistrerSerie, lireProgression, type Progression } from '../../io/apprendre';
+  import { enregistrerRevision, enregistrerSerie, lireProgression, reprendreProgression, type Progression } from '../../io/apprendre';
   import { aRevoir } from '../../engine/revision';
-  import { EXT_PROGRESSION, exporterProgression } from '../../io/progression';
+  import { EXT_PROGRESSION, exporterProgression, importerProgression } from '../../io/progression';
+  import { choisirFichiers } from '../fichiers-navigateur';
+  import { ErreurFichier } from '../../io/fichiers';
   import { nomFichier } from '../../io/fichiers';
   import { telecharger } from '../fichiers-navigateur';
   import { dt } from '../format';
@@ -243,6 +245,24 @@
   let nomE = $state(connu?.nom ?? '');
   let classeE = $state(connu?.classe ?? '');
   let envoye = $state(false);
+  // Reprise de la progression sur un autre ordinateur : le fichier téléchargé est fusionné avec ce navigateur.
+  let repriseMessage = $state('');
+  let repriseErreur = $state('');
+  async function reprendreMaProgression() {
+    repriseMessage = '';
+    repriseErreur = '';
+    const [f] = await choisirFichiers(`${EXT_PROGRESSION},.json`);
+    if (!f) return;
+    try {
+      const lu = importerProgression(f.texte);
+      progression = reprendreProgression(progression, lu.progression);
+      const n = Object.values(progression).filter((p) => p.maitrise).length;
+      repriseMessage = `Progression reprise : ${n} notion${n > 1 ? 's' : ''} réussie${n > 1 ? 's' : ''} dans ce navigateur.`;
+    } catch (e) {
+      repriseErreur = e instanceof ErreurFichier ? e.message : "Le fichier n'a pas pu être lu.";
+    }
+  }
+
   function envoyerProgression(e: SubmitEvent) {
     e.preventDefault();
     if (!prenomE.trim() || !nomE.trim() || !classeE.trim()) return;
@@ -317,7 +337,7 @@
       </ol>
       {/each}
       <details class="carte envoi">
-        <summary>Envoyer ma progression à l'enseignant</summary>
+        <summary>Envoyer ou reprendre ma progression</summary>
         <form class="corps-carte" onsubmit={envoyerProgression}>
           <p>Téléchargez votre fichier de progression, puis rendez-le dans le devoir Google Classroom.</p>
           <div class="grille-envoi">
@@ -328,6 +348,12 @@
           </div>
           {#if envoye}<p class="ok" role="status">Fichier téléchargé : déposez-le dans le devoir Classroom.</p>{/if}
         </form>
+        <div class="corps-carte reprise">
+          <p>Sur un autre ordinateur, rouvrez ce même fichier pour retrouver vos notions réussies et vos révisions.</p>
+          <button class="btn" type="button" onclick={reprendreMaProgression}>Reprendre ma progression…</button>
+          {#if repriseMessage}<p class="ok" role="status">{repriseMessage}</p>{/if}
+          {#if repriseErreur}<p class="message erreur" role="alert">{repriseErreur}</p>{/if}
+        </div>
       </details>
       <nav class="nav-modules" aria-label="Navigation">
         <button class="btn" onclick={() => etat.allerAccueil()}><span aria-hidden="true">←</span> Retour à la page d'accueil</button>
