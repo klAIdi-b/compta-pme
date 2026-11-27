@@ -1,7 +1,7 @@
 <script lang="ts">
   import { dialogue } from '../dialogue.svelte';
   import { etat } from '../etat.svelte';
-  import { etiquetteNiveau, LIBELLES_MODE, operationsSaisies } from '../../engine/exercice';
+  import { etiquetteNiveau, LIBELLES_ANNEE, LIBELLES_MODE, operationsSaisies } from '../../engine/exercice';
   import { balance } from '../../engine/ledger';
   import { dt } from '../format';
   import { corrigerCopie } from '../../engine/notation';
@@ -39,7 +39,7 @@
 
 <section class="mission">
   <h1><span class="surtitre">Votre mission</span>{s.dossier.raisonSociale}</h1>
-  <p class="sous-titre">{s.exercice.titre} · {etiquetteNiveau(s.exercice)} · {LIBELLES_MODE[s.exercice.mode]}</p>
+  <p class="sous-titre">{s.exercice.papier ? `Énoncé sur papier${s.exercice.papier.code ? ` · code ${s.exercice.papier.code}` : ''} · ${LIBELLES_ANNEE[s.exercice.niveau]}` : `${s.exercice.titre} · ${etiquetteNiveau(s.exercice)} · ${LIBELLES_MODE[s.exercice.mode]}`}</p>
   {#if paragraphes.length}
     <p class="accroche">{paragraphes[0]}</p>
     {#if paragraphes.length > 1}
@@ -92,7 +92,15 @@
       {/if}
     </div>
     <div class="demarrer-action">
-      {#if total > 0}
+      {#if s.exercice.papier}
+        {#if Object.keys(s.exercice.ouvertureActif).length === 0}
+          <button class="btn btn-principal btn-grand" onclick={() => etat.aller('ouverture')}>Saisir le bilan d'ouverture</button>
+        {:else}
+          <button class="btn btn-principal btn-grand" onclick={() => etat.aller('journal')}>
+            {s.dossier.ecritures.some((e) => !e.automatique) ? 'Continuer la saisie' : 'Commencer la saisie'}
+          </button>
+        {/if}
+      {:else if total > 0}
         <button class="btn btn-principal btn-grand" onclick={() => etat.commencerSaisie()}>
           {s.dossier.ecritures.some((e) => !e.automatique) ? 'Continuer la saisie' : 'Commencer la saisie'}
         </button>

@@ -70,6 +70,7 @@ describe('espaces du site (phase V1)', () => {
   it('range chaque rubrique dans la Comptabilité, le Cours ou l’accueil', () => {
     expect(espaceDe('accueil')).toBe('accueil');
     expect(espaceDe('dossiers')).toBe('comptabilite');
+    expect(espaceDe('papier')).toBe('comptabilite');
     expect(espaceDe('exercices')).toBe('comptabilite');
     expect(espaceDe('evaluation')).toBe('comptabilite');
     expect(espaceDe('apprendre')).toBe('cours');

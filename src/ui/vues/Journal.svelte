@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { estPapier, prochainePiece } from '../../engine/papier';
   import { dialogue } from '../dialogue.svelte';
   import { tick } from 'svelte';
   import { etat } from '../etat.svelte';
@@ -170,9 +171,17 @@
     return operations.find((o) => !saisies.has(o.numero));
   }
 
+  /** Énoncé papier (phase V2) : pas d'opérations dans le logiciel, l'élève saisit les numéros de pièce de la feuille. */
+  const papier = $derived(estPapier(ex));
+  /** Numéro proposé pour la prochaine pièce d'un énoncé papier : le plus grand numéro saisi, plus un. */
+  const piecePapier = () => prochainePiece(d.ecritures.filter((e) => !e.automatique).map((e) => e.piece));
   const op0 = prochaineOperation();
   let date = $state(op0 ? dt(op0.date) : '');
-  let piece = $state(op0?.numero ?? '');
+  let piece = $state(op0?.numero ?? (estPapier(etat.exercice) ? prochainePiece(etat.dossier.ecritures.map((e) => e.piece)) : ''));
+  /** Énoncé papier : un numéro de pièce déjà saisi est signalé (sans bloquer : une pièce peut avoir deux écritures). */
+  const pieceDejaSaisie = $derived(
+    papier && !editionId && piece.trim() !== '' && d.ecritures.some((e) => !e.automatique && !e.extourneDe && e.piece === piece.trim()),
+  );
   let libelle = $state('');
   let lignes = $state<LigneSaisie[]>([nouvelleLigne()]);
   let erreurs = $state<string[]>([]);
@@ -227,7 +236,7 @@
     const etape = etapeCourante;
     const suivante = etape ? etapes.slice(etapes.indexOf(etape) + 1).find((e) => !etapesFaites.has(e.piece)) : undefined;
     const o = suivante ? undefined : prochaineOperation();
-    piece = suivante?.piece ?? o?.numero ?? '';
+    piece = suivante?.piece ?? o?.numero ?? (papier ? piecePapier() : '');
     date = suivante ? dt(d.fin) : o ? dt(o.date) : date;
     libelle = '';
     lignes = [nouvelleLigne()];
@@ -473,7 +482,13 @@
 </div>
 
 {#if vueEleve(etat.genre)}<BilanVivant />{/if}
-<div class="mise-en-page">
+{#if papier}
+  <p class="message information bandeau-papier">
+    Énoncé sur papier : le logiciel ne corrige pas pendant la saisie. Saisissez chaque opération de la feuille avec son
+    numéro de pièce ; votre enseignant corrigera votre copie exportée.
+  </p>
+{/if}
+<div class="mise-en-page" class:sans-enonce={papier}>
   <div class="colonne-principale">
     <!-- Verdict de la dernière écriture validée, au-dessus de la saisie (25.11.2026, audit) : après « Valider », il est
          ramené à l'écran s'il n'y est pas ; l'énoncé de l'opération suivante et la grille viennent juste dessous. -->
@@ -672,6 +687,11 @@
           <button class="btn btn-principal" disabled={!equilibree} aria-describedby="raison-validation" onclick={valider}>{editionId ? 'Enregistrer la modification' : "Valider l'écriture"}</button>
         </div>
       </div>
+      {#if pieceDejaSaisie}
+        <p class="message avert piece-deja" role="status">
+          La pièce {piece.trim()} existe déjà dans le journal. Vérifiez le numéro sur la feuille, ou validez quand même s'il s'agit d'une seconde écriture de la même pièce.
+        </p>
+      {/if}
       {#if erreurs.length}
         <div class="alerte erreurs" role="alert">
           <b>L'écriture n'a pas été validée :</b>
@@ -703,7 +723,7 @@
       {#if d.ecritures.length === 0}
         <p class="vide">
           Aucune écriture pour l'instant.
-          {#if operations[0]}Commencez par saisir l'opération {operations[0].numero}.{/if}
+          {#if operations[0]}Commencez par saisir l'opération {operations[0].numero}.{:else if papier}Commencez par la première opération de la feuille.{/if}
         </p>
       {:else}
         <div class="defilement"><table class="journal">
@@ -814,6 +834,7 @@
     </section>
   </div>
 
+  {#if !papier}
   <aside class="carte enonce" aria-label="Énoncé" data-visite="enonce">
     <h2>Énoncé · opérations</h2>
     {#if operations.length === 0}
@@ -843,10 +864,14 @@
       </ol>
     {/if}
   </aside>
+  {/if}
 </div>
 
 <style>
   .mise-en-page { display: grid; grid-template-columns: minmax(0, 1fr) 250px; gap: 16px; align-items: start; }
+  .mise-en-page.sans-enonce { grid-template-columns: minmax(0, 1fr); }
+  .bandeau-papier { margin: 0 0 var(--e-4); }
+  .piece-deja { margin: var(--e-2) 0 0; }
   .colonne-principale { min-width: 0; }
   .saisie td { padding: 5px 6px; border-bottom: none; }
   .saisie tbody tr:hover td { background: none; }

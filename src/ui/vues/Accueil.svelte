@@ -8,6 +8,11 @@
   import { classerExercices, etiquetteNiveau, filiereDe, LIBELLES_FILIERE, LIBELLES_MODE, type Exercice, type Filiere } from '../../engine/exercice';
   import { EXT_COPIE, EXT_EXERCICE, ErreurFichier, importerCopie, importerExercice, statutExport, type Copie } from '../../io/fichiers';
   import { dossierDeCopie } from '../../engine/reprise';
+  import { exerciceDuCode, exercicePapier } from '../../engine/papier';
+  import { lireDate } from '../../engine/dates';
+  import { LIBELLES_ANNEE } from '../../engine/exercice';
+  import type { Niveau } from '../../engine/plan';
+  import type { FormeJuridique } from '../../engine/dossier';
   import { plan as planParDefaut } from '../../data/plan';
   import { dialogue } from '../dialogue.svelte';
   import { choisirFichiers } from '../fichiers-navigateur';
@@ -16,7 +21,7 @@
   const lireSituation = async (texte: string) => (await import('../../io/simulation')).importerSituation(texte);
   import { simulationEleve } from '../simulation-eleve.svelte';
   import { avancementSession, avecCorrection } from '../avancement';
-  import { dateHeure, normaliser } from '../format';
+  import { dateHeure, normaliser, periode } from '../format';
   import BarreAvancement from '../composants/BarreAvancement.svelte';
   import DemoEcriture from '../composants/DemoEcriture.svelte';
   import BandeauRubriques from '../composants/BandeauRubriques.svelte';
@@ -106,7 +111,7 @@
       erreurImport = e instanceof ErreurFichier ? e.message : "Le fichier n'a pas pu être lu.";
       return;
     }
-    const ex = tous.find((x) => x.id === c.exerciceId) ?? etat.sessionDe(c.exerciceId)?.exercice;
+    const ex = c.papier?.exercice ?? tous.find((x) => x.id === c.exerciceId) ?? etat.sessionDe(c.exerciceId)?.exercice;
     if (!ex) {
       copieEnAttente = c;
       infoImport = `Cette copie concerne « ${c.exerciceTitre} », un exercice remis par fichier. Ouvrez d'abord ce fichier avec « Ouvrir un exercice reçu… » : votre copie sera reprise aussitôt.`;
@@ -201,6 +206,7 @@
   const dossiers = $derived(etat.dossiersEleve);
   /** Origine d'un dossier : exercice ou dossier de pièces du logiciel, simulateur, ou fichier remis par l'enseignant. */
   function origineDe(ex: Exercice): { texte: string; classe: string } {
+    if (ex.papier) return { texte: 'Énoncé sur papier', classe: 'papier' };
     if (ex.id.startsWith('simulation-')) return { texte: "Simulateur d'entreprise", classe: 'fichier' };
     if (exercicesDemo.some((e) => e.id === ex.id)) return estDossier(ex) ? { texte: 'Dossier de pièces', classe: 'dossier' } : { texte: 'Exercice du logiciel', classe: 'exo' };
     return { texte: "Fichier de l'enseignant", classe: 'fichier' };
@@ -261,6 +267,53 @@
     confirmer = false;
     oublierLien();
     etat.commencer({ prenom: prenom.trim(), nom: nom.trim(), classe: classe.trim() }, ex);
+  }
+
+  // ---- Énoncé papier (phase V2) ----
+  const anneeCourante = new Date().getFullYear();
+  let codePapier = $state('');
+  let raisonPapier = $state('');
+  let formePapier = $state<FormeJuridique>('raison individuelle');
+  let niveauPapier = $state<Niveau>(depart?.exercice.niveau ?? (etat.prefs.filiere === 'MP' ? 'MP' : 'CFC1'));
+  let debutPapier = $state(`01.01.${anneeCourante}`);
+  let finPapier = $state(`31.12.${anneeCourante}`);
+  let erreursPapier = $state<string[]>([]);
+  /** Code d'un exercice du logiciel tapé par l'élève : l'entreprise (et parfois le bilan d'ouverture) se remplit seule. */
+  const reconnu = $derived(codePapier.trim() ? exerciceDuCode(codePapier, exercicesDemo) : null);
+
+  async function creerPapier(e: SubmitEvent) {
+    e.preventDefault();
+    const err: string[] = [];
+    const debut = lireDate(debutPapier);
+    const fin = lireDate(finPapier);
+    if (!reconnu) {
+      if (!raisonPapier.trim()) err.push("Indiquez le nom de l'entreprise, tel qu'il figure sur la feuille.");
+      if (!debut || !fin) err.push("Indiquez le début et la fin de l'exercice (JJ.MM.AAAA).");
+      else if (debut >= fin) err.push("La fin de l'exercice doit être postérieure à son début.");
+    }
+    if (!prenom.trim()) err.push('Indiquez votre prénom.');
+    if (!nom.trim()) err.push('Indiquez votre nom.');
+    if (!classe.trim()) err.push('Indiquez votre classe (par exemple 1CFC3).');
+    erreursPapier = err;
+    if (err.length) return;
+    const autreEleve = eleveConnu && !(meme(eleveConnu.prenom, prenom) && meme(eleveConnu.nom, nom));
+    if (autreEleve) {
+      const oui = await dialogue.demander({
+        titre: `Ce navigateur contient le travail de ${eleveConnu!.prenom} ${eleveConnu!.nom}`,
+        texte: ["Si vous n'êtes pas cette personne, ce travail sera effacé pour laisser la place au vôtre.", "S'il doit être rendu, annulez, reprenez-le d'abord et cliquez sur « Exporter ma copie »."],
+        confirmer: 'Effacer et créer le dossier',
+        danger: true,
+      });
+      if (!oui) return;
+      etat.quitter();
+    }
+    const ex = exercicePapier(
+      `papier-${Date.now().toString(36)}`,
+      { raisonSociale: raisonPapier, formeJuridique: formePapier, niveau: niveauPapier, debut: debut ?? '', fin: fin ?? '', code: codePapier },
+      reconnu ?? undefined,
+    );
+    oublierLien();
+    etat.commencerPapier({ prenom: prenom.trim(), nom: nom.trim(), classe: classe.trim() }, ex);
   }
 
   // Parcours « Apprendre » : notions maîtrisées dans ce navigateur (relu à chaque ouverture de l'accueil).
@@ -479,12 +532,81 @@
             <strong>Fichier reçu de l'enseignant</strong>
             <span class="discret petit">Ouvrir le fichier {EXT_EXERCICE} du devoir Google Classroom.</span>
           </button>
+          <button class="choix-dossier" onclick={() => etat.ouvrirRubrique('papier')}>
+            <strong>Énoncé sur papier</strong>
+            <span class="discret petit">Créer l'entreprise de la feuille, saisir son bilan d'ouverture puis les écritures.</span>
+          </button>
         </div>
       </section>
       <p class="aussi">
         Vous avez rendu une copie et vous changez d'ordinateur ?
         <button class="btn-lien" onclick={ouvrirCopie}>Reprendre ma copie…</button>
       </p>
+    {:else if page === 'papier'}
+      <!-- Comptabilité · Nouveau dossier, énoncé sur papier (phase V2, écran V2.1 de la maquette). -->
+      <section class="tete-page" aria-labelledby="titre-accueil">
+        <h1 id="titre-accueil">Nouveau dossier, énoncé sur papier</h1>
+        <p class="accroche">Recopiez les données de la feuille de votre enseignant. Ensuite, vous saisirez le bilan d'ouverture puis les écritures, avec les numéros de pièce de la feuille.</p>
+      </section>
+      <form class="carte papier" onsubmit={creerPapier} novalidate>
+        <div class="corps-carte grille-papier">
+          <div class="large">
+            <label class="bloc" for="code-papier">Code de l'exercice <span class="discret petit">(facultatif)</span></label>
+            <input id="code-papier" class="champ" bind:value={codePapier} autocomplete="off" placeholder="par ex. CYCLES-K7Q" aria-describedby="aide-code" />
+            <p id="aide-code" class="discret petit aide">Écrit en haut de la feuille par votre enseignant. Il associe votre copie au bon corrigé.</p>
+            {#if reconnu}
+              <p class="message succes" role="status"><span>
+                Exercice reconnu : <b>{reconnu.exercice.raisonSociale}</b>, {LIBELLES_ANNEE[reconnu.exercice.niveau]}, exercice {periode(reconnu.exercice.debut, reconnu.exercice.fin)}.
+                {reconnu.variante === 'fourni' ? "Le bilan d'ouverture est déjà rempli : vous passerez directement au journal." : "Vous saisirez vous-même le bilan d'ouverture."}
+              </span></p>
+            {/if}
+          </div>
+          {#if !reconnu}
+            <div class="large">
+              <label class="bloc" for="raison-papier">Nom de l'entreprise</label>
+              <input id="raison-papier" class="champ" bind:value={raisonPapier} autocomplete="off" />
+            </div>
+            <div>
+              <label class="bloc" for="forme-papier">Forme juridique</label>
+              <select id="forme-papier" class="champ" bind:value={formePapier}>
+                <option value="raison individuelle">Raison individuelle</option>
+                <option value="Sàrl">Sàrl</option>
+                <option value="SA">SA</option>
+              </select>
+            </div>
+            <div>
+              <label class="bloc" for="niveau-papier">Votre année</label>
+              <select id="niveau-papier" class="champ" bind:value={niveauPapier} aria-describedby="aide-niveau">
+                {#each ['CFC1', 'CFC2', 'MP'] as const as n}<option value={n}>{LIBELLES_ANNEE[n]}</option>{/each}
+              </select>
+              <p id="aide-niveau" class="discret petit aide">Les comptes proposés sont ceux du plan du cours de cette année.</p>
+            </div>
+            <div>
+              <label class="bloc" for="debut-papier">Début de l'exercice</label>
+              <input id="debut-papier" class="champ num" bind:value={debutPapier} placeholder="JJ.MM.AAAA" autocomplete="off" />
+            </div>
+            <div>
+              <label class="bloc" for="fin-papier">Fin de l'exercice</label>
+              <input id="fin-papier" class="champ num" bind:value={finPapier} placeholder="JJ.MM.AAAA" autocomplete="off" />
+            </div>
+          {/if}
+        </div>
+        <div class="corps-carte identite">
+          <h2 class="sous-titre">Vos informations <span class="discret petit">pour votre copie</span></h2>
+          <div class="grille">
+            <div><label class="bloc" for="prenom-papier">Prénom</label><input id="prenom-papier" class="champ" bind:value={prenom} autocomplete="given-name" /></div>
+            <div><label class="bloc" for="nom-papier">Nom</label><input id="nom-papier" class="champ" bind:value={nom} autocomplete="family-name" /></div>
+            <div><label class="bloc" for="classe-papier">Classe</label><input id="classe-papier" class="champ" bind:value={classe} placeholder="par ex. 1CFC3" /></div>
+          </div>
+        </div>
+        {#if erreursPapier.length}
+          <div class="alerte" role="alert" style="margin:0 20px 16px"><ul>{#each erreursPapier as e}<li>{e}</li>{/each}</ul></div>
+        {/if}
+        <div class="actions">
+          <button type="button" class="btn" onclick={() => etat.ouvrirRubrique('dossiers')}>Annuler</button>
+          <button type="submit" class="btn btn-principal btn-grand">Créer le dossier</button>
+        </div>
+      </form>
     {:else if page === 'theorie'}
       <!-- Théorie ouverte sans exercice : l'élève choisit son année. Fichier chargé à la demande. -->
       <Differe charger={() => import('./Theorie.svelte')} props={{ libre: true }} />
@@ -791,7 +913,13 @@
   .ligne-dossier .origine { display: flex; flex-wrap: wrap; gap: 4px; }
   .ligne-dossier .av { display: flex; flex-direction: column; gap: 4px; }
   .type.fichier { background: #eef0f3; color: var(--c-texte-2); }
-  .choix-nouveau { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--e-3); padding: var(--e-4) var(--e-5) var(--e-5); }
+  .type.papier { background: var(--c-orange-doux); color: var(--c-action-fonce); }
+  .grille-papier { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--e-4); }
+  .grille-papier .large { grid-column: 1 / -1; }
+  .grille-papier .aide { margin: 4px 0 0; }
+  .grille-papier .message { margin: var(--e-3) 0 0; }
+  .papier .actions { justify-content: flex-end; }
+  .choix-nouveau { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--e-3); padding: var(--e-4) var(--e-5) var(--e-5); }
   .choix-dossier {
     font: inherit; text-align: left; cursor: pointer; display: flex; flex-direction: column; gap: 4px; padding: var(--e-3) var(--e-4);
     border: 1px solid var(--c-bordure-2); border-radius: var(--r-3); background: #fff; color: var(--c-texte); min-height: var(--h-cible);
@@ -804,6 +932,7 @@
     .ligne-dossier .origine, .ligne-dossier .av, .ligne-dossier .modif { grid-column: 1; }
     .ligne-dossier .ouvrir-dossier { grid-column: 2; grid-row: 1 / span 4; align-self: center; }
     .choix-nouveau { grid-template-columns: 1fr; padding: var(--e-3) var(--e-4) var(--e-4); }
+    .grille-papier { grid-template-columns: minmax(0, 1fr); }
     .actions-dossiers { width: 100%; }
     .actions-dossiers .btn { flex: 1; justify-content: center; }
   }

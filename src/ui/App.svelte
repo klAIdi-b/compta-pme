@@ -53,6 +53,8 @@
       suivi: s.suivi,
       fiches: s.fiches,
       formativeTerminee: s.formativeTerminee || undefined,
+      // Énoncé papier : l'exercice créé par l'élève voyage avec la copie (reprise, rattachement au corrigé).
+      ...(s.exercice.papier ? { papier: { exercice: $state.snapshot(s.exercice) } } : {}),
     });
     telecharger(nomFichier([s.eleve.nom, s.eleve.prenom, s.eleve.classe, s.exercice.titre], EXT_COPIE), texte);
     s.dernierExport = { le: new Date().toISOString(), empreinte: empreinteTravail(s.dossier, $state.snapshot(s.fiches)) };
@@ -137,6 +139,18 @@
       ...(f.has('budget') ? [{ vue: 'budget' as Vue, libelle: 'Budget' }] : []),
       { vue: 'theorie', libelle: 'Théorie' },
     ];
+    // Énoncé papier : le bilan d'ouverture puis le journal, sans parcours (pas d'opérations dans le logiciel).
+    if (etat.session && etat.exercice.papier) {
+      const ouvertureFaite = Object.keys(etat.exercice.ouvertureActif).length > 0;
+      return [
+        { titre: null, entrees: [{ vue: 'tableau', libelle: 'Votre mission' }] },
+        { titre: 'Saisie', entrees: [{ vue: 'ouverture', libelle: "Bilan d'ouverture", fait: ouvertureFaite }, { vue: 'journal', libelle: 'Journal', compte: saisies ? `${new Set(etat.dossier.ecritures.map((e) => e.piece)).size} pièces` : undefined }] },
+        { titre: 'Comptes', entrees: [{ vue: 'comptes', libelle: 'Comptes en T' }, { vue: 'grandlivre', libelle: 'Grand livre' }, { vue: 'balance', libelle: 'Balance' }] },
+        { titre: 'États financiers', entrees: [{ vue: 'resultat', libelle: 'Compte de résultat' }, { vue: 'bilan', libelle: 'Bilan' }] },
+        { titre: 'Clôture', entrees: [{ vue: 'bouclement', libelle: 'Bouclement' }] },
+        { titre: 'Outils', entrees: outils },
+      ];
+    }
     // Exercice sans journal (fiche seule : budget, facturation) : la mission, puis les fiches.
     if (etat.session && etat.exercice.operations.length === 0) return [{ titre: null, entrees: [{ vue: 'tableau', libelle: 'Votre mission' }] }, { titre: 'Outils', entrees: outils }];
     const fichesParcours = etapesApres.filter((e) => !['balance', 'resultat', 'bilan', 'bouclement'].includes(e.vue)).map((e) => entree(e.vue, e.libelle));
@@ -221,7 +235,7 @@
         <span class="meta">Exercice {periode(s.dossier.debut, s.dossier.fin)}</span>
         <span class="badge badge-niveau" title="Formation et niveau de difficulté">{etiquetteNiveau(s.exercice)}</span>
         <span class="badge badge-mode" class:corrige={genre === 'corrige'} title="Mode">
-          {genre === 'corrige' ? 'Saisie du corrigé' : LIBELLES_MODE[s.exercice.mode]}
+          {genre === 'corrige' ? 'Saisie du corrigé' : s.exercice.papier ? 'Énoncé papier' : LIBELLES_MODE[s.exercice.mode]}
         </span>
       </div>
       {#if vueEleve(genre)}<AvancementEntete />{/if}
@@ -299,6 +313,7 @@
       {:else if etat.vue === 'bilan'}<Differe charger={VUES_BASE.bilan} props={{}} />
       {:else if etat.vue === 'resultat'}<Differe charger={VUES_BASE.resultat} props={{}} />
       {:else if etat.vue === 'bouclement'}<Differe charger={VUES_BASE.bouclement} props={{}} />
+      {:else if etat.vue === 'ouverture' && s.exercice.papier}<Differe charger={() => import('./vues/SaisieOuverture.svelte')} props={{}} />
       {:else if etat.vue === 'tva' && etat.fonctions.has('tva')}<Differe charger={() => import('./vues/Tva.svelte')} props={{}} />
       {:else if etat.vue === 'salaire' && etat.fonctions.has('salaire')}<Differe charger={() => import('./vues/Salaire.svelte')} props={{}} />
       {:else if etat.vue === 'repartition' && etat.fonctions.has('repartition')}<Differe charger={() => import('./vues/Repartition.svelte')} props={{}} />

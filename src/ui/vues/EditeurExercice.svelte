@@ -25,6 +25,8 @@
   import type { Centimes } from '../../engine/money';
   import { dt, m, normaliser, TITRES_CLASSES } from '../format';
   import ChampCompte from '../composants/ChampCompte.svelte';
+  import ImprimerExercice from '../composants/ImprimerExercice.svelte';
+  import { codeExercice } from '../../engine/papier';
   import ChampMontant from '../composants/ChampMontant.svelte';
   import BoutonRetirer from '../composants/BoutonRetirer.svelte';
   import { PIECE_BOUCLEMENT, POINTS_BOUCLEMENT_PAR_DEFAUT } from '../../engine/correction-bouclement';
@@ -48,6 +50,8 @@
   let difficulte = $state<number>(difficulteDe(source));
   let sujets = $state((source.sujets ?? []).join(SAUT));
   let raisonSociale = $state(source.raisonSociale);
+  /** Code imprimé sur l'énoncé papier (facultatif ; sinon calculé d'après l'exercice). */
+  let code = $state(source.code ?? '');
   let formeJuridique = $state<FormeJuridique>(source.formeJuridique);
   let debut = $state(dt(source.debut));
   let fin = $state(dt(source.fin));
@@ -157,6 +161,7 @@
       difficulte: Math.max(1, Math.floor(Number(difficulte) || 1)),
       sujets: sujets.split(SAUT).map((c) => c.trim()).filter(Boolean),
       raisonSociale: raisonSociale.trim(),
+      code: code.trim() || undefined,
       formeJuridique,
       debut: iso(debut),
       fin: iso(fin),
@@ -228,6 +233,8 @@
   }
 
   const controle = $derived(controlerExercice(construire(), plan));
+  /** Exercice tel qu'il est à l'écran, pour l'impression de l'énoncé et du corrigé. */
+  const aImprimer = $derived(construire());
 
   function enregistrer() {
     enseignant.enregistrer(construire());
@@ -355,6 +362,11 @@
     <div class="large">
       <label class="bloc" for="ex-rs">Raison sociale</label>
       <input id="ex-rs" class="champ" bind:value={raisonSociale} />
+    </div>
+    <div>
+      <label class="bloc" for="ex-code">Code pour l'énoncé papier</label>
+      <input id="ex-code" class="champ" bind:value={code} placeholder={codeExercice({ id, raisonSociale, code: undefined })} aria-describedby="aide-ex-code" />
+      <p id="aide-ex-code" class="discret petit aide-code">Facultatif : sinon le code proposé.</p>
     </div>
     <div>
       <label class="bloc" for="ex-forme">Forme juridique</label>
@@ -613,6 +625,17 @@
   </div>
 </section>
 
+<section class="carte">
+  <h2>Imprimer l'énoncé et le corrigé</h2>
+  <div class="corps-carte">
+    <ImprimerExercice ex={aImprimer} />
+    <p class="discret petit aide-code">
+      Énoncé papier : l'élève tape le code dans « Comptabilité › Nouveau dossier › Énoncé sur papier ». Sa copie se corrige
+      dans l'onglet « Copies », comme une copie faite dans le logiciel.
+    </p>
+  </div>
+</section>
+
 {#if controle.erreurs.length || controle.avertissements.length}
   <section class="carte controle">
     <h2>Contrôle de l'exercice</h2>
@@ -631,6 +654,7 @@
 
 <style>
   .aide-seuil { padding: 0 14px 12px; margin: 0; }
+  .aide-code { margin: 4px 0 0; }
   .boutons { display: flex; gap: 8px; }
   section { margin-bottom: 16px; }
   .grille { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 14px; align-items: start; }

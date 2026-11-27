@@ -68,6 +68,33 @@ export const GUIDE: PartieGuide[] = [
         ],
       },
       {
+        id: 'papier',
+        titre: 'Énoncé sur papier',
+        blocs: [
+          {
+            type: 'p',
+            texte:
+              "Votre enseignant vous a donné l'énoncé sur une feuille ? Vous tenez quand même la comptabilité dans le logiciel, " +
+              'puis vous rendez votre copie comme d’habitude.',
+          },
+          {
+            type: 'etapes',
+            items: [
+              '« Comptabilité », puis « Mes dossiers », « Nouveau dossier », « Énoncé sur papier ».',
+              "Tapez le code imprimé en haut de la feuille (majuscules et tirets sans importance). Si le logiciel le reconnaît, " +
+                "l'entreprise se remplit seule, et parfois aussi le bilan d'ouverture. Sans code, recopiez le nom de " +
+                "l'entreprise, sa forme juridique, votre année et les dates de l'exercice.",
+              "« Bilan d'ouverture » : recopiez chaque compte de la feuille, choisi par son nom, et son montant. L'actif doit " +
+                'être égal au passif.',
+              'Journal : passez chaque opération de la feuille avec son numéro comme numéro de pièce. Le logiciel propose le ' +
+                'numéro suivant et vous prévient si un numéro est déjà utilisé.',
+              'Il n’y a pas de correction pendant la saisie : votre enseignant corrige votre copie. Terminez par la balance, ' +
+                'les états, le bouclement, puis « Exporter ma copie ».',
+            ],
+          },
+        ],
+      },
+      {
         id: 'apprendre',
         titre: 'Apprendre pas à pas',
         blocs: [
@@ -485,6 +512,44 @@ export const GUIDE: PartieGuide[] = [
               'En évaluation, le fichier ne contient pas le corrigé et l’élève ne reçoit aucun retour pendant le travail.',
               '« Version enseignant » : fichier complet, corrigé en clair. Conservez-le : il sert à corriger les copies, à ' +
                 'retrouver l’exercice sur un autre ordinateur et à le partager avec un collègue.',
+            ],
+          },
+        ],
+      },
+      {
+        id: 'enonce-papier',
+        titre: 'Énoncés sur papier',
+        blocs: [
+          {
+            type: 'p',
+            texte:
+              "Vous distribuez vos énoncés sur papier ? Les élèves tiennent la comptabilité dans le logiciel à partir de la " +
+              'feuille, et vous corrigez leurs copies automatiquement, pièce par pièce.',
+          },
+          {
+            type: 'etapes',
+            items: [
+              "Imprimez l'énoncé : onglet « Dossiers », « Imprimer un exercice du logiciel » (tous les exercices fournis), ou " +
+                "section « Imprimer l'énoncé et le corrigé » de l'éditeur pour vos exercices. Choisissez « bilan d'ouverture " +
+                "fourni » (le code le remplit chez l'élève) ou « à saisir » (l'élève le recopie). Le code est imprimé en haut de " +
+                'la feuille ; dans l’éditeur, vous pouvez choisir votre propre code.',
+              'L’élève crée son dossier avec ce code (« Comptabilité › Nouveau dossier › Énoncé sur papier »), saisit les ' +
+                'opérations avec les numéros de la feuille, puis rend sa copie dans le devoir Google Classroom.',
+              "Onglet « Copies » : choisissez l'exercice (son corrigé doit être saisi), puis importez les copies. Une copie " +
+                "d'énoncé papier est acceptée si son code est celui de l'exercice ; une copie sans code est acceptée et " +
+                'signalée.',
+            ],
+          },
+          {
+            type: 'liste',
+            items: [
+              'La correction est la même que pour un exercice fait dans le logiciel : par numéro de pièce, avec les points ' +
+                'partiels, et le bouclement corrigé d’après les comptes de l’élève.',
+              "Le bilan d'ouverture saisi par l'élève est comparé au vôtre, sans points : les écarts s'affichent dans le " +
+                "détail de la copie. Les écritures étant corrigées pièce par pièce, une erreur d'ouverture n'est jamais " +
+                'comptée deux fois.',
+              'Pour un exercice à vous, le code ne remplit rien chez l’élève (il ne connaît pas votre exercice) : il sert à ' +
+                'rattacher la copie au bon corrigé.',
             ],
           },
         ],

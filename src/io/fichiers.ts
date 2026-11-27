@@ -65,6 +65,8 @@ interface FichierCopie {
   fiches?: unknown;
   /** Évaluation formative terminée : la copie reprise reste fermée à la saisie. */
   formativeTerminee?: boolean;
+  /** Énoncé papier (phase V2) : l'exercice créé par l'élève (entreprise, période, bilan d'ouverture, code tapé). */
+  papier?: { exercice: Exercice };
   exporteLe: string;
 }
 
@@ -79,6 +81,11 @@ export interface Copie {
   fiches?: unknown;
   /** Évaluation formative terminée (correction déjà vue) : une copie reprise reste fermée à la saisie. */
   formativeTerminee?: boolean;
+  /**
+   * Énoncé papier (phase V2) : l'exercice créé par l'élève, sans opérations ni corrigé (entreprise, période, bilan
+   * d'ouverture, code de l'exercice tapé par l'élève). Il sert à reprendre la copie et à la rattacher au corrigé.
+   */
+  papier?: { exercice: Exercice };
   exporteLe: string;
 }
 
@@ -315,6 +322,7 @@ export function importerCopie(texte: string): Copie {
     suivi: c.suivi ?? {},
     fiches: c.fiches,
     formativeTerminee: c.formativeTerminee === true ? true : undefined,
+    ...(c.papier && typeof c.papier === 'object' && c.papier.exercice ? { papier: { exercice: { ...verifierExercice(c.papier.exercice), corrige: undefined } } } : {}),
     exporteLe: c.exporteLe,
   };
 }

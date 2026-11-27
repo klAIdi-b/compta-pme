@@ -69,13 +69,13 @@ export function ecranAffiche(x: {
 //    l'élève, choix d'un exercice, évaluation) et le Cours (Apprendre, Théorie) sont séparés ; l'accueil mène aux deux.
 
 /** Pages de l'accueil (sans exercice ouvert, ou par-dessus un travail en cours). */
-export type PageAccueil = 'accueil' | 'dossiers' | 'theorie' | 'exercices' | 'evaluation';
+export type PageAccueil = 'accueil' | 'dossiers' | 'papier' | 'theorie' | 'exercices' | 'evaluation';
 /** Rubriques du bandeau : les pages de l'accueil, plus le parcours Apprendre (écran à part). */
 export type Rubrique = PageAccueil | 'apprendre';
 export type Espace = 'accueil' | 'comptabilite' | 'cours';
 
 export function espaceDe(r: Rubrique): Espace {
   if (r === 'apprendre' || r === 'theorie') return 'cours';
-  if (r === 'dossiers' || r === 'exercices' || r === 'evaluation') return 'comptabilite';
+  if (r === 'dossiers' || r === 'papier' || r === 'exercices' || r === 'evaluation') return 'comptabilite';
   return 'accueil';
 }

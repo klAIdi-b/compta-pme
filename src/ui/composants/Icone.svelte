@@ -15,6 +15,7 @@
     analyse: 'M12 3a9 9 0 1 0 9 9h-9z',
     seuil: 'M3 20h18M4 17 20 6M4 12h16',
     bilanOuverture: 'M4 5h16v14H4zM12 5v14M6.5 9h3M14.5 9h3M6.5 13h3M14.5 13h3',
+    ouverture: 'M4 5h16v14H4zM12 5v14M6.5 9h3M14.5 9h3M6.5 13h3M14.5 13h3',
     margeBrute: 'M4 20h16M7 20V12M12 20V8M17 20V4M5 9l5-4 4 3 5-4',
     echelle: 'M5 20V14M10 20V11M15 20V8M20 20V5M3 20h18',
     tva: 'M6 4h12v16H6zM9 8h6M9 12h6M9 16h3',

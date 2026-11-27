@@ -8,6 +8,13 @@
   import { etat } from '../etat.svelte';
   import { enseignant } from '../enseignant.svelte';
   import BoutonLien from '../composants/BoutonLien.svelte';
+  import ImprimerExercice from '../composants/ImprimerExercice.svelte';
+  import { exercicesDemo } from '../../data/demos';
+
+  /** Impression d'un exercice du logiciel (phase V2) : tous les exercices du catalogue, journal et dossiers de pièces. */
+  const imprimables = classerExercices(exercicesDemo.filter((e) => e.operations.length > 0));
+  let aImprimerId = $state('');
+  const aImprimer = $derived(exercicesDemo.find((e) => e.id === aImprimerId));
 
   const groupes = classerExercices(DOSSIERS);
   let enCours = $state<string | null>(null);
@@ -75,6 +82,30 @@
 </p>
 {#if erreur}<div class="alerte" role="alert">{erreur}</div>{/if}
 
+<section class="carte imprimer-catalogue" aria-labelledby="titre-imprimer">
+  <h2 id="titre-imprimer">Imprimer un exercice du logiciel</h2>
+  <div class="corps-carte">
+    <p class="discret petit">
+      Pour distribuer l'énoncé sur papier : l'élève tape le code imprimé dans « Comptabilité › Nouveau dossier › Énoncé sur
+      papier », et sa copie se corrige dans l'onglet « Copies ».
+    </p>
+    <label class="choix-imprimer">
+      <span>Exercice</span>
+      <select class="champ" bind:value={aImprimerId}>
+        <option value="">Choisissez un exercice…</option>
+        {#each imprimables as g (`${g.filiere}-${g.difficulte}`)}
+          <optgroup label={`${LIBELLES_FILIERE[g.filiere]} · niveau ${g.difficulte}${g.titre ? ` · ${g.titre}` : ''}`}>
+            {#each g.exercices as e (e.id)}<option value={e.id}>{e.titre}</option>{/each}
+          </optgroup>
+        {/each}
+      </select>
+    </label>
+    {#if aImprimer}
+      {#key aImprimer.id}<ImprimerExercice ex={aImprimer} complements={COMPLEMENTS_CORRIGE[aImprimer.id]} />{/key}
+    {/if}
+  </div>
+</section>
+
 {#each groupes as g, i}
   {#if i === 0 || groupes[i - 1]!.filiere !== g.filiere}<h2 class="filiere">{LIBELLES_FILIERE[g.filiere]}</h2>{/if}
   <section class="carte">
@@ -138,6 +169,10 @@
 </p>
 
 <style>
+  .imprimer-catalogue .corps-carte { display: flex; flex-direction: column; gap: var(--e-3); }
+  .imprimer-catalogue h2 { padding: 14px 18px; border-bottom: 1px solid var(--c-bordure-3); }
+  .choix-imprimer { display: flex; flex-direction: column; gap: 4px; max-width: 560px; }
+  .imprimer-catalogue p { margin: 0; }
   .avis-public { background: var(--c-alerte-fond); border-left: 4px solid var(--c-avert-trait); padding: 10px 14px; margin-bottom: 12px; max-width: 900px; }
   .aide-haut { margin: 0 0 12px; max-width: 900px; }
   h2.filiere { font-size: var(--t-17); color: var(--c-structure); margin: 18px 0 8px; }

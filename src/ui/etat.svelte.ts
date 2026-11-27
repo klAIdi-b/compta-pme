@@ -6,6 +6,7 @@ import type { FicheBudget } from '../engine/budget';
 import type { Exercice } from '../engine/exercice';
 import { actualiserDossier, avecCorrigeAJour, corrigeDepuisEcritures, creerDossier, estNouvelleVersionSimulation, fonctionsExercice, retourVisible, type EcritureCorrigee } from '../engine/exercice';
 import { ajouterEcriture } from '../engine/journal';
+import { ouvertureDepuisBilan } from '../engine/dossier';
 import { plan as planParDefaut } from '../data/plan';
 import { exercicesDemo } from '../data/demos';
 import { ecrire, lire } from '../io/stockage';
@@ -39,6 +40,7 @@ export type Vue =
   | 'facturation'
   | 'budget'
   | 'bouclement'
+  | 'ouverture'
   | 'theorie';
 
 export interface Eleve {
@@ -112,7 +114,7 @@ function completer(s: (Partial<Session> & Omit<Session, 'suivi' | 'role' | 'fich
     : null;
 }
 
-const VUES: Vue[] = ['tableau', 'journal', 'comptes', 'grandlivre', 'balance', 'bilan', 'resultat', 'tva', 'salaire', 'repartition', 'analyse', 'degres', 'flux', 'seuil', 'bilanOuverture', 'margeBrute', 'echelle', 'facturation', 'budget', 'bouclement', 'theorie'];
+const VUES: Vue[] = ['tableau', 'journal', 'comptes', 'grandlivre', 'balance', 'bilan', 'resultat', 'tva', 'salaire', 'repartition', 'analyse', 'degres', 'flux', 'seuil', 'bilanOuverture', 'margeBrute', 'echelle', 'facturation', 'budget', 'bouclement', 'ouverture', 'theorie'];
 
 function vueDepuisAdresse(): Vue {
   const h = location.hash.replace('#', '') as Vue;
@@ -318,6 +320,26 @@ class Etat {
   /** Ouvre un dossier de la liste : le travail actif est repris, un autre exercice commencé est remis au premier plan. */
   ouvrirDossier(s: Session) {
     this.commencer(s.eleve, s.exercice);
+  }
+
+  /**
+   * Énoncé papier (phase V2) : dossier créé par l'élève à partir de la feuille. Le travail actif est mis en réserve ;
+   * l'élève saisit d'abord le bilan d'ouverture, sauf s'il a été fourni par le code de l'exercice.
+   */
+  commencerPapier(eleve: Eleve, exercice: Exercice) {
+    const actif = this.session;
+    if (actif && this.genre === 'travail') this.autres[actif.exercice.id] = actif;
+    this.session = { eleve, exercice, dossier: creerDossier(exercice, planParDefaut), archives: [], suivi: {}, role: 'eleve', fiches: {}, derniereActivite: new Date().toISOString() };
+    this.accueilOuvert = false;
+    this.aller(Object.keys(exercice.ouvertureActif).length ? 'journal' : 'ouverture');
+  }
+
+  /** Bilan d'ouverture saisi par l'élève (énoncé papier) : gardé dans l'exercice du dossier et dans le dossier. */
+  majOuverture(actif: Record<string, number>, passif: Record<string, number>) {
+    const s = this.session!;
+    s.exercice = { ...s.exercice, ouvertureActif: actif, ouverturePassif: passif };
+    s.dossier = { ...s.dossier, ouverture: ouvertureDepuisBilan(actif, passif) };
+    s.derniereActivite = new Date().toISOString();
   }
 
   /** Bouton « Commencer la saisie » : ouvre le journal, avec la visite guidée la première fois. */

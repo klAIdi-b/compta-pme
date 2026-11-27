@@ -18,6 +18,7 @@
   import { bouclementCorrige, PIECE_BOUCLEMENT } from '../../engine/correction-bouclement';
   import { EXT_COPIE, ErreurFichier, importerCopie, nomFichier, type Copie } from '../../io/fichiers';
   import { alertesCopie, copiesIdentiques } from '../../engine/reprise';
+  import { codeExercice, copiePapierPour, ecartsOuverture } from '../../engine/papier';
   import { ANCIENS_IDS } from '../lien';
   import { plan } from '../../data/plan';
   import { choisirFichiers, telecharger, telechargerBlob } from '../fichiers-navigateur';
@@ -46,7 +47,23 @@
   const alertes = $derived.by(() => {
     const r = new Map<string, string[]>();
     if (!exercice) return r;
-    for (const l of lignes) r.set(l.cle, alertesCopie(exercice, plan, l.copie));
+    for (const l of lignes) {
+      const p = l.copie.papier?.exercice;
+      if (!p) {
+        r.set(l.cle, alertesCopie(exercice, plan, l.copie));
+        continue;
+      }
+      // Énoncé papier : le journal est rejoué sur le dossier créé par l'élève ; l'ouverture est comparée, sans points.
+      const a = alertesCopie(p, plan, { dossier: l.copie.dossier });
+      if (!p.papier?.code) a.push("Énoncé papier sans code d'exercice : vérifiez que la copie correspond bien à cet exercice.");
+      const ecarts = ecartsOuverture(l.copie.dossier.ouverture, exercice);
+      if (ecarts.length) {
+        const nom = new Map(l.copie.dossier.plan.map((c) => [c.numero, c.intitule]));
+        const sens = (x: number) => (x === 0 ? 'absent' : `${formatMontant(Math.abs(x))}${x < 0 ? ' au passif' : ''}`);
+        a.push(`Bilan d'ouverture (non noté) : ${ecarts.map((e) => `${nom.get(e.compte) ?? e.compte} ${sens(e.saisi)} au lieu de ${sens(e.attendu)}`).join(' ; ')}.`);
+      }
+      r.set(l.cle, a);
+    }
     for (const g of copiesIdentiques(lignes, (l) => l.copie.dossier.ecritures)) {
       const noms = g.map((l) => `${l.copie.eleve.prenom} ${l.copie.eleve.nom}`);
       for (const l of g) {
@@ -88,7 +105,13 @@
           );
           continue;
         }
-        if (c.exerciceId !== exercice.id) {
+        if (c.papier) {
+          const code = c.papier.exercice.papier?.code;
+          if (copiePapierPour(exercice, c.papier.exercice.papier ?? {}) === 'non') {
+            messages.push(`${f.nom} : copie d'énoncé papier avec le code « ${code ?? ''} », qui n'est pas celui de cet exercice (${codeExercice(exercice, 'fourni')} ou ${codeExercice(exercice, 'saisi')}).`);
+            continue;
+          }
+        } else if (c.exerciceId !== exercice.id) {
           messages.push(`${f.nom} : cette copie concerne l'exercice « ${c.exerciceTitre} », pas celui-ci.`);
           continue;
         }
@@ -217,6 +240,13 @@
     Les copies importées restent dans cette page : elles ne sont ni enregistrées ni envoyées en ligne. Seuls les exercices
     dont le corrigé est saisi apparaissent dans la liste.
   </p>
+  {#if exercice}
+    <p class="petit aide codes-papier">
+      Énoncé sur papier : les élèves tapent <b class="num">{codeExercice(exercice, 'fourni')}</b> (bilan d'ouverture fourni
+      par le logiciel) ou <b class="num">{codeExercice(exercice, 'saisi')}</b> (bilan d'ouverture à saisir). Leurs copies
+      se corrigent ici, pièce par pièce ; l'ouverture saisie est comparée, sans points.
+    </p>
+  {/if}
 </section>
 
 {#if messages.length}
