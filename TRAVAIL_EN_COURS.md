@@ -215,3 +215,19 @@ Corrections faites une à une, sur accord de l'enseignant, d'abord sur `apercu`.
   dans `main` le 27.11.2026 sur l'accord de l'enseignant (PR 29).
 - [x] 27.11.2026 : identifiants de ces treize contenus renommés (anciens liens redirigés, anciennes copies refusées avec
   un message). Fusionné dans `main` le 27.11.2026 sur l'accord de l'enseignant (PR 30).
+
+# Chantier « Logiciel comptable professionnel » (demande du 27.11.2026, `VISION_LOGICIEL.md`)
+
+Règles : une phase à la fois sur `apercu`, maquette avant l'interface, tests, vérification dans le navigateur, guide
+(`npm run guide`), arrêt et accord de l'enseignant ; fusion dans `main` seulement sur accord explicite.
+
+- [x] Étape 1 : étude du marché et vision (`VISION_LOGICIEL.md`), décisions de l'enseignant du 27.11.2026 consignées.
+- [x] Étape 2 : maquette des phases V1 et V2 (`public/maquettes/comptabilite-cours.html`), validée le 27.11.2026.
+- [x] V1. Séparer la Comptabilité et le Cours : bandeau à trois espaces, page « Mes dossiers », barre latérale groupée.
+- [ ] V2. Mode énoncé papier (ouverture saisie ou pré-remplie, numéros de pièce libres, code d'exercice, correction
+  par pièce, impression de l'énoncé et du corrigé de tous les exercices).
+- [ ] V3. Distribution, retour et « Ma classe » (fichier de classe).
+
+- 27.11.2026 : V1 faite sur `apercu` (non commitée) : `npm test`, `check`, `build`, tests d'écran et vérification
+  dans le navigateur ; 662 tests, 60 tests d’écran (6 adaptés à la nouvelle navigation). Reste : accord de l’enseignant
+  sur V1, puis V2.

@@ -64,3 +64,18 @@ export function ecranAffiche(x: {
   if (x.accueilOuvert && peutOuvrirAccueil(genreSession(x.session))) return 'accueil';
   return 'logiciel';
 }
+
+// 3. Espaces du site (phase V1 de VISION_LOGICIEL.md, maquette validée le 27.11.2026) : la Comptabilité (dossiers de
+//    l'élève, choix d'un exercice, évaluation) et le Cours (Apprendre, Théorie) sont séparés ; l'accueil mène aux deux.
+
+/** Pages de l'accueil (sans exercice ouvert, ou par-dessus un travail en cours). */
+export type PageAccueil = 'accueil' | 'dossiers' | 'theorie' | 'exercices' | 'evaluation';
+/** Rubriques du bandeau : les pages de l'accueil, plus le parcours Apprendre (écran à part). */
+export type Rubrique = PageAccueil | 'apprendre';
+export type Espace = 'accueil' | 'comptabilite' | 'cours';
+
+export function espaceDe(r: Rubrique): Espace {
+  if (r === 'apprendre' || r === 'theorie') return 'cours';
+  if (r === 'dossiers' || r === 'exercices' || r === 'evaluation') return 'comptabilite';
+  return 'accueil';
+}

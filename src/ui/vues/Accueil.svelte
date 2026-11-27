@@ -197,6 +197,14 @@
 
   // Autres exercices commencés dans ce navigateur (l'exercice actif a sa propre carte).
   const autres = $derived(Object.values(etat.autres).sort((a, b) => (b.derniereActivite ?? '').localeCompare(a.derniereActivite ?? '')));
+  /** Page « Mes dossiers » : le travail actif et les autres exercices commencés, du plus récent au plus ancien. */
+  const dossiers = $derived(etat.dossiersEleve);
+  /** Origine d'un dossier : exercice ou dossier de pièces du logiciel, simulateur, ou fichier remis par l'enseignant. */
+  function origineDe(ex: Exercice): { texte: string; classe: string } {
+    if (ex.id.startsWith('simulation-')) return { texte: "Simulateur d'entreprise", classe: 'fichier' };
+    if (exercicesDemo.some((e) => e.id === ex.id)) return estDossier(ex) ? { texte: 'Dossier de pièces', classe: 'dossier' } : { texte: 'Exercice du logiciel', classe: 'exo' };
+    return { texte: "Fichier de l'enseignant", classe: 'fichier' };
+  }
   /** Élève dont le travail est enregistré dans ce navigateur. */
   const eleveConnu = $derived(enCours?.eleve ?? autres[0]?.eleve ?? null);
 
@@ -372,40 +380,31 @@
     {/if}
 
     {#if autres.length}
-      <section class="carte" aria-labelledby="titre-autres">
-        <h2 id="titre-autres" class="tete-simple">Vos autres exercices en cours</h2>
-        {#each autres as s (s.exercice.id)}
-          {@const a = avancementSession(s)}
-          <div class="autre">
-            <span class="infos">
-              <strong>{s.exercice.titre}</strong><br />
-              <span class="discret petit">
-                {etiquetteNiveau(s.exercice)} · {LIBELLES_MODE[s.exercice.mode]}{s.derniereActivite ? ` · dernière activité : ${dateHeure(s.derniereActivite)}` : ''}
-              </span>
-            </span>
-            {#if a}<span class="petit"><BarreAvancement {a} correction={avecCorrection(s)} largeur={120} /> {a.saisies} / {a.total}</span>{/if}
-            <button class="btn" onclick={() => etat.commencer(s.eleve, s.exercice)}>Reprendre</button>
-          </div>
-        {/each}
-      </section>
+      <p class="renvoi-dossiers">
+        {autres.length > 1 ? `Vous avez ${autres.length} autres dossiers en cours.` : 'Vous avez un autre dossier en cours.'}
+        <button class="btn-lien" onclick={() => etat.ouvrirRubrique('dossiers')}>Mes dossiers</button>
+      </p>
     {/if}
 
       <section class="choix-depart" aria-labelledby="titre-choix">
         <h2 id="titre-choix" class="titre-section">{enCours ? 'Ou bien, que voulez-vous faire ?' : 'Par où voulez-vous commencer ?'}</h2>
         <div class="portes">
+          <button class="porte" onclick={() => etat.ouvrirRubrique(eleveConnu ? 'dossiers' : 'exercices')}>
+            <span class="porte-espace">Comptabilité</span>
+            <span class="porte-titre">Tenir une comptabilité</span>
+            <span class="porte-texte">Tenez la comptabilité d'une entreprise : journal, bilan, bouclement, avec une correction à chaque écriture.</span>
+            <span class="porte-meta">{nbEntrainement} exercices et dossiers de pièces</span>
+            <span class="porte-action">{eleveConnu ? 'Mes dossiers' : 'Choisir un exercice'} <span class="fleche" aria-hidden="true">→</span></span>
+          </button>
           <button class="porte" onclick={() => etat.ouvrirRubrique('apprendre')}>
+            <span class="porte-espace">Cours</span>
             <span class="porte-titre">Apprendre une notion</span>
             <span class="porte-texte">L'essentiel, un exemple travaillé et dix questions courtes, du bilan à la comptabilité analytique.</span>
             <span class="porte-meta">{maitrises > 0 ? `${maitrises} notion${maitrises > 1 ? 's' : ''} réussie${maitrises > 1 ? 's' : ''} sur ${NB_MODULES}` : `${NB_MODULES} notions`}{revisionsDues > 0 ? ` · ${revisionsDues} à revoir aujourd’hui` : ''}</span>
-            <span class="porte-action">{maitrises > 0 ? 'Continuer le parcours' : 'Ouvrir le parcours'} <span class="fleche" aria-hidden="true">→</span></span>
-          </button>
-          <button class="porte" onclick={() => allerAuChoix('entrainement')}>
-            <span class="porte-titre">M'exercer sur une entreprise</span>
-            <span class="porte-texte">Tenez la comptabilité d'une entreprise : journal, bilan, bouclement, avec une correction à chaque écriture.</span>
-            <span class="porte-meta">{nbEntrainement} exercices et dossiers de pièces</span>
-            <span class="porte-action">Choisir un exercice <span class="fleche" aria-hidden="true">→</span></span>
+            <span class="porte-action">{maitrises > 0 ? 'Continuer le parcours' : 'Ouvrir le cours'} <span class="fleche" aria-hidden="true">→</span></span>
           </button>
           <button class="porte" onclick={() => allerAuChoix('evaluation')}>
+            <span class="porte-espace">Comptabilité</span>
             <span class="porte-titre">Faire une évaluation</span>
             <span class="porte-texte">Ouvrez l'évaluation remise par votre enseignant, puis rendez votre copie dans Google Classroom.</span>
             <span class="porte-meta">Fichier remis par l'enseignant</span>
@@ -434,6 +433,58 @@
           <button class="btn-lien" onclick={ouvrirSituation}>ouvrir la situation de mon groupe</button>
         </p>
       </section>
+    {:else if page === 'dossiers'}
+      <!-- Comptabilité · Mes dossiers (phase V1) : tout ce que l'élève a commencé dans ce navigateur. -->
+      <section class="tete-page tete-dossiers" aria-labelledby="titre-accueil">
+        <div>
+          <h1 id="titre-accueil">Mes dossiers</h1>
+          <p class="accroche">Les comptabilités que vous tenez dans ce navigateur. Exportez votre copie pour la rendre ou pour continuer sur un autre ordinateur.</p>
+        </div>
+        <div class="actions-dossiers">
+          <button class="btn btn-principal" onclick={() => allerAuChoix('entrainement')}>Nouveau dossier</button>
+          <button class="btn" onclick={ouvrirFichier}>Ouvrir un fichier…</button>
+        </div>
+      </section>
+      {#if infoImport}<div class="message information" role="status">{infoImport}</div>{/if}
+      {#if erreurImport}<div class="alerte" role="alert">{erreurImport}</div>{/if}
+      <section class="carte liste-dossiers" aria-label="Vos dossiers">
+        {#if dossiers.length}
+          <div class="ligne-dossier tete" aria-hidden="true"><span>Dossier</span><span>Origine</span><span>Avancement</span><span>Dernière activité</span><span></span></div>
+          {#each dossiers as s, i (s.exercice.id)}
+            {@const a = avancementSession(s)}
+            {@const st = etatExercice(s.exercice)}
+            {@const o = origineDe(s.exercice)}
+            <div class="ligne-dossier">
+              <span class="nom"><strong>{s.dossier.raisonSociale}</strong><span class="discret petit">{s.exercice.titre} · {etiquetteNiveau(s.exercice)}</span></span>
+              <span class="origine"><span class={`type ${o.classe}`}>{o.texte}</span>{#if s.exercice.mode !== 'entrainement'}<span class="type exo">{LIBELLES_MODE[s.exercice.mode]}</span>{/if}</span>
+              <span class="av petit">
+                {#if st.classe === 'fini'}<span class="etat fini">Terminé</span>{:else if a}<span>{a.saisies} / {a.total} {a.total > 1 ? 'opérations' : 'opération'}</span><BarreAvancement {a} correction={avecCorrection(s)} largeur={140} />{:else}<span>{s.dossier.ecritures.length} {s.dossier.ecritures.length > 1 ? 'écritures' : 'écriture'}</span>{/if}
+              </span>
+              <span class="modif discret petit">{s.derniereActivite ? dateHeure(s.derniereActivite) : 'Pas encore commencé'}</span>
+              <span class="ouvrir-dossier"><button class="btn" class:btn-principal={i === 0} onclick={() => { oublierLien(); etat.ouvrirDossier(s); }}>Ouvrir<span class="sr-only"> {s.dossier.raisonSociale}</span></button></span>
+            </div>
+          {/each}
+        {:else}
+          <p class="vide">Aucun dossier pour l'instant. Choisissez un exercice du logiciel, ou ouvrez le fichier remis par votre enseignant.</p>
+        {/if}
+      </section>
+      <section class="carte" aria-labelledby="titre-nouveau">
+        <h2 id="titre-nouveau" class="tete-simple">Nouveau dossier</h2>
+        <div class="choix-nouveau">
+          <button class="choix-dossier" onclick={() => allerAuChoix('entrainement')}>
+            <strong>Exercice du logiciel</strong>
+            <span class="discret petit">Choisir dans la liste des exercices et des dossiers de pièces de votre formation.</span>
+          </button>
+          <button class="choix-dossier" onclick={ouvrirFichier}>
+            <strong>Fichier reçu de l'enseignant</strong>
+            <span class="discret petit">Ouvrir le fichier {EXT_EXERCICE} du devoir Google Classroom.</span>
+          </button>
+        </div>
+      </section>
+      <p class="aussi">
+        Vous avez rendu une copie et vous changez d'ordinateur ?
+        <button class="btn-lien" onclick={ouvrirCopie}>Reprendre ma copie…</button>
+      </p>
     {:else if page === 'theorie'}
       <!-- Théorie ouverte sans exercice : l'élève choisit son année. Fichier chargé à la demande. -->
       <Differe charger={() => import('./Theorie.svelte')} props={{ libre: true }} />
@@ -724,10 +775,38 @@
     border-radius: 0 0 var(--rayon) var(--rayon);
   }
   .choisi-texte { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .autre { display: flex; gap: 16px; align-items: center; padding: 12px 20px; border-top: 1px solid var(--c-bordure-2); flex-wrap: wrap; }
-  .tete-simple + .autre { border-top: 0; }
   .actions-confirmation { display: flex; gap: 8px; margin-top: 10px; }
   .pied-page { text-align: center; margin: 28px 0 0; }
+  .porte-espace { font-size: var(--t-12); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--c-action-fonce); }
+  .renvoi-dossiers { margin: 0 0 var(--e-5); color: var(--c-texte-2); }
+  /* Mes dossiers */
+  .tete-dossiers { display: flex; justify-content: space-between; align-items: flex-end; gap: var(--e-4); flex-wrap: wrap; }
+  .tete-dossiers .accroche { margin-top: var(--e-2); }
+  .actions-dossiers { display: flex; gap: var(--e-2); flex-wrap: wrap; }
+  .tete-dossiers + .message, .tete-dossiers + .alerte { margin-bottom: var(--e-4); }
+  .liste-dossiers .ligne-dossier { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 0.9fr) auto; gap: var(--e-3); align-items: center; padding: var(--e-3) var(--e-5); border-top: 1px solid var(--c-bordure-3); }
+  .liste-dossiers .ligne-dossier.tete { border-top: 0; font-size: var(--t-13); font-weight: 600; color: var(--c-texte-2); background: var(--c-fond-tete); }
+  .ligne-dossier .nom { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .ligne-dossier .nom strong { color: var(--c-encre); }
+  .ligne-dossier .origine { display: flex; flex-wrap: wrap; gap: 4px; }
+  .ligne-dossier .av { display: flex; flex-direction: column; gap: 4px; }
+  .type.fichier { background: #eef0f3; color: var(--c-texte-2); }
+  .choix-nouveau { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--e-3); padding: var(--e-4) var(--e-5) var(--e-5); }
+  .choix-dossier {
+    font: inherit; text-align: left; cursor: pointer; display: flex; flex-direction: column; gap: 4px; padding: var(--e-3) var(--e-4);
+    border: 1px solid var(--c-bordure-2); border-radius: var(--r-3); background: #fff; color: var(--c-texte); min-height: var(--h-cible);
+  }
+  .choix-dossier:hover { border-color: #b9cde1; background: var(--c-fond-tete); }
+  .choix-dossier strong { color: var(--c-encre); }
+  @media (max-width: 760px) {
+    .liste-dossiers .ligne-dossier { grid-template-columns: minmax(0, 1fr) auto; gap: 6px var(--e-3); padding: var(--e-3) var(--e-4); }
+    .liste-dossiers .ligne-dossier.tete { display: none; }
+    .ligne-dossier .origine, .ligne-dossier .av, .ligne-dossier .modif { grid-column: 1; }
+    .ligne-dossier .ouvrir-dossier { grid-column: 2; grid-row: 1 / span 4; align-self: center; }
+    .choix-nouveau { grid-template-columns: 1fr; padding: var(--e-3) var(--e-4) var(--e-4); }
+    .actions-dossiers { width: 100%; }
+    .actions-dossiers .btn { flex: 1; justify-content: center; }
+  }
   @media (max-width: 860px) { .portes { grid-template-columns: 1fr; } }
   @media (max-width: 760px) { .cartes-exo { grid-template-columns: 1fr; } }
   @media (max-width: 640px) {

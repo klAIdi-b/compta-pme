@@ -103,12 +103,13 @@
   /** Écran affiché (machine à états explicite : src/ui/modes.ts). */
   const ecran = $derived(etat.ecran(enseignant.ouvert));
 
-  type Entree = { vue: Vue; libelle: string; etape?: number; fait?: boolean };
+  type Entree = { vue: Vue; libelle: string; fait?: boolean; compte?: string };
   type Rubrique = { titre: string | null; entrees: Entree[] };
 
   /**
-   * Navigation en parcours (refonte du 23.11.2026) : les étapes de l'exercice dans l'ordre du cours, numérotées et
-   * cochées une fois faites ; les consultations et les fiches d'appoint sont regroupées dans « Outils ».
+   * Barre latérale rangée comme celle d'un logiciel comptable (phase V1 de VISION_LOGICIEL.md, maquette validée le
+   * 27.11.2026) : Saisie, Comptes, États financiers, Clôture, puis les fiches de l'exercice et les outils. Les étapes du
+   * parcours restent cochées une fois faites, et la barre « Étape suivante » garde l'ordre du cours.
    */
   const journalTermine = $derived.by(() => {
     const s = etat.session;
@@ -116,50 +117,40 @@
     const a = avancementSession(s);
     return !!a && etatJournal(a, avecCorrection(s) && !etat.verrouille).termine;
   });
+  const avancementJournal = $derived(etat.session && vueEleve(etat.genre) ? avancementSession(etat.session) : null);
   const etapesApres = $derived(etat.session ? etapesParcours(etat.exercice, etat.fonctions) : []);
   const rangAtteint = $derived(etat.etapeParcours ? rangParcours(etapesApres, etat.etapeParcours) : 0);
   const boucleFait = $derived(!!etat.session && etat.dossier.ecritures.length > 0 && estBoucle(etat.dossier));
   const rubriques = $derived.by((): Rubrique[] => {
     const f = etat.session ? etat.fonctions : new Set();
     const saisies = (etat.session?.dossier.ecritures.length ?? 0) > 0;
-    // Exercice sans journal (fiche seule : budget, facturation) : le parcours ne contient que la mission et les fiches.
-    const sansJournal = !!etat.session && etat.exercice.operations.length === 0;
-    const fiches: Entree[] = [
+    /** Une étape du parcours est cochée quand elle est faite ; une rubrique hors parcours ne l'est jamais. */
+    const entree = (vue: Vue, libelle: string): Entree => {
+      const rang = rangParcours(etapesApres, vue);
+      const fait = rang > 0 && journalTermine && (vue === 'bouclement' ? boucleFait : rangAtteint > rang);
+      return { vue, libelle, fait };
+    };
+    const outils: Entree[] = [
+      ...(f.has('tva') ? [{ vue: 'tva' as Vue, libelle: 'TVA' }] : []),
+      ...(f.has('salaire') ? [{ vue: 'salaire' as Vue, libelle: 'Décompte de salaire' }] : []),
       ...(f.has('facturation') ? [{ vue: 'facturation' as Vue, libelle: 'Facturation' }] : []),
       ...(f.has('budget') ? [{ vue: 'budget' as Vue, libelle: 'Budget' }] : []),
+      { vue: 'theorie', libelle: 'Théorie' },
     ];
-    const parcours: Entree[] = (sansJournal
-      ? [{ vue: 'tableau' as Vue, libelle: 'Votre mission', fait: false }, ...fiches]
-      : [
-          { vue: 'tableau' as Vue, libelle: 'Votre mission', fait: saisies },
-          { vue: 'journal' as Vue, libelle: 'Journal', fait: journalTermine },
-          ...etapesApres.map((e, i) => ({
-            vue: e.vue,
-            libelle: e.libelle,
-            fait: journalTermine && (e.vue === 'bouclement' ? boucleFait : rangAtteint > i + 1),
-          })),
-        ]
-    ).map((e, i) => ({ ...e, etape: i + 1 }));
-    if (sansJournal) return [{ titre: 'Votre parcours', entrees: parcours }, { titre: 'Outils', entrees: [{ vue: 'theorie', libelle: 'Théorie' }] }];
+    // Exercice sans journal (fiche seule : budget, facturation) : la mission, puis les fiches.
+    if (etat.session && etat.exercice.operations.length === 0) return [{ titre: null, entrees: [{ vue: 'tableau', libelle: 'Votre mission' }] }, { titre: 'Outils', entrees: outils }];
+    const fichesParcours = etapesApres.filter((e) => !['balance', 'resultat', 'bilan', 'bouclement'].includes(e.vue)).map((e) => entree(e.vue, e.libelle));
+    const a = avancementJournal;
     return [
-      { titre: 'Votre parcours', entrees: parcours },
-      {
-        titre: 'Outils',
-        entrees: [
-          ...(f.has('bilanOuverture') ? [{ vue: 'bilanOuverture' as Vue, libelle: "Bilan d'ouverture" }] : []),
-          ...(f.has('facturation') ? [{ vue: 'facturation' as Vue, libelle: 'Facturation' }] : []),
-          ...(f.has('budget') ? [{ vue: 'budget' as Vue, libelle: 'Budget' }] : []),
-          ...(f.has('salaire') ? [{ vue: 'salaire' as Vue, libelle: 'Décompte de salaire' }] : []),
-          ...(f.has('tva') ? [{ vue: 'tva' as Vue, libelle: 'TVA' }] : []),
-          { vue: 'comptes', libelle: 'Comptes' },
-          { vue: 'grandlivre', libelle: 'Grand livre' },
-          ...(etapesApres.some((e) => e.vue === 'balance') ? [] : [{ vue: 'balance' as Vue, libelle: 'Balance' }]),
-          ...(etapesApres.some((e) => e.vue === 'bilan') ? [] : [{ vue: 'bilan' as Vue, libelle: 'Bilan' }]),
-          ...(etapesApres.some((e) => e.vue === 'resultat') ? [] : [{ vue: 'resultat' as Vue, libelle: 'Compte de résultat' }]),
-          ...(etapesApres.some((e) => e.vue === 'bouclement') ? [] : [{ vue: 'bouclement' as Vue, libelle: 'Bouclement' }]),
-          { vue: 'theorie', libelle: 'Théorie' },
-        ],
-      },
+      { titre: null, entrees: [{ vue: 'tableau', libelle: 'Votre mission', fait: saisies }] },
+      { titre: 'Saisie', entrees: [{ vue: 'journal', libelle: 'Journal', fait: journalTermine, compte: a && !journalTermine ? `${a.saisies} / ${a.total}` : undefined }] },
+      { titre: 'Comptes', entrees: [{ vue: 'comptes', libelle: 'Comptes en T' }, { vue: 'grandlivre', libelle: 'Grand livre' }, entree('balance', 'Balance')] },
+      { titre: 'États financiers', entrees: [entree('resultat', 'Compte de résultat'), entree('bilan', 'Bilan')] },
+      { titre: 'Clôture', entrees: [entree('bouclement', 'Bouclement')] },
+      ...(fichesParcours.length || f.has('bilanOuverture')
+        ? [{ titre: 'Fiches', entrees: [...(f.has('bilanOuverture') ? [{ vue: 'bilanOuverture' as Vue, libelle: "Bilan d'ouverture" }] : []), ...fichesParcours] }]
+        : []),
+      { titre: 'Outils', entrees: outils },
     ];
   });
   /** Menu de navigation sur téléphone et petite tablette : ouvert par le bouton « Menu », refermé après un choix. */
@@ -223,6 +214,7 @@
         <div class="logo"><span class="pastille-logo" aria-hidden="true">CP</span>Compta PME</div>
       {/if}
       <div class="dossier">
+        {#if genre === 'travail'}<button class="vers-dossiers" onclick={() => etat.ouvrirRubrique('dossiers')}>Mes dossiers<span class="chevron" aria-hidden="true">›</span></button>{/if}
         <strong>{s.dossier.raisonSociale}</strong>
         <span class="fil" aria-hidden="true">/ {libelleVue}</span>
         <span class="meta">{s.dossier.formeJuridique === 'raison individuelle' ? 'Raison individuelle' : s.dossier.formeJuridique}</span>
@@ -249,7 +241,6 @@
           <a
             href={`#${e.vue}`}
             class:actif={etat.vue === e.vue}
-            class:etape={e.etape !== undefined}
             class:fait={e.fait}
             aria-current={etat.vue === e.vue ? 'page' : undefined}
             onclick={(ev) => {
@@ -257,7 +248,7 @@
               basculerMenu(false, false);
               etat.aller(e.vue);
             }}
-            >{#if e.etape !== undefined}<span class="num-etape" aria-hidden="true">{e.fait ? '✓' : e.etape}</span>{:else}<Icone nom={e.vue} />{/if}<span>{e.libelle}</span>{#if e.fait}<span class="sr-only"> (fait)</span>{/if}</a
+            ><Icone nom={e.vue} /><span class="libelle">{e.libelle}</span>{#if e.compte}<span class="compte num">{e.compte}</span>{/if}{#if e.fait}<span class="coche" aria-hidden="true">✓</span><span class="sr-only"> (fait)</span>{/if}</a
           >
         {/each}
       {/each}
@@ -277,7 +268,8 @@
             </p>
           {/if}
           <button class="action-lateral" onclick={exporterPdf} disabled={pdfEnCours}>{pdfEnCours ? 'Création du PDF…' : 'Exporter en PDF'}</button>
-          <button class="action-lateral discrete" onclick={() => (etat.apprendre = true)}>Apprendre pas à pas</button>
+          <button class="action-lateral discrete" onclick={() => { basculerMenu(false, false); etat.ouvrirRubrique('dossiers'); }}>Mes dossiers</button>
+          <button class="action-lateral discrete" onclick={() => (etat.apprendre = true)}>Cours : apprendre pas à pas</button>
         <button class="action-lateral discrete" onclick={() => (etat.guide = 'eleve')}>Guide d'utilisation</button>
           <button class="action-lateral discrete" onclick={() => (enseignant.ouvert = true)}>Espace enseignant</button>
         {/if}
@@ -348,16 +340,19 @@
   .lateral { background: var(--c-nuit); color: #fff; padding: 14px 12px; overflow-y: auto; gap: 2px; }
   .rubrique { font-size: var(--t-12); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #8fa9c4; padding: 16px 10px 8px; }
   .rubrique:first-child { padding-top: 4px; }
+  .rubrique { padding-top: 12px; padding-bottom: 4px; }
   .lateral a { display: flex; align-items: center; gap: 10px; min-height: 38px; padding: 6px 10px; color: #dce6f0; text-decoration: none; border-radius: var(--r-3); }
   .lateral a:hover { background: rgba(255, 255, 255, 0.07); color: #fff; }
   .lateral a.actif { background: rgba(255, 255, 255, 0.13); color: #fff; font-weight: 650; box-shadow: inset 3px 0 0 var(--c-accent); }
-  .num-etape {
-    width: 22px; height: 22px; border-radius: 50%; flex: none; display: grid; place-items: center; font-size: var(--t-12); font-weight: 700;
-    border: 1.5px solid rgba(255, 255, 255, 0.35); color: #dce6f0;
+  .lateral a .libelle { flex: 1; min-width: 0; }
+  .lateral a .compte { font-size: var(--t-12); color: #a9bccf; }
+  .lateral a .coche { font-size: var(--t-12); font-weight: 700; color: #9fd3b0; }
+  .vers-dossiers {
+    font: inherit; font-size: var(--t-14); border: 0; background: none; padding: 0 var(--e-1); color: var(--c-structure); cursor: pointer;
+    white-space: nowrap; align-self: center; min-height: var(--h-cible); border-radius: var(--r-2);
   }
-  .lateral a.actif .num-etape { background: var(--c-accent); border-color: var(--c-accent); color: #fff; }
-  .lateral a.fait .num-etape { background: #2e8b57; border-color: #2e8b57; color: #fff; }
-  .lateral a.etape + a.etape { position: relative; }
+  .vers-dossiers:hover { background: var(--c-bleu-doux); }
+  .vers-dossiers .chevron { margin-left: 6px; color: var(--c-texte-2); }
   .bouton-menu { display: none; }
   .voile-menu { display: none; }
   .lateral { display: flex; flex-direction: column; }

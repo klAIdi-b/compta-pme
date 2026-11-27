@@ -29,7 +29,7 @@ test('nouvel élève : une première écriture en un clic, puis le choix d’un 
   await expect(demo).toContainText("93'000.00");
   await page.getByRole('button', { name: 'Valider cette écriture' }).click();
   // Les trois portes, le fil rouge et les accès sont toujours là.
-  for (const nom of [/Apprendre une notion/, /M'exercer sur une entreprise/, /Faire une évaluation/]) await expect(page.getByRole('button', { name: nom })).toBeVisible();
+  for (const nom of [/Apprendre une notion/, /Tenir une comptabilité/, /Faire une évaluation/]) await expect(page.getByRole('button', { name: nom })).toBeVisible();
   await expect(page.getByRole('heading', { name: /Suivre une entreprise : Cycles du Léman/ })).toBeVisible();
   await expect(page.getByRole('button', { name: "Guide d'utilisation" })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Espace enseignant' })).toBeVisible();
@@ -41,12 +41,16 @@ test('nouvel élève : une première écriture en un clic, puis le choix d’un 
 
 test('onglets du bandeau : chaque rubrique a sa page, le bouton Retour ramène en arrière', async ({ page }) => {
   await page.goto('./');
-  const rubriques = page.getByRole('navigation', { name: 'Rubriques' });
-  await expect(rubriques.getByRole('button', { name: 'Accueil' })).toHaveAttribute('aria-current', 'page');
-  await rubriques.getByRole('button', { name: 'Apprendre' }).click();
+  const espaces = page.getByRole('navigation', { name: 'Espaces' });
+  await expect(espaces.getByRole('button', { name: 'Accueil' })).toHaveAttribute('aria-current', 'page');
+  // L'accueil n'a pas de rubriques : elles appartiennent à l'espace Comptabilité ou à l'espace Cours.
+  await expect(page.getByRole('navigation', { name: 'Rubriques' })).toHaveCount(0);
+  await espaces.getByRole('button', { name: 'Cours' }).click();
   await expect(page.getByRole('heading', { level: 1, name: 'Apprendre pas à pas' })).toBeVisible();
+  await expect(page.getByRole('navigation', { name: 'Espaces' }).getByRole('button', { name: 'Cours' })).toHaveAttribute('aria-current', 'page');
   await expect(page.getByRole('navigation', { name: 'Rubriques' }).getByRole('button', { name: 'Apprendre' })).toHaveAttribute('aria-current', 'page');
   // Théorie sans exercice : l'élève choisit son année ; la 2ème CFC ajoute ses chapitres à ceux de la 1ère.
+  await page.getByRole('navigation', { name: 'Espaces' }).getByRole('button', { name: 'Cours' }).click();
   await page.getByRole('navigation', { name: 'Rubriques' }).getByRole('button', { name: 'Théorie' }).click();
   await expect(page.getByRole('heading', { level: 1, name: 'Théorie' })).toBeVisible();
   const annees = page.getByRole('group', { name: 'Votre année' });
@@ -56,6 +60,10 @@ test('onglets du bandeau : chaque rubrique a sa page, le bouton Retour ramène e
   expect(await page.locator('.sommaire li').count()).toBeGreaterThan(nb1);
   await page.locator('.sommaire li button').first().click();
   await expect(page.getByRole('heading', { level: 2 }).first()).toBeVisible();
+  // L'espace Comptabilité s'ouvre sur « Mes dossiers » ; ses rubriques mènent au choix d'un exercice et à l'évaluation.
+  await page.getByRole('navigation', { name: 'Espaces' }).getByRole('button', { name: 'Comptabilité' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Mes dossiers' })).toBeVisible();
+  await expect(page.getByText("Aucun dossier pour l'instant.")).toBeVisible();
   await page.getByRole('navigation', { name: 'Rubriques' }).getByRole('button', { name: 'Exercices' }).click();
   await expect(page.getByRole('heading', { level: 1, name: 'Choisir un exercice' })).toBeVisible();
   await page.getByRole('navigation', { name: 'Rubriques' }).getByRole('button', { name: 'Évaluation' }).click();
@@ -64,12 +72,15 @@ test('onglets du bandeau : chaque rubrique a sa page, le bouton Retour ramène e
   await page.goBack();
   await expect(page.getByRole('heading', { level: 1, name: 'Choisir un exercice' })).toBeVisible();
   await page.goBack();
+  await expect(page.getByRole('heading', { level: 1, name: 'Mes dossiers' })).toBeVisible();
+  await page.goBack();
   await expect(page.getByRole('heading', { level: 1, name: 'Théorie' })).toBeVisible();
   await page.goBack();
   await expect(page.getByRole('heading', { level: 1, name: 'Apprendre pas à pas' })).toBeVisible();
   await page.goBack();
   await expect(page.getByRole('heading', { level: 1, name: 'Passez votre première écriture.' })).toBeVisible();
   // Le nom du site ramène toujours à l'accueil.
+  await page.getByRole('navigation', { name: 'Espaces' }).getByRole('button', { name: 'Comptabilité' }).click();
   await page.getByRole('navigation', { name: 'Rubriques' }).getByRole('button', { name: 'Exercices' }).click();
   await page.getByTitle("Retour à la page d'accueil").click();
   await expect(page.getByRole('heading', { level: 1, name: 'Passez votre première écriture.' })).toBeVisible();
@@ -139,6 +150,7 @@ for (const [largeur, hauteur] of [[1440, 900], [360, 740]] as const) {
     await page.setViewportSize({ width: largeur, height: hauteur });
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.goto('./');
+    await page.getByRole('navigation', { name: 'Espaces' }).getByRole('button', { name: 'Comptabilité' }).click();
     await page.getByRole('navigation', { name: 'Rubriques' }).getByRole('button', { name: 'Exercices' }).click();
     await page.getByLabel('Rechercher un exercice').fill('cycles');
     await page.locator('#choisir-exercice').getByText(/Cycles du Léman/).first().click();

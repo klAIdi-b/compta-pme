@@ -14,9 +14,9 @@ import { empreinteTravail, type DernierExport } from '../io/fichiers';
 import type { Suivi } from '../engine/correction';
 import { aMettreDeCote, ecranAffiche, genreSession, peutOuvrirAccueil, vueEleve, type Ecran, type GenreSession } from './modes';
 
-/** Pages de l'accueil, et rubriques du bandeau (les mêmes, plus le parcours Apprendre). */
-export type PageAccueil = 'accueil' | 'theorie' | 'exercices' | 'evaluation';
-export type Rubrique = PageAccueil | 'apprendre';
+export type { PageAccueil, Rubrique, Espace } from './modes';
+export { espaceDe } from './modes';
+import type { PageAccueil, Rubrique } from './modes';
 
 export type Vue =
   | 'tableau'
@@ -304,6 +304,20 @@ class Etat {
     };
     this.accueilOuvert = false;
     this.aller('tableau');
+  }
+
+  /**
+   * Dossiers de l'élève dans ce navigateur (page « Mes dossiers ») : le travail actif et les autres exercices
+   * commencés, du plus récent au plus ancien. Un aperçu ou un corrigé de l'enseignant n'en fait pas partie.
+   */
+  get dossiersEleve(): Session[] {
+    const actif = this.genre === 'travail' ? [this.session!] : [];
+    return [...actif, ...Object.values(this.autres)].sort((a, b) => (b.derniereActivite ?? '').localeCompare(a.derniereActivite ?? ''));
+  }
+
+  /** Ouvre un dossier de la liste : le travail actif est repris, un autre exercice commencé est remis au premier plan. */
+  ouvrirDossier(s: Session) {
+    this.commencer(s.eleve, s.exercice);
   }
 
   /** Bouton « Commencer la saisie » : ouvre le journal, avec la visite guidée la première fois. */

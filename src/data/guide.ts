@@ -34,9 +34,10 @@ export const GUIDE: PartieGuide[] = [
           {
             type: 'etapes',
             items: [
-              'Sur la page d’accueil, « Que voulez-vous faire ? » propose trois entrées : apprendre une notion, vous exercer ' +
-                'sur une entreprise, faire une évaluation.',
-              "Choisissez votre formation (CFC ou maturité professionnelle), puis ouvrez un niveau et choisissez l'exercice. " +
+              'Le site a deux espaces, en haut de la page : « Comptabilité », où vous tenez la comptabilité d’entreprises, ' +
+                'et « Cours », où vous apprenez les notions (Apprendre, Théorie). La page d’accueil mène à l’un ou à l’autre.',
+              "Dans « Comptabilité », la rubrique « Exercices » présente les exercices du logiciel : choisissez votre formation " +
+                "(CFC ou maturité professionnelle), puis ouvrez un niveau et choisissez l'exercice. " +
                 "La recherche trouve un exercice par sujet (« TVA », « salaires »…). Un fichier reçu de votre enseignant " +
                 "s'ouvre avec le bouton « Ouvrir un exercice reçu… ».",
               'Indiquez votre prénom, votre nom et votre classe (« Vos informations »), puis cliquez sur « Commencer ». ' +
@@ -52,10 +53,11 @@ export const GUIDE: PartieGuide[] = [
           {
             type: 'p',
             texte:
-              "Quand vous revenez sur le site, l'accueil affiche « Reprendre où vous en étiez » avec votre avancement, puis vos " +
-              "autres exercices en cours. Vous pouvez travailler sur plusieurs exercices : le lien « Changer d'exercice » de " +
-              "« Votre mission » ouvre l'accueil, et chaque exercice reprend là où vous l'aviez laissé. Dans la liste, chaque " +
-              "exercice commencé indique « En cours » ou « Terminé ».",
+              "Quand vous revenez sur le site, l'accueil affiche « Votre prochaine étape » avec votre avancement. Tous les " +
+              "exercices commencés dans ce navigateur sont dans « Comptabilité › Mes dossiers » : pour chacun, son origine " +
+              "(exercice du logiciel, dossier de pièces, fichier de l'enseignant), son avancement et la date de votre dernière " +
+              "activité ; « Ouvrir » le reprend là où vous l'aviez laissé. Pendant un exercice, « Mes dossiers » en haut de " +
+              "l'écran ramène à cette liste.",
           },
           {
             type: 'retenir',
@@ -72,7 +74,7 @@ export const GUIDE: PartieGuide[] = [
           {
             type: 'p',
             texte:
-              "Avant les exercices complets, « Apprendre pas à pas » (page d'accueil ou barre latérale) reprend les notions " +
+              "Avant les exercices complets, « Apprendre » (espace « Cours », depuis la page d'accueil ou la barre latérale) reprend les notions " +
               'une à une, dans l’ordre du cours : écritures de la 1ère CFC, écritures composées de la 2ème CFC (TVA, ' +
               'amortissements, transitoires, créances, salaires) et de la maturité (société anonyme, titres), calculs de la 2ème CFC et de l’option ' +
               'Finances (livres auxiliaires, déclaration de salaire, marge contributive, répartition des coûts) et de la ' +
@@ -101,9 +103,11 @@ export const GUIDE: PartieGuide[] = [
             type: 'liste',
             items: [
               "En haut : l'entreprise, la formation et le niveau, le mode (entraînement ou évaluation) et votre avancement.",
-              'À gauche, « Votre parcours » : les étapes numérotées de l’exercice (votre mission, journal, balance, compte de ' +
-                'résultat, bilan, bouclement, puis les fiches demandées), cochées une fois faites. En dessous, « Outils » : ' +
-                'comptes en T, grand livre, théorie et fiches d’appoint (facturation, budget, salaire, TVA).',
+              'À gauche, les rubriques rangées comme dans un logiciel comptable : « Votre mission », puis « Saisie » ' +
+                '(journal), « Comptes » (comptes en T, grand livre, balance), « États financiers » (compte de résultat, ' +
+                'bilan), « Clôture » (bouclement), « Fiches » (les fiches demandées par l’exercice) et « Outils » (TVA, ' +
+                'salaire, facturation, budget, théorie). Les étapes de l’exercice sont cochées une fois faites ; en bas de ' +
+                'chaque écran, « Étape suivante » indique toujours la suite, dans l’ordre du cours.',
               'Sur téléphone ou petite tablette, ce menu s’ouvre avec le bouton à trois traits en haut à gauche.',
               'Au centre : une seule tâche à la fois.',
               'Dans le journal, l’énoncé et ses opérations sont affichés à droite ou en dessous, selon la taille de l’écran.',
@@ -119,12 +123,12 @@ export const GUIDE: PartieGuide[] = [
             type: 'p',
             texte:
               'La théorie est le cours de référence : on y revient pour revoir une règle, chercher un exemple ou préparer une ' +
-              'évaluation. Elle s’ouvre par l’onglet « Théorie » de la page d’accueil, ou par la rubrique « Théorie » pendant un exercice.',
+              'évaluation. Elle s’ouvre par l’espace « Cours », rubrique « Théorie », ou par la rubrique « Théorie » pendant un exercice.',
           },
           {
             type: 'liste',
             items: [
-              'Sur la page d’accueil, choisissez votre année : 1ère CFC, 2ème CFC ou Maturité professionnelle. Chaque année reprend les chapitres des précédentes.',
+              'Dans la Théorie ouverte sans exercice, choisissez votre année : 1ère CFC, 2ème CFC ou Maturité professionnelle. Chaque année reprend les chapitres des précédentes.',
               'Chaque chapitre annonce ses objectifs, définit les termes à connaître, puis explique la règle avec des exemples résolus pas à pas.',
               '« Erreurs fréquentes » montre les pièges habituels et comment les éviter.',
               '« Vérifiez vos connaissances » : cherchez la réponse, puis cliquez sur la question pour l’afficher. Rien n’est noté ni enregistré.',
@@ -243,7 +247,7 @@ export const GUIDE: PartieGuide[] = [
               'En évaluation, aucun retour n’est affiché pendant le travail : votre enseignant corrige votre copie. En ' +
               'évaluation formative, aucun retour non plus pendant la saisie ; quand vous avez fini, « Terminer et voir la ' +
               'correction » (« Votre mission ») ferme la saisie et affiche ce qui est juste ou à revoir, les solutions et une ' +
-              'note indicative. À l’accueil, l’onglet « Évaluation » regroupe les évaluations reçues de votre enseignant.',
+              'note indicative. Dans l’espace « Comptabilité », la rubrique « Évaluation » regroupe les évaluations reçues de votre enseignant.',
           },
         ],
       },
@@ -321,7 +325,7 @@ export const GUIDE: PartieGuide[] = [
           {
             type: 'p',
             texte:
-              'Pour continuer sur un autre ordinateur : page « Exercices » de l’accueil, bouton « Reprendre ma copie… », ' +
+              'Pour continuer sur un autre ordinateur : espace « Comptabilité », rubrique « Mes dossiers » ou « Exercices », bouton « Reprendre ma copie… », ' +
               'puis choisissez votre fichier .compta-copie.json. Pour un exercice reçu par fichier, ouvrez d’abord ce ' +
               'fichier avec « Ouvrir un exercice reçu… ». Votre progression d’« Apprendre pas à pas » se reprend de la même ' +
               'façon : « Envoyer ou reprendre ma progression », puis « Reprendre ma progression… ».',
@@ -555,7 +559,7 @@ export const GUIDE: PartieGuide[] = [
               'Corrigé PDF : écritures de chaque pièce, bouclement et états financiers, pour l’enseignant.',
               'Fichier entraînement et fichier évaluation : à distribuer comme un exercice ordinaire. Dans le journal, la pièce ' +
                 's’affiche au-dessus de la grille de saisie.',
-              'Les dossiers figurent aussi dans la liste de la page d’accueil, en entraînement.',
+              'Les dossiers figurent aussi dans la liste des exercices de l’espace « Comptabilité », en entraînement.',
             ],
           },
         ],
