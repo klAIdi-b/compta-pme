@@ -1,7 +1,7 @@
 // Exercices de journal construits sur la structure de cas du manuel E&S (vol. 1 ch. 1, vol. 2 ch. 12 et 14, vol. 3
 // ch. 22 à 24, vol. 4 ch. 35) et de F&C (vol. 2 ch. 36 et 54). Droits d'utilisation obtenus par l'enseignant
 // (09.11.2026). Décision de l'enseignant du 27.11.2026 : mêmes écritures, mais noms et montants changés ; entreprises,
-// personnes et montants fictifs. Les identifiants des exercices sont gardés pour les liens et les copies déjà rendues.
+// personnes et montants fictifs. Identifiants renommés le 27.11.2026 (anciens liens redirigés, voir `src/ui/lien.ts`).
 import type { Exercice } from '../engine/exercice';
 
 const f = (francs: number) => Math.round(francs * 100);
@@ -23,7 +23,7 @@ const CONSIGNE =
 
 // ───────────────────────── Bilan, comptes de bilan, écritures composées ─────────────────────────
 export const manuelGolay: Exercice = {
-  id: 'manuel-cfc1-favre-evenements',
+  id: 'exercice-cfc1-golay-evenements',
   titre: 'Golay Événements — bilan et comptes de bilan',
   niveau: 'CFC1',
   filiere: 'CFC',
@@ -100,7 +100,7 @@ export const manuelGolay: Exercice = {
 
 // ───────────────────────── Entreprise commerciale ─────────────────────────
 export const manuelCaveEauxVives: Exercice = {
-  id: 'manuel-cfc1-vinotheque-des-paquis',
+  id: 'exercice-cfc1-cave-eaux-vives',
   titre: 'Cave des Eaux-Vives — marchandises, rabais et escomptes',
   niveau: 'CFC1',
   filiere: 'CFC',
@@ -190,7 +190,7 @@ export const manuelCaveEauxVives: Exercice = {
 
 // ───────────────────────── TVA (taux 8,1 % et 2,6 %) ─────────────────────────
 export const manuelVuilleumier: Exercice = {
-  id: 'manuel-cfc2-maison-lacroix-tva',
+  id: 'exercice-cfc2-maison-vuilleumier-tva',
   titre: 'Maison Vuilleumier — TVA du premier trimestre',
   niveau: 'CFC2',
   filiere: 'CFC',
@@ -273,7 +273,7 @@ export const manuelVuilleumier: Exercice = {
 
 // ───────────────────────── Pertes sur créances ─────────────────────────
 export const manuelJaquier: Exercice = {
-  id: 'manuel-cfc3-materiaux-brodard-creances',
+  id: 'exercice-cfc3-materiaux-jaquier-creances',
   titre: 'Matériaux Jaquier — pertes sur créances et ducroire',
   niveau: 'CFC2',
   filiere: 'CFC',
@@ -332,7 +332,7 @@ export const manuelJaquier: Exercice = {
 
 // ───────────────────────── Amortissements ─────────────────────────
 export const manuelDelices: Exercice = {
-  id: 'manuel-cfc3-imprimerie-mont-blanc-amortissements',
+  id: 'exercice-cfc3-imprimerie-delices-amortissements',
   titre: 'Imprimerie des Délices — amortissements de fin d’année',
   niveau: 'CFC2',
   filiere: 'CFC',
@@ -381,7 +381,7 @@ export const manuelDelices: Exercice = {
 
 // ───────────────────────── Comptes transitoires ─────────────────────────
 export const manuelMonnier: Exercice = {
-  id: 'manuel-cfc3-truffaz-transports-transitoires',
+  id: 'exercice-cfc3-transports-monnier-transitoires',
   titre: 'Transports Monnier — actifs et passifs transitoires',
   niveau: 'CFC2',
   filiere: 'CFC',
@@ -442,7 +442,7 @@ export const manuelMonnier: Exercice = {
 
 // ───────────────────────── Clôture de l'entreprise individuelle ─────────────────────────
 export const manuelPerrin: Exercice = {
-  id: 'manuel-cfc4-lambert-horlogerie-cloture',
+  id: 'exercice-cfc4-horlogerie-perrin-cloture',
   titre: 'Horlogerie Perrin — clôture annuelle de l’entreprise individuelle',
   niveau: 'CFC2',
   filiere: 'CFC',
@@ -543,7 +543,7 @@ export const manuelPerrin: Exercice = {
 
 // ───────────────────────── MP : fondation et augmentation du capital ─────────────────────────
 export const manuelAlize: Exercice = {
-  id: 'manuel-mp3-zephyr-automation-fondation',
+  id: 'exercice-mp3-alize-robotique-fondation',
   titre: 'Alizé Robotique SA — fondation et augmentation du capital',
   niveau: 'MP',
   filiere: 'MP',
@@ -606,7 +606,7 @@ export const manuelAlize: Exercice = {
 
 // ───────────────────────── MP : titres ─────────────────────────
 export const manuelArve: Exercice = {
-  id: 'manuel-mp4-rive-gauche-participations-titres',
+  id: 'exercice-mp4-arve-placements-titres',
   titre: 'Arve Placements SA — portefeuille de titres',
   niveau: 'MP',
   filiere: 'MP',

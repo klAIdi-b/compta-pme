@@ -205,7 +205,7 @@ export function enrichirCfc1(valides: Chapitre[]): Chapitre[] {
           { question: "Les actifs valent 30'000.00 et les dettes 34'000.00. Que montre le bilan ?", reponse: "Un découvert de 4'000.00, inscrit du côté de l'actif pour équilibrer." },
           { question: "L'entreprise emprunte 10'000.00 à la banque. Quel est l'effet sur le bilan ?", reponse: "Actif + (banque) et passif + (emprunt) : le total augmente de 10'000.00." },
         ],
-        liens: { module: 'bilan', exercices: ['manuel-cfc1-favre-evenements', 'demo-cfc1-cycles-du-leman'] },
+        liens: { module: 'bilan', exercices: ['exercice-cfc1-golay-evenements', 'demo-cfc1-cycles-du-leman'] },
       }),
     ],
 
@@ -282,7 +282,7 @@ export function enrichirCfc1(valides: Chapitre[]): Chapitre[] {
           { question: "Le propriétaire dépose 2'000.00 de la caisse sur le compte bancaire. Quelle écriture ?", reponse: "Banque au débit, Caisse au crédit, 2'000.00." },
           { question: 'Pourquoi un compte de charge ou de produit n’a-t-il pas de solde initial ?', reponse: 'Parce qu’il mesure ce qui se passe pendant l’exercice : il repart de zéro chaque année.' },
         ],
-        liens: { module: 'comptes', exercices: ['manuel-cfc1-favre-evenements'] },
+        liens: { module: 'comptes', exercices: ['exercice-cfc1-golay-evenements'] },
       }),
     ],
 
@@ -427,7 +427,7 @@ export function enrichirCfc1(valides: Chapitre[]): Chapitre[] {
             { question: "Un client règle par la banque une facture de 2'300.00 déjà comptabilisée. Quelle écriture ?", reponse: "Banque / Créances clients, 2'300.00." },
             { question: "L'énoncé dit : « facture non comptabilisée, payée par la banque ». Faut-il passer par une dette ?", reponse: 'Non : on passe directement l’achat ou la charge contre la banque.' },
           ],
-          liens: { module: 'factures', exercices: ['manuel-cfc1-favre-evenements', 'dossier-cfc1-garage-pont-rouge'] },
+          liens: { module: 'factures', exercices: ['exercice-cfc1-golay-evenements', 'dossier-cfc1-garage-praille'] },
         },
       ),
     ],
@@ -642,7 +642,7 @@ export function enrichirCfc1(valides: Chapitre[]): Chapitre[] {
           { question: 'Pourquoi une augmentation du stock augmente-t-elle le bénéfice ?', reponse: 'Parce que les marchandises non vendues ne sont pas une charge de l’exercice : on les retire des achats.' },
           { question: 'Dans quel compte passe-t-on les droits de douane payés sur un achat de marchandises ?', reponse: 'Frais d’achats.' },
         ],
-        liens: { module: 'marchandises', exercices: ['manuel-cfc1-vinotheque-des-paquis', 'dossier-cfc1-hifi-plainpalais'] },
+        liens: { module: 'marchandises', exercices: ['exercice-cfc1-cave-eaux-vives', 'dossier-cfc1-son-image-servette'] },
       }),
     ],
 
@@ -699,7 +699,7 @@ export function enrichirCfc1(valides: Chapitre[]): Chapitre[] {
           { question: 'Le PVN vaut 441.00 et le client a droit à 2 % d’escompte. Quel est le PVC ?', reponse: '441.00 ÷ 98 % = 450.00.' },
           { question: 'PAN 200.00 et PVN 290.00. Quel est le nombre clé pour passer du PAN au PVN ?', reponse: '290 ÷ 200 = 1,45.' },
         ],
-        liens: { exercices: ['manuel-cfc1-vinotheque-des-paquis'] },
+        liens: { exercices: ['exercice-cfc1-cave-eaux-vives'] },
       }),
     ],
   };

@@ -4,9 +4,31 @@
 
 const PARAMETRE = 'exercice';
 
-/** Identifiant d'exercice indiqué dans l'adresse, ou null. */
+/**
+ * Anciens identifiants des contenus construits sur les manuels, renommés le 27.11.2026 avec leurs entreprises : un lien
+ * déjà donné aux élèves ouvre la nouvelle version. Les copies rendues avec un ancien identifiant ne sont pas redirigées :
+ * leurs montants ne correspondent plus au corrigé.
+ */
+export const ANCIENS_IDS: Record<string, string> = {
+  'manuel-cfc1-favre-evenements': 'exercice-cfc1-golay-evenements',
+  'manuel-cfc1-vinotheque-des-paquis': 'exercice-cfc1-cave-eaux-vives',
+  'manuel-cfc2-maison-lacroix-tva': 'exercice-cfc2-maison-vuilleumier-tva',
+  'manuel-cfc3-materiaux-brodard-creances': 'exercice-cfc3-materiaux-jaquier-creances',
+  'manuel-cfc3-imprimerie-mont-blanc-amortissements': 'exercice-cfc3-imprimerie-delices-amortissements',
+  'manuel-cfc3-truffaz-transports-transitoires': 'exercice-cfc3-transports-monnier-transitoires',
+  'manuel-cfc4-lambert-horlogerie-cloture': 'exercice-cfc4-horlogerie-perrin-cloture',
+  'manuel-mp3-zephyr-automation-fondation': 'exercice-mp3-alize-robotique-fondation',
+  'manuel-mp4-rive-gauche-participations-titres': 'exercice-mp4-arve-placements-titres',
+  'dossier-cfc1-garage-pont-rouge': 'dossier-cfc1-garage-praille',
+  'dossier-cfc1-hifi-plainpalais': 'dossier-cfc1-son-image-servette',
+  'dossier-cfc2-electromenager-du-rhone-tva': 'dossier-mp1-electromenager-acacias-tva',
+  'dossier-cfc3-confiserie-bourg-de-four-salaires': 'dossier-cfc3-patisserie-molard-salaires',
+};
+
+/** Identifiant d'exercice indiqué dans l'adresse (un ancien identifiant est remplacé par le nouveau), ou null. */
 export function exerciceDuLien(): string | null {
-  return new URLSearchParams(location.search).get(PARAMETRE);
+  const id = new URLSearchParams(location.search).get(PARAMETRE);
+  return id ? (ANCIENS_IDS[id] ?? id) : null;
 }
 
 /** Adresse à donner aux élèves pour ouvrir directement un exercice. */

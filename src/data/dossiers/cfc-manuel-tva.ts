@@ -2,7 +2,7 @@
 // en maturité seulement), TVA, construit sur la structure de cas du manuel E&S 2022, vol. 2, ch. 14 : droits
 // d'utilisation obtenus par l'enseignant (09.11.2026). Décision de l'enseignant du 27.11.2026 : mêmes écritures, noms et
 // montants changés. TVA aux taux en vigueur (8,1 % et 2,6 %, arrondi aux 5 centimes). Entreprises, personnes et numéros
-// fictifs ; identifiant gardé pour les copies rendues.
+// fictifs ; identifiant renommé le 27.11.2026.
 import { avisBancaire, facture, noteCredit, noteInterne, ticket } from '../../engine/pieces';
 import { BANQUE, C, construireDossier, D, f, S } from './outils';
 
@@ -98,7 +98,7 @@ const e12 = avisBancaire({ sens: 'debit', banque: BANQUE, titulaire: magasin, co
 
 export const dossierElectromenager = construireDossier(
   {
-    id: 'dossier-cfc2-electromenager-du-rhone-tva',
+    id: 'dossier-mp1-electromenager-acacias-tva',
     titre: 'Électroménager des Acacias — dossier de pièces, TVA, escomptes et remises',
     niveau: 'MP',
     filiere: 'MP',

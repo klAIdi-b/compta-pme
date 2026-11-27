@@ -22,18 +22,18 @@ function dossierCorrige(ex: Exercice): Dossier {
 
 /** Résultat attendu (calculé à la main) et soldes de contrôle. */
 const attendus: Record<string, { resultat: number; soldes: Record<string, number> }> = {
-  'manuel-cfc1-favre-evenements': {
+  'exercice-cfc1-golay-evenements': {
     resultat: 0,
     soldes: { '1020': 4880, '1010': 8065, '1000': 1000, '1100': 0, '1510': 67350, '1530': 68800, '2010': -22825 },
   },
   // Ventes 40'260.00 − déductions 849.60 − frais de ventes 280.00 + prélèvement 420.00 ; achats nets 30'000.00 − 852.00
   // + frais 610.00 − variation de stock 3'000.00 ; loyer 3'100.00.
-  'manuel-cfc1-vinotheque-des-paquis': {
+  'exercice-cfc1-cave-eaux-vives': {
     resultat: 9692.4,
     soldes: { '1020': 43542.4, '1000': 7750, '1100': 6460, '2000': -18980, '1200': 29000 },
   },
   // Ventes 74'600.00 − achats nets 37'400.00 − autres charges 930.00 ; comptes de TVA soldés par le décompte.
-  'manuel-cfc2-maison-lacroix-tva': {
+  'exercice-cfc2-maison-vuilleumier-tva': {
     resultat: 36270,
     soldes: {
       '1000': 25687, '1010': 15019.4, '1020': 20438.6, '1100': 17100, '2000': -17810,
@@ -41,22 +41,22 @@ const attendus: Record<string, { resultat: number; soldes: Record<string, number
     },
   },
   // Ventes 39'200.00 − pertes nettes 35'357.50 + produits exceptionnels 14'000.00.
-  'manuel-cfc3-materiaux-brodard-creances': {
+  'exercice-cfc3-materiaux-jaquier-creances': {
     resultat: 17842.5,
     soldes: { '1000': 7500, '1010': 21780, '1020': 75500, '1100': 23750, '1108': 21000, '1109': -1187.5, '2000': -14800 },
   },
   // Amortissements 63'749.00 (perte, aucune autre opération de résultat).
-  'manuel-cfc3-imprimerie-mont-blanc-amortissements': {
+  'exercice-cfc3-imprimerie-delices-amortissements': {
     resultat: -63749,
     soldes: { '1500': 212000, '1509': -96500, '1549': -10800, '1510': 18250, '1521': 7200, '1530': 1, '1020': 33000 },
   },
   // Charges de l'exercice : assurances 3'700, réparations 4'200 + 7'500, salaires 36'000, intérêt 2'400.
-  'manuel-cfc3-truffaz-transports-transitoires': {
+  'exercice-cfc3-transports-monnier-transitoires': {
     resultat: -53800,
     soldes: { '1300': 21380, '2300': -50100, '1020': 104920, '6000': 0, '6500': 0, '6300': 3700 },
   },
   // Produits 1'713'100.00 − charges 1'295'275.00.
-  'manuel-cfc4-lambert-horlogerie-cloture': {
+  'exercice-cfc4-horlogerie-perrin-cloture': {
     resultat: 417825,
     soldes: {
       '1020': 429000, '1010': 8440, '1100': 385000, '1109': -19250, '1200': 396000, '1510': 26400, '1521': 15400,
@@ -64,12 +64,12 @@ const attendus: Record<string, { resultat: number; soldes: Record<string, number
     },
   },
   // Frais de fondation 2'885.50 et d'augmentation 7'200.00 ; 48'000.00 encore à libérer.
-  'manuel-mp3-zephyr-automation-fondation': {
+  'exercice-mp3-alize-robotique-fondation': {
     resultat: -10085.5,
     soldes: { '1850': 48000, '1860': 0, '1020': 273314.5, '2800': -360000, '2810': -60000, '2900': -30000, '1109': -3200, '1100': 32000 },
   },
   // Produits des titres 4'938.50 − droits de garde 60.00.
-  'manuel-mp4-rive-gauche-participations-titres': {
+  'exercice-mp4-arve-placements-titres': {
     resultat: 4878.5,
     soldes: { '1060': 71000, '1176': 0, '1300': 262.5, '1020': 283616 },
   },

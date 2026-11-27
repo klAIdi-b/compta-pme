@@ -18,6 +18,7 @@
   import { bouclementCorrige, PIECE_BOUCLEMENT } from '../../engine/correction-bouclement';
   import { EXT_COPIE, ErreurFichier, importerCopie, nomFichier, type Copie } from '../../io/fichiers';
   import { alertesCopie, copiesIdentiques } from '../../engine/reprise';
+  import { ANCIENS_IDS } from '../lien';
   import { plan } from '../../data/plan';
   import { choisirFichiers, telecharger, telechargerBlob } from '../fichiers-navigateur';
 
@@ -80,6 +81,13 @@
     for (const f of fichiers) {
       try {
         const c = importerCopie(f.texte);
+        const base = c.exerciceId.replace(/-evaluation$/, '');
+        if (ANCIENS_IDS[base] && exercice.id.replace(/-evaluation$/, '') === ANCIENS_IDS[base]) {
+          messages.push(
+            `${f.nom} : copie faite sur l'ancienne version de cet exercice (avant le changement des noms et des montants du 27.11.2026) : elle ne peut pas être corrigée avec le corrigé actuel.`,
+          );
+          continue;
+        }
         if (c.exerciceId !== exercice.id) {
           messages.push(`${f.nom} : cette copie concerne l'exercice « ${c.exerciceTitre} », pas celui-ci.`);
           continue;
