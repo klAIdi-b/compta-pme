@@ -18,9 +18,15 @@
   import { bouclementCorrige, PIECE_BOUCLEMENT } from '../../engine/correction-bouclement';
   import { EXT_COPIE, ErreurFichier, importerCopie, nomFichier, type Copie } from '../../io/fichiers';
   import { alertesCopie, copiesIdentiques } from '../../engine/reprise';
+  import { codeExercice, copiePapierPour, ecartsOuverture } from '../../engine/papier';
   import { ANCIENS_IDS } from '../lien';
   import { plan } from '../../data/plan';
-  import { choisirFichiers, telecharger, telechargerBlob } from '../fichiers-navigateur';
+  import { choisirFichiersBruts, telecharger, telechargerBlob } from '../fichiers-navigateur';
+  import { appliquerAjustements, pointsAccordes, type Ajustements } from '../../engine/ajustements';
+  import { ajouterCopies, cleCopie, cleEleve, exerciceDeCopie } from '../../io/classe';
+  import { creerRetour, EXT_RETOUR, exporterRetour } from '../../io/retour';
+  import { historiqueDePiece, resumeHistorique } from '../../engine/historique';
+  import { dateHeure } from '../format';
 
   const disponibles = $derived<Exercice[]>(
     [...enseignant.exercices, ...exercicesDemo, ...DOSSIERS_EVALUATION].filter((e) => (e.corrige?.length ?? 0) > 0),
@@ -31,11 +37,31 @@
   let messages = $state<string[]>([]);
   let detail = $state<string | null>(null);
 
+  /** Ajustements des points (phase V3) : dans le fichier de classe s'il est ouvert, sinon en mémoire dans cette page. */
+  let ajustementsLocaux = $state<Record<string, Ajustements>>({});
+  const cleAjustement = (c: Copie) => cleCopie(c, exercice!.id);
+  function ajustementsDe(c: Copie): Ajustements {
+    return (enseignant.classe ? enseignant.classe.ajustements : ajustementsLocaux)[cleAjustement(c)] ?? {};
+  }
+  function ajuster(c: Copie, piece: string, changement: { points?: number | null; commentaire?: string }) {
+    const k = cleAjustement(c);
+    const actuel = { ...ajustementsDe(c) };
+    const a = { ...(actuel[piece] ?? {}) };
+    if (changement.points === null) delete a.points;
+    else if (changement.points !== undefined) a.points = changement.points;
+    if (changement.commentaire !== undefined) a.commentaire = changement.commentaire;
+    actuel[piece] = a;
+    if (enseignant.classe) {
+      enseignant.classe.ajustements = { ...enseignant.classe.ajustements, [k]: actuel };
+      enseignant.classeModifiee = true;
+    } else ajustementsLocaux = { ...ajustementsLocaux, [k]: actuel };
+  }
+
   type Ligne = { cle: string; copie: Copie; correction: CorrectionCopie };
   const lignes = $derived<Ligne[]>(
     exercice
       ? copies
-          .map((c) => ({ cle: `${c.eleve.nom}|${c.eleve.prenom}|${c.exporteLe}`, copie: c, correction: corrigerCopie(exercice, c.dossier, c.fiches as { facturation?: FicheFacturation; budget?: FicheBudget } | undefined) }))
+          .map((c) => ({ cle: `${c.eleve.nom}|${c.eleve.prenom}|${c.exporteLe}`, copie: c, correction: appliquerAjustements(corrigerCopie(exercice, c.dossier, c.fiches as { facturation?: FicheFacturation; budget?: FicheBudget } | undefined), ajustementsDe(c)) }))
           .sort((a, b) => `${a.copie.eleve.nom} ${a.copie.eleve.prenom}`.localeCompare(`${b.copie.eleve.nom} ${b.copie.eleve.prenom}`, 'fr'))
       : [],
   );
@@ -46,7 +72,23 @@
   const alertes = $derived.by(() => {
     const r = new Map<string, string[]>();
     if (!exercice) return r;
-    for (const l of lignes) r.set(l.cle, alertesCopie(exercice, plan, l.copie));
+    for (const l of lignes) {
+      const p = l.copie.papier?.exercice;
+      if (!p) {
+        r.set(l.cle, alertesCopie(exercice, plan, l.copie));
+        continue;
+      }
+      // Énoncé papier : le journal est rejoué sur le dossier créé par l'élève ; l'ouverture est comparée, sans points.
+      const a = alertesCopie(p, plan, { dossier: l.copie.dossier });
+      if (!p.papier?.code) a.push("Énoncé papier sans code d'exercice : vérifiez que la copie correspond bien à cet exercice.");
+      const ecarts = ecartsOuverture(l.copie.dossier.ouverture, exercice);
+      if (ecarts.length) {
+        const nom = new Map(l.copie.dossier.plan.map((c) => [c.numero, c.intitule]));
+        const sens = (x: number) => (x === 0 ? 'absent' : `${formatMontant(Math.abs(x))}${x < 0 ? ' au passif' : ''}`);
+        a.push(`Bilan d'ouverture (non noté) : ${ecarts.map((e) => `${nom.get(e.compte) ?? e.compte} ${sens(e.saisi)} au lieu de ${sens(e.attendu)}`).join(' ; ')}.`);
+      }
+      r.set(l.cle, a);
+    }
     for (const g of copiesIdentiques(lignes, (l) => l.copie.dossier.ecritures)) {
       const noms = g.map((l) => `${l.copie.eleve.prenom} ${l.copie.eleve.nom}`);
       for (const l of g) {
@@ -73,10 +115,66 @@
   const texteOp = (piece: string) =>
     piece === PIECE_BOUCLEMENT ? 'Écritures de bouclement' : (exercice?.operations.find((o) => o.numero === piece)?.texte ?? piece);
 
+  /** Changement d'exercice : les copies déjà rangées dans le fichier de classe ouvert sont reprises. */
+  function changerExercice() {
+    messages = [];
+    detail = null;
+    copies = enseignant.classe && exerciceId ? enseignant.classe.copies.filter((c) => exerciceDeCopie(c) === exerciceId) : [];
+    if (copies.length) messages.push(`${copies.length} copie${copies.length > 1 ? 's' : ''} reprise${copies.length > 1 ? 's' : ''} du fichier de classe « ${enseignant.classe!.nom} ».`);
+    signalerSansCopie();
+  }
+
+  /** Élèves de la liste de classe sans copie pour cet exercice. */
+  function signalerSansCopie() {
+    if (!enseignant.classe || !exercice) return;
+    const rendus = new Set(copies.map((c) => cleEleve(c.eleve)));
+    const absents = enseignant.classe.eleves.filter((e) => !rendus.has(cleEleve(e)));
+    if (absents.length && copies.length) messages.push(`Pas de copie : ${absents.map((e) => `${e.nom} ${e.prenom}`).join(', ')}.`);
+  }
+
+  /** Rendre les copies (phase V3) : un fichier de retour par élève, dans une archive ZIP. */
+  let avecSolutionsRetour = $state(false);
+  let retourEnCours = $state(false);
+  async function rendreCopies() {
+    if (!exercice) return;
+    retourEnCours = true;
+    try {
+      const { creerZip } = await import('../../io/zip');
+      const e = new TextEncoder();
+      const fichiers = lignes.map((l) => ({
+        nom: nomFichier([l.copie.eleve.nom, l.copie.eleve.prenom, l.copie.eleve.classe, exercice!.titre, 'corrige'], EXT_RETOUR),
+        donnees: e.encode(exporterRetour(creerRetour($state.snapshot(l.copie) as Copie, exercice!, l.correction as ReturnType<typeof appliquerAjustements>, avecSolutionsRetour))),
+      }));
+      telechargerBlob(nomFichier([exercice.titre, 'copies-rendues'], '.zip'), new Blob([creerZip(fichiers)], { type: 'application/zip' }));
+    } finally {
+      retourEnCours = false;
+    }
+  }
+
   async function importer() {
     messages = [];
     if (!exercice) return;
-    const fichiers = await choisirFichiers(`${EXT_COPIE},.json`, true);
+    const bruts = await choisirFichiersBruts(`${EXT_COPIE},.json,.zip`, true);
+    const fichiers: { nom: string; texte: string }[] = [];
+    const dec = new TextDecoder();
+    for (const b of bruts) {
+      if (!b.nom.toLowerCase().endsWith('.zip')) {
+        fichiers.push({ nom: b.nom, texte: dec.decode(b.octets) });
+        continue;
+      }
+      // Archive téléchargée depuis le devoir Classroom : seules les copies sont lues, le reste est ignoré.
+      try {
+        const { lireZip } = await import('../../io/zip');
+        const z = await lireZip(b.octets);
+        const copiesZip = z.fichiers.filter((f) => f.nom.toLowerCase().endsWith('.json'));
+        for (const f of copiesZip) fichiers.push({ nom: f.nom.split('/').pop()!, texte: dec.decode(f.donnees) });
+        const autres = z.fichiers.length - copiesZip.length;
+        if (autres) messages.push(`${b.nom} : ${autres} fichier${autres > 1 ? 's' : ''} sans copie ignoré${autres > 1 ? 's' : ''}.`);
+        if (z.ecartes.length) messages.push(`${b.nom} : fichier${z.ecartes.length > 1 ? 's' : ''} illisible${z.ecartes.length > 1 ? 's' : ''} dans l'archive : ${z.ecartes.join(', ')}.`);
+      } catch (e) {
+        messages.push(`${b.nom} : ${e instanceof Error ? e.message : 'archive illisible.'}`);
+      }
+    }
     const nouvelles: Copie[] = [];
     for (const f of fichiers) {
       try {
@@ -88,7 +186,13 @@
           );
           continue;
         }
-        if (c.exerciceId !== exercice.id) {
+        if (c.papier) {
+          const code = c.papier.exercice.papier?.code;
+          if (copiePapierPour(exercice, c.papier.exercice.papier ?? {}) === 'non') {
+            messages.push(`${f.nom} : copie d'énoncé papier avec le code « ${code ?? ''} », qui n'est pas celui de cet exercice (${codeExercice(exercice, 'fourni')} ou ${codeExercice(exercice, 'saisi')}).`);
+            continue;
+          }
+        } else if (c.exerciceId !== exercice.id) {
           messages.push(`${f.nom} : cette copie concerne l'exercice « ${c.exerciceTitre} », pas celui-ci.`);
           continue;
         }
@@ -107,6 +211,12 @@
     }
     copies = [...parEleve.values()];
     if (nouvelles.length) messages.push(`${nouvelles.length} copie${nouvelles.length > 1 ? 's' : ''} importée${nouvelles.length > 1 ? 's' : ''}.`);
+    // Fichier de classe ouvert : les copies le rejoignent (décision de l'enseignant du 27.11.2026).
+    if (enseignant.classe && nouvelles.length) {
+      enseignant.classe = ajouterCopies(enseignant.classe, nouvelles, exercice.id);
+      enseignant.classeModifiee = true;
+    }
+    signalerSansCopie();
   }
 
   function exporterCsv() {
@@ -202,7 +312,7 @@
   <div class="corps-carte barre">
     <label>
       <span class="discret">Exercice</span>
-      <select class="champ" bind:value={exerciceId} onchange={() => { copies = []; messages = []; detail = null; }}>
+      <select class="champ" bind:value={exerciceId} onchange={changerExercice}>
         <option value="">Choisissez un exercice…</option>
         {#each disponibles as e}<option value={e.id}>{e.titre}</option>{/each}
       </select>
@@ -212,11 +322,20 @@
     <button class="btn" disabled={!lignes.length || pdfEnCours} onclick={exporterPdf}>{pdfEnCours ? 'Création du PDF…' : 'Copies corrigées (PDF)'}</button>
     <button class="btn" disabled={!lignes.length || zipEnCours} onclick={exporterPdfEleves}>{zipEnCours ? 'Création des PDF…' : 'Un PDF par élève (ZIP)'}</button>
     <label class="petit"><input type="checkbox" bind:checked={avecCorrigeEleves} /> avec le corrigé</label>
+    <button class="btn" disabled={!lignes.length || retourEnCours} onclick={rendreCopies}>{retourEnCours ? 'Création…' : 'Rendre les copies (ZIP)'}</button>
+    <label class="petit"><input type="checkbox" bind:checked={avecSolutionsRetour} /> avec les solutions</label>
   </div>
   <p class="discret petit aide">
     Les copies importées restent dans cette page : elles ne sont ni enregistrées ni envoyées en ligne. Seuls les exercices
     dont le corrigé est saisi apparaissent dans la liste.
   </p>
+  {#if exercice}
+    <p class="petit aide codes-papier">
+      Énoncé sur papier : les élèves tapent <b class="num">{codeExercice(exercice, 'fourni')}</b> (bilan d'ouverture fourni
+      par le logiciel) ou <b class="num">{codeExercice(exercice, 'saisi')}</b> (bilan d'ouverture à saisir). Leurs copies
+      se corrigent ici, pièce par pièce ; l'ouverture saisie est comparée, sans points.
+    </p>
+  {/if}
 </section>
 
 {#if messages.length}
@@ -266,6 +385,11 @@
                         <label><input type="checkbox" bind:checked={voirJustes} /> Montrer aussi les écritures des opérations justes</label>
                       </td>
                     </tr>
+                    {#if l.copie.annees?.length}
+                      <tr>
+                        <td colspan="4" class="hors-enonce">L'élève a aussi ouvert {l.copie.annees.length > 1 ? 'les exercices' : "l'exercice"} {l.copie.annees.map((a) => a.fin.slice(0, 4)).join(', ')} ({l.copie.annees.reduce((t, a) => t + a.ecritures.filter((e) => !e.automatique).length, 0)} écriture{l.copie.annees.reduce((t, a) => t + a.ecritures.filter((e) => !e.automatique).length, 0) > 1 ? 's' : ''}). La correction porte sur l'exercice de l'énoncé.</td>
+                      </tr>
+                    {/if}
                     {#if l.correction.piecesHorsEnonce.length}
                       <tr>
                         <td colspan="4" class="hors-enonce">
@@ -282,8 +406,32 @@
                           {LIBELLES_DIAGNOSTIC[o.diagnostic]}
                           {#if o.piece === PIECE_BOUCLEMENT && texteAides(l.copie)}<div class="aides-vues">{texteAides(l.copie)}</div>{/if}
                           {#if texteTentatives(l.copie, o.piece)}<div class="aides-vues">{texteTentatives(l.copie, o.piece)}</div>{/if}
+                          {#if historiqueDePiece(l.copie.historique, o.piece).length > 1}<div class="aides-vues">Historique : {resumeHistorique(historiqueDePiece(l.copie.historique, o.piece), (iso) => dateHeure(iso).slice(-5))}</div>{/if}
                         </td>
                         <td class="montant" style="width:80px">{fmt(o.points)} / {fmt(o.max)}</td>
+                      </tr>
+                      {@const aj = ajustementsDe(l.copie)[o.piece]}
+                      <tr class="ajustement" class:ajuste={aj?.points !== undefined}>
+                        <td></td>
+                        <td colspan="3">
+                          <div class="ligne-ajustement">
+                            <label>
+                              <span class="discret petit">Points accordés</span>
+                              <input class="champ num points-accordes" inputmode="decimal" aria-label={`Points accordés, opération ${o.piece}`}
+                                value={aj?.points !== undefined ? fmt(aj.points) : ''} placeholder={fmt((o as { calcules?: number }).calcules ?? o.points)}
+                                onchange={(e) => {
+                                  const t = (e.currentTarget as HTMLInputElement).value.trim().replace(',', '.');
+                                  ajuster(l.copie, o.piece, { points: t === '' ? null : pointsAccordes(Number(t), o.max) });
+                                }} />
+                            </label>
+                            <label class="commentaire">
+                              <span class="discret petit">Commentaire pour l'élève</span>
+                              <input class="champ" aria-label={`Commentaire, opération ${o.piece}`} value={aj?.commentaire ?? ''}
+                                onchange={(e) => ajuster(l.copie, o.piece, { commentaire: (e.currentTarget as HTMLInputElement).value })} />
+                            </label>
+                            {#if aj?.points !== undefined}<button class="btn-lien" onclick={() => ajuster(l.copie, o.piece, { points: null })}>Revenir au calcul ({fmt((o as { calcules?: number }).calcules ?? o.points)})</button>{/if}
+                          </div>
+                        </td>
                       </tr>
                       {#if voirJustes || o.diagnostic !== 'juste'}
                         {@const cmp = comparaisonOperation(exercice!, l.copie.dossier, o.piece)}
@@ -414,6 +562,11 @@
   .barre label { display: flex; flex-direction: column; gap: 4px; min-width: 360px; }
   .petit { font-size: var(--t-12); }
   .aide { padding: 0 14px 12px; margin: 0; }
+  .ligne-ajustement { display: flex; gap: var(--e-3); align-items: flex-end; flex-wrap: wrap; }
+  .ligne-ajustement label { display: flex; flex-direction: column; gap: 2px; }
+  .ligne-ajustement .commentaire { flex: 1; min-width: 220px; }
+  .points-accordes { width: 80px; }
+  tr.ajustement.ajuste td { background: var(--c-orange-doux); }
   .messages { margin-bottom: 16px; }
   .messages ul { margin: 0; padding-left: 18px; }
   .actions { text-align: right; }

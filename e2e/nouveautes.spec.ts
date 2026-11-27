@@ -54,7 +54,7 @@ test('budget : préparer le budget puis calculer les écarts', async ({ page }) 
 
 test('apprendre pas à pas : un module, son exemple, une question corrigée tout de suite', async ({ page }) => {
   await page.goto('./');
-  await page.getByRole('button', { name: /Ouvrir le parcours|Continuer le parcours/ }).click();
+  await page.getByRole('button', { name: /Ouvrir le cours|Continuer le parcours/ }).click();
   await expect(page.getByRole('heading', { name: 'Apprendre pas à pas' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Maturité professionnelle' })).toBeVisible();
   // Les années suivantes sont repliées (second audit, 26.11.2026) : on ouvre la 2ème CFC.
@@ -83,7 +83,7 @@ test('apprendre : une notion réussie une seule fois reste « à confirmer »', 
     localStorage.setItem('compta-pme:apprendre:v1', JSON.stringify({ bilan: p(0, demain), comptes: p(2, dans3, 2) }));
   });
   await page.reload();
-  await page.getByRole('button', { name: /Ouvrir le parcours|Continuer le parcours/ }).click();
+  await page.getByRole('button', { name: /Ouvrir le cours|Continuer le parcours/ }).click();
   await expect(page.locator('.module', { hasText: 'Le bilan : actif ou passif' }).locator('.etat')).toContainText('Réussie une fois · à confirmer le');
   await expect(page.locator('.module', { hasText: 'Débit et crédit : opérations du bilan' }).locator('.etat')).toContainText('Confirmée · prochaine révision le');
   await expect(page.locator('.intro')).toContainText('au moins la moitié des points dans chaque type de question');
@@ -103,7 +103,7 @@ test('formulaire officiel de décompte TVA dans l’écran TVA', async ({ page }
 
 test('classer les pièces : exemple, classeurs et question projetée pour la classe', async ({ page }) => {
   await page.goto('./');
-  await page.getByRole('button', { name: /Ouvrir le parcours|Continuer le parcours/ }).click();
+  await page.getByRole('button', { name: /Ouvrir le cours|Continuer le parcours/ }).click();
   await page.getByRole('button', { name: 'Classer les pièces', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Exemple travaillé' })).toBeVisible();
   await page.getByRole('button', { name: 'Projeter une question pour la classe' }).click();
@@ -125,7 +125,7 @@ test('fil rouge sur l’accueil et onglet Progression de l’espace enseignant',
 
 test('leçon d’un module et navigation en bas de page', async ({ page }) => {
   await page.goto('./');
-  await page.getByRole('button', { name: /Ouvrir le parcours|Continuer le parcours/ }).click();
+  await page.getByRole('button', { name: /Ouvrir le cours|Continuer le parcours/ }).click();
   await page.getByRole('button', { name: 'Charges et produits', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'La leçon' })).toBeVisible();
   await expect(page.getByRole('heading', { name: /Charge ou investissement/ })).toBeVisible();
@@ -142,6 +142,7 @@ test('théorie enrichie : chapitre lisible à 360 px, réponses masquées au cla
   const { default: AxeBuilder } = await import('@axe-core/playwright');
   await page.setViewportSize({ width: 360, height: 740 });
   await page.goto('./');
+  await page.getByRole('navigation', { name: 'Espaces' }).getByRole('button', { name: 'Cours' }).click();
   await page.getByRole('navigation', { name: 'Rubriques' }).getByRole('button', { name: 'Théorie' }).click();
   await expect(page.locator('.sommaire').getByText('À relire')).toHaveCount(0);
   await page.locator('.sommaire li button').filter({ hasText: 'Compte privé' }).click();
@@ -180,6 +181,7 @@ for (const [annee, chapitres] of [
   const { default: AxeBuilder } = await import('@axe-core/playwright');
   await page.setViewportSize({ width: 360, height: 740 });
   await page.goto('./');
+  await page.getByRole('navigation', { name: 'Espaces' }).getByRole('button', { name: 'Cours' }).click();
   await page.getByRole('navigation', { name: 'Rubriques' }).getByRole('button', { name: 'Théorie' }).click();
   await page.getByRole('group', { name: 'Votre année' }).getByRole('button', { name: annee }).click();
   for (const titre of chapitres) {
@@ -206,6 +208,7 @@ for (const [annee, chapitres] of [
 test('théorie : choix de l’année et ouverture d’un chapitre au clavier, tableau en fiches sur téléphone', async ({ page }) => {
   await page.setViewportSize({ width: 360, height: 740 });
   await page.goto('./');
+  await page.getByRole('navigation', { name: 'Espaces' }).getByRole('button', { name: 'Cours' }).click();
   await page.getByRole('navigation', { name: 'Rubriques' }).getByRole('button', { name: 'Théorie' }).click();
   const annee = page.getByRole('group', { name: 'Votre année' }).getByRole('button', { name: '2ème CFC' });
   await annee.focus();
@@ -230,6 +233,7 @@ test('théorie : choix de l’année et ouverture d’un chapitre au clavier, ta
 
 test('module d’Apprendre : le chapitre de théorie s’ouvre par un lien dans un nouvel onglet, sur la bonne année', async ({ page, context }) => {
   await page.goto('./');
+  await page.getByRole('navigation', { name: 'Espaces' }).getByRole('button', { name: 'Cours' }).click();
   await page.getByRole('navigation', { name: 'Rubriques' }).getByRole('button', { name: 'Apprendre' }).click();
   await page.getByText('2ème CFC et option Finances').click();
   await page.getByRole('button', { name: 'TVA : comptabilisation au net', exact: true }).click();

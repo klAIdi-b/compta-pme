@@ -20,6 +20,7 @@ function copie(prenom: string, n: number) {
 }
 
 async function ouvrirCopie(page: import('@playwright/test').Page, contenu: Buffer) {
+  await page.getByRole('navigation', { name: 'Espaces' }).getByRole('button', { name: 'Comptabilité' }).click();
   await page.getByRole('navigation', { name: 'Rubriques' }).getByRole('button', { name: 'Exercices' }).click();
   const choix = page.waitForEvent('filechooser');
   await page.getByRole('button', { name: 'Reprendre ma copie…' }).click();

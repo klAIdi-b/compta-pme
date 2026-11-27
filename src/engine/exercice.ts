@@ -78,6 +78,17 @@ export interface Exercice {
    * texte d'origine (assistant de réécriture, 26.11.2026).
    */
   aReecrire?: { numero: string; texte: string }[];
+  /**
+   * Code imprimé sur l'énoncé papier, choisi par l'enseignant (sinon calculé : `codeExercice` dans `papier.ts`). Il
+   * associe la copie d'un élève qui a travaillé sur la feuille au bon corrigé.
+   */
+  code?: string;
+  /**
+   * Dossier « énoncé papier » créé par l'élève (phase V2) : pas d'opérations ni de corrigé, l'énoncé est sur la feuille.
+   * `code` : code tapé par l'élève ; `source` : exercice du logiciel reconnu par ce code ; `ouvertureFournie` : le bilan
+   * d'ouverture vient de cet exercice.
+   */
+  papier?: { code?: string; source?: string; ouvertureFournie?: boolean };
   /** Sujets traités, affichés aux élèves (par exemple « TVA », « Amortissements »). */
   sujets?: string[];
   raisonSociale: string;
@@ -109,6 +120,10 @@ export interface Exercice {
     ficheSalaire?: boolean;
     /** Calculatrice de TVA (aide au calcul, désactivée par défaut). */
     calculatriceTva?: boolean;
+    /** Journal : saisie rapide permise (phase V4) ; `false` impose la saisie guidée. */
+    saisieRapide?: boolean;
+    /** Journal : modèles d'écritures permis (phase V4) ; `false` les masque. */
+    modeles?: boolean;
     /** Corriger (entraînement) et noter (évaluation) les écritures de bouclement. */
     corrigerBouclement?: boolean;
     /** Mode compte de résultat : le logiciel passe lui-même les écritures de bouclement (bouton à l'écran Bouclement). */

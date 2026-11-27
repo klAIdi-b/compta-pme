@@ -1,0 +1,701 @@
+<!doctype html>
+<html lang="fr-CH">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex" />
+<title>Compta PME · Comptabilité et Cours (phases V1 et V2)</title>
+<style>
+/* Maquette du 27.11.2026 (VISION_LOGICIEL.md, phases V1 et V2). Variables du design system validé (theme.css).
+   Chaque écran est écrit une fois (<template>) et affiché dans deux cadres : ordinateur (1100 px) et téléphone (360 px) ;
+   la mise en page du téléphone vient des requêtes de conteneur (@container). Maquette statique. */
+:root {
+  --c-structure: #1f4e78; --c-structure-2: #163a5a; --c-nuit: #11304d; --c-encre: #0f2742;
+  --c-selection: #d6e4f0; --c-bleu-doux: #eaf1f8; --c-fond-tete: #f8fafc; --c-fond-page: #f6f7f9; --c-fond: #ffffff;
+  --c-zebra: #fafbfd;
+  --c-action: #c4501a; --c-action-fonce: #a8420f; --c-accent: #e8601c; --c-orange-doux: #fdf0e8;
+  --c-texte: #1b2430; --c-texte-2: #56616f; --c-bordure: #8793a2; --c-bordure-2: #dfe5ec; --c-bordure-3: #eef2f6;
+  --c-succes: #1d6b3a; --c-succes-fond: #e6f3ea; --c-erreur: #b00020; --c-erreur-fond: #fdecee;
+  --c-avert: #7a5200; --c-avert-fond: #fff5db; --c-avert-trait: #c98a00; --c-info-fond: #eaf1f8;
+  --t-12: 0.75rem; --t-13: 0.8125rem; --t-14: 0.875rem; --t-15: 0.9375rem; --t-17: 1.0625rem; --t-20: 1.25rem; --t-26: 1.625rem;
+  --e-1: 4px; --e-2: 8px; --e-3: 12px; --e-4: 16px; --e-5: 24px; --e-6: 32px; --e-7: 48px;
+  --r-1: 4px; --r-2: 6px; --r-3: 8px;
+  --ombre-haute: 0 10px 30px rgba(15, 39, 66, 0.1), 0 2px 6px rgba(15, 39, 66, 0.06);
+  --police: 'Inter Variable', 'Inter', 'Segoe UI Variable Text', 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif;
+}
+* { box-sizing: border-box; }
+body { margin: 0; font-family: var(--police); font-size: var(--t-15); line-height: 1.5; color: var(--c-texte); background: var(--c-fond-page); -webkit-font-smoothing: antialiased; }
+h1, h2, h3, p { margin: 0; }
+.num, .montant { font-variant-numeric: tabular-nums lining-nums; }
+.montant { text-align: right; white-space: nowrap; }
+:focus-visible { outline: 2px solid var(--c-accent); outline-offset: 2px; }
+button, input, select { font: inherit; }
+
+/* ---------- Page de présentation ---------- */
+.doc { max-width: 1560px; margin: 0 auto; padding: var(--e-6) var(--e-5) var(--e-7); }
+.doc > header { max-width: 82ch; margin-bottom: var(--e-5); }
+.doc > header h1 { font-size: var(--t-26); color: var(--c-encre); letter-spacing: -0.015em; }
+.doc > header p { margin-top: var(--e-2); }
+.sommaire { display: flex; flex-wrap: wrap; gap: var(--e-2); margin-top: var(--e-4); }
+.sommaire a { font-size: var(--t-14); color: var(--c-structure); background: var(--c-fond); border: 1px solid var(--c-bordure-2); border-radius: var(--r-2); padding: 6px 10px; text-decoration: none; }
+.phase { margin-top: var(--e-7); font-size: var(--t-20); color: var(--c-encre); padding-bottom: var(--e-2); border-bottom: 2px solid var(--c-structure); }
+.ecran-doc { margin-top: var(--e-6); }
+.ecran-doc > h3 { font-size: var(--t-17); color: var(--c-encre); }
+.ecran-doc > p.explication { max-width: 90ch; margin: var(--e-2) 0 var(--e-4); color: var(--c-texte); }
+.cadres { display: flex; gap: var(--e-5); align-items: flex-start; flex-wrap: wrap; }
+.etiq { font-size: var(--t-12); color: var(--c-texte-2); font-weight: 600; text-transform: uppercase; letter-spacing: .05em; margin-bottom: var(--e-2); }
+.cadre { container-type: inline-size; background: var(--c-fond-page); border: 1px solid #c3ccd7; border-radius: var(--r-3); overflow: hidden; box-shadow: var(--ombre-haute); }
+.cadre.ordi { width: 1100px; max-width: 100%; }
+.cadre.tel { width: 360px; border-radius: 22px; }
+.question { max-width: 90ch; margin-top: var(--e-4); background: var(--c-orange-doux); border-left: 4px solid var(--c-accent); border-radius: var(--r-2); padding: var(--e-3) var(--e-4); font-size: var(--t-14); }
+.question b { display: block; }
+
+/* ---------- Composants de l'application ---------- */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--e-2); min-height: 40px; padding: 0 var(--e-4); border-radius: var(--r-2); border: 1px solid var(--c-bordure); background: var(--c-fond); color: var(--c-structure); font-weight: 600; cursor: pointer; text-decoration: none; white-space: nowrap; }
+.btn.principal { background: var(--c-action); border-color: var(--c-action); color: #fff; }
+.btn.petit { min-height: 32px; padding: 0 var(--e-3); font-size: var(--t-14); }
+.lien { color: var(--c-structure); font-weight: 550; text-decoration: underline; text-underline-offset: 2px; }
+.discret { color: var(--c-texte-2); }
+.pastille { display: inline-block; font-size: var(--t-12); font-weight: 600; padding: 2px 8px; border-radius: 999px; background: var(--c-bleu-doux); color: var(--c-structure); white-space: nowrap; }
+.pastille.papier { background: var(--c-orange-doux); color: var(--c-action-fonce); }
+.pastille.fichier { background: #eef0f3; color: var(--c-texte-2); }
+.pastille.ok { background: var(--c-succes-fond); color: var(--c-succes); }
+.message { border-radius: var(--r-2); padding: var(--e-3) var(--e-4); font-size: var(--t-14); border: 1px solid; }
+.message.information { background: var(--c-info-fond); border-color: #c6d7ea; color: var(--c-encre); }
+.message.avert { background: var(--c-avert-fond); border-color: var(--c-avert-trait); color: var(--c-avert); }
+.message.succes { background: var(--c-succes-fond); border-color: #a9d3b6; color: var(--c-succes); }
+.message.erreur { background: var(--c-erreur-fond); border-color: #f0b3bc; color: var(--c-erreur); }
+.carte { background: var(--c-fond); border: 1px solid var(--c-bordure-2); border-radius: var(--r-3); }
+.carte > header { padding: var(--e-3) var(--e-4); border-bottom: 1px solid var(--c-bordure-3); display: flex; align-items: center; justify-content: space-between; gap: var(--e-3); flex-wrap: wrap; }
+.carte > header h2 { font-size: var(--t-17); color: var(--c-encre); }
+.carte > .corps { padding: var(--e-4); }
+table.t { width: 100%; border-collapse: collapse; font-size: var(--t-14); }
+table.t th { text-align: left; font-size: var(--t-13); font-weight: 600; color: var(--c-texte-2); background: var(--c-fond-tete); padding: 8px 12px; border-bottom: 1px solid var(--c-bordure-2); }
+table.t td { padding: 8px 12px; border-bottom: 1px solid var(--c-bordure-3); vertical-align: top; }
+table.t tbody tr:nth-child(even) td { background: var(--c-zebra); }
+table.t th.montant, table.t td.montant { text-align: right; }
+table.t td.num:first-child { white-space: nowrap; }
+table.t tfoot td { font-weight: 650; border-top: 2px solid var(--c-bordure-2); }
+.no { font-size: var(--t-12); color: var(--c-texte-2); margin-left: 6px; }
+.champ { display: flex; flex-direction: column; gap: 4px; }
+.champ label { font-size: var(--t-13); font-weight: 600; color: var(--c-texte); }
+.champ .aide { font-size: var(--t-12); color: var(--c-texte-2); }
+.saisie { min-height: 40px; border: 1px solid var(--c-bordure); border-radius: var(--r-1); padding: 0 10px; background: #fff; display: flex; align-items: center; color: var(--c-texte); }
+.saisie.vide { color: var(--c-texte-2); }
+.saisie.actif { outline: 2px solid var(--c-accent); outline-offset: 0; }
+.saisie.montant { justify-content: flex-end; }
+
+/* Bandeau commun aux trois espaces */
+.bandeau { display: flex; align-items: center; gap: var(--e-3); min-height: 56px; padding: 0 var(--e-5); background: var(--c-fond); border-bottom: 1px solid var(--c-bordure-2); flex-wrap: wrap; }
+.marque { display: flex; align-items: center; gap: var(--e-2); font-weight: 700; color: var(--c-encre); }
+.marque i { width: 28px; height: 28px; border-radius: var(--r-2); background: var(--c-action); color: #fff; display: grid; place-items: center; font-size: var(--t-12); font-style: normal; }
+.onglets { display: flex; gap: var(--e-1); margin-left: var(--e-4); }
+.onglets a { color: var(--c-structure); text-decoration: none; font-weight: 600; padding: 16px 12px 14px; border-bottom: 3px solid transparent; font-size: var(--t-15); }
+.onglets a.actif { border-bottom-color: var(--c-accent); color: var(--c-encre); }
+.annexes { margin-left: auto; display: flex; gap: var(--e-1); }
+.annexes a { color: var(--c-structure); text-decoration: none; font-weight: 550; padding: 8px 10px; border-radius: var(--r-2); font-size: var(--t-14); }
+.initiales { width: 32px; height: 32px; border-radius: 50%; background: var(--c-bleu-doux); color: var(--c-structure); display: grid; place-items: center; font-size: var(--t-13); font-weight: 700; }
+.page { padding: var(--e-5); display: flex; flex-direction: column; gap: var(--e-5); }
+.titre-page { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--e-4); flex-wrap: wrap; }
+.titre-page h1 { font-size: var(--t-26); color: var(--c-encre); letter-spacing: -0.015em; }
+.titre-page .sous { color: var(--c-texte-2); margin-top: 2px; }
+.actions { display: flex; gap: var(--e-2); flex-wrap: wrap; }
+
+/* Accueil */
+.portes { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--e-4); }
+.porte { background: var(--c-fond); border: 1px solid var(--c-bordure-2); border-radius: var(--r-3); padding: var(--e-4); display: flex; flex-direction: column; gap: var(--e-2); }
+.porte .espace { font-size: var(--t-12); font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--c-action-fonce); }
+.porte h2 { font-size: var(--t-17); color: var(--c-encre); }
+.porte p { font-size: var(--t-14); color: var(--c-texte-2); flex: 1; }
+.reprise { display: grid; grid-template-columns: 1fr auto; gap: var(--e-4); align-items: center; background: var(--c-fond); border: 1px solid var(--c-bordure-2); border-left: 4px solid var(--c-structure); border-radius: var(--r-3); padding: var(--e-4) var(--e-5); }
+.barre-av { height: 8px; background: var(--c-bordure-3); border-radius: 999px; overflow: hidden; margin-top: var(--e-2); max-width: 420px; }
+.barre-av span { display: block; height: 100%; background: var(--c-structure); }
+
+/* Mes dossiers */
+.liste-dossiers .ligne-dossier { display: grid; grid-template-columns: 1.6fr 1fr 0.9fr 1fr auto; gap: var(--e-3); align-items: center; padding: var(--e-3) var(--e-4); border-bottom: 1px solid var(--c-bordure-3); }
+.liste-dossiers .ligne-dossier.tete { font-size: var(--t-13); font-weight: 600; color: var(--c-texte-2); background: var(--c-fond-tete); }
+.ligne-dossier .nom b { display: block; color: var(--c-encre); }
+.ligne-dossier .nom span { font-size: var(--t-13); color: var(--c-texte-2); }
+.ligne-dossier .av { font-size: var(--t-13); color: var(--c-texte-2); }
+.ligne-dossier .av .barre-av { margin-top: 4px; height: 6px; }
+.menu-nouveau { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--e-3); }
+.choix { border: 1px solid var(--c-bordure-2); border-radius: var(--r-3); padding: var(--e-3) var(--e-4); background: var(--c-fond); }
+.choix b { display: block; color: var(--c-encre); }
+.choix span { font-size: var(--t-13); color: var(--c-texte-2); }
+.choix.mis-en-avant { border-color: var(--c-accent); background: var(--c-orange-doux); }
+
+/* Dans un dossier : cadre de logiciel */
+.appli { display: grid; grid-template-columns: 220px 1fr; min-height: 640px; }
+.laterale { background: var(--c-nuit); color: #dce6f0; padding: var(--e-4) 0; font-size: var(--t-14); }
+.laterale .dossier-nom { padding: 0 var(--e-4) var(--e-3); border-bottom: 1px solid rgba(255,255,255,.12); margin-bottom: var(--e-2); }
+.laterale .dossier-nom b { display: block; color: #fff; font-size: var(--t-15); }
+.laterale .dossier-nom span { font-size: var(--t-12); color: #a9bccf; }
+.laterale .groupe { padding: var(--e-3) var(--e-4) 4px; font-size: var(--t-12); text-transform: uppercase; letter-spacing: .06em; color: #8fa6bd; font-weight: 600; }
+.laterale a { display: flex; justify-content: space-between; align-items: center; padding: 7px var(--e-4); color: #dce6f0; text-decoration: none; border-left: 3px solid transparent; }
+.laterale a.actif { background: rgba(255,255,255,.08); border-left-color: var(--c-accent); color: #fff; font-weight: 600; }
+.laterale a .coche { font-size: var(--t-12); color: #9fd3b0; }
+.tete-dossier { display: flex; align-items: center; gap: var(--e-3); padding: var(--e-3) var(--e-5); background: var(--c-fond); border-bottom: 1px solid var(--c-bordure-2); flex-wrap: wrap; }
+.tete-dossier .fil { font-size: var(--t-14); color: var(--c-texte-2); }
+.tete-dossier .fil b { color: var(--c-encre); }
+.tete-dossier .droite { margin-left: auto; display: flex; gap: var(--e-2); align-items: center; }
+.bouton-menu { display: none; }
+.corps-dossier { display: grid; grid-template-columns: 1fr 300px; gap: var(--e-4); padding: var(--e-4) var(--e-5); align-items: start; }
+.corps-dossier.plein { grid-template-columns: 1fr; }
+.enonce { font-size: var(--t-14); }
+.enonce ol { margin: 0; padding-left: 0; list-style: none; }
+.enonce li { padding: 6px 0; border-bottom: 1px solid var(--c-bordure-3); display: grid; grid-template-columns: 28px 1fr auto; gap: 6px; }
+.enonce li .n { font-weight: 700; color: var(--c-structure); }
+.enonce li.courante { background: var(--c-bleu-doux); margin: 0 -16px; padding: 6px 16px; }
+.enonce li .fait { font-size: var(--t-12); color: var(--c-succes); }
+.grille { display: grid; grid-template-columns: 80px 110px 1fr; gap: var(--e-3); }
+.lignes-saisie { display: grid; grid-template-columns: 1fr 1fr 120px; gap: var(--e-2) var(--e-3); margin-top: var(--e-3); }
+.lignes-saisie .entete-col { font-size: var(--t-13); font-weight: 600; color: var(--c-texte-2); }
+.equilibre { display: flex; justify-content: space-between; align-items: center; gap: var(--e-3); margin-top: var(--e-3); padding-top: var(--e-3); border-top: 1px solid var(--c-bordure-3); flex-wrap: wrap; }
+.equilibre .ok { color: var(--c-succes); font-weight: 600; font-size: var(--t-14); }
+.saisie-carte { box-shadow: 0 1px 2px rgba(16,24,40,.06), 0 4px 14px rgba(16,24,40,.07); }
+
+/* Ouverture */
+.deux-colonnes { display: grid; grid-template-columns: 1fr 1fr; gap: var(--e-4); }
+.bilan-saisie td .saisie { min-height: 34px; }
+.etapes { display: flex; gap: var(--e-2); font-size: var(--t-13); flex-wrap: wrap; }
+.etapes span { padding: 4px 10px; border-radius: 999px; background: var(--c-bordure-3); color: var(--c-texte-2); font-weight: 600; }
+.etapes span.fait { background: var(--c-succes-fond); color: var(--c-succes); }
+.etapes span.encours { background: var(--c-structure); color: #fff; }
+.formulaire { display: grid; grid-template-columns: 1fr 1fr; gap: var(--e-4); }
+.formulaire .large { grid-column: 1 / -1; }
+
+/* Corriger */
+.etats-copies td .pastille { margin-right: 4px; }
+.statut-juste { color: var(--c-succes); font-weight: 600; }
+.statut-faux { color: var(--c-erreur); font-weight: 600; }
+.statut-partiel { color: var(--c-avert); font-weight: 600; }
+.note { font-size: var(--t-20); font-weight: 700; color: var(--c-encre); }
+
+/* Impression */
+.feuille { background: #fff; border: 1px solid var(--c-bordure-2); box-shadow: 0 2px 10px rgba(15,39,66,.1); width: 100%; max-width: 520px; aspect-ratio: 210 / 297; padding: 28px 30px; font-family: Helvetica, Arial, sans-serif; font-size: 10px; line-height: 1.4; overflow: hidden; }
+.feuille h4 { font-size: 15px; margin: 0 0 2px; color: #0f2742; }
+.feuille .code { float: right; border: 1.5px solid #0f2742; padding: 4px 8px; font-weight: 700; font-size: 11px; }
+.feuille table { width: 100%; border-collapse: collapse; margin: 6px 0 10px; }
+.feuille td, .feuille th { border-bottom: 0.5px solid #c3ccd7; padding: 2px 4px; text-align: left; }
+.feuille .m { text-align: right; }
+.feuille .sect { font-weight: 700; margin-top: 8px; color: #1f4e78; }
+.imprimer-grille { display: grid; grid-template-columns: 320px 1fr; gap: var(--e-5); align-items: start; }
+.options-impr label { display: flex; gap: var(--e-2); align-items: flex-start; padding: 6px 0; font-size: var(--t-14); }
+.case { width: 18px; height: 18px; border: 1.5px solid var(--c-bordure); border-radius: 3px; flex: none; margin-top: 2px; display: grid; place-items: center; font-size: 12px; color: #fff; }
+.case.cochee { background: var(--c-structure); border-color: var(--c-structure); }
+
+/* Cours */
+.sous-onglets { display: flex; gap: var(--e-2); border-bottom: 1px solid var(--c-bordure-2); }
+.sous-onglets a { padding: 8px 12px; text-decoration: none; color: var(--c-structure); font-weight: 600; border-bottom: 3px solid transparent; font-size: var(--t-14); }
+.sous-onglets a.actif { border-bottom-color: var(--c-accent); color: var(--c-encre); }
+.modules { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--e-3); }
+.module { background: var(--c-fond); border: 1px solid var(--c-bordure-2); border-radius: var(--r-3); padding: var(--e-3) var(--e-4); display: flex; flex-direction: column; gap: 4px; }
+.module b { color: var(--c-encre); }
+.module .etat { font-size: var(--t-13); color: var(--c-texte-2); }
+.module .etat.reussi { color: var(--c-succes); }
+.pont { display: flex; justify-content: space-between; align-items: center; gap: var(--e-4); flex-wrap: wrap; background: var(--c-bleu-doux); border-radius: var(--r-3); padding: var(--e-3) var(--e-4); }
+
+/* ---------- Téléphone (cadre étroit) ---------- */
+@container (max-width: 600px) {
+  .bandeau { padding: var(--e-2) var(--e-4) 0; gap: var(--e-2); }
+  .onglets { order: 3; width: 100%; margin-left: 0; }
+  .onglets a { padding: 10px 8px 9px; font-size: var(--t-14); }
+  .onglets a.cache-tel { display: none; }
+  .annexes a.texte { display: none; }
+  .page { padding: var(--e-4); gap: var(--e-4); }
+  .titre-page h1 { font-size: var(--t-20); }
+  .portes, .menu-nouveau, .modules, .deux-colonnes, .formulaire, .imprimer-grille { grid-template-columns: 1fr; }
+  .reprise { grid-template-columns: 1fr; padding: var(--e-4); }
+  .reprise .btn { width: 100%; }
+  .liste-dossiers .ligne-dossier { grid-template-columns: 1fr auto; gap: 4px var(--e-3); }
+  .liste-dossiers .ligne-dossier.tete { display: none; }
+  .liste-dossiers .ligne-dossier .origine, .liste-dossiers .ligne-dossier .av { grid-column: 1; }
+  .liste-dossiers .ligne-dossier .modif { display: none; }
+  .liste-dossiers .ligne-dossier .ouvrir { grid-column: 2; grid-row: 1 / span 3; }
+  .actions { width: 100%; }
+  .actions .btn { flex: 1; }
+  .appli { grid-template-columns: 1fr; min-height: 0; }
+  .laterale { display: none; }
+  .bouton-menu { display: inline-flex; }
+  .tete-dossier { padding: var(--e-2) var(--e-4); }
+  .tete-dossier .droite .pastille.mode { display: none; }
+  .corps-dossier { grid-template-columns: 1fr; padding: var(--e-3) var(--e-4); }
+  .corps-dossier .enonce-colonne { order: -1; }
+  .enonce li:not(.courante) { display: none; }
+  .enonce .tout { display: block; }
+  .grille { grid-template-columns: 1fr 1fr; }
+  .grille .large-tel { grid-column: 1 / -1; }
+  .lignes-saisie { grid-template-columns: 1fr; }
+  .lignes-saisie .entete-col { display: none; }
+  .lignes-saisie .etiquette-tel { display: block; }
+  table.empile thead { display: none; }
+  table.empile tr { display: block; border-bottom: 1px solid var(--c-bordure-2); padding: 6px 0; }
+  table.empile td { display: flex; justify-content: space-between; gap: var(--e-3); border: none; padding: 3px 12px; }
+  table.empile td::before { content: attr(data-etiquette); font-size: var(--t-12); color: var(--c-texte-2); font-weight: 600; }
+  table.empile td.libre::before { content: none; }
+  table.empile tbody tr:nth-child(even) td { background: none; }
+  .feuille { max-width: 100%; padding: 14px; font-size: 8px; }
+  .cache-tel { display: none !important; }
+}
+.etiquette-tel { display: none; font-size: var(--t-12); font-weight: 600; color: var(--c-texte-2); margin-bottom: -4px; }
+.seul-tel { display: none; }
+@container (max-width: 600px) { .seul-tel { display: revert; } }
+</style>
+</head>
+<body>
+<div class="doc">
+  <header>
+    <h1>Comptabilité et Cours : maquettes des phases V1 et V2</h1>
+    <p>Maquette du 27.11.2026, d'après <code>VISION_LOGICIEL.md</code> et vos décisions du même jour. Chaque écran est montré sur ordinateur (1100 px) et sur téléphone (360 px), avec un contenu réel : l'exercice de démonstration Cycles du Léman (1ère CFC, 15 opérations, bénéfice de 3'530.00) et les comptes du plan du cours. L'élève s'appelle ici Léa Martin (nom fictif). Maquette statique : les boutons ne fonctionnent pas.</p>
+    <p><b>Ce qui ne change pas :</b> les règles comptables, la correction, le journal, les écrans d'aujourd'hui (rangés autrement), les fichiers <code>.compta-exercice.json</code> et <code>.compta-copie.json</code>, les liens <code>?exercice=</code> déjà donnés. Les travaux en cours dans le navigateur des élèves deviennent des dossiers de la liste « Mes dossiers », sans rien perdre.</p>
+    <nav class="sommaire" aria-label="Écrans">
+      <a href="#v1-accueil">V1.1 Accueil</a><a href="#v1-dossiers">V1.2 Mes dossiers</a><a href="#v1-dossier">V1.3 Dans un dossier</a><a href="#v1-cours">V1.4 Cours</a>
+      <a href="#v2-nouveau">V2.1 Nouveau dossier papier</a><a href="#v2-ouverture">V2.2 Bilan d'ouverture</a><a href="#v2-journal">V2.3 Journal sans corrigé</a><a href="#v2-corriger">V2.4 Corriger les copies</a><a href="#v2-imprimer">V2.5 Imprimer l'énoncé</a>
+    </nav>
+  </header>
+
+  <h2 class="phase">Phase V1 · Séparer la Comptabilité et le Cours</h2>
+
+  <section class="ecran-doc" id="v1-accueil" data-modele="m-accueil">
+    <h3>V1.1 Accueil : trois espaces dans le même bandeau</h3>
+    <p class="explication">Le bandeau garde sa place et son allure. Les onglets deviennent <b>Accueil · Comptabilité · Cours</b> ; Guide et Espace enseignant restent à droite. Les anciens onglets Exercices et Évaluation entrent dans « Comptabilité », Apprendre et Théorie dans « Cours ». La carte « Votre prochaine étape » et la démonstration du nouvel élève restent comme aujourd'hui ; les trois portes mènent aux deux espaces.</p>
+  </section>
+
+  <section class="ecran-doc" id="v1-dossiers" data-modele="m-dossiers">
+    <h3>V1.2 Comptabilité · Mes dossiers</h3>
+    <p class="explication">Une seule liste pour tout ce que l'élève a commencé, comme la liste des mandats d'un logiciel professionnel. Chaque dossier porte son origine : exercice du logiciel, fichier reçu de l'enseignant, ou énoncé sur papier (phase V2). « Nouveau dossier » propose les trois chemins ; « Reprendre ma copie… » reste en lien, comme aujourd'hui. L'ancien choix en trois étapes (formation, exercice, vos informations) s'ouvre par « Exercice du logiciel », sans changement.</p>
+  </section>
+
+  <section class="ecran-doc" id="v1-dossier" data-modele="m-dossier">
+    <h3>V1.3 Dans un dossier : la barre latérale d'un logiciel comptable</h3>
+    <p class="explication">La barre latérale se range comme celle de Banana ou d'Abacus : <b>Saisie</b>, <b>Comptes</b>, <b>États financiers</b>, <b>Clôture</b>, puis les modules activés (TVA, Salaire, fiches…) sous <b>Outils</b>. L'énoncé n'est plus une rubrique : il est dans un panneau à droite du journal (repliable), la pièce de l'opération courante y est affichée. Les étapes à suivre restent cochées dans la barre et la barre « Étape suivante » du bas de chaque écran ne change pas. Sur téléphone, la barre latérale passe derrière le bouton « Menu » (comme aujourd'hui) et l'énoncé montre l'opération courante au-dessus de la saisie.</p>
+    <div class="question"><b>À trancher</b>Rubriques groupées comme un logiciel professionnel (proposé ici, les étapes restent cochées), ou parcours numéroté d'aujourd'hui (« 1 Votre mission, 2 Journal, 3 Balance… ») ? Ma recommandation : les groupes, car c'est ce que l'élève retrouvera en entreprise, et la barre « Étape suivante » garde le guidage.</div>
+  </section>
+
+  <section class="ecran-doc" id="v1-cours" data-modele="m-cours">
+    <h3>V1.4 Cours : Apprendre, Théorie, Révision</h3>
+    <p class="explication">L'espace Cours réunit ce qui sert à apprendre : les modules d'Apprendre, la Théorie et la révision du jour, avec le choix de l'année (sans rien enregistrer, comme aujourd'hui). Les contenus ne changent pas. Seul ajout : un pont « Appliquer dans la Comptabilité » à la fin d'un module, qui ouvre l'exercice du catalogue lié au module.</p>
+  </section>
+
+  <h2 class="phase">Phase V2 · Le mode énoncé papier</h2>
+
+  <section class="ecran-doc" id="v2-nouveau" data-modele="m-nouveau">
+    <h3>V2.1 Nouveau dossier, énoncé sur papier</h3>
+    <p class="explication">Un seul écran court. L'année fixe les comptes du plan du cours proposés (le plan n'est pas modifiable par l'élève, décision du 27.11.2026). Le code de l'exercice, écrit par l'enseignant sur la feuille, est facultatif : il sert à vérifier, à la correction, que la copie et le corrigé vont ensemble. Prénom, nom et classe sont repris de la dernière fois.</p>
+  </section>
+
+  <section class="ecran-doc" id="v2-ouverture" data-modele="m-ouverture">
+    <h3>V2.2 Saisir le bilan d'ouverture</h3>
+    <p class="explication">L'élève recopie le bilan d'ouverture de la feuille. Comptes choisis par leur nom dans la liste déroulante habituelle, montants à droite, totaux et différence en direct. Seul contrôle : actif = passif, comme le contrôle de l'éditeur. Exemple : Léa a inversé les montants du mobilier et des véhicules ; le bilan est équilibré, rien ne l'arrête. L'écart sera signalé à l'enseignant, sans être noté (voir V2.4).</p>
+  </section>
+
+  <section class="ecran-doc" id="v2-journal" data-modele="m-journal">
+    <h3>V2.3 Journal sans corrigé</h3>
+    <p class="explication">Le journal habituel. Le numéro de pièce est libre et proposé d'après la dernière pièce (ici 9). Il n'y a pas de verdict : un bandeau discret le dit une fois, sans répéter. Seuls les contrôles du journal restent : équilibre, compte existant, et un avertissement si le numéro de pièce existe déjà. La liste des opérations est absente : l'énoncé est sur la feuille. Le bouclement, la balance et les états se font comme pour tout dossier ; la copie s'exporte avec le même bouton.</p>
+  </section>
+
+  <section class="ecran-doc" id="v2-corriger" data-modele="m-corriger">
+    <h3>V2.4 Espace enseignant · Corriger des copies papier</h3>
+    <p class="explication">Même onglet « Copies » qu'aujourd'hui. Le corrigé se choisit en premier : fichier d'exercice, exercice de « Mes exercices », ou dossier tenu par l'enseignant lui-même dans la Comptabilité (« Enregistrer comme corrigé »). La correction est celle d'aujourd'hui : par numéro de pièce, totaux par compte, points partiels, bouclement d'après les comptes de l'élève. L'ouverture est comparée mais <b>non notée</b> (0 point par défaut, modifiable dans le barème) ; une erreur d'ouverture n'est donc jamais comptée deux fois. Chiffres de l'exemple : barème 16 points pour les 15 opérations (2 points pour l'opération 14, à trois lignes) et 3 pour le bouclement, soit 19 ; Léa obtient 15,5 points, note 5.</p>
+  </section>
+
+  <section class="ecran-doc" id="v2-imprimer" data-modele="m-imprimer">
+    <h3>V2.5 Éditeur · Imprimer l'énoncé et le corrigé</h3>
+    <p class="explication">Pour l'enseignant qui part du logiciel vers le papier : deux boutons dans l'éditeur d'exercice, qui produisent un PDF avec le même moteur que les dossiers de pièces d'aujourd'hui. L'énoncé porte le code de l'exercice ; le corrigé reprend le journal par pièce, les états et le barème. L'aperçu montre la première page de l'énoncé de Cycles du Léman.</p>
+  </section>
+</div>
+
+<!-- ======================================================================================= -->
+<!-- Modèles d'écrans (chacun affiché dans les deux cadres)                                  -->
+<!-- ======================================================================================= -->
+
+<template id="m-accueil">
+  <div class="bandeau">
+    <span class="marque"><i>CP</i>Compta PME</span>
+    <nav class="onglets" aria-label="Espaces"><a href="#" class="actif cache-tel">Accueil</a><a href="#">Comptabilité</a><a href="#">Cours</a></nav>
+    <span class="annexes"><a href="#" class="texte">Guide</a><a href="#" class="texte">Espace enseignant</a><span class="initiales" title="Léa Martin">LM</span></span>
+  </div>
+  <div class="page">
+    <div class="titre-page"><div><h1>Bon retour, Léa.</h1><p class="sous">1ère CFC · classe 1CA</p></div></div>
+    <div class="reprise">
+      <div>
+        <div class="etiq" style="margin:0">Votre prochaine étape</div>
+        <b style="font-size:var(--t-17);color:var(--c-encre)">Cycles du Léman · premier trimestre</b>
+        <p class="discret" style="font-size:var(--t-14)">Comptabilité · 9 opérations sur 15 passées au journal</p>
+        <div class="barre-av"><span style="width:60%"></span></div>
+      </div>
+      <a class="btn principal" href="#">Reprendre</a>
+    </div>
+    <div class="portes">
+      <div class="porte"><span class="espace">Comptabilité</span><h2>Tenir une comptabilité</h2><p>Ouvrez un exercice du logiciel, un fichier de votre enseignant, ou créez un dossier pour un énoncé sur papier.</p><a class="btn" href="#">Mes dossiers</a></div>
+      <div class="porte"><span class="espace">Cours</span><h2>Apprendre une notion</h2><p>Modules pas à pas, théorie de référence et révision du jour.</p><a class="btn" href="#">Ouvrir le cours</a></div>
+      <div class="porte"><span class="espace">Comptabilité</span><h2>Faire une évaluation</h2><p>Ouvrez le fichier d'évaluation reçu dans le devoir Google Classroom.</p><a class="btn" href="#">Ouvrir le fichier reçu</a></div>
+    </div>
+  </div>
+</template>
+
+<template id="m-dossiers">
+  <div class="bandeau">
+    <span class="marque"><i>CP</i>Compta PME</span>
+    <nav class="onglets" aria-label="Espaces"><a href="#" class="cache-tel">Accueil</a><a href="#" class="actif">Comptabilité</a><a href="#">Cours</a></nav>
+    <span class="annexes"><a href="#" class="texte">Guide</a><a href="#" class="texte">Espace enseignant</a><span class="initiales" title="Léa Martin">LM</span></span>
+  </div>
+  <div class="page">
+    <div class="titre-page">
+      <div><h1>Mes dossiers</h1><p class="sous">Les comptabilités que vous tenez dans ce navigateur.</p></div>
+      <div class="actions"><a class="btn principal" href="#">Nouveau dossier</a><a class="btn" href="#">Ouvrir un fichier…</a></div>
+    </div>
+    <div class="carte liste-dossiers">
+      <div class="ligne-dossier tete"><span>Dossier</span><span>Origine</span><span>Avancement</span><span>Dernière modification</span><span></span></div>
+      <div class="ligne-dossier">
+        <span class="nom"><b>Cycles du Léman</b><span>Premier trimestre · exercice 2026 · raison individuelle</span></span>
+        <span class="origine"><span class="pastille">Exercice du logiciel</span></span>
+        <span class="av">9 / 15 opérations<div class="barre-av"><span style="width:60%"></span></div></span>
+        <span class="modif discret">Aujourd'hui, 10:42</span>
+        <span class="ouvrir"><a class="btn petit principal" href="#">Ouvrir</a></span>
+      </div>
+      <div class="ligne-dossier">
+        <span class="nom"><b>Cycles du Léman</b><span>Énoncé papier · code CYCLES-T1 · exercice 2026</span></span>
+        <span class="origine"><span class="pastille papier">Énoncé sur papier</span></span>
+        <span class="av">8 pièces saisies · ouverture saisie</span>
+        <span class="modif discret">Hier, 15:10</span>
+        <span class="ouvrir"><a class="btn petit" href="#">Ouvrir</a></span>
+      </div>
+      <div class="ligne-dossier">
+        <span class="nom"><b>Golay Événements</b><span>Bilan et comptes de bilan · exercice 2026</span></span>
+        <span class="origine"><span class="pastille fichier">Fichier de l'enseignant</span></span>
+        <span class="av"><span class="pastille ok">Terminé · copie exportée</span></span>
+        <span class="modif discret">12.11.2026</span>
+        <span class="ouvrir"><a class="btn petit" href="#">Ouvrir</a></span>
+      </div>
+    </div>
+    <div class="carte">
+      <header><h2>Nouveau dossier</h2><span class="discret" style="font-size:var(--t-13)">Ce panneau s'ouvre avec « Nouveau dossier »</span></header>
+      <div class="corps menu-nouveau">
+        <div class="choix"><b>Exercice du logiciel</b><span>Choisir dans la liste des exercices et des dossiers de pièces de votre année.</span></div>
+        <div class="choix"><b>Fichier reçu de l'enseignant</b><span>Ouvrir le fichier <code>.compta-exercice.json</code> du devoir Classroom.</span></div>
+        <div class="choix mis-en-avant"><b>Énoncé sur papier</b><span>Créer l'entreprise de la feuille, saisir son bilan d'ouverture puis les écritures.</span></div>
+      </div>
+    </div>
+    <p class="discret" style="font-size:var(--t-14)">Vous avez déjà rendu une copie et changé d'ordinateur ? <a class="lien" href="#">Reprendre ma copie…</a></p>
+  </div>
+</template>
+
+<template id="m-dossier">
+  <div class="bandeau">
+    <span class="marque"><i>CP</i>Compta PME</span>
+    <nav class="onglets" aria-label="Espaces"><a href="#" class="cache-tel">Accueil</a><a href="#" class="actif">Comptabilité</a><a href="#">Cours</a></nav>
+    <span class="annexes"><a href="#" class="texte">Guide</a><span class="initiales" title="Léa Martin">LM</span></span>
+  </div>
+  <div class="appli">
+    <nav class="laterale" aria-label="Rubriques du dossier">
+      <div class="dossier-nom"><b>Cycles du Léman</b><span>Exercice 2026 · 1ère CFC</span></div>
+      <a href="#">Tableau de bord</a>
+      <div class="groupe">Saisie</div>
+      <a href="#" class="actif">Journal <span class="coche">9 / 15</span></a>
+      <div class="groupe">Comptes</div>
+      <a href="#">Comptes en T</a><a href="#">Grand livre</a><a href="#">Balance</a>
+      <div class="groupe">États financiers</div>
+      <a href="#">Compte de résultat</a><a href="#">Bilan</a>
+      <div class="groupe">Clôture</div>
+      <a href="#">Bouclement</a>
+      <div class="groupe">Outils</div>
+      <a href="#">Théorie (nouvel onglet)</a>
+    </nav>
+    <div>
+      <div class="tete-dossier">
+        <a class="btn petit bouton-menu" href="#">Menu</a>
+        <span class="fil"><span class="cache-tel">Mes dossiers › </span><b>Cycles du Léman</b> › Journal</span>
+        <span class="droite"><span class="pastille">1ère CFC</span><span class="pastille mode">Entraînement</span><a class="btn petit cache-tel" href="#">Exporter ma copie</a></span>
+      </div>
+      <div class="corps-dossier">
+        <div class="carte saisie-carte">
+          <header><h2>Nouvelle écriture</h2><span class="discret" style="font-size:var(--t-13)">Tab entre les champs · Entrée valide</span></header>
+          <div class="corps">
+            <div class="grille">
+              <div class="champ"><label>Pièce</label><div class="saisie num">10</div></div>
+              <div class="champ"><label>Date</label><div class="saisie num">28.02.2026</div></div>
+              <div class="champ large-tel"><label>Libellé</label><div class="saisie">Salaire de l'employé</div></div>
+            </div>
+            <div class="lignes-saisie">
+              <span class="entete-col">Débit</span><span class="entete-col">Crédit</span><span class="entete-col" style="text-align:right">Montant</span>
+              <span class="etiquette-tel">Débit</span><div class="saisie">Salaires <span class="no">5200</span></div>
+              <span class="etiquette-tel">Crédit</span><div class="saisie actif">Banque (n/avoir) <span class="no">1020</span></div>
+              <span class="etiquette-tel">Montant</span><div class="saisie montant num">4'200.00</div>
+            </div>
+            <div class="equilibre"><span class="ok num">Débit 4'200.00 = Crédit 4'200.00</span><a class="btn principal" href="#">Valider l'écriture</a></div>
+          </div>
+        </div>
+        <aside class="carte enonce enonce-colonne" aria-label="Énoncé">
+          <header><h2>Énoncé</h2><a class="lien cache-tel" href="#" style="font-size:var(--t-13)">Replier</a></header>
+          <div class="corps">
+            <ol>
+              <li><span class="n">8</span><span>Achat d'un ordinateur pour le bureau, payé par la banque, 1'600.00.</span><span class="fait">Juste</span></li>
+              <li><span class="n">9</span><span>Facture d'électricité payée par le compte postal, 240.00.</span><span class="fait">Juste</span></li>
+              <li class="courante"><span class="n">10</span><span>Salaire de l'employé payé par la banque, 4'200.00.</span><span></span></li>
+              <li><span class="n">11</span><span>Sandra Rochat prélève 800.00 en espèces dans la caisse pour ses besoins privés.</span><span></span></li>
+              <li><span class="n">12</span><span>Facture reçue d'une agence pour une annonce dans le journal local, 650.00, payable à 30 jours.</span><span></span></li>
+            </ol>
+            <a class="lien seul-tel" href="#" style="font-size:var(--t-13);margin-top:6px">Voir les 15 opérations</a>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+</template>
+
+<template id="m-cours">
+  <div class="bandeau">
+    <span class="marque"><i>CP</i>Compta PME</span>
+    <nav class="onglets" aria-label="Espaces"><a href="#" class="cache-tel">Accueil</a><a href="#">Comptabilité</a><a href="#" class="actif">Cours</a></nav>
+    <span class="annexes"><a href="#" class="texte">Guide</a><a href="#" class="texte">Espace enseignant</a><span class="initiales" title="Léa Martin">LM</span></span>
+  </div>
+  <div class="page">
+    <div class="titre-page"><div><h1>Cours</h1><p class="sous">Apprendre pas à pas, consulter la théorie, réviser.</p></div>
+      <div class="actions"><span class="saisie" style="min-width:160px">1ère CFC ▾</span></div></div>
+    <nav class="sous-onglets" aria-label="Rubriques du cours"><a href="#" class="actif">Apprendre</a><a href="#">Théorie</a><a href="#">Révision du jour <span class="pastille">2</span></a></nav>
+    <div class="modules">
+      <div class="module"><b>Le bilan</b><span class="etat reussi">Maîtrisé · prochaine révision le 02.12.2026</span></div>
+      <div class="module"><b>Débit et crédit</b><span class="etat reussi">Réussie une fois · à confirmer le 29.11.2026</span></div>
+      <div class="module"><b>Charges et produits</b><span class="etat">En cours · 6 points sur 10 à la dernière série</span></div>
+      <div class="module"><b>Achats et ventes à crédit</b><span class="etat">Pas encore commencé</span></div>
+    </div>
+    <div class="pont">
+      <div><b style="color:var(--c-encre)">Appliquer dans la Comptabilité</b><p class="discret" style="font-size:var(--t-14)">Fin du module « Charges et produits » : passez les 15 opérations de Cycles du Léman.</p></div>
+      <a class="btn" href="#">Ouvrir le dossier</a>
+    </div>
+  </div>
+</template>
+
+<template id="m-nouveau">
+  <div class="bandeau">
+    <span class="marque"><i>CP</i>Compta PME</span>
+    <nav class="onglets" aria-label="Espaces"><a href="#" class="cache-tel">Accueil</a><a href="#" class="actif">Comptabilité</a><a href="#">Cours</a></nav>
+    <span class="annexes"><a href="#" class="texte">Guide</a><span class="initiales" title="Léa Martin">LM</span></span>
+  </div>
+  <div class="page">
+    <div class="titre-page"><div><h1>Nouveau dossier, énoncé sur papier</h1><p class="sous">Recopiez les données de la feuille de votre enseignant.</p></div></div>
+    <div class="etapes"><span class="encours">1 · L'entreprise</span><span>2 · Bilan d'ouverture</span><span>3 · Journal</span></div>
+    <div class="carte"><div class="corps formulaire">
+      <div class="champ large"><label>Nom de l'entreprise</label><div class="saisie">Cycles du Léman</div></div>
+      <div class="champ"><label>Forme juridique</label><div class="saisie">Raison individuelle ▾</div></div>
+      <div class="champ"><label>Votre année</label><div class="saisie">1ère CFC ▾</div><span class="aide">Les comptes proposés sont ceux du plan du cours de cette année.</span></div>
+      <div class="champ"><label>Début de l'exercice</label><div class="saisie num">01.01.2026</div></div>
+      <div class="champ"><label>Fin de l'exercice</label><div class="saisie num">31.12.2026</div></div>
+      <div class="champ large"><label>Code de l'exercice <span class="discret" style="font-weight:400">(facultatif)</span></label><div class="saisie">CYCLES-T1</div><span class="aide">Écrit en haut de la feuille par votre enseignant. Il sert à associer votre copie au bon corrigé.</span></div>
+      <div class="champ large" style="flex-direction:row;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:var(--e-3);border-top:1px solid var(--c-bordure-3);padding-top:var(--e-3)">
+        <span class="discret" style="font-size:var(--t-14)">Léa Martin · 1CA <a class="lien" href="#">modifier</a></span>
+        <span class="actions" style="width:auto"><a class="btn" href="#">Annuler</a><a class="btn principal" href="#">Créer le dossier</a></span>
+      </div>
+    </div></div>
+  </div>
+</template>
+
+<template id="m-ouverture">
+  <div class="bandeau">
+    <span class="marque"><i>CP</i>Compta PME</span>
+    <nav class="onglets" aria-label="Espaces"><a href="#" class="cache-tel">Accueil</a><a href="#" class="actif">Comptabilité</a><a href="#">Cours</a></nav>
+    <span class="annexes"><a href="#" class="texte">Guide</a><span class="initiales" title="Léa Martin">LM</span></span>
+  </div>
+  <div class="page">
+    <div class="titre-page"><div><h1>Bilan d'ouverture au 01.01.2026</h1><p class="sous">Cycles du Léman · énoncé papier CYCLES-T1</p></div></div>
+    <div class="etapes"><span class="fait">1 · L'entreprise</span><span class="encours">2 · Bilan d'ouverture</span><span>3 · Journal</span></div>
+    <div class="deux-colonnes">
+      <div class="carte"><header><h2>Actif</h2></header>
+        <table class="t bilan-saisie"><thead><tr><th>Compte</th><th class="montant">Montant</th></tr></thead><tbody>
+          <tr><td><div class="saisie">Caisse <span class="no">1000</span></div></td><td><div class="saisie montant num">3'500.00</div></td></tr>
+          <tr><td><div class="saisie">Poste (CP) <span class="no">1010</span></div></td><td><div class="saisie montant num">4'200.00</div></td></tr>
+          <tr><td><div class="saisie">Banque (n/avoir) <span class="no">1020</span></div></td><td><div class="saisie montant num">28'000.00</div></td></tr>
+          <tr><td><div class="saisie">Créances clients <span class="no">1100</span></div></td><td><div class="saisie montant num">2'300.00</div></td></tr>
+          <tr><td><div class="saisie">Stock de marchandises <span class="no">1200</span></div></td><td><div class="saisie montant num">18'000.00</div></td></tr>
+          <tr><td><div class="saisie">Mobilier et installations <span class="no">1510</span></div></td><td><div class="saisie montant num">22'000.00</div></td></tr>
+          <tr><td><div class="saisie">Véhicules <span class="no">1530</span></div></td><td><div class="saisie montant num">15'000.00</div></td></tr>
+          <tr><td><div class="saisie vide">Ajouter un compte…</div></td><td></td></tr>
+        </tbody><tfoot><tr><td>Total de l'actif</td><td class="montant num">93'000.00</td></tr></tfoot></table>
+      </div>
+      <div class="carte"><header><h2>Passif</h2></header>
+        <table class="t bilan-saisie"><thead><tr><th>Compte</th><th class="montant">Montant</th></tr></thead><tbody>
+          <tr><td><div class="saisie">Dettes fournisseurs <span class="no">2000</span></div></td><td><div class="saisie montant num">7'600.00</div></td></tr>
+          <tr><td><div class="saisie">Emprunt bancaire à long terme <span class="no">2400</span></div></td><td><div class="saisie montant num">30'000.00</div></td></tr>
+          <tr><td><div class="saisie">Capital <span class="no">2800</span></div></td><td><div class="saisie montant num">55'400.00</div></td></tr>
+          <tr><td><div class="saisie vide">Ajouter un compte…</div></td><td></td></tr>
+        </tbody><tfoot><tr><td>Total du passif</td><td class="montant num">93'000.00</td></tr></tfoot></table>
+      </div>
+    </div>
+    <div class="equilibre" style="border:none;padding:0;margin:0">
+      <span class="message succes">Actif 93'000.00 = Passif 93'000.00 · le bilan d'ouverture est équilibré.</span>
+      <a class="btn principal" href="#">Valider l'ouverture et passer au journal</a>
+    </div>
+  </div>
+</template>
+
+<template id="m-journal">
+  <div class="bandeau">
+    <span class="marque"><i>CP</i>Compta PME</span>
+    <nav class="onglets" aria-label="Espaces"><a href="#" class="cache-tel">Accueil</a><a href="#" class="actif">Comptabilité</a><a href="#">Cours</a></nav>
+    <span class="annexes"><a href="#" class="texte">Guide</a><span class="initiales" title="Léa Martin">LM</span></span>
+  </div>
+  <div class="appli">
+    <nav class="laterale" aria-label="Rubriques du dossier">
+      <div class="dossier-nom"><b>Cycles du Léman</b><span>Énoncé papier · CYCLES-T1</span></div>
+      <a href="#">Tableau de bord</a>
+      <div class="groupe">Saisie</div>
+      <a href="#">Bilan d'ouverture <span class="coche">fait</span></a>
+      <a href="#" class="actif">Journal <span class="coche">8 pièces</span></a>
+      <div class="groupe">Comptes</div>
+      <a href="#">Comptes en T</a><a href="#">Grand livre</a><a href="#">Balance</a>
+      <div class="groupe">États financiers</div>
+      <a href="#">Compte de résultat</a><a href="#">Bilan</a>
+      <div class="groupe">Clôture</div>
+      <a href="#">Bouclement</a>
+    </nav>
+    <div>
+      <div class="tete-dossier">
+        <a class="btn petit bouton-menu" href="#">Menu</a>
+        <span class="fil"><span class="cache-tel">Mes dossiers › </span><b>Cycles du Léman</b> › Journal</span>
+        <span class="droite"><span class="pastille papier">Énoncé papier</span><a class="btn petit cache-tel" href="#">Exporter ma copie</a></span>
+      </div>
+      <div class="corps-dossier plein">
+        <p class="message information">Énoncé sur papier : le logiciel ne corrige pas pendant la saisie. Votre enseignant corrigera votre copie exportée. <a class="lien" href="#">Compris</a></p>
+        <div class="carte saisie-carte">
+          <header><h2>Nouvelle écriture</h2><span class="discret cache-tel" style="font-size:var(--t-13)">Tab entre les champs · Entrée valide</span></header>
+          <div class="corps">
+            <div class="grille">
+              <div class="champ"><label>Pièce</label><div class="saisie num actif">9</div></div>
+              <div class="champ"><label>Date</label><div class="saisie num">20.02.2026</div></div>
+              <div class="champ large-tel"><label>Libellé</label><div class="saisie">Facture d'électricité</div></div>
+            </div>
+            <div class="lignes-saisie">
+              <span class="entete-col">Débit</span><span class="entete-col">Crédit</span><span class="entete-col" style="text-align:right">Montant</span>
+              <span class="etiquette-tel">Débit</span><div class="saisie">Électricité, gaz (autres énergies) <span class="no">6400</span></div>
+              <span class="etiquette-tel">Crédit</span><div class="saisie">Poste (CP) <span class="no">1010</span></div>
+              <span class="etiquette-tel">Montant</span><div class="saisie montant num">240.00</div>
+            </div>
+            <div class="equilibre"><span class="ok num">Débit 240.00 = Crédit 240.00</span><a class="btn principal" href="#">Valider l'écriture</a></div>
+            <p class="message avert" style="margin-top:var(--e-3)">Si Léa tape « 8 » : La pièce 8 existe déjà dans le journal. Vérifiez le numéro sur la feuille, ou validez quand même s'il s'agit d'une seconde écriture de la même pièce.</p>
+          </div>
+        </div>
+        <div class="carte">
+          <header><h2>Journal</h2><span class="discret" style="font-size:var(--t-13)">8 pièces</span></header>
+          <table class="t empile"><thead><tr><th>Pièce</th><th>Date</th><th>Libellé</th><th>Débit</th><th>Crédit</th><th class="montant">Montant</th></tr></thead><tbody>
+            <tr><td data-etiquette="Pièce" class="num">6</td><td data-etiquette="Date" class="num">02.02.2026</td><td data-etiquette="Libellé">Paiement fournisseur</td><td data-etiquette="Débit">Dettes fournisseurs</td><td data-etiquette="Crédit">Banque (n/avoir)</td><td data-etiquette="Montant" class="montant num">4'800.00</td></tr>
+            <tr><td data-etiquette="Pièce" class="num">7</td><td data-etiquette="Date" class="num">10.02.2026</td><td data-etiquette="Libellé">Paiement du club de cyclisme</td><td data-etiquette="Débit">Banque (n/avoir)</td><td data-etiquette="Crédit">Créances clients</td><td data-etiquette="Montant" class="montant num">6'400.00</td></tr>
+            <tr><td data-etiquette="Pièce" class="num">8</td><td data-etiquette="Date" class="num">14.02.2026</td><td data-etiquette="Libellé">Achat d'un ordinateur</td><td data-etiquette="Débit">Machines de bureau</td><td data-etiquette="Crédit">Banque (n/avoir)</td><td data-etiquette="Montant" class="montant num">1'600.00</td></tr>
+          </tbody></table>
+          <p class="discret" style="font-size:var(--t-13);padding:var(--e-2) var(--e-4)">Pièces 1 à 5 plus haut dans la liste. Aucun statut affiché : il n'y a pas de corrigé.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<template id="m-corriger">
+  <div class="bandeau">
+    <span class="marque"><i>CP</i>Compta PME</span>
+    <nav class="onglets" aria-label="Espaces"><a href="#" class="cache-tel">Accueil</a><a href="#">Comptabilité</a><a href="#">Cours</a></nav>
+    <span class="annexes"><a href="#" class="texte">Guide</a><a href="#" class="texte" style="color:var(--c-encre);font-weight:700">Espace enseignant</a></span>
+  </div>
+  <div class="page">
+    <div class="titre-page"><div><h1>Copies · Cycles du Léman (CYCLES-T1)</h1><p class="sous">Corrigé : « Cycles du Léman, premier trimestre », 15 opérations, ouverture comprise</p></div>
+      <div class="actions"><a class="btn" href="#">Changer de corrigé</a><a class="btn" href="#">Ajouter des copies…</a></div></div>
+    <p class="message information">Copies d'énoncé papier : comparées pièce par pièce au corrigé. L'ouverture saisie est comparée, sans points (barème : 0 point, <a class="lien" href="#">modifier</a>).</p>
+    <div class="carte">
+      <header><h2>Résultats de la classe 1CA</h2><a class="btn petit" href="#">PDF par élève (ZIP)</a></header>
+      <table class="t empile etats-copies"><thead><tr><th>Élève</th><th>Code</th><th>Ouverture</th><th>Opérations justes</th><th class="montant">Points</th><th class="montant">Note</th></tr></thead><tbody>
+        <tr><td data-etiquette="Élève"><b>Martin Léa</b></td><td data-etiquette="Code"><span class="pastille ok">CYCLES-T1</span></td><td data-etiquette="Ouverture"><span class="pastille" style="background:var(--c-avert-fond);color:var(--c-avert)">2 écarts</span></td><td data-etiquette="Opérations">12 / 15</td><td data-etiquette="Points" class="montant num">15,5 / 19</td><td data-etiquette="Note" class="montant num"><b>5</b></td></tr>
+        <tr><td data-etiquette="Élève"><b>Rossier Noah</b></td><td data-etiquette="Code"><span class="pastille ok">CYCLES-T1</span></td><td data-etiquette="Ouverture"><span class="pastille ok">Conforme</span></td><td data-etiquette="Opérations">15 / 15</td><td data-etiquette="Points" class="montant num">19 / 19</td><td data-etiquette="Note" class="montant num"><b>6</b></td></tr>
+        <tr><td data-etiquette="Élève"><b>Dupraz Inès</b></td><td data-etiquette="Code"><span class="pastille" style="background:var(--c-erreur-fond);color:var(--c-erreur)">Sans code</span></td><td data-etiquette="Ouverture"><span class="pastille ok">Conforme</span></td><td data-etiquette="Opérations">13 / 15</td><td data-etiquette="Points" class="montant num">17 / 19</td><td data-etiquette="Note" class="montant num"><b>5,5</b></td></tr>
+      </tbody></table>
+    </div>
+    <div class="carte">
+      <header><h2>Détail · Martin Léa</h2><span class="discret" style="font-size:var(--t-13)">Points modifiables à la main (phase V3)</span></header>
+      <div class="corps" style="display:flex;flex-direction:column;gap:var(--e-3)">
+        <p class="message avert">Bilan d'ouverture : Mobilier et installations 22'000.00 au lieu de 15'000.00 ; Véhicules 15'000.00 au lieu de 22'000.00. Non noté ; les écritures sont corrigées pièce par pièce et le bouclement d'après les comptes de l'élève.</p>
+        <table class="t empile"><thead><tr><th>Pièce</th><th>Statut</th><th>Écriture de l'élève</th><th class="montant">Points</th></tr></thead><tbody>
+          <tr><td data-etiquette="Pièce" class="num">1 à 7</td><td data-etiquette="Statut" class="statut-juste">Juste</td><td data-etiquette="Écriture" class="discret">Conformes au corrigé</td><td data-etiquette="Points" class="montant num">7 / 7</td></tr>
+          <tr><td data-etiquette="Pièce" class="num">8</td><td data-etiquette="Statut" class="statut-faux">Bonne classe, mauvais compte</td><td data-etiquette="Écriture">Machines de bureau / Banque (n/avoir) 1'600.00 · attendu : Infrastructure informatique</td><td data-etiquette="Points" class="montant num">0 / 1</td></tr>
+          <tr><td data-etiquette="Pièce" class="num">9 à 11</td><td data-etiquette="Statut" class="statut-juste">Juste</td><td data-etiquette="Écriture" class="discret">Conformes au corrigé</td><td data-etiquette="Points" class="montant num">3 / 3</td></tr>
+          <tr><td data-etiquette="Pièce" class="num">12</td><td data-etiquette="Statut" class="statut-faux">Bonne classe, mauvais compte</td><td data-etiquette="Écriture">Publicité / Dettes fournisseurs 650.00 · attendu : Autres dettes</td><td data-etiquette="Points" class="montant num">0 / 1</td></tr>
+          <tr><td data-etiquette="Pièce" class="num">13</td><td data-etiquette="Statut" class="statut-juste">Juste</td><td data-etiquette="Écriture" class="discret">Conforme au corrigé</td><td data-etiquette="Points" class="montant num">1 / 1</td></tr>
+          <tr><td data-etiquette="Pièce" class="num">14</td><td data-etiquette="Statut" class="statut-partiel">Écriture erronée · points partiels</td><td data-etiquette="Écriture">Crédit Autres dettes 2'000.00 au lieu de Dettes fournisseurs (2 lignes justes sur 3, 1 en trop)</td><td data-etiquette="Points" class="montant num">0,5 / 2</td></tr>
+          <tr><td data-etiquette="Pièce" class="num">15</td><td data-etiquette="Statut" class="statut-juste">Juste</td><td data-etiquette="Écriture" class="discret">Conforme au corrigé</td><td data-etiquette="Points" class="montant num">1 / 1</td></tr>
+          <tr><td data-etiquette="Pièce">B1, B2</td><td data-etiquette="Statut" class="statut-juste">Bouclement juste</td><td data-etiquette="Écriture" class="discret">Bénéfice 3'530.00 viré au privé, puis privé viré au capital</td><td data-etiquette="Points" class="montant num">3 / 3</td></tr>
+        </tbody><tfoot><tr><td colspan="3" class="libre">Total</td><td class="montant num">15,5 / 19 · note 5</td></tr></tfoot></table>
+      </div>
+    </div>
+  </div>
+</template>
+
+<template id="m-imprimer">
+  <div class="bandeau">
+    <span class="marque"><i>CP</i>Compta PME</span>
+    <nav class="onglets" aria-label="Espaces"><a href="#" class="cache-tel">Accueil</a><a href="#">Comptabilité</a><a href="#">Cours</a></nav>
+    <span class="annexes"><a href="#" class="texte">Guide</a><a href="#" class="texte" style="color:var(--c-encre);font-weight:700">Espace enseignant</a></span>
+  </div>
+  <div class="page">
+    <div class="titre-page"><div><h1>Imprimer · Cycles du Léman</h1><p class="sous">Éditeur d'exercice › Imprimer</p></div></div>
+    <div class="imprimer-grille">
+      <div class="carte"><div class="corps options-impr">
+        <div class="champ" style="margin-bottom:var(--e-3)"><label>Code de l'exercice</label><div class="saisie">CYCLES-T1</div><span class="aide">Imprimé en haut de la feuille ; l'élève le recopie dans son dossier.</span></div>
+        <label><span class="case cochee">✓</span>Situation de départ</label>
+        <label><span class="case cochee">✓</span>Bilan d'ouverture</label>
+        <label><span class="case cochee">✓</span>Opérations (ou pièces, pour un dossier de pièces)</label>
+        <label><span class="case"></span>Consigne « énoncé papier » pour l'élève</label>
+        <div class="actions" style="margin-top:var(--e-3);flex-direction:column">
+          <a class="btn principal" href="#">Imprimer l'énoncé (PDF)</a>
+          <a class="btn" href="#">Imprimer le corrigé (PDF)</a>
+        </div>
+      </div></div>
+      <div class="feuille" aria-label="Aperçu de la première page">
+        <span class="code">CYCLES-T1</span>
+        <h4>Cycles du Léman</h4>
+        <div style="color:#56616f">Raison individuelle · exercice du 01.01.2026 au 31.12.2026 · 1ère CFC</div>
+        <div class="sect">Situation</div>
+        <p>Vous commencez votre première année d'apprentissage d'employé·e de commerce chez Cycles du Léman, un magasin de vélos situé à Carouge…</p>
+        <div class="sect">Bilan d'ouverture au 01.01.2026</div>
+        <table><tr><td>Caisse</td><td class="m">3'500.00</td><td>Dettes fournisseurs</td><td class="m">7'600.00</td></tr>
+          <tr><td>Poste (CP)</td><td class="m">4'200.00</td><td>Emprunt bancaire à long terme</td><td class="m">30'000.00</td></tr>
+          <tr><td>Banque (n/avoir)</td><td class="m">28'000.00</td><td>Capital</td><td class="m">55'400.00</td></tr>
+          <tr><td>Créances clients</td><td class="m">2'300.00</td><td></td><td></td></tr>
+          <tr><td>Stock de marchandises</td><td class="m">18'000.00</td><td></td><td></td></tr>
+          <tr><td>Mobilier et installations</td><td class="m">15'000.00</td><td></td><td></td></tr>
+          <tr><td>Véhicules</td><td class="m">22'000.00</td><td></td><td></td></tr>
+          <tr><th>Total</th><th class="m">93'000.00</th><th>Total</th><th class="m">93'000.00</th></tr></table>
+        <div class="sect">Opérations (numéro = numéro de pièce)</div>
+        <table>
+          <tr><td>1</td><td>05.01</td><td>Achat de marchandises à crédit chez un fournisseur, 4'800.00.</td></tr>
+          <tr><td>2</td><td>08.01</td><td>Ventes au comptant de la période, 12'350.00.</td></tr>
+          <tr><td>3</td><td>12.01</td><td>Vente de vélos à crédit à un club de cyclisme, 6'400.00.</td></tr>
+          <tr><td>4</td><td>15.01</td><td>Versement de 9'000.00 de la caisse sur le compte bancaire.</td></tr>
+          <tr><td>5</td><td>31.01</td><td>Paiement du loyer de janvier par la banque, 1'850.00.</td></tr>
+          <tr><td>6</td><td>02.02</td><td>Paiement par la banque de la facture du fournisseur de l'opération 1, 4'800.00.</td></tr>
+          <tr><td>…</td><td></td><td>Opérations 7 à 15 à la suite.</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+// Chaque section de la page reçoit son écran dans deux cadres : ordinateur et téléphone.
+for (const section of document.querySelectorAll('.ecran-doc')) {
+  const modele = document.getElementById(section.dataset.modele);
+  const cadres = document.createElement('div');
+  cadres.className = 'cadres';
+  for (const [classe, etiquette] of [['ordi', 'Ordinateur · 1100 px'], ['tel', 'Téléphone · 360 px']]) {
+    const bloc = document.createElement('div');
+    const etiq = document.createElement('div');
+    etiq.className = 'etiq';
+    etiq.textContent = etiquette;
+    const cadre = document.createElement('div');
+    cadre.className = `cadre ${classe}`;
+    cadre.appendChild(modele.content.cloneNode(true));
+    bloc.append(etiq, cadre);
+    cadres.appendChild(bloc);
+  }
+  const question = section.querySelector('.question');
+  section.insertBefore(cadres, question);
+}
+</script>
+</body>
+</html>

@@ -1,8 +1,7 @@
 <script lang="ts">
-  import { dialogue } from '../dialogue.svelte';
   import { etat } from '../etat.svelte';
   import { vueEleve } from '../modes';
-  import { boucler, estBoucle, reouvrir } from '../../engine/closing';
+  import { boucler, estBoucle } from '../../engine/closing';
   import { compteDeResultat } from '../../engine/statements';
   import { m } from '../format';
   import { bouclementCorrige, diagnostiquerBouclement } from '../../engine/correction-bouclement';
@@ -42,18 +41,6 @@
     return `B${n}`;
   });
 
-  async function rouvrir() {
-    const ok = await dialogue.demander({
-      titre: `Ouvrir l'exercice comptable ${anneeSuivante} ?`,
-      texte: ["L'exercice actuel sera archivé et le bilan de clôture deviendra le bilan d'ouverture."],
-      confirmer: `Ouvrir l'exercice ${anneeSuivante}`,
-    });
-    if (!ok) return;
-    const r = reouvrir(d, mode);
-    if (!r.ok) return void dialogue.informer("L'exercice n'a pas pu être ouvert", r.erreurs);
-    etat.session!.archives.push(d);
-    etat.majDossier(r.valeur);
-  }
 </script>
 
 <div class="titre"><h1>Bouclement</h1></div>
@@ -110,12 +97,7 @@
       La réouverture archive l'exercice actuel et reporte le bilan de clôture comme bilan d'ouverture du
       1er janvier {anneeSuivante}. C'est facultatif : l'exercice de l'énoncé est terminé une fois le bouclement passé.
     </p>
-    <p>
-      <button class="btn" disabled={mode === 'compteDeResultat' && !boucle} onclick={rouvrir}>Ouvrir l'exercice comptable {anneeSuivante}</button>
-      {#if mode === 'compteDeResultat' && !boucle}
-        <span class="discret petit-inline">Disponible quand les écritures de bouclement sont passées au journal.</span>
-      {/if}
-    </p>
+    <p><button class="btn" disabled={etat.consultation} onclick={() => etat.aller('cloture')}>Clôture de l'exercice</button></p>
   </div>
 </section>
 
@@ -123,5 +105,4 @@
   section { margin-bottom: 16px; }
   .revoir { color: var(--c-erreur); }
   .petit { font-size: var(--t-12); margin: 6px 0 0; }
-  .petit-inline { font-size: var(--t-13); margin-left: 10px; }
 </style>

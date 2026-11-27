@@ -6,17 +6,21 @@ import type { FicheBudget } from '../engine/budget';
 import type { Exercice } from '../engine/exercice';
 import { actualiserDossier, avecCorrigeAJour, corrigeDepuisEcritures, creerDossier, estNouvelleVersionSimulation, fonctionsExercice, retourVisible, type EcritureCorrigee } from '../engine/exercice';
 import { ajouterEcriture } from '../engine/journal';
+import { ouvertureDepuisBilan, type Resultat } from '../engine/dossier';
+import { reouvrir } from '../engine/closing';
 import { plan as planParDefaut } from '../data/plan';
 import { exercicesDemo } from '../data/demos';
 import { ecrire, lire } from '../io/stockage';
 import { chapitreDuLien } from './lien';
+import type { Retour } from '../io/retour';
+import { noterEvenement, type EvenementHistorique, type ModeleEcriture } from '../engine/historique';
 import { empreinteTravail, type DernierExport } from '../io/fichiers';
 import type { Suivi } from '../engine/correction';
 import { aMettreDeCote, ecranAffiche, genreSession, peutOuvrirAccueil, vueEleve, type Ecran, type GenreSession } from './modes';
 
-/** Pages de l'accueil, et rubriques du bandeau (les mêmes, plus le parcours Apprendre). */
-export type PageAccueil = 'accueil' | 'theorie' | 'exercices' | 'evaluation';
-export type Rubrique = PageAccueil | 'apprendre';
+export type { PageAccueil, Rubrique, Espace } from './modes';
+export { espaceDe } from './modes';
+import type { PageAccueil, Rubrique } from './modes';
 
 export type Vue =
   | 'tableau'
@@ -39,6 +43,8 @@ export type Vue =
   | 'facturation'
   | 'budget'
   | 'bouclement'
+  | 'ouverture'
+  | 'cloture'
   | 'theorie';
 
 export interface Eleve {
@@ -67,6 +73,12 @@ export interface Session {
   apercu?: boolean;
   /** Évaluation formative : l'élève a terminé ; la correction est affichée et la saisie verrouillée. */
   formativeTerminee?: boolean;
+  /** Copie corrigée rendue par l'enseignant (phase V3) : note, statuts, commentaires. */
+  retour?: Retour;
+  /** Historique des modifications du journal (phase V4) : rien ne s'efface, il voyage dans la copie. */
+  historique?: EvenementHistorique[];
+  /** Modèles d'écritures de l'élève (phase V4). */
+  modeles?: ModeleEcriture[];
 }
 
 export interface FicheSalaire {
@@ -94,6 +106,8 @@ interface Preferences {
   numerosComptes: boolean;
   /** Formation affichée à l'accueil (mémorisée). */
   filiere?: 'CFC' | 'MP';
+  /** Journal : saisie rapide choisie par l'élève (phase V4), sinon saisie guidée. */
+  saisieRapide?: boolean;
 }
 
 interface Sauvegarde {
@@ -112,7 +126,7 @@ function completer(s: (Partial<Session> & Omit<Session, 'suivi' | 'role' | 'fich
     : null;
 }
 
-const VUES: Vue[] = ['tableau', 'journal', 'comptes', 'grandlivre', 'balance', 'bilan', 'resultat', 'tva', 'salaire', 'repartition', 'analyse', 'degres', 'flux', 'seuil', 'bilanOuverture', 'margeBrute', 'echelle', 'facturation', 'budget', 'bouclement', 'theorie'];
+const VUES: Vue[] = ['tableau', 'journal', 'comptes', 'grandlivre', 'balance', 'bilan', 'resultat', 'tva', 'salaire', 'repartition', 'analyse', 'degres', 'flux', 'seuil', 'bilanOuverture', 'margeBrute', 'echelle', 'facturation', 'budget', 'bouclement', 'ouverture', 'cloture', 'theorie'];
 
 function vueDepuisAdresse(): Vue {
   const h = location.hash.replace('#', '') as Vue;
@@ -141,6 +155,10 @@ class Etat {
   pieceCiblee = $state<string | null>(null);
   /** Dernière étape du parcours atteinte après le journal (non enregistrée) : le journal sait qu'il sert au bouclement. */
   etapeParcours = $state<Vue | null>(null);
+  /** Année comptable archivée consultée (début ISO), en lecture seule (phase V5) ; null = année en cours. */
+  anneeConsultee = $state<string | null>(null);
+  /** Compte à montrer dans le grand livre (palette de commandes, phase V4). */
+  compteCible = $state<string | null>(null);
   /** Chapitre de théorie à ouvrir (lien « Revoir la théorie » sous un indice). */
   chapitreCible = $state<string | null>(null);
 
@@ -153,7 +171,8 @@ class Etat {
       this.autres = Object.fromEntries(Object.entries(s.autres ?? {}).map(([k, v]) => [k, completer(v)!]));
     }
     // Arrivée sur le site (sans rubrique dans l'adresse) avec un travail en cours : l'accueil propose de le reprendre.
-    const lienExercice = new URLSearchParams(location.search).has('exercice');
+    // Lien vers un exercice du logiciel (?exercice=) ou lien autonome qui contient l'exercice (#ex=, phase V3).
+    const lienExercice = new URLSearchParams(location.search).has('exercice') || location.hash.startsWith('#ex=');
     if (this.genre === 'travail' && (lienExercice || !location.hash || location.hash === '#')) this.accueilOuvert = true;
     // Lien direct d'un enseignant : la page des exercices s'ouvre, l'exercice déjà choisi.
     if (lienExercice) this.pageAccueil = 'exercices';
@@ -183,8 +202,38 @@ class Etat {
     return ecranAffiche({ guide: this.guide !== null, apprendre: this.apprendre, enseignantOuvert, session: this.session, accueilOuvert: this.accueilOuvert });
   }
 
+  /** Dossier affiché : l'année en cours, ou l'année archivée consultée (phase V5). */
   get dossier(): Dossier {
-    return this.session!.dossier;
+    const s = this.session!;
+    return (this.anneeConsultee && s.archives.find((a) => a.debut === this.anneeConsultee)) || s.dossier;
+  }
+
+  /** Une année clôturée est consultée : rien ne peut y être modifié. */
+  get consultation(): boolean {
+    return !!this.session && !!this.anneeConsultee && this.session.archives.some((a) => a.debut === this.anneeConsultee);
+  }
+
+  /** Clôture (phase V5) : l'année en cours est archivée, l'année suivante s'ouvre avec le bilan de clôture. */
+  ouvrirAnneeSuivante(): Resultat<Dossier> {
+    const s = this.session!;
+    const r = reouvrir(s.dossier, s.exercice.parametres.modeBouclement);
+    if (!r.ok) return r;
+    s.archives = [...s.archives, s.dossier];
+    s.dossier = r.valeur;
+    s.derniereActivite = new Date().toISOString();
+    this.anneeConsultee = null;
+    return r;
+  }
+
+  /** Annule l'ouverture de l'année suivante tant qu'aucune écriture n'y a été passée : l'année précédente reprend. */
+  annulerOuverture(): boolean {
+    const s = this.session!;
+    const precedente = s.archives.at(-1);
+    if (!precedente || s.dossier.ecritures.some((e) => !e.automatique)) return false;
+    s.archives = s.archives.slice(0, -1);
+    s.dossier = precedente;
+    this.anneeConsultee = null;
+    return true;
   }
 
   get exercice(): Exercice {
@@ -230,6 +279,7 @@ class Etat {
 
   /** Session neuve, sans toucher aux autres exercices (corrigé et aperçu passent par ici). */
   private nouvelleSession(eleve: Eleve, exercice: Exercice, role: Session['role']) {
+    this.anneeConsultee = null;
     this.session = { eleve, exercice, dossier: creerDossier(exercice, planParDefaut), archives: [], suivi: {}, role, fiches: {} };
     this.accueilOuvert = false;
     this.aller(role === 'eleve' ? 'tableau' : 'journal');
@@ -246,6 +296,7 @@ class Etat {
    * l'élève l'avait laissé, sinon une session neuve est créée.
    */
   commencer(eleve: Eleve, exercice: Exercice, role: Session['role'] = 'eleve') {
+    this.anneeConsultee = null;
     if (role !== 'eleve') return this.nouvelleSession(eleve, exercice, role);
     const actif = this.session;
     if (actif && this.genre === 'travail') {
@@ -285,6 +336,7 @@ class Etat {
     dossier: Dossier,
     copie: { suivi: Suivi; fiches?: unknown; formativeTerminee?: boolean; exporteLe: string },
   ) {
+    this.anneeConsultee = null;
     const actif = this.session;
     if (actif && this.genre === 'travail' && actif.exercice.id !== exercice.id) this.autres[actif.exercice.id] = actif;
     delete this.autres[exercice.id];
@@ -304,6 +356,64 @@ class Etat {
     };
     this.accueilOuvert = false;
     this.aller('tableau');
+  }
+
+  /**
+   * Dossiers de l'élève dans ce navigateur (page « Mes dossiers ») : le travail actif et les autres exercices
+   * commencés, du plus récent au plus ancien. Un aperçu ou un corrigé de l'enseignant n'en fait pas partie.
+   */
+  get dossiersEleve(): Session[] {
+    const actif = this.genre === 'travail' ? [this.session!] : [];
+    return [...actif, ...Object.values(this.autres)].sort((a, b) => (b.derniereActivite ?? '').localeCompare(a.derniereActivite ?? ''));
+  }
+
+  /** Ouvre un dossier de la liste : le travail actif est repris, un autre exercice commencé est remis au premier plan. */
+  ouvrirDossier(s: Session) {
+    this.commencer(s.eleve, s.exercice);
+  }
+
+  /**
+   * Énoncé papier (phase V2) : dossier créé par l'élève à partir de la feuille. Le travail actif est mis en réserve ;
+   * l'élève saisit d'abord le bilan d'ouverture, sauf s'il a été fourni par le code de l'exercice.
+   */
+  commencerPapier(eleve: Eleve, exercice: Exercice) {
+    const actif = this.session;
+    if (actif && this.genre === 'travail') this.autres[actif.exercice.id] = actif;
+    this.session = { eleve, exercice, dossier: creerDossier(exercice, planParDefaut), archives: [], suivi: {}, role: 'eleve', fiches: {}, derniereActivite: new Date().toISOString() };
+    this.accueilOuvert = false;
+    this.aller(Object.keys(exercice.ouvertureActif).length ? 'journal' : 'ouverture');
+  }
+
+  /** Bilan d'ouverture saisi par l'élève (énoncé papier) : gardé dans l'exercice du dossier et dans le dossier. */
+  majOuverture(actif: Record<string, number>, passif: Record<string, number>) {
+    const s = this.session!;
+    s.exercice = { ...s.exercice, ouvertureActif: actif, ouverturePassif: passif };
+    s.dossier = { ...s.dossier, ouverture: ouvertureDepuisBilan(actif, passif) };
+    s.derniereActivite = new Date().toISOString();
+  }
+
+  /** Historique du journal : un événement de plus (création, modification, extourne, suppression). */
+  noterHistorique(ev: EvenementHistorique) {
+    if (!this.session) return;
+    this.session.historique = noterEvenement(this.session.historique, ev);
+  }
+
+  ajouterModele(mo: ModeleEcriture) {
+    if (!this.session) return;
+    this.session.modeles = [...(this.session.modeles ?? []).filter((x) => x.nom !== mo.nom), mo];
+  }
+
+  retirerModele(i: number) {
+    if (!this.session?.modeles) return;
+    this.session.modeles = this.session.modeles.filter((_, k) => k !== i);
+  }
+
+  /** Copie corrigée rendue par l'enseignant : attachée au dossier de cet exercice (actif ou mis en réserve). */
+  attacherRetour(r: Retour): boolean {
+    const s = this.sessionDe(r.copie.exerciceId);
+    if (!s) return false;
+    s.retour = r;
+    return true;
   }
 
   /** Bouton « Commencer la saisie » : ouvre le journal, avec la visite guidée la première fois. */

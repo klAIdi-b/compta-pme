@@ -4,6 +4,7 @@
 //   en entraînement, il y figure encodé (illisible à l'œil nu, sans prétention de sécurité).
 // - Copie (.compta-copie.json) : rendue par l'élève, importée par l'enseignant.
 
+import type { EvenementHistorique } from '../engine/historique';
 import type { Dossier } from '../engine/dossier';
 import type { EcritureCorrigee, Exercice } from '../engine/exercice';
 import type { Suivi } from '../engine/correction';
@@ -65,6 +66,12 @@ interface FichierCopie {
   fiches?: unknown;
   /** Évaluation formative terminée : la copie reprise reste fermée à la saisie. */
   formativeTerminee?: boolean;
+  /** Énoncé papier (phase V2) : l'exercice créé par l'élève (entreprise, période, bilan d'ouverture, code tapé). */
+  papier?: { exercice: Exercice };
+  /** Historique des modifications du journal (phase V4). */
+  historique?: EvenementHistorique[];
+  /** Années ouvertes après l'exercice de l'énoncé (phase V5), pour information. */
+  annees?: Dossier[];
   exporteLe: string;
 }
 
@@ -79,6 +86,17 @@ export interface Copie {
   fiches?: unknown;
   /** Évaluation formative terminée (correction déjà vue) : une copie reprise reste fermée à la saisie. */
   formativeTerminee?: boolean;
+  /**
+   * Énoncé papier (phase V2) : l'exercice créé par l'élève, sans opérations ni corrigé (entreprise, période, bilan
+   * d'ouverture, code de l'exercice tapé par l'élève). Il sert à reprendre la copie et à la rattacher au corrigé.
+   */
+  papier?: { exercice: Exercice };
+  /** Historique des modifications du journal (phase V4) : non noté, il montre le cheminement de l'élève. */
+  historique?: EvenementHistorique[];
+  /** Années ouvertes après l'exercice de l'énoncé (phase V5) : pour information, jamais corrigées. */
+  annees?: Dossier[];
+  /** Fichier de classe seulement : exercice de correction auquel une copie d'énoncé papier a été rattachée. */
+  rattacheeA?: string;
   exporteLe: string;
 }
 
@@ -315,6 +333,9 @@ export function importerCopie(texte: string): Copie {
     suivi: c.suivi ?? {},
     fiches: c.fiches,
     formativeTerminee: c.formativeTerminee === true ? true : undefined,
+    ...(Array.isArray(c.historique) ? { historique: c.historique } : {}),
+    ...(Array.isArray(c.annees) ? { annees: c.annees } : {}),
+    ...(c.papier && typeof c.papier === 'object' && c.papier.exercice ? { papier: { exercice: { ...verifierExercice(c.papier.exercice), corrige: undefined } } } : {}),
     exporteLe: c.exporteLe,
   };
 }

@@ -19,6 +19,7 @@ async function controler(page: Page, nom: string) {
 test('accueil, journal, comptes, bilan, théorie et espace enseignant sans défaut grave', async ({ page }) => {
   await page.goto('./');
   await controler(page, 'Accueil');
+  await page.getByRole('navigation', { name: 'Espaces' }).getByRole('button', { name: 'Comptabilité' }).click();
   await page.getByRole('navigation', { name: 'Rubriques' }).getByRole('button', { name: 'Exercices' }).click();
   await page.getByLabel('Prénom').fill('Léa');
   await page.getByLabel('Nom', { exact: true }).fill('Martin');

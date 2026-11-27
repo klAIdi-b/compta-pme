@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { aMettreDeCote, ecranAffiche, genreSession, peutOuvrirAccueil, vueEleve, type SessionQualifiable } from '../src/ui/modes';
+import { aMettreDeCote, ecranAffiche, espaceDe, genreSession, peutOuvrirAccueil, vueEleve, type SessionQualifiable } from '../src/ui/modes';
 
 type S = SessionQualifiable & { id: string };
 const travail: S = { role: 'eleve', id: 'travail' };
@@ -63,5 +63,17 @@ describe('écran du parcours Apprendre', () => {
     const s = { role: 'eleve' as const };
     expect(ecranAffiche({ guide: false, apprendre: true, enseignantOuvert: true, session: s, accueilOuvert: true })).toBe('apprendre');
     expect(ecranAffiche({ guide: true, apprendre: true, enseignantOuvert: false, session: null, accueilOuvert: false })).toBe('guide');
+  });
+});
+
+describe('espaces du site (phase V1)', () => {
+  it('range chaque rubrique dans la Comptabilité, le Cours ou l’accueil', () => {
+    expect(espaceDe('accueil')).toBe('accueil');
+    expect(espaceDe('dossiers')).toBe('comptabilite');
+    expect(espaceDe('papier')).toBe('comptabilite');
+    expect(espaceDe('exercices')).toBe('comptabilite');
+    expect(espaceDe('evaluation')).toBe('comptabilite');
+    expect(espaceDe('apprendre')).toBe('cours');
+    expect(espaceDe('theorie')).toBe('cours');
   });
 });

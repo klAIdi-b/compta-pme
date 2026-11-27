@@ -4,6 +4,7 @@ import type { Exercice } from '../engine/exercice';
 import { CLE_ENSEIGNANT, ecrire, lire } from '../io/stockage';
 import type { Relecture } from '../io/relecture';
 import { varianteSure } from '../engine/variante';
+import type { Classe } from '../io/classe';
 
 interface DonneesEnseignant {
   code: string | null;
@@ -23,7 +24,16 @@ class Enseignant {
   ouvert = $state(false);
   deverrouille = $state(false);
   /** Onglet affiché ; gardé en mémoire pour revenir au même endroit après un aperçu. */
-  onglet = $state<'exercices' | 'dossiers' | 'copies' | 'progression' | 'simulateur' | 'relecture' | 'parametres'>('exercices');
+  onglet = $state<'exercices' | 'dossiers' | 'copies' | 'classe' | 'progression' | 'simulateur' | 'relecture' | 'parametres'>('exercices');
+  /** Exercice dont le panneau « Distribuer » est ouvert (phase V3). */
+  distribuer = $state<string | null>(null);
+  /**
+   * Fichier de classe ouvert (phase V3) : gardé en mémoire seulement, jamais dans le navigateur (décision de
+   * l'enseignant du 27.11.2026) ; l'enseignant l'enregistre dans un fichier.
+   */
+  classe = $state<Classe | null>(null);
+  /** Le fichier de classe a changé depuis son dernier enregistrement. */
+  classeModifiee = $state(false);
   /** Exercice en cours d'édition (identifiant). */
   edition = $state<string | null>(null);
 

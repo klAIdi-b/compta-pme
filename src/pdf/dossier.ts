@@ -17,6 +17,10 @@ import { bilanOuverture, echelle, margeBrute, MASSES } from '../engine/fiches-cf
 import { formatMontant as m } from '../engine/money';
 import { formatDate as dt } from '../engine/dates';
 import { cote, lignesEtat } from './copie';
+import { codeExercice, type VarianteCode } from '../engine/papier';
+
+/** Exercice accompagné de pièces comptables (même règle que `estDossier` du catalogue, sans charger le catalogue). */
+const estDossier = (ex: Exercice) => ex.operations.length > 0 && ex.operations.every((o) => o.piece);
 
 type JsPDF = import('jspdf').jsPDF;
 type AutoTable = (typeof import('jspdf-autotable'))['autoTable'];
@@ -153,14 +157,27 @@ function texteBilanOuverture(ex: Exercice, plan: Compte[]): { actif: string[][];
   return { actif: liste(ex.ouvertureActif), passif: liste(ex.ouverturePassif), total: m(total) };
 }
 
-/** Dossier de l'élève : à imprimer ou à déposer sur la plateforme de l'école. */
-export async function genererPdfDossier(ex: Exercice, planCours: Compte[], nomDocument: string): Promise<Blob> {
+/**
+ * Dossier de l'élève : à imprimer ou à déposer sur la plateforme de l'école. Avec `papier` (phase V2), l'énoncé est fait
+ * pour être distribué sur papier : le code de l'exercice est imprimé en haut, et les consignes expliquent comment créer
+ * le dossier dans Compta PME (« fourni » : le code remplit le bilan d'ouverture ; « saisi » : l'élève le recopie).
+ */
+export async function genererPdfDossier(ex: Exercice, planCours: Compte[], nomDocument: string, papier?: VarianteCode): Promise<Blob> {
   const plan = planSelonForme(planCours, ex.formeJuridique);
   const { doc, autoTable } = await outils();
   let y = MARGE + 4;
+  if (papier) {
+    const code = codeExercice(ex, papier);
+    doc.setFont('helvetica', 'bold').setFontSize(12);
+    const l = doc.getTextWidth(code) + 8;
+    const x = doc.internal.pageSize.getWidth() - MARGE - l;
+    doc.setDrawColor(...BLEU).setLineWidth(0.5).rect(x, y - 2, l, 9);
+    doc.setTextColor(...BLEU).text(code, x + 4, y + 4.2);
+    doc.setFont('helvetica', 'normal').setFontSize(8).setTextColor(90).text("Code de l'exercice", x, y + 11);
+  }
   doc.setFont('helvetica', 'bold').setFontSize(16).setTextColor(...BLEU).text(ex.raisonSociale, MARGE, y + 4);
   doc.setFont('helvetica', 'normal').setFontSize(11).setTextColor(60);
-  doc.text(`Dossier d'exercices · ${etiquetteNiveau(ex)}`, MARGE, y + 11);
+  doc.text(`${estDossier(ex) ? "Dossier d'exercices" : 'Exercice'} · ${etiquetteNiveau(ex)} · exercice du ${dt(ex.debut)} au ${dt(ex.fin)}`, MARGE, y + 11);
   if (ex.sujets?.length) doc.text(`Sujets traités : ${ex.sujets.join(' · ')}`, MARGE, y + 17);
   y += 26;
 
@@ -168,11 +185,23 @@ export async function genererPdfDossier(ex: Exercice, planCours: Compte[], nomDo
   for (const par of (ex.situation ?? '').split(/\n\s*\n/).filter(Boolean)) y = paragraphe(doc, par.trim(), y + 1);
 
   y = titreSection(doc, 'Consignes', y + 4);
+  const consignesPapier = papier
+    ? [
+        `Dans Compta PME, ouvrez « Comptabilité », puis « Mes dossiers », « Nouveau dossier », « Énoncé sur papier », et tapez le code ${codeExercice(ex, papier)}.`,
+        papier === 'fourni'
+          ? "L'entreprise et le bilan d'ouverture se remplissent seuls : vérifiez-les avec cette feuille, puis passez au journal."
+          : "L'entreprise se remplit seule. Recopiez ensuite le bilan d'ouverture de cette feuille, puis passez au journal.",
+        `Comptabilisez chaque ${estDossier(ex) ? 'pièce' : 'opération'} dans le journal, en indiquant son numéro comme numéro de pièce.`,
+        'À la fin, cliquez sur « Exporter ma copie » et rendez le fichier dans le devoir Google Classroom.',
+      ]
+    : [
+        `Ouvrez l'exercice « ${ex.titre} » dans Compta PME (fichier remis par votre enseignant ou liste des exercices).`,
+        'Chaque pièce de ce dossier correspond à une opération. Lisez-la, déterminez les comptes touchés et comptabilisez-la ' +
+          'dans le journal, en indiquant comme numéro de pièce le numéro de la pièce.',
+      ];
   for (const c of [
-    `Ouvrez l'exercice « ${ex.titre} » dans Compta PME (fichier remis par votre enseignant ou liste des exercices).`,
-    'Chaque pièce de ce dossier correspond à une opération. Lisez-la, déterminez les comptes touchés et comptabilisez-la ' +
-      'dans le journal, en indiquant comme numéro de pièce le numéro de la pièce.',
-    ex.introduction,
+    ...consignesPapier,
+    papier ? '' : ex.introduction,
   ].filter(Boolean)) {
     y = paragraphe(doc, `• ${c}`, y + 1);
   }
@@ -195,11 +224,11 @@ export async function genererPdfDossier(ex: Exercice, planCours: Compte[], nomDo
     y = finY(doc, y) + 6;
   }
 
-  y = titreSection(doc, 'Liste des pièces', y + 2);
+  y = titreSection(doc, estDossier(ex) ? 'Liste des pièces' : 'Opérations (numéro = numéro de pièce)', y + 2);
   autoTable(doc, {
     startY: y,
     margin: { left: MARGE, right: MARGE },
-    head: [['Pièce', 'Date', 'Document']],
+    head: [[estDossier(ex) ? 'Pièce' : 'N°', 'Date', estDossier(ex) ? 'Document' : 'Opération']],
     body: ex.operations.map((op) => [op.numero, dt(op.date), op.texte]),
     styles: { font: 'helvetica', fontSize: 9, cellPadding: 1.4 },
     headStyles: { fillColor: BLEU, textColor: 255 },

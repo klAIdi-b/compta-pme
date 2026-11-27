@@ -31,3 +31,18 @@ export function choisirFichiers(accept: string, multiple = false): Promise<{ nom
     input.click();
   });
 }
+
+/** Ouvre le sélecteur de fichiers et renvoie le contenu brut des fichiers choisis (archive ZIP, phase V3). */
+export function choisirFichiersBruts(accept: string, multiple = false): Promise<{ nom: string; octets: Uint8Array }[]> {
+  return new Promise((resolve) => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = accept;
+    input.multiple = multiple;
+    input.onchange = async () => {
+      const fichiers = [...(input.files ?? [])];
+      resolve(await Promise.all(fichiers.map(async (f) => ({ nom: f.name, octets: new Uint8Array(await f.arrayBuffer()) }))));
+    };
+    input.click();
+  });
+}
