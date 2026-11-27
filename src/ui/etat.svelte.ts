@@ -6,7 +6,8 @@ import type { FicheBudget } from '../engine/budget';
 import type { Exercice } from '../engine/exercice';
 import { actualiserDossier, avecCorrigeAJour, corrigeDepuisEcritures, creerDossier, estNouvelleVersionSimulation, fonctionsExercice, retourVisible, type EcritureCorrigee } from '../engine/exercice';
 import { ajouterEcriture } from '../engine/journal';
-import { ouvertureDepuisBilan } from '../engine/dossier';
+import { ouvertureDepuisBilan, type Resultat } from '../engine/dossier';
+import { reouvrir } from '../engine/closing';
 import { plan as planParDefaut } from '../data/plan';
 import { exercicesDemo } from '../data/demos';
 import { ecrire, lire } from '../io/stockage';
@@ -43,6 +44,7 @@ export type Vue =
   | 'budget'
   | 'bouclement'
   | 'ouverture'
+  | 'cloture'
   | 'theorie';
 
 export interface Eleve {
@@ -124,7 +126,7 @@ function completer(s: (Partial<Session> & Omit<Session, 'suivi' | 'role' | 'fich
     : null;
 }
 
-const VUES: Vue[] = ['tableau', 'journal', 'comptes', 'grandlivre', 'balance', 'bilan', 'resultat', 'tva', 'salaire', 'repartition', 'analyse', 'degres', 'flux', 'seuil', 'bilanOuverture', 'margeBrute', 'echelle', 'facturation', 'budget', 'bouclement', 'ouverture', 'theorie'];
+const VUES: Vue[] = ['tableau', 'journal', 'comptes', 'grandlivre', 'balance', 'bilan', 'resultat', 'tva', 'salaire', 'repartition', 'analyse', 'degres', 'flux', 'seuil', 'bilanOuverture', 'margeBrute', 'echelle', 'facturation', 'budget', 'bouclement', 'ouverture', 'cloture', 'theorie'];
 
 function vueDepuisAdresse(): Vue {
   const h = location.hash.replace('#', '') as Vue;
@@ -153,6 +155,8 @@ class Etat {
   pieceCiblee = $state<string | null>(null);
   /** Dernière étape du parcours atteinte après le journal (non enregistrée) : le journal sait qu'il sert au bouclement. */
   etapeParcours = $state<Vue | null>(null);
+  /** Année comptable archivée consultée (début ISO), en lecture seule (phase V5) ; null = année en cours. */
+  anneeConsultee = $state<string | null>(null);
   /** Compte à montrer dans le grand livre (palette de commandes, phase V4). */
   compteCible = $state<string | null>(null);
   /** Chapitre de théorie à ouvrir (lien « Revoir la théorie » sous un indice). */
@@ -198,8 +202,38 @@ class Etat {
     return ecranAffiche({ guide: this.guide !== null, apprendre: this.apprendre, enseignantOuvert, session: this.session, accueilOuvert: this.accueilOuvert });
   }
 
+  /** Dossier affiché : l'année en cours, ou l'année archivée consultée (phase V5). */
   get dossier(): Dossier {
-    return this.session!.dossier;
+    const s = this.session!;
+    return (this.anneeConsultee && s.archives.find((a) => a.debut === this.anneeConsultee)) || s.dossier;
+  }
+
+  /** Une année clôturée est consultée : rien ne peut y être modifié. */
+  get consultation(): boolean {
+    return !!this.session && !!this.anneeConsultee && this.session.archives.some((a) => a.debut === this.anneeConsultee);
+  }
+
+  /** Clôture (phase V5) : l'année en cours est archivée, l'année suivante s'ouvre avec le bilan de clôture. */
+  ouvrirAnneeSuivante(): Resultat<Dossier> {
+    const s = this.session!;
+    const r = reouvrir(s.dossier, s.exercice.parametres.modeBouclement);
+    if (!r.ok) return r;
+    s.archives = [...s.archives, s.dossier];
+    s.dossier = r.valeur;
+    s.derniereActivite = new Date().toISOString();
+    this.anneeConsultee = null;
+    return r;
+  }
+
+  /** Annule l'ouverture de l'année suivante tant qu'aucune écriture n'y a été passée : l'année précédente reprend. */
+  annulerOuverture(): boolean {
+    const s = this.session!;
+    const precedente = s.archives.at(-1);
+    if (!precedente || s.dossier.ecritures.some((e) => !e.automatique)) return false;
+    s.archives = s.archives.slice(0, -1);
+    s.dossier = precedente;
+    this.anneeConsultee = null;
+    return true;
   }
 
   get exercice(): Exercice {
@@ -245,6 +279,7 @@ class Etat {
 
   /** Session neuve, sans toucher aux autres exercices (corrigé et aperçu passent par ici). */
   private nouvelleSession(eleve: Eleve, exercice: Exercice, role: Session['role']) {
+    this.anneeConsultee = null;
     this.session = { eleve, exercice, dossier: creerDossier(exercice, planParDefaut), archives: [], suivi: {}, role, fiches: {} };
     this.accueilOuvert = false;
     this.aller(role === 'eleve' ? 'tableau' : 'journal');
@@ -261,6 +296,7 @@ class Etat {
    * l'élève l'avait laissé, sinon une session neuve est créée.
    */
   commencer(eleve: Eleve, exercice: Exercice, role: Session['role'] = 'eleve') {
+    this.anneeConsultee = null;
     if (role !== 'eleve') return this.nouvelleSession(eleve, exercice, role);
     const actif = this.session;
     if (actif && this.genre === 'travail') {
@@ -300,6 +336,7 @@ class Etat {
     dossier: Dossier,
     copie: { suivi: Suivi; fiches?: unknown; formativeTerminee?: boolean; exporteLe: string },
   ) {
+    this.anneeConsultee = null;
     const actif = this.session;
     if (actif && this.genre === 'travail' && actif.exercice.id !== exercice.id) this.autres[actif.exercice.id] = actif;
     delete this.autres[exercice.id];

@@ -191,9 +191,12 @@ test('une écriture composée se saisit avec le bouton « Ajouter une ligne »',
 
 test("l'écran Bouclement mène au journal sur la pièce B1 et explique la réouverture", async ({ page }) => {
   await commencer(page, 'cycles', /Cycles du Léman/);
+  // Phase V5 : la réouverture se fait depuis « Clôture de l'exercice », disponible une fois le bouclement passé.
   await page.goto('./#bouclement');
-  await expect(page.getByRole('button', { name: "Ouvrir l'exercice comptable 2027" })).toBeDisabled();
+  await page.getByRole('button', { name: "Clôture de l'exercice" }).click();
+  await expect(page.getByRole('button', { name: "Clôturer et ouvrir l'exercice 2027" })).toBeDisabled();
   await expect(page.getByText('Disponible quand les écritures de bouclement sont passées au journal.')).toBeVisible();
+  await page.goto('./#bouclement');
   await page.getByRole('button', { name: 'Saisir les écritures de bouclement (B1)' }).click();
   const fermerVisite = page.getByRole('button', { name: /Passer|Fermer la visite|Terminer/ });
   if (await fermerVisite.first().isVisible().catch(() => false)) await fermerVisite.first().click();

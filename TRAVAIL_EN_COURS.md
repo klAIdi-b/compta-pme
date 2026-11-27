@@ -247,3 +247,11 @@ Règles : une phase à la fois sur `apercu`, maquette avant l'interface, tests, 
 - 27.11.2026 : maquette V4 validée (« Oui, réaliser V4 », avec les trois recommandations). V4 faite sur `apercu`, publiée
   sur la prévisualisation sur l’accord de l’enseignant : saisie rapide, recherche et filtres, dupliquer, historique des modifications, modèles d'écritures, palette
   de commandes. Reste : accord de l'enseignant sur V4.
+- 27.11.2026 : V4 publiée sur la prévisualisation (commit `3ff3fc0`). Maquette de la phase V5
+  (`public/maquettes/annees-comptables.html` : choix de l'année, clôture guidée, bilan d'ouverture reporté, Mes dossiers,
+  copie rendue après une réouverture), non commitée, à valider. Constat : une copie exportée après la réouverture
+  contient la nouvelle année vide et ne se corrige plus (corrigé par V5).
+- 27.11.2026 : maquette V5 validée (« Oui, réaliser V5 »). V5 faite sur `apercu`, publiée sur la prévisualisation sur l’accord de l’enseignant : clôture guidée,
+  ouverture et annulation de l'année suivante, bilan d'ouverture reporté, consultation d'une année clôturée, copie de
+  l'exercice de l'énoncé. Rappels de clôture par année : non faits, liste de l'enseignant attendue. Reste : accord de
+  l'enseignant sur V5.

@@ -385,6 +385,11 @@
                         <label><input type="checkbox" bind:checked={voirJustes} /> Montrer aussi les écritures des opérations justes</label>
                       </td>
                     </tr>
+                    {#if l.copie.annees?.length}
+                      <tr>
+                        <td colspan="4" class="hors-enonce">L'élève a aussi ouvert {l.copie.annees.length > 1 ? 'les exercices' : "l'exercice"} {l.copie.annees.map((a) => a.fin.slice(0, 4)).join(', ')} ({l.copie.annees.reduce((t, a) => t + a.ecritures.filter((e) => !e.automatique).length, 0)} écriture{l.copie.annees.reduce((t, a) => t + a.ecritures.filter((e) => !e.automatique).length, 0) > 1 ? 's' : ''}). La correction porte sur l'exercice de l'énoncé.</td>
+                      </tr>
+                    {/if}
                     {#if l.correction.piecesHorsEnonce.length}
                       <tr>
                         <td colspan="4" class="hors-enonce">

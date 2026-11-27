@@ -15,6 +15,7 @@
   import { avecParcours, etapesParcours, etatJournal, rangParcours } from './parcours';
   import { avancementSession, avecCorrection } from './avancement';
   import { estBoucle } from '../engine/closing';
+  import { dossierDeLEnonce } from '../engine/cloture';
   import { dateHeure, periode } from './format';
   import Accueil from './vues/Accueil.svelte';
 
@@ -48,13 +49,16 @@
 
   function exporterMaCopie() {
     const s = etat.session!;
+    // Phase V5 : la copie rend toujours l'exercice de l'énoncé, même après l'ouverture de l'année suivante.
+    const { dossier, suivants } = dossierDeLEnonce(s.exercice, s.dossier, s.archives);
     const texte = exporterCopie({
       eleve: s.eleve,
       exerciceId: s.exercice.id,
       exerciceTitre: s.exercice.titre,
       mode: s.exercice.mode,
-      dossier: s.dossier,
+      dossier,
       suivi: s.suivi,
+      ...(suivants.length ? { annees: $state.snapshot(suivants) } : {}),
       fiches: s.fiches,
       formativeTerminee: s.formativeTerminee || undefined,
       // Énoncé papier : l'exercice créé par l'élève voyage avec la copie (reprise, rattachement au corrigé).
@@ -62,12 +66,12 @@
       ...(s.historique?.length ? { historique: $state.snapshot(s.historique) } : {}),
     });
     telecharger(nomFichier([s.eleve.nom, s.eleve.prenom, s.eleve.classe, s.exercice.titre], EXT_COPIE), texte);
-    s.dernierExport = { le: new Date().toISOString(), empreinte: empreinteTravail(s.dossier, $state.snapshot(s.fiches)) };
+    s.dernierExport = { le: new Date().toISOString(), empreinte: empreinteTravail(dossier, $state.snapshot(s.fiches)) };
   }
 
   const statut = $derived(
     etat.genre === 'travail' && etat.session
-      ? statutExport(etat.session.dossier, $state.snapshot(etat.session.fiches), etat.session.dernierExport)
+      ? statutExport(dossierDeLEnonce(etat.session.exercice, etat.session.dossier, etat.session.archives).dossier, $state.snapshot(etat.session.fiches), etat.session.dernierExport)
       : 'vide',
   );
   const heureExport = $derived(
@@ -83,7 +87,7 @@
     try {
       const { genererPdfCopie } = await import('../pdf/copie');
       const nom = nomFichier([s.eleve.nom, s.eleve.prenom, s.eleve.classe, s.exercice.titre], '.pdf');
-      telechargerBlob(nom, await genererPdfCopie(s.eleve, s.exercice, s.dossier, nom));
+      telechargerBlob(nom, await genererPdfCopie(s.eleve, s.exercice, dossierDeLEnonce(s.exercice, s.dossier, s.archives).dossier, nom));
     } catch {
       dialogue.informer("Le PDF n'a pas pu être créé", ['Vérifiez votre connexion lors du premier export, puis réessayez.']);
     } finally {
@@ -152,7 +156,7 @@
         { titre: 'Saisie', entrees: [{ vue: 'ouverture', libelle: "Bilan d'ouverture", fait: ouvertureFaite }, { vue: 'journal', libelle: 'Journal', compte: saisies ? `${new Set(etat.dossier.ecritures.map((e) => e.piece)).size} pièces` : undefined }] },
         { titre: 'Comptes', entrees: [{ vue: 'comptes', libelle: 'Comptes en T' }, { vue: 'grandlivre', libelle: 'Grand livre' }, { vue: 'balance', libelle: 'Balance' }] },
         { titre: 'États financiers', entrees: [{ vue: 'resultat', libelle: 'Compte de résultat' }, { vue: 'bilan', libelle: 'Bilan' }] },
-        { titre: 'Clôture', entrees: [{ vue: 'bouclement', libelle: 'Bouclement' }] },
+        { titre: 'Clôture', entrees: [{ vue: 'bouclement', libelle: 'Bouclement' }, { vue: 'cloture', libelle: "Clôture de l'exercice" }] },
         { titre: 'Outils', entrees: outils },
       ];
     }
@@ -165,7 +169,7 @@
       { titre: 'Saisie', entrees: [{ vue: 'journal', libelle: 'Journal', fait: journalTermine, compte: a && !journalTermine ? `${a.saisies} / ${a.total}` : undefined }] },
       { titre: 'Comptes', entrees: [{ vue: 'comptes', libelle: 'Comptes en T' }, { vue: 'grandlivre', libelle: 'Grand livre' }, entree('balance', 'Balance')] },
       { titre: 'États financiers', entrees: [entree('resultat', 'Compte de résultat'), entree('bilan', 'Bilan')] },
-      { titre: 'Clôture', entrees: [entree('bouclement', 'Bouclement')] },
+      { titre: 'Clôture', entrees: [entree('bouclement', 'Bouclement'), { vue: 'cloture', libelle: "Clôture de l'exercice" }] },
       ...(fichesParcours.length || f.has('bilanOuverture')
         ? [{ titre: 'Fiches', entrees: [...(f.has('bilanOuverture') ? [{ vue: 'bilanOuverture' as Vue, libelle: "Bilan d'ouverture" }] : []), ...fichesParcours] }]
         : []),
@@ -260,6 +264,15 @@
 
     {#if menuOuvert}<button class="voile-menu" aria-label="Fermer le menu" tabindex="-1" onclick={() => basculerMenu(false)}></button>{/if}
     <nav class="lateral" class:ouvert={menuOuvert} bind:this={navigation} id="navigation-principale" aria-label="Navigation" data-visite="navigation">
+      {#if s.archives.length}
+        <label class="annee-lateral">
+          <span>Exercice comptable</span>
+          <select value={etat.anneeConsultee ?? ''} onchange={(ev) => (etat.anneeConsultee = (ev.currentTarget as HTMLSelectElement).value || null)}>
+            {#each s.archives as a (a.debut)}<option value={a.debut}>{a.fin.slice(0, 4)} · clôturé</option>{/each}
+            <option value="">{s.dossier.fin.slice(0, 4)} · en cours</option>
+          </select>
+        </label>
+      {/if}
       {#each rubriques as r}
         {#if r.titre}<div class="rubrique">{r.titre}</div>{/if}
         {#each r.entrees as e}
@@ -311,6 +324,12 @@
           <button class="btn" onclick={fermerApercu}>Fermer l'aperçu</button>
         </div>
       {/if}
+      {#if etat.consultation}
+        <div class="bandeau-apercu" role="status">
+          <span><b>Exercice {etat.dossier.fin.slice(0, 4)} clôturé.</b> Vous le consultez : rien ne peut y être modifié.</span>
+          <button class="btn" onclick={() => (etat.anneeConsultee = null)}>Revenir à {s.dossier.fin.slice(0, 4)}</button>
+        </div>
+      {/if}
       {#if etat.stockageIndisponible}
         <div class="alerte" role="alert" style="margin-bottom:16px">
           Le navigateur refuse l'enregistrement local (navigation privée ?). Votre travail sera perdu à la fermeture de
@@ -325,6 +344,7 @@
       {:else if etat.vue === 'bilan'}<Differe charger={VUES_BASE.bilan} props={{}} />
       {:else if etat.vue === 'resultat'}<Differe charger={VUES_BASE.resultat} props={{}} />
       {:else if etat.vue === 'bouclement'}<Differe charger={VUES_BASE.bouclement} props={{}} />
+      {:else if etat.vue === 'cloture'}<Differe charger={() => import('./vues/Cloture.svelte')} props={{}} />
       {:else if etat.vue === 'ouverture' && s.exercice.papier}<Differe charger={() => import('./vues/SaisieOuverture.svelte')} props={{}} />
       {:else if etat.vue === 'tva' && etat.fonctions.has('tva')}<Differe charger={() => import('./vues/Tva.svelte')} props={{}} />
       {:else if etat.vue === 'salaire' && etat.fonctions.has('salaire')}<Differe charger={() => import('./vues/Salaire.svelte')} props={{}} />
@@ -394,6 +414,9 @@
   @media (pointer: coarse) { .loupe { width: 44px; height: 44px; } }
   .voile-menu { display: none; }
   .lateral { display: flex; flex-direction: column; }
+  .annee-lateral { display: flex; flex-direction: column; gap: 4px; padding: 4px 10px 12px; font-size: var(--t-12); color: #a9bccf; }
+  .annee-lateral select { font: inherit; font-size: var(--t-14); padding: 6px 8px; border-radius: var(--r-2); border: 1px solid rgba(255, 255, 255, 0.3); background: rgba(255, 255, 255, 0.08); color: #fff; min-height: 36px; }
+  .annee-lateral option { color: var(--c-texte); }
   .bas { margin-top: auto; padding: 16px 0 4px; display: flex; flex-direction: column; gap: 8px; }
   .action-lateral {
     font: inherit; text-align: center; padding: 9px 10px; border-radius: var(--r-2); cursor: pointer;

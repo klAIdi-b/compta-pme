@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="fr-CH">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex" />
+<title>Compta PME · Années comptables (phase V5)</title>
+<style>
+/* Maquette du 27.11.2026 (VISION_LOGICIEL.md, phases V1 et V2). Variables du design system validé (theme.css).
+   Chaque écran est écrit une fois (<template>) et affiché dans deux cadres : ordinateur (1100 px) et téléphone (360 px) ;
+   la mise en page du téléphone vient des requêtes de conteneur (@container). Maquette statique. */
+:root {
+  --c-structure: #1f4e78; --c-structure-2: #163a5a; --c-nuit: #11304d; --c-encre: #0f2742;
+  --c-selection: #d6e4f0; --c-bleu-doux: #eaf1f8; --c-fond-tete: #f8fafc; --c-fond-page: #f6f7f9; --c-fond: #ffffff;
+  --c-zebra: #fafbfd;
+  --c-action: #c4501a; --c-action-fonce: #a8420f; --c-accent: #e8601c; --c-orange-doux: #fdf0e8;
+  --c-texte: #1b2430; --c-texte-2: #56616f; --c-bordure: #8793a2; --c-bordure-2: #dfe5ec; --c-bordure-3: #eef2f6;
+  --c-succes: #1d6b3a; --c-succes-fond: #e6f3ea; --c-erreur: #b00020; --c-erreur-fond: #fdecee;
+  --c-avert: #7a5200; --c-avert-fond: #fff5db; --c-avert-trait: #c98a00; --c-info-fond: #eaf1f8;
+  --t-12: 0.75rem; --t-13: 0.8125rem; --t-14: 0.875rem; --t-15: 0.9375rem; --t-17: 1.0625rem; --t-20: 1.25rem; --t-26: 1.625rem;
+  --e-1: 4px; --e-2: 8px; --e-3: 12px; --e-4: 16px; --e-5: 24px; --e-6: 32px; --e-7: 48px;
+  --r-1: 4px; --r-2: 6px; --r-3: 8px;
+  --ombre-haute: 0 10px 30px rgba(15, 39, 66, 0.1), 0 2px 6px rgba(15, 39, 66, 0.06);
+  --police: 'Inter Variable', 'Inter', 'Segoe UI Variable Text', 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif;
+}
+* { box-sizing: border-box; }
+body { margin: 0; font-family: var(--police); font-size: var(--t-15); line-height: 1.5; color: var(--c-texte); background: var(--c-fond-page); -webkit-font-smoothing: antialiased; }
+h1, h2, h3, p { margin: 0; }
+.num, .montant { font-variant-numeric: tabular-nums lining-nums; }
+.montant { text-align: right; white-space: nowrap; }
+:focus-visible { outline: 2px solid var(--c-accent); outline-offset: 2px; }
+button, input, select { font: inherit; }
+
+/* ---------- Page de présentation ---------- */
+.doc { max-width: 1560px; margin: 0 auto; padding: var(--e-6) var(--e-5) var(--e-7); }
+.doc > header { max-width: 82ch; margin-bottom: var(--e-5); }
+.doc > header h1 { font-size: var(--t-26); color: var(--c-encre); letter-spacing: -0.015em; }
+.doc > header p { margin-top: var(--e-2); }
+.sommaire { display: flex; flex-wrap: wrap; gap: var(--e-2); margin-top: var(--e-4); }
+.sommaire a { font-size: var(--t-14); color: var(--c-structure); background: var(--c-fond); border: 1px solid var(--c-bordure-2); border-radius: var(--r-2); padding: 6px 10px; text-decoration: none; }
+.phase { margin-top: var(--e-7); font-size: var(--t-20); color: var(--c-encre); padding-bottom: var(--e-2); border-bottom: 2px solid var(--c-structure); }
+.ecran-doc { margin-top: var(--e-6); }
+.ecran-doc > h3 { font-size: var(--t-17); color: var(--c-encre); }
+.ecran-doc > p.explication { max-width: 90ch; margin: var(--e-2) 0 var(--e-4); color: var(--c-texte); }
+.cadres { display: flex; gap: var(--e-5); align-items: flex-start; flex-wrap: wrap; }
+.etiq { font-size: var(--t-12); color: var(--c-texte-2); font-weight: 600; text-transform: uppercase; letter-spacing: .05em; margin-bottom: var(--e-2); }
+.cadre { container-type: inline-size; background: var(--c-fond-page); border: 1px solid #c3ccd7; border-radius: var(--r-3); overflow: hidden; box-shadow: var(--ombre-haute); }
+.cadre.ordi { width: 1100px; max-width: 100%; }
+.cadre.tel { width: 360px; border-radius: 22px; }
+.question { max-width: 90ch; margin-top: var(--e-4); background: var(--c-orange-doux); border-left: 4px solid var(--c-accent); border-radius: var(--r-2); padding: var(--e-3) var(--e-4); font-size: var(--t-14); }
+.question b { display: block; }
+
+/* ---------- Composants de l'application ---------- */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--e-2); min-height: 40px; padding: 0 var(--e-4); border-radius: var(--r-2); border: 1px solid var(--c-bordure); background: var(--c-fond); color: var(--c-structure); font-weight: 600; cursor: pointer; text-decoration: none; white-space: nowrap; }
+.btn.principal { background: var(--c-action); border-color: var(--c-action); color: #fff; }
+.btn.petit { min-height: 32px; padding: 0 var(--e-3); font-size: var(--t-14); }
+.lien { color: var(--c-structure); font-weight: 550; text-decoration: underline; text-underline-offset: 2px; }
+.discret { color: var(--c-texte-2); }
+.pastille { display: inline-block; font-size: var(--t-12); font-weight: 600; padding: 2px 8px; border-radius: 999px; background: var(--c-bleu-doux); color: var(--c-structure); white-space: nowrap; }
+.pastille.papier { background: var(--c-orange-doux); color: var(--c-action-fonce); }
+.pastille.fichier { background: #eef0f3; color: var(--c-texte-2); }
+.pastille.ok { background: var(--c-succes-fond); color: var(--c-succes); }
+.message { border-radius: var(--r-2); padding: var(--e-3) var(--e-4); font-size: var(--t-14); border: 1px solid; }
+.message.information { background: var(--c-info-fond); border-color: #c6d7ea; color: var(--c-encre); }
+.message.avert { background: var(--c-avert-fond); border-color: var(--c-avert-trait); color: var(--c-avert); }
+.message.succes { background: var(--c-succes-fond); border-color: #a9d3b6; color: var(--c-succes); }
+.message.erreur { background: var(--c-erreur-fond); border-color: #f0b3bc; color: var(--c-erreur); }
+.carte { background: var(--c-fond); border: 1px solid var(--c-bordure-2); border-radius: var(--r-3); }
+.carte > header { padding: var(--e-3) var(--e-4); border-bottom: 1px solid var(--c-bordure-3); display: flex; align-items: center; justify-content: space-between; gap: var(--e-3); flex-wrap: wrap; }
+.carte > header h2 { font-size: var(--t-17); color: var(--c-encre); }
+.carte > .corps { padding: var(--e-4); }
+table.t { width: 100%; border-collapse: collapse; font-size: var(--t-14); }
+table.t th { text-align: left; font-size: var(--t-13); font-weight: 600; color: var(--c-texte-2); background: var(--c-fond-tete); padding: 8px 12px; border-bottom: 1px solid var(--c-bordure-2); }
+table.t td { padding: 8px 12px; border-bottom: 1px solid var(--c-bordure-3); vertical-align: top; }
+table.t tbody tr:nth-child(even) td { background: var(--c-zebra); }
+table.t th.montant, table.t td.montant { text-align: right; }
+table.t td.num:first-child { white-space: nowrap; }
+table.t tfoot td { font-weight: 650; border-top: 2px solid var(--c-bordure-2); }
+.no { font-size: var(--t-12); color: var(--c-texte-2); margin-left: 6px; }
+.champ { display: flex; flex-direction: column; gap: 4px; }
+.champ label { font-size: var(--t-13); font-weight: 600; color: var(--c-texte); }
+.champ .aide { font-size: var(--t-12); color: var(--c-texte-2); }
+.saisie { min-height: 40px; border: 1px solid var(--c-bordure); border-radius: var(--r-1); padding: 0 10px; background: #fff; display: flex; align-items: center; color: var(--c-texte); }
+.saisie.vide { color: var(--c-texte-2); }
+.saisie.actif { outline: 2px solid var(--c-accent); outline-offset: 0; }
+.saisie.montant { justify-content: flex-end; }
+
+/* Bandeau commun aux trois espaces */
+.bandeau { display: flex; align-items: center; gap: var(--e-3); min-height: 56px; padding: 0 var(--e-5); background: var(--c-fond); border-bottom: 1px solid var(--c-bordure-2); flex-wrap: wrap; }
+.marque { display: flex; align-items: center; gap: var(--e-2); font-weight: 700; color: var(--c-encre); }
+.marque i { width: 28px; height: 28px; border-radius: var(--r-2); background: var(--c-action); color: #fff; display: grid; place-items: center; font-size: var(--t-12); font-style: normal; }
+.onglets { display: flex; gap: var(--e-1); margin-left: var(--e-4); }
+.onglets a { color: var(--c-structure); text-decoration: none; font-weight: 600; padding: 16px 12px 14px; border-bottom: 3px solid transparent; font-size: var(--t-15); }
+.onglets a.actif { border-bottom-color: var(--c-accent); color: var(--c-encre); }
+.annexes { margin-left: auto; display: flex; gap: var(--e-1); }
+.annexes a { color: var(--c-structure); text-decoration: none; font-weight: 550; padding: 8px 10px; border-radius: var(--r-2); font-size: var(--t-14); }
+.initiales { width: 32px; height: 32px; border-radius: 50%; background: var(--c-bleu-doux); color: var(--c-structure); display: grid; place-items: center; font-size: var(--t-13); font-weight: 700; }
+.page { padding: var(--e-5); display: flex; flex-direction: column; gap: var(--e-5); }
+.titre-page { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--e-4); flex-wrap: wrap; }
+.titre-page h1 { font-size: var(--t-26); color: var(--c-encre); letter-spacing: -0.015em; }
+.titre-page .sous { color: var(--c-texte-2); margin-top: 2px; }
+.actions { display: flex; gap: var(--e-2); flex-wrap: wrap; }
+
+/* Accueil */
+.portes { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--e-4); }
+.porte { background: var(--c-fond); border: 1px solid var(--c-bordure-2); border-radius: var(--r-3); padding: var(--e-4); display: flex; flex-direction: column; gap: var(--e-2); }
+.porte .espace { font-size: var(--t-12); font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--c-action-fonce); }
+.porte h2 { font-size: var(--t-17); color: var(--c-encre); }
+.porte p { font-size: var(--t-14); color: var(--c-texte-2); flex: 1; }
+.reprise { display: grid; grid-template-columns: 1fr auto; gap: var(--e-4); align-items: center; background: var(--c-fond); border: 1px solid var(--c-bordure-2); border-left: 4px solid var(--c-structure); border-radius: var(--r-3); padding: var(--e-4) var(--e-5); }
+.barre-av { height: 8px; background: var(--c-bordure-3); border-radius: 999px; overflow: hidden; margin-top: var(--e-2); max-width: 420px; }
+.barre-av span { display: block; height: 100%; background: var(--c-structure); }
+
+/* Mes dossiers */
+.liste-dossiers .ligne-dossier { display: grid; grid-template-columns: 1.6fr 1fr 0.9fr 1fr auto; gap: var(--e-3); align-items: center; padding: var(--e-3) var(--e-4); border-bottom: 1px solid var(--c-bordure-3); }
+.liste-dossiers .ligne-dossier.tete { font-size: var(--t-13); font-weight: 600; color: var(--c-texte-2); background: var(--c-fond-tete); }
+.ligne-dossier .nom b { display: block; color: var(--c-encre); }
+.ligne-dossier .nom span { font-size: var(--t-13); color: var(--c-texte-2); }
+.ligne-dossier .av { font-size: var(--t-13); color: var(--c-texte-2); }
+.ligne-dossier .av .barre-av { margin-top: 4px; height: 6px; }
+.menu-nouveau { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--e-3); }
+.choix { border: 1px solid var(--c-bordure-2); border-radius: var(--r-3); padding: var(--e-3) var(--e-4); background: var(--c-fond); }
+.choix b { display: block; color: var(--c-encre); }
+.choix span { font-size: var(--t-13); color: var(--c-texte-2); }
+.choix.mis-en-avant { border-color: var(--c-accent); background: var(--c-orange-doux); }
+
+/* Dans un dossier : cadre de logiciel */
+.appli { display: grid; grid-template-columns: 220px 1fr; min-height: 640px; }
+.laterale { background: var(--c-nuit); color: #dce6f0; padding: var(--e-4) 0; font-size: var(--t-14); }
+.laterale .dossier-nom { padding: 0 var(--e-4) var(--e-3); border-bottom: 1px solid rgba(255,255,255,.12); margin-bottom: var(--e-2); }
+.laterale .dossier-nom b { display: block; color: #fff; font-size: var(--t-15); }
+.laterale .dossier-nom span { font-size: var(--t-12); color: #a9bccf; }
+.laterale .groupe { padding: var(--e-3) var(--e-4) 4px; font-size: var(--t-12); text-transform: uppercase; letter-spacing: .06em; color: #8fa6bd; font-weight: 600; }
+.laterale a { display: flex; justify-content: space-between; align-items: center; padding: 7px var(--e-4); color: #dce6f0; text-decoration: none; border-left: 3px solid transparent; }
+.laterale a.actif { background: rgba(255,255,255,.08); border-left-color: var(--c-accent); color: #fff; font-weight: 600; }
+.laterale a .coche { font-size: var(--t-12); color: #9fd3b0; }
+.tete-dossier { display: flex; align-items: center; gap: var(--e-3); padding: var(--e-3) var(--e-5); background: var(--c-fond); border-bottom: 1px solid var(--c-bordure-2); flex-wrap: wrap; }
+.tete-dossier .fil { font-size: var(--t-14); color: var(--c-texte-2); }
+.tete-dossier .fil b { color: var(--c-encre); }
+.tete-dossier .droite { margin-left: auto; display: flex; gap: var(--e-2); align-items: center; }
+.bouton-menu { display: none; }
+.corps-dossier { display: grid; grid-template-columns: 1fr 300px; gap: var(--e-4); padding: var(--e-4) var(--e-5); align-items: start; }
+.corps-dossier.plein { grid-template-columns: 1fr; }
+.enonce { font-size: var(--t-14); }
+.enonce ol { margin: 0; padding-left: 0; list-style: none; }
+.enonce li { padding: 6px 0; border-bottom: 1px solid var(--c-bordure-3); display: grid; grid-template-columns: 28px 1fr auto; gap: 6px; }
+.enonce li .n { font-weight: 700; color: var(--c-structure); }
+.enonce li.courante { background: var(--c-bleu-doux); margin: 0 -16px; padding: 6px 16px; }
+.enonce li .fait { font-size: var(--t-12); color: var(--c-succes); }
+.grille { display: grid; grid-template-columns: 80px 110px 1fr; gap: var(--e-3); }
+.lignes-saisie { display: grid; grid-template-columns: 1fr 1fr 120px; gap: var(--e-2) var(--e-3); margin-top: var(--e-3); }
+.lignes-saisie .entete-col { font-size: var(--t-13); font-weight: 600; color: var(--c-texte-2); }
+.equilibre { display: flex; justify-content: space-between; align-items: center; gap: var(--e-3); margin-top: var(--e-3); padding-top: var(--e-3); border-top: 1px solid var(--c-bordure-3); flex-wrap: wrap; }
+.equilibre .ok { color: var(--c-succes); font-weight: 600; font-size: var(--t-14); }
+.saisie-carte { box-shadow: 0 1px 2px rgba(16,24,40,.06), 0 4px 14px rgba(16,24,40,.07); }
+
+/* Ouverture */
+.deux-colonnes { display: grid; grid-template-columns: 1fr 1fr; gap: var(--e-4); }
+.bilan-saisie td .saisie { min-height: 34px; }
+.etapes { display: flex; gap: var(--e-2); font-size: var(--t-13); flex-wrap: wrap; }
+.etapes span { padding: 4px 10px; border-radius: 999px; background: var(--c-bordure-3); color: var(--c-texte-2); font-weight: 600; }
+.etapes span.fait { background: var(--c-succes-fond); color: var(--c-succes); }
+.etapes span.encours { background: var(--c-structure); color: #fff; }
+.formulaire { display: grid; grid-template-columns: 1fr 1fr; gap: var(--e-4); }
+.formulaire .large { grid-column: 1 / -1; }
+
+/* Corriger */
+.etats-copies td .pastille { margin-right: 4px; }
+.statut-juste { color: var(--c-succes); font-weight: 600; }
+.statut-faux { color: var(--c-erreur); font-weight: 600; }
+.statut-partiel { color: var(--c-avert); font-weight: 600; }
+.note { font-size: var(--t-20); font-weight: 700; color: var(--c-encre); }
+
+/* Impression */
+.feuille { background: #fff; border: 1px solid var(--c-bordure-2); box-shadow: 0 2px 10px rgba(15,39,66,.1); width: 100%; max-width: 520px; aspect-ratio: 210 / 297; padding: 28px 30px; font-family: Helvetica, Arial, sans-serif; font-size: 10px; line-height: 1.4; overflow: hidden; }
+.feuille h4 { font-size: 15px; margin: 0 0 2px; color: #0f2742; }
+.feuille .code { float: right; border: 1.5px solid #0f2742; padding: 4px 8px; font-weight: 700; font-size: 11px; }
+.feuille table { width: 100%; border-collapse: collapse; margin: 6px 0 10px; }
+.feuille td, .feuille th { border-bottom: 0.5px solid #c3ccd7; padding: 2px 4px; text-align: left; }
+.feuille .m { text-align: right; }
+.feuille .sect { font-weight: 700; margin-top: 8px; color: #1f4e78; }
+.imprimer-grille { display: grid; grid-template-columns: 320px 1fr; gap: var(--e-5); align-items: start; }
+.options-impr label { display: flex; gap: var(--e-2); align-items: flex-start; padding: 6px 0; font-size: var(--t-14); }
+.case { width: 18px; height: 18px; border: 1.5px solid var(--c-bordure); border-radius: 3px; flex: none; margin-top: 2px; display: grid; place-items: center; font-size: 12px; color: #fff; }
+.case.cochee { background: var(--c-structure); border-color: var(--c-structure); }
+
+/* Cours */
+.sous-onglets { display: flex; gap: var(--e-2); border-bottom: 1px solid var(--c-bordure-2); }
+.sous-onglets a { padding: 8px 12px; text-decoration: none; color: var(--c-structure); font-weight: 600; border-bottom: 3px solid transparent; font-size: var(--t-14); }
+.sous-onglets a.actif { border-bottom-color: var(--c-accent); color: var(--c-encre); }
+.modules { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--e-3); }
+.module { background: var(--c-fond); border: 1px solid var(--c-bordure-2); border-radius: var(--r-3); padding: var(--e-3) var(--e-4); display: flex; flex-direction: column; gap: 4px; }
+.module b { color: var(--c-encre); }
+.module .etat { font-size: var(--t-13); color: var(--c-texte-2); }
+.module .etat.reussi { color: var(--c-succes); }
+.pont { display: flex; justify-content: space-between; align-items: center; gap: var(--e-4); flex-wrap: wrap; background: var(--c-bleu-doux); border-radius: var(--r-3); padding: var(--e-3) var(--e-4); }
+
+/* ---------- Téléphone (cadre étroit) ---------- */
+@container (max-width: 600px) {
+  .bandeau { padding: var(--e-2) var(--e-4) 0; gap: var(--e-2); }
+  .onglets { order: 3; width: 100%; margin-left: 0; }
+  .onglets a { padding: 10px 8px 9px; font-size: var(--t-14); }
+  .onglets a.cache-tel { display: none; }
+  .annexes a.texte { display: none; }
+  .page { padding: var(--e-4); gap: var(--e-4); }
+  .titre-page h1 { font-size: var(--t-20); }
+  .portes, .menu-nouveau, .modules, .deux-colonnes, .formulaire, .imprimer-grille { grid-template-columns: 1fr; }
+  .reprise { grid-template-columns: 1fr; padding: var(--e-4); }
+  .reprise .btn { width: 100%; }
+  .liste-dossiers .ligne-dossier { grid-template-columns: 1fr auto; gap: 4px var(--e-3); }
+  .liste-dossiers .ligne-dossier.tete { display: none; }
+  .liste-dossiers .ligne-dossier .origine, .liste-dossiers .ligne-dossier .av { grid-column: 1; }
+  .liste-dossiers .ligne-dossier .modif { display: none; }
+  .liste-dossiers .ligne-dossier .ouvrir { grid-column: 2; grid-row: 1 / span 3; }
+  .actions { width: 100%; }
+  .actions .btn { flex: 1; }
+  .appli { grid-template-columns: 1fr; min-height: 0; }
+  .laterale { display: none; }
+  .bouton-menu { display: inline-flex; }
+  .tete-dossier { padding: var(--e-2) var(--e-4); }
+  .tete-dossier .droite .pastille.mode { display: none; }
+  .corps-dossier { grid-template-columns: 1fr; padding: var(--e-3) var(--e-4); }
+  .corps-dossier .enonce-colonne { order: -1; }
+  .enonce li:not(.courante) { display: none; }
+  .enonce .tout { display: block; }
+  .grille { grid-template-columns: 1fr 1fr; }
+  .grille .large-tel { grid-column: 1 / -1; }
+  .lignes-saisie { grid-template-columns: 1fr; }
+  .lignes-saisie .entete-col { display: none; }
+  .lignes-saisie .etiquette-tel { display: block; }
+  table.empile thead { display: none; }
+  table.empile tr { display: block; border-bottom: 1px solid var(--c-bordure-2); padding: 6px 0; }
+  table.empile td { display: flex; justify-content: space-between; gap: var(--e-3); border: none; padding: 3px 12px; }
+  table.empile td::before { content: attr(data-etiquette); font-size: var(--t-12); color: var(--c-texte-2); font-weight: 600; }
+  table.empile td.libre::before { content: none; }
+  table.empile tbody tr:nth-child(even) td { background: none; }
+  .feuille { max-width: 100%; padding: 14px; font-size: 8px; }
+  .cache-tel { display: none !important; }
+}
+.etiquette-tel { display: none; font-size: var(--t-12); font-weight: 600; color: var(--c-texte-2); margin-bottom: -4px; }
+.seul-tel { display: none; }
+@container (max-width: 600px) { .seul-tel { display: revert; } }
+</style>
+<style>
+/* Écrans de la phase V5 (s'ajoutent aux styles de la maquette V1 et V2). */
+.aide { font-size: var(--t-13); color: var(--c-texte-2); margin: 0; }
+.selecteur-annee { border: 1px solid var(--c-bordure); border-radius: var(--r-2); padding: 6px 10px; font-size: var(--t-14); background: #fff; white-space: nowrap; }
+.liste-annees { max-width: 360px; }
+.annee { display: flex; justify-content: space-between; gap: var(--e-3); padding: 8px 12px; border-bottom: 1px solid var(--c-bordure-3); font-size: var(--t-14); }
+.annee.sel { background: var(--c-selection); }
+.controles { list-style: none; margin: 0; padding: 0; }
+.controles li { display: grid; grid-template-columns: 28px 1fr auto; gap: var(--e-3); align-items: center; padding: var(--e-3) var(--e-4); border-bottom: 1px solid var(--c-bordure-3); font-size: var(--t-14); }
+.marque-etat { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: var(--t-13); }
+.controles li.ok .marque-etat { background: var(--c-succes-fond); color: var(--c-succes); }
+.controles li.a-faire .marque-etat { background: var(--c-avert-fond); color: var(--c-avert); }
+.action-cloture { display: flex; justify-content: space-between; align-items: center; gap: var(--e-4); flex-wrap: wrap; }
+.action-cloture p { margin: 0; max-width: 60ch; font-size: var(--t-14); }
+tr.capital td { background: var(--c-bleu-doux) !important; }
+.liste-dossiers .ligne-dossier { display: grid; grid-template-columns: 1.6fr 1fr 0.9fr 1fr auto; gap: var(--e-3); align-items: center; padding: var(--e-3) var(--e-4); border-bottom: 1px solid var(--c-bordure-3); }
+.liste-dossiers .ligne-dossier.tete { font-size: var(--t-13); font-weight: 600; color: var(--c-texte-2); background: var(--c-fond-tete); }
+.ligne-dossier .nom b { color: var(--c-encre); }
+.ligne-dossier .nom { display: flex; flex-direction: column; font-size: var(--t-14); }
+@container (max-width: 600px) {
+  .controles li { grid-template-columns: 28px 1fr; }
+  .controles li > :last-child { grid-column: 2; }
+  .liste-dossiers .ligne-dossier { grid-template-columns: 1fr auto; }
+  .liste-dossiers .ligne-dossier.tete { display: none; }
+  .liste-dossiers .ligne-dossier .origine, .liste-dossiers .ligne-dossier .av, .liste-dossiers .ligne-dossier .modif { grid-column: 1; }
+  .liste-dossiers .ligne-dossier .ouvrir { grid-column: 2; grid-row: 1 / span 3; }
+}
+</style>
+</head>
+<body>
+<div class="doc">
+  <header>
+    <h1>Années comptables : maquettes de la phase V5</h1>
+    <p>Maquette du 27.11.2026, d'après <code>VISION_LOGICIEL.md</code> (fonctions 2 et 22). Chaque écran est montré sur ordinateur (1100 px) et sur téléphone (360 px). Contenu réel, calculé par le moteur du logiciel : Cycles du Léman après ses 15 opérations, bouclé (B1 bénéfice de 3'530.00 viré au compte privé, B2 solde du privé de 2'730.00 viré au capital), puis rouvert au 01.01.2027. Maquette statique : les boutons ne fonctionnent pas.</p>
+    <p><b>Ce qui existe déjà :</b> le moteur sait rouvrir un exercice (bilan de clôture repris comme bilan d'ouverture) et l'écran Bouclement propose « Ouvrir l'exercice comptable 2027 ». Mais l'exercice archivé ne se consulte plus, et l'élève ne voit pas ce qui a été reporté. <b>Ce qui ne change pas :</b> les règles de bouclement validées (B1, B2 ; mode « à la réouverture »), la correction, la note.</p>
+    <nav class="sommaire" aria-label="Écrans">
+      <a href="#v5-annees">V5.1 Choisir l'année</a><a href="#v5-cloture">V5.2 Clôture guidée</a><a href="#v5-report">V5.3 Report à nouveau</a><a href="#v5-dossiers">V5.4 Mes dossiers</a><a href="#v5-copie">V5.5 La copie rendue</a>
+    </nav>
+  </header>
+
+  <h2 class="phase">Plusieurs années dans un même dossier</h2>
+
+  <section class="ecran-doc" id="v5-annees" data-modele="m-annees">
+    <h3>V5.1 Choisir l'exercice comptable consulté</h3>
+    <p class="explication">Dans l'en-tête du dossier, un sélecteur montre les exercices comptables de l'entreprise : « 2026 · clôturé », « 2027 · en cours ». Choisir 2026 affiche ses écrans (journal, comptes, balance, bilan, compte de résultat) en lecture seule, avec un bandeau qui le dit. On revient à l'année en cours d'un clic. La saisie, la correction et l'export portent toujours sur l'année en cours.</p>
+  </section>
+
+  <section class="ecran-doc" id="v5-cloture" data-modele="m-cloture">
+    <h3>V5.2 Clôture guidée de l'exercice</h3>
+    <p class="explication">La rubrique « Clôture » réunit, avant d'ouvrir l'année suivante, ce que l'élève doit avoir fait. Les contrôles sont calculés d'après son dossier : opérations de l'énoncé saisies, écritures à revoir (en entraînement), pièces hors énoncé, balance, bouclement passé, copie exportée. Chaque ligne mène à l'écran concerné. « Clôturer et ouvrir l'exercice 2027 » n'est possible que lorsque le bouclement est passé (mode compte de résultat), comme aujourd'hui.</p>
+    <div class="question"><b>À trancher</b>Faut-il ajouter, en 2ème CFC et en maturité, des <b>rappels de clôture</b> non corrigés (par exemple « Amortissements : aucune écriture au compte Amortissements cette année », « Ducroire : aucune écriture », « Décompte TVA »), calculés d'après les comptes mouvementés ? Ma recommandation : oui, mais seulement si vous m'en donnez la liste par année, comme contenu de niveau. Sans votre liste, la clôture guidée ne contient que les contrôles ci-contre, qui ne supposent aucune règle nouvelle.</div>
+  </section>
+
+  <section class="ecran-doc" id="v5-report" data-modele="m-report">
+    <h3>V5.3 Report à nouveau : du bilan de clôture au bilan d'ouverture</h3>
+    <p class="explication">Après « Clôturer et ouvrir », l'élève voit ce qui a été reporté : chaque compte de bilan avec son solde de clôture au 31.12.2026 et son solde d'ouverture au 01.01.2027, et, en raison individuelle, le capital qui a reçu le solde du compte privé (B2). Les comptes de charges et de produits repartent de zéro. Tant qu'aucune écriture n'a été passée dans la nouvelle année, « Annuler l'ouverture » remet l'exercice 2026 en cours.</p>
+    <div class="question"><b>À trancher</b>Libellés des soldes : le tableau suit le réglage de l'exercice (SI / SF par défaut, ou San / Spb). Faut-il parler de « Report à nouveau » dans le titre, ou de « Bilan d'ouverture 2027 » ? Ma recommandation : « Bilan d'ouverture 2027 », avec une phrase qui explique le report, pour ne pas ajouter de vocabulaire hors du cours.</div>
+  </section>
+
+  <h2 class="phase">Dans la liste des dossiers et pour l'enseignant</h2>
+
+  <section class="ecran-doc" id="v5-dossiers" data-modele="m-dossiers">
+    <h3>V5.4 Mes dossiers : les années de chaque entreprise</h3>
+    <p class="explication">La ligne d'un dossier indique ses années : « 2026 clôturé · 2027 en cours ». L'avancement reste celui de l'exercice de l'énoncé.</p>
+  </section>
+
+  <section class="ecran-doc" id="v5-copie" data-modele="m-copie">
+    <h3>V5.5 La copie rendue après une réouverture</h3>
+    <p class="explication">Aujourd'hui, une copie exportée après la réouverture contient la nouvelle année, vide : elle ne peut plus être corrigée. Avec V5, « Exporter ma copie » rend toujours l'exercice de l'énoncé (l'année qui a des opérations), et y ajoute les années suivantes pour information. L'enseignant corrige l'exercice de l'énoncé comme d'habitude ; le détail de la copie indique que l'élève a ouvert l'année suivante.</p>
+  </section>
+</div>
+
+<template id="m-annees">
+  <div class="bandeau">
+    <span class="marque"><i>CP</i>Compta PME</span>
+    <nav class="onglets" aria-label="Espaces"><a href="#" class="cache-tel">Accueil</a><a href="#" class="actif">Comptabilité</a><a href="#">Cours</a></nav>
+    <span class="annexes"><a href="#" class="texte">Guide</a><span class="initiales">LM</span></span>
+  </div>
+  <div class="tete-dossier">
+    <span class="fil"><span class="cache-tel">Mes dossiers › </span><b>Cycles du Léman</b> › Bilan</span>
+    <span class="droite"><span class="selecteur-annee">Exercice <b>2026 · clôturé</b> ▾</span></span>
+  </div>
+  <div class="page">
+    <div class="liste-annees carte"><div class="annee sel"><b>2026</b><span class="discret">clôturé le 14.12.2026 · lecture seule</span></div><div class="annee"><b>2027</b><span class="discret">en cours · 0 écriture</span></div></div>
+    <p class="message avert">Vous consultez l'exercice 2026, clôturé : rien ne peut y être modifié. <a class="lien" href="#">Revenir à 2027</a></p>
+    <div class="carte"><header><h2>Bilan au 31.12.2026</h2><span class="discret" style="font-size:var(--t-13)">après bouclement</span></header>
+      <div class="corps deux-colonnes">
+        <table class="t"><thead><tr><th>Actif</th><th class="montant">CHF</th></tr></thead><tbody>
+          <tr><td>Caisse</td><td class="montant num">5'050.00</td></tr><tr><td>Poste (CP)</td><td class="montant num">3'480.00</td></tr><tr><td>Banque (n/avoir)</td><td class="montant num">25'950.00</td></tr><tr><td>Créances clients</td><td class="montant num">2'300.00</td></tr><tr><td>Stock de marchandises</td><td class="montant num">18'000.00</td></tr><tr><td>Mobilier et installations</td><td class="montant num">15'000.00</td></tr><tr><td>Infrastructure informatique</td><td class="montant num">1'600.00</td></tr><tr><td>Véhicules</td><td class="montant num">22'000.00</td></tr>
+        </tbody><tfoot><tr><td>Total</td><td class="montant num">93'380.00</td></tr></tfoot></table>
+        <table class="t"><thead><tr><th>Passif</th><th class="montant">CHF</th></tr></thead><tbody>
+          <tr><td>Dettes fournisseurs</td><td class="montant num">9'600.00</td></tr><tr><td>Autres dettes</td><td class="montant num">650.00</td></tr><tr><td>Emprunt bancaire à long terme</td><td class="montant num">25'000.00</td></tr><tr><td>Capital</td><td class="montant num">58'130.00</td></tr>
+        </tbody><tfoot><tr><td>Total</td><td class="montant num">93'380.00</td></tr></tfoot></table>
+      </div>
+    </div>
+  </div>
+</template>
+
+<template id="m-cloture">
+  <div class="bandeau">
+    <span class="marque"><i>CP</i>Compta PME</span>
+    <nav class="onglets" aria-label="Espaces"><a href="#" class="cache-tel">Accueil</a><a href="#" class="actif">Comptabilité</a><a href="#">Cours</a></nav>
+    <span class="annexes"><a href="#" class="texte">Guide</a><span class="initiales">LM</span></span>
+  </div>
+  <div class="page">
+    <div class="titre-page"><div><h1>Clôture de l'exercice 2026</h1><p class="sous">Cycles du Léman · ce qu'il faut avoir fait avant d'ouvrir l'année suivante</p></div></div>
+    <div class="carte">
+      <ul class="controles">
+        <li class="ok"><span class="marque-etat">✓</span><span><b>Opérations de l'énoncé</b> · 15 sur 15 saisies</span><a class="lien" href="#">Journal</a></li>
+        <li class="ok"><span class="marque-etat">✓</span><span><b>Écritures à revoir</b> · aucune (entraînement)</span><a class="lien" href="#">Journal</a></li>
+        <li class="ok"><span class="marque-etat">✓</span><span><b>Pièces hors énoncé</b> · aucune</span><span></span></li>
+        <li class="ok"><span class="marque-etat">✓</span><span><b>Balance</b> · total du débit = total du crédit (160'830.00, bouclement compris)</span><a class="lien" href="#">Balance</a></li>
+        <li class="ok"><span class="marque-etat">✓</span><span><b>Bouclement</b> · B1 et B2 passés : bénéfice de 3'530.00 viré au compte privé, puis solde du privé (2'730.00) viré au capital</span><a class="lien" href="#">Bouclement</a></li>
+        <li class="a-faire"><span class="marque-etat">!</span><span><b>Copie</b> · pas encore exportée : exportez-la avant d'ouvrir 2027</span><a class="lien" href="#">Exporter ma copie</a></li>
+      </ul>
+    </div>
+    <div class="carte"><div class="corps action-cloture">
+      <p>L'exercice 2026 sera clôturé : il restera consultable, mais plus rien ne pourra y être modifié. Le bilan de clôture deviendra le bilan d'ouverture du 01.01.2027.</p>
+      <a class="btn principal" href="#">Clôturer et ouvrir l'exercice 2027</a>
+    </div></div>
+  </div>
+</template>
+
+<template id="m-report">
+  <div class="bandeau">
+    <span class="marque"><i>CP</i>Compta PME</span>
+    <nav class="onglets" aria-label="Espaces"><a href="#" class="cache-tel">Accueil</a><a href="#" class="actif">Comptabilité</a><a href="#">Cours</a></nav>
+    <span class="annexes"><a href="#" class="texte">Guide</a><span class="initiales">LM</span></span>
+  </div>
+  <div class="page">
+    <p class="message succes">Exercice 2026 clôturé. L'exercice 2027 est ouvert : voici son bilan d'ouverture.</p>
+    <div class="carte"><header><h2>Bilan d'ouverture au 01.01.2027</h2><a class="lien" href="#" style="font-size:var(--t-13)">Annuler l'ouverture</a></header>
+      <p class="aide" style="padding:var(--e-3) var(--e-4) 0">Chaque compte de bilan reprend son solde de clôture. Les comptes de charges et de produits repartent de zéro ; le bénéfice de 2026 est déjà dans le capital (B1 puis B2).</p>
+      <table class="t empile"><thead><tr><th>Compte</th><th class="montant">SF au 31.12.2026</th><th class="montant">SI au 01.01.2027</th></tr></thead><tbody>
+        <tr><td data-etiquette="Compte">Caisse</td><td data-etiquette="SF 2026" class="montant num">5'050.00</td><td data-etiquette="SI 2027" class="montant num">5'050.00</td></tr>
+        <tr><td data-etiquette="Compte">Banque (n/avoir)</td><td data-etiquette="SF 2026" class="montant num">25'950.00</td><td data-etiquette="SI 2027" class="montant num">25'950.00</td></tr>
+        <tr><td data-etiquette="Compte">Dettes fournisseurs</td><td data-etiquette="SF 2026" class="montant num">9'600.00</td><td data-etiquette="SI 2027" class="montant num">9'600.00</td></tr>
+        <tr class="capital"><td data-etiquette="Compte">Capital <span class="discret">(55'400.00 + 2'730.00 du compte privé)</span></td><td data-etiquette="SF 2026" class="montant num">58'130.00</td><td data-etiquette="SI 2027" class="montant num">58'130.00</td></tr>
+        <tr><td data-etiquette="Compte" class="discret">… les huit autres comptes de bilan</td><td class="libre"></td><td class="libre"></td></tr>
+      </tbody><tfoot><tr><td>Total de l'actif = total du passif</td><td class="montant num">93'380.00</td><td class="montant num">93'380.00</td></tr></tfoot></table>
+    </div>
+  </div>
+</template>
+
+<template id="m-dossiers">
+  <div class="bandeau">
+    <span class="marque"><i>CP</i>Compta PME</span>
+    <nav class="onglets" aria-label="Espaces"><a href="#" class="cache-tel">Accueil</a><a href="#" class="actif">Comptabilité</a><a href="#">Cours</a></nav>
+    <span class="annexes"><a href="#" class="texte">Guide</a><span class="initiales">LM</span></span>
+  </div>
+  <div class="page">
+    <div class="titre-page"><div><h1>Mes dossiers</h1></div></div>
+    <div class="carte liste-dossiers">
+      <div class="ligne-dossier tete"><span>Dossier</span><span>Origine</span><span>Avancement</span><span>Dernière activité</span><span></span></div>
+      <div class="ligne-dossier">
+        <span class="nom"><b>Cycles du Léman</b><span>2026 clôturé · <b>2027 en cours</b></span></span>
+        <span class="origine"><span class="pastille">Exercice du logiciel</span></span>
+        <span class="av">15 / 15 opérations · bouclé</span>
+        <span class="modif discret">14.12.2026 à 10:52</span>
+        <span class="ouvrir"><a class="btn petit principal" href="#">Ouvrir</a></span>
+      </div>
+    </div>
+  </div>
+</template>
+
+<template id="m-copie">
+  <div class="bandeau">
+    <span class="marque"><i>CP</i>Compta PME</span>
+    <nav class="onglets" aria-label="Espaces"><a href="#" class="cache-tel">Accueil</a><a href="#">Comptabilité</a><a href="#">Cours</a></nav>
+    <span class="annexes"><a href="#" class="texte" style="color:var(--c-encre);font-weight:700">Espace enseignant</a></span>
+  </div>
+  <div class="page">
+    <div class="titre-page"><div><h1>Détail · Martin Léa</h1><p class="sous">Cycles du Léman · 19 / 19 points · note 6</p></div></div>
+    <p class="message information">L'élève a aussi ouvert l'exercice 2027 (0 écriture). La correction porte sur l'exercice 2026, celui de l'énoncé.</p>
+    <div class="carte">
+      <table class="t empile"><thead><tr><th>Pièce</th><th>Statut</th><th class="montant">Points</th></tr></thead><tbody>
+        <tr><td data-etiquette="Pièce" class="num">1 à 15</td><td data-etiquette="Statut" class="statut-juste">Justes</td><td data-etiquette="Points" class="montant num">16 / 16</td></tr>
+        <tr><td data-etiquette="Pièce">B1, B2</td><td data-etiquette="Statut" class="statut-juste">Bouclement juste</td><td data-etiquette="Points" class="montant num">3 / 3</td></tr>
+      </tbody></table>
+    </div>
+  </div>
+</template>
+
+<script>
+// Chaque section de la page reçoit son écran dans deux cadres : ordinateur et téléphone.
+for (const section of document.querySelectorAll('.ecran-doc')) {
+  const modele = document.getElementById(section.dataset.modele);
+  const cadres = document.createElement('div');
+  cadres.className = 'cadres';
+  for (const [classe, etiquette] of [['ordi', 'Ordinateur · 1100 px'], ['tel', 'Téléphone · 360 px']]) {
+    const bloc = document.createElement('div');
+    const etiq = document.createElement('div');
+    etiq.className = 'etiq';
+    etiq.textContent = etiquette;
+    const cadre = document.createElement('div');
+    cadre.className = `cadre ${classe}`;
+    cadre.appendChild(modele.content.cloneNode(true));
+    bloc.append(etiq, cadre);
+    cadres.appendChild(bloc);
+  }
+  const question = section.querySelector('.question');
+  section.insertBefore(cadres, question);
+}
+</script>
+</body>
+</html>

@@ -8,6 +8,7 @@
   import { classerExercices, etiquetteNiveau, filiereDe, LIBELLES_FILIERE, LIBELLES_MODE, type Exercice, type Filiere } from '../../engine/exercice';
   import { EXT_COPIE, EXT_EXERCICE, ErreurFichier, importerCopie, importerExercice, statutExport, type Copie } from '../../io/fichiers';
   import { dossierDeCopie } from '../../engine/reprise';
+  import { dossierDeLEnonce } from '../../engine/cloture';
   import { exerciceDuCode, exercicePapier } from '../../engine/papier';
   import { exerciceDansAdresse, lireExerciceDuLien } from '../../io/lien-exercice';
   import { importerRetour, type Retour } from '../../io/retour';
@@ -39,7 +40,7 @@
   const enCours = $derived(etat.genre === 'travail' ? etat.session : null);
   const av = $derived(enCours ? avancementSession(enCours) : null);
   const correction = $derived(enCours ? avecCorrection(enCours) : false);
-  const exporte = $derived(enCours ? statutExport(enCours.dossier, $state.snapshot(enCours.fiches), enCours.dernierExport) : 'vide');
+  const exporte = $derived(enCours ? statutExport(dossierDeLEnonce(enCours.exercice, enCours.dossier, enCours.archives).dossier, $state.snapshot(enCours.fiches), enCours.dernierExport) : 'vide');
 
   // ---- Lien direct donné par l'enseignant ----
   const lienId = exerciceDuLien();
@@ -551,7 +552,7 @@
             {@const st = etatExercice(s.exercice)}
             {@const o = origineDe(s.exercice)}
             <div class="ligne-dossier">
-              <span class="nom"><strong>{s.dossier.raisonSociale}</strong><span class="discret petit">{s.exercice.titre} · {etiquetteNiveau(s.exercice)}</span></span>
+              <span class="nom"><strong>{s.dossier.raisonSociale}</strong><span class="discret petit">{s.exercice.titre} · {etiquetteNiveau(s.exercice)}</span>{#if s.archives.length}<span class="petit">{s.archives.map((a) => `${a.fin.slice(0, 4)} clôturé`).join(' · ')} · <b>{s.dossier.fin.slice(0, 4)} en cours</b></span>{/if}</span>
               <span class="origine"><span class={`type ${o.classe}`}>{o.texte}</span>{#if s.exercice.mode !== 'entrainement'}<span class="type exo">{LIBELLES_MODE[s.exercice.mode]}</span>{/if}</span>
               <span class="av petit">
                 {#if st.classe === 'fini'}<span class="etat fini">Terminé</span>{:else if a}<span>{a.saisies} / {a.total} {a.total > 1 ? 'opérations' : 'opération'}</span><BarreAvancement {a} correction={avecCorrection(s)} largeur={140} />{:else}<span>{s.dossier.ecritures.length} {s.dossier.ecritures.length > 1 ? 'écritures' : 'écriture'}</span>{/if}

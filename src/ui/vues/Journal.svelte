@@ -60,7 +60,7 @@
     return k === PIECE_BOUCLEMENT ? corrigeBouclement(d, ex) : corrigeParPiece.get(k);
   }
   /** Modification d'une écriture validée : toujours possible pour l'élève (choix de l'enseignant le 18.11.2026). */
-  const modifAutorisee = $derived(vueEleve(etat.genre) && !etat.verrouille);
+  const modifAutorisee = $derived(vueEleve(etat.genre) && !etat.verrouille && !etat.consultation);
   /** Une écriture liée à une extourne ne se modifie pas (le moteur le refuse). */
   const modifiable = (e: Ecriture) => modifAutorisee && !e.automatique && !e.extourneDe && !estExtournee(d, e.id);
   const suivi = $derived(etat.session!.suivi);
@@ -647,7 +647,12 @@
       {/if}
     </div>
 
-    {#if etat.verrouille}
+    {#if etat.consultation}
+      <section class="carte formative-fin" aria-label="Exercice clôturé">
+        <h2>Exercice {d.debut.slice(0, 4)} clôturé</h2>
+        <p class="corps-carte">Cet exercice est clôturé : son journal se consulte, mais plus rien ne peut y être saisi ni modifié.</p>
+      </section>
+    {:else if etat.verrouille}
       <section class="carte formative-fin" aria-label="Évaluation formative terminée">
         <h2>Évaluation formative terminée</h2>
         <p class="corps-carte">
@@ -920,7 +925,7 @@
                   {/if}
                   <td class="actions">
                     {#if j === 0}
-                      {#if !etat.verrouille && !e.automatique}
+                      {#if !etat.verrouille && !etat.consultation && !e.automatique}
                       <div class="boutons-ecriture">
                         {#if !extournee && !e.extourneDe && modifAutorisee}<button class="action-ecr" aria-label={`Modifier la pièce ${e.piece}`} onclick={() => modifier(e)}>Modifier</button>{/if}
                         <button

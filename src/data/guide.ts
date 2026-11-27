@@ -211,6 +211,31 @@ export const GUIDE: PartieGuide[] = [
         ],
       },
       {
+        id: 'annees',
+        titre: 'Clôturer et passer à l’année suivante',
+        blocs: [
+          {
+            type: 'etapes',
+            items: [
+              '« Clôture de l’exercice » (groupe « Clôture ») vérifie votre dossier : opérations de l’énoncé saisies, ' +
+                'écritures à revoir, pièces hors énoncé, balance, bouclement passé, copie exportée. Chaque ligne mène à ' +
+                'l’écran concerné.',
+              '« Clôturer et ouvrir l’exercice suivant » (une fois le bouclement passé) : l’année clôturée reste ' +
+                'consultable mais ne se modifie plus ; son bilan de clôture devient le bilan d’ouverture de l’année suivante, ' +
+                'présenté compte par compte. Tant que la nouvelle année est vide, « Annuler l’ouverture » revient en arrière.',
+              'En haut de la barre latérale, « Exercice comptable » permet de consulter une année clôturée (en lecture ' +
+                'seule) puis de revenir à l’année en cours.',
+            ],
+          },
+          {
+            type: 'retenir',
+            texte:
+              '« Exporter ma copie » rend toujours l’exercice de l’énoncé, même après l’ouverture de l’année suivante : ' +
+              'votre enseignant peut le corriger. Les années suivantes sont jointes pour information.',
+          },
+        ],
+      },
+      {
         id: 'comptes',
         titre: 'Choisir un compte',
         blocs: [
