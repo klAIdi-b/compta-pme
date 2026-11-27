@@ -214,4 +214,4 @@ Corrections faites une à une, sur accord de l'enseignant, d'abord sur `apercu`.
   journal, quatre dossiers de pièces), corrigés recalculés et tests mis à jour. Correspondance dans `CLAUDE.md`. Fusionné
   dans `main` le 27.11.2026 sur l'accord de l'enseignant (PR 29).
 - [x] 27.11.2026 : identifiants de ces treize contenus renommés (anciens liens redirigés, anciennes copies refusées avec
-  un message), sur `apercu`.
+  un message). Fusionné dans `main` le 27.11.2026 sur l'accord de l'enseignant (PR 30).
