@@ -27,7 +27,14 @@ interface Regle extends ErreurTypique {
   sens: Sens;
   attendu: Test;
   saisi: Test;
+  /** Condition sur le corrigé (comptes et côtés « 1020|D »), quand la règle ne vaut que pour certaines opérations. */
+  si?: (corrige: Set<string>) => boolean;
 }
+
+/** Le corrigé débite une liquidité (encaissement). */
+const ENCAISSEMENT = (c: Set<string>) => [...c].some((k) => k.endsWith('|D') && LIQUIDITES(k.split('|')[0]!));
+/** Le corrigé est un amortissement : 6800, ou la charge d'un immeuble (7510 annexe, 8000 hors exploitation), au débit. */
+const AMORTISSEMENT = (c: Set<string>) => ['6800', '7510', '8000'].some((n) => c.has(`${n}|D`));
 
 const REGLES: Regle[] = [
   {
@@ -82,6 +89,7 @@ const REGLES: Regle[] = [
     sens: 'C',
     attendu: parmi('1100'),
     saisi: parmi('3200', '3400'),
+    si: ENCAISSEMENT,
     explication:
       "La vente a déjà été comptabilisée à l'envoi de la facture. L'encaissement éteint la créance du client : on crédite " +
       'Créances clients, pas une deuxième fois les ventes.',
@@ -111,7 +119,7 @@ const REGLES: Regle[] = [
     attendu: LIQUIDITES,
     saisi: LIQUIDITES,
     explication: 'Relisez le moyen de paiement : espèces → Caisse, compte postal → Poste, compte bancaire → Banque.',
-    chapitre: 'comptes',
+    chapitre: 'bilan',
   },
   {
     id: 'moyen-de-paiement',
@@ -119,7 +127,7 @@ const REGLES: Regle[] = [
     attendu: LIQUIDITES,
     saisi: LIQUIDITES,
     explication: 'Relisez le moyen de paiement : espèces → Caisse, compte postal → Poste, compte bancaire → Banque.',
-    chapitre: 'comptes',
+    chapitre: 'bilan',
   },
   {
     id: 'prive-en-charge',
@@ -127,7 +135,7 @@ const REGLES: Regle[] = [
     attendu: parmi('2850'),
     saisi: CHARGE,
     explication:
-      "Cette dépense concerne la vie privée du propriétaire : elle va dans son compte privé, pas dans les charges de l'entreprise.",
+      "Cette opération concerne la vie privée du propriétaire : elle va dans son compte privé, pas dans les charges de l'entreprise.",
     chapitre: 'prive',
   },
   {
@@ -181,6 +189,7 @@ const REGLES: Regle[] = [
     sens: 'C',
     attendu: (x) => /^1[4-7]\d9$/.test(x),
     saisi: IMMOBILISATION,
+    si: AMORTISSEMENT,
     explication:
       "Méthode indirecte : l'amortissement est crédité au fonds d'amortissements cumulés (compte en 9) ; la valeur " +
       "d'acquisition reste inchangée dans le compte de l'immobilisation.",
@@ -191,6 +200,7 @@ const REGLES: Regle[] = [
     sens: 'C',
     attendu: IMMOBILISATION,
     saisi: (x) => /^1[4-7]\d9$/.test(x),
+    si: AMORTISSEMENT,
     explication:
       "Méthode directe : l'amortissement est crédité directement au compte de l'immobilisation, sans fonds d'amortissements cumulés.",
     chapitre: 'amortissements',
@@ -202,7 +212,7 @@ const REGLES: Regle[] = [
     saisi: parmi('1100'),
     explication:
       'Le ducroire est une correction de valeur estimée : il se passe au compte Ducroire. Les créances clients ne ' +
-      'diminuent que pour une perte définitive.',
+      'sont pas touchées par le ducroire ; on ne les diminue pour une perte que lorsqu\'elle est définitive.',
     chapitre: 'creances',
   },
   {
@@ -239,13 +249,18 @@ function cotes(lignes: readonly LigneEcriture[]): Set<string> {
 /**
  * Première erreur typique reconnue entre l'écriture de l'élève et le corrigé de l'opération, ou null.
  * Seuls les comptes en trop chez l'élève et ceux qui lui manquent sont comparés, côté par côté.
+ * Une écriture qui emploie exactement les comptes du corrigé (débit et crédit inversés, montant faux) n'est pas une
+ * confusion de comptes : aucune explication (relecture du 27.11.2026).
  */
 export function erreurTypique(eleve: readonly LigneEcriture[], corrige: readonly LigneEcriture[]): ErreurTypique | null {
   const e = cotes(eleve);
   const c = cotes(corrige);
+  const comptes = (s: Set<string>) => [...new Set([...s].map((k) => k.split('|')[0]))].sort().join(',');
+  if (comptes(e) === comptes(c)) return null;
   const enTrop = [...e].filter((k) => !c.has(k)).map((k) => k.split('|') as [string, Sens]);
   const manquants = [...c].filter((k) => !e.has(k)).map((k) => k.split('|') as [string, Sens]);
   for (const r of REGLES) {
+    if (r.si && !r.si(c)) continue;
     for (const [attendu, sa] of manquants) {
       if (sa !== r.sens || !r.attendu(attendu)) continue;
       if (enTrop.some(([saisi, se]) => se === r.sens && saisi !== attendu && r.saisi(saisi))) {
