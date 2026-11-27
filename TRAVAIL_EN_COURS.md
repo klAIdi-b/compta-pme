@@ -241,3 +241,9 @@ Règles : une phase à la fois sur `apercu`, maquette avant l'interface, tests, 
 - 27.11.2026 : maquette V3 validée (« Oui, réaliser V3 », avec les deux recommandations). V3 faite sur `apercu`, publiée
   sur la prévisualisation sur l’accord de l’enseignant : lien autonome et code QR (`qrcode-generator` 2.0.4), archive ZIP de Classroom, ajustement des points,
   fichier de retour, fichier de classe et onglet « Ma classe ». Reste : accord de l'enseignant sur V3.
+- 27.11.2026 : V3 publiée sur la prévisualisation (commit `1237f11`). Maquette de la phase V4
+  (`public/maquettes/saisie-professionnelle.html` : saisie guidée ou rapide, grille continue, recherche et filtres,
+  historique des modifications, palette de commandes, modèles d'écritures), non commitée, à valider.
+- 27.11.2026 : maquette V4 validée (« Oui, réaliser V4 », avec les trois recommandations). V4 faite sur `apercu`, publiée
+  sur la prévisualisation sur l’accord de l’enseignant : saisie rapide, recherche et filtres, dupliquer, historique des modifications, modèles d'écritures, palette
+  de commandes. Reste : accord de l'enseignant sur V4.

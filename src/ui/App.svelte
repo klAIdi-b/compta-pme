@@ -41,6 +41,10 @@
   });
   import Visite from './composants/Visite.svelte';
   import EtapeSuivante from './composants/EtapeSuivante.svelte';
+  import Palette from './composants/Palette.svelte';
+
+  /** Palette de commandes (phase V4) : Ctrl + K ou Cmd + K dans un dossier, loupe de l'en-tête sur téléphone. */
+  let paletteOuverte = $state(false);
 
   function exporterMaCopie() {
     const s = etat.session!;
@@ -55,6 +59,7 @@
       formativeTerminee: s.formativeTerminee || undefined,
       // Énoncé papier : l'exercice créé par l'élève voyage avec la copie (reprise, rattachement au corrigé).
       ...(s.exercice.papier ? { papier: { exercice: $state.snapshot(s.exercice) } } : {}),
+      ...(s.historique?.length ? { historique: $state.snapshot(s.historique) } : {}),
     });
     telecharger(nomFichier([s.eleve.nom, s.eleve.prenom, s.eleve.classe, s.exercice.titre], EXT_COPIE), texte);
     s.dernierExport = { le: new Date().toISOString(), empreinte: empreinteTravail(s.dossier, $state.snapshot(s.fiches)) };
@@ -180,6 +185,11 @@
     else if (rendreFocus) boutonMenu?.focus();
   }
   function toucheGlobale(e: KeyboardEvent) {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k' && etat.session && ecran === 'logiciel') {
+      e.preventDefault();
+      paletteOuverte = !paletteOuverte;
+      return;
+    }
     if (e.key === 'Escape' && menuOuvert) {
       e.preventDefault();
       basculerMenu(false);
@@ -238,6 +248,7 @@
           {genre === 'corrige' ? 'Saisie du corrigé' : s.exercice.papier ? 'Énoncé papier' : LIBELLES_MODE[s.exercice.mode]}
         </span>
       </div>
+      <button class="loupe" aria-label="Rechercher : rubrique, compte, pièce ou action (Ctrl + K)" title="Rechercher (Ctrl + K)" onclick={() => (paletteOuverte = true)}><span aria-hidden="true">⌕</span></button>
       {#if vueEleve(genre)}<AvancementEntete />{/if}
       {#if vueEleve(genre)}
         <div class="eleve" title={`${s.eleve.prenom} ${s.eleve.nom} · ${s.eleve.classe}`}>
@@ -283,6 +294,7 @@
           {/if}
           <button class="action-lateral" onclick={exporterPdf} disabled={pdfEnCours}>{pdfEnCours ? 'Création du PDF…' : 'Exporter en PDF'}</button>
           <button class="action-lateral discrete" onclick={() => { basculerMenu(false, false); etat.ouvrirRubrique('dossiers'); }}>Mes dossiers</button>
+          <button class="action-lateral discrete recherche-menu" onclick={() => { basculerMenu(false, false); paletteOuverte = true; }}>Rechercher (rubrique, compte, pièce)</button>
           <button class="action-lateral discrete" onclick={() => (etat.apprendre = true)}>Cours : apprendre pas à pas</button>
         <button class="action-lateral discrete" onclick={() => (etat.guide = 'eleve')}>Guide d'utilisation</button>
           <button class="action-lateral discrete" onclick={() => (enseignant.ouvert = true)}>Espace enseignant</button>
@@ -333,6 +345,14 @@
     </main>
   </div>
   {#if etat.visiteOuverte}<Visite />{/if}
+  <Palette
+    bind:ouverte={paletteOuverte}
+    rubriques={rubriques.flatMap((r) => r.entrees)}
+    actions={[
+      { libelle: 'Nouvelle écriture', agir: () => { etat.aller('journal'); setTimeout(() => document.getElementById('saisie-libelle')?.focus(), 200); } },
+      ...(genre === 'travail' ? [{ libelle: 'Exporter ma copie', agir: exporterMaCopie }, { libelle: 'Mes dossiers', agir: () => etat.ouvrirRubrique('dossiers') }] : []),
+    ]}
+  />
 {/if}
 
 <style>
@@ -369,6 +389,9 @@
   .vers-dossiers:hover { background: var(--c-bleu-doux); }
   .vers-dossiers .chevron { margin-left: 6px; color: var(--c-texte-2); }
   .bouton-menu { display: none; }
+  .loupe { flex: none; width: 40px; height: 40px; border: 1px solid var(--c-bordure-2); border-radius: var(--r-2); background: #fff; color: var(--c-structure); font-size: 20px; line-height: 1; cursor: pointer; }
+  .loupe:hover { background: var(--c-bleu-doux); }
+  @media (pointer: coarse) { .loupe { width: 44px; height: 44px; } }
   .voile-menu { display: none; }
   .lateral { display: flex; flex-direction: column; }
   .bas { margin-top: auto; padding: 16px 0 4px; display: flex; flex-direction: column; gap: 8px; }
@@ -425,8 +448,12 @@
     .voile-menu { display: block; position: fixed; inset: 64px 0 0 0; z-index: 35; background: rgba(15, 30, 45, 0.4); border: 0; }
     .principal { padding: 16px 14px 40px; }
   }
+  .recherche-menu { display: none; }
   @media (max-width: 600px) {
     .dossier, .eleve { display: none; }
+    /* Téléphone : la loupe passe dans le menu, l'en-tête garde le menu et l'avancement. */
+    .loupe { display: none; }
+    .recherche-menu { display: block; }
     .entete { justify-content: space-between; }
   }
 </style>

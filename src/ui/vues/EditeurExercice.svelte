@@ -65,6 +65,9 @@
   let ficheSalaire = $state(source.parametres.ficheSalaire ?? false);
   let calculatriceTva = $state(source.parametres.calculatriceTva ?? false);
   let ficheBilanOuverture = $state(source.parametres.ficheBilanOuverture ?? false);
+  /** Journal (phase V4) : saisie rapide et modèles d'écritures permis (par défaut). */
+  let saisieRapide = $state(source.parametres.saisieRapide !== false);
+  let modeles = $state(source.parametres.modeles !== false);
   let ficheMargeBrute = $state(source.parametres.ficheMargeBrute ?? false);
   let formulaireTva = $state(source.parametres.formulaireTva ?? false);
   const ech0 = source.parametres.echellePrix;
@@ -188,6 +191,8 @@
         ficheSalaire,
         calculatriceTva,
         ficheBilanOuverture,
+        saisieRapide: saisieRapide ? undefined : false,
+        modeles: modeles ? undefined : false,
         ficheMargeBrute,
         formulaireTva,
         echellePrix:
@@ -448,6 +453,8 @@
     {/if}
     <label class="case"><input type="checkbox" bind:checked={ficheBilanOuverture} /> Fiche « Bilan d'ouverture »</label>
     <label class="case"><input type="checkbox" bind:checked={ficheMargeBrute} /> Fiche « Marge brute »</label>
+    <label class="case large"><input type="checkbox" bind:checked={saisieRapide} /> Journal : saisie rapide permise (sinon saisie guidée imposée)</label>
+    <label class="case large"><input type="checkbox" bind:checked={modeles} /> Journal : modèles d'écritures permis</label>
   </div>
 </section>
 

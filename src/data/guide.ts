@@ -187,6 +187,30 @@ export const GUIDE: PartieGuide[] = [
         ],
       },
       {
+        id: 'saisie-rapide',
+        titre: 'Saisie rapide et outils du journal',
+        blocs: [
+          {
+            type: 'liste',
+            items: [
+              '« Saisie guidée » ou « Saisie rapide », en tête du journal. En saisie rapide, le journal est au-dessus et la ' +
+                'grille dessous, comme dans un logiciel comptable : Entrée valide l’écriture, son verdict s’affiche sur sa ' +
+                'ligne, et la grille propose la pièce suivante. Dans une écriture composée, la ligne suivante propose la ' +
+                'différence qui manque. Votre choix est mémorisé ; sur téléphone, la saisie guidée est toujours utilisée.',
+              'Rechercher : au-dessus des écritures validées, tapez un libellé, un compte (nom ou numéro), un montant ou une ' +
+                'pièce ; filtrez par compte et par période. Le nombre d’écritures trouvées et leur total s’affichent.',
+              '« ⋯ » à côté d’une écriture : « Dupliquer » la remet dans la grille avec la pièce suivante ; « Historique » ' +
+                'montre quand elle a été créée, modifiée (et ce qui a changé), extournée ou supprimée. L’historique voyage ' +
+                'avec votre copie ; il ne compte pas dans la note.',
+              'Modèles : « Enregistrer comme modèle » garde une écriture qui revient (avec ou sans son montant) ; « Insérer ' +
+                'un modèle » (ou Ctrl + M) la remet dans la grille. Ce sont vos modèles : le logiciel n’en propose aucun.',
+              'Ctrl + K (Cmd + K sur Mac), la loupe en haut de l’écran, ou « Rechercher » dans le menu sur téléphone : allez à une rubrique, au grand livre d’un compte, ' +
+                'à une pièce, ou exportez votre copie, en tapant quelques lettres.',
+            ],
+          },
+        ],
+      },
+      {
         id: 'comptes',
         titre: 'Choisir un compte',
         blocs: [
@@ -483,7 +507,8 @@ export const GUIDE: PartieGuide[] = [
                 "de l'opération est le numéro de pièce que l'élève inscrit dans le journal.",
               'Options : SI/SF ou San/Spb dans les comptes en T, bouclement par le compte 9000 ou intégration à la ' +
                 'réouverture, correction des écritures de bouclement, TVA au net ou au brut, fiche « Décompte de salaire », ' +
-                'calculatrice de TVA, répartition du bénéfice (sociétés).',
+                'calculatrice de TVA, répartition du bénéfice (sociétés), saisie rapide et modèles d’écritures permis ' +
+                '(décochez pour imposer la saisie guidée ou masquer les modèles, par exemple en 1ère CFC ou pour une évaluation).',
               '« Saisir le corrigé dans le journal » : passez les écritures exactement comme un élève, puis enregistrez le ' +
                 'corrigé. Votre éventuel travail d’élève est mis de côté puis restauré.',
               'Vérifiez le cadre « Contrôle de l’exercice » en bas de page : il liste ce qui manque. Quand il indique ' +
@@ -729,6 +754,8 @@ export const GUIDE: PartieGuide[] = [
                 'élève avec le résultat de chaque opération et, pour les erreurs, ses écritures à côté du corrigé.',
               '« Un PDF par élève (ZIP) » produit une archive avec un PDF par élève, à déposer dans Classroom : la note et le ' +
                 'résultat de chaque opération, sans le corrigé (cochez « avec le corrigé » quand toutes les classes ont passé l’épreuve).',
+              'Dans « Détail », une ligne « Historique » résume les modifications d’une pièce (créée, modifiée, extournée, ' +
+                'supprimée, avec l’heure) : elle montre le cheminement de l’élève, sans effet sur les points.',
               'Ajuster les points : dans « Détail », chaque opération a un champ « Points accordés » (au demi-point, entre 0 ' +
                 'et le barème) et un commentaire pour l’élève. Le calcul du logiciel reste affiché ; « Revenir au calcul » ' +
                 'efface l’ajustement. Avec un fichier de classe ouvert, les ajustements y sont enregistrés.',

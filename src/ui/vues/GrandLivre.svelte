@@ -6,7 +6,9 @@
   const d = $derived(etat.dossier);
   const comptes = $derived(grandLivre(d));
   const libelles = $derived(libellesSoldes(etat.exercice.parametres.libellesT));
-  let filtre = $state('');
+  // Compte demandé par la palette de commandes (phase V4) : montré seul, puis la demande est oubliée.
+  let filtre = $state(etat.compteCible ?? '');
+  etat.compteCible = null;
   const affiches = $derived(filtre ? comptes.filter((c) => c.numero === filtre) : comptes);
 
   function solde(s: number) {

@@ -12,6 +12,7 @@ import { exercicesDemo } from '../data/demos';
 import { ecrire, lire } from '../io/stockage';
 import { chapitreDuLien } from './lien';
 import type { Retour } from '../io/retour';
+import { noterEvenement, type EvenementHistorique, type ModeleEcriture } from '../engine/historique';
 import { empreinteTravail, type DernierExport } from '../io/fichiers';
 import type { Suivi } from '../engine/correction';
 import { aMettreDeCote, ecranAffiche, genreSession, peutOuvrirAccueil, vueEleve, type Ecran, type GenreSession } from './modes';
@@ -72,6 +73,10 @@ export interface Session {
   formativeTerminee?: boolean;
   /** Copie corrigée rendue par l'enseignant (phase V3) : note, statuts, commentaires. */
   retour?: Retour;
+  /** Historique des modifications du journal (phase V4) : rien ne s'efface, il voyage dans la copie. */
+  historique?: EvenementHistorique[];
+  /** Modèles d'écritures de l'élève (phase V4). */
+  modeles?: ModeleEcriture[];
 }
 
 export interface FicheSalaire {
@@ -99,6 +104,8 @@ interface Preferences {
   numerosComptes: boolean;
   /** Formation affichée à l'accueil (mémorisée). */
   filiere?: 'CFC' | 'MP';
+  /** Journal : saisie rapide choisie par l'élève (phase V4), sinon saisie guidée. */
+  saisieRapide?: boolean;
 }
 
 interface Sauvegarde {
@@ -146,6 +153,8 @@ class Etat {
   pieceCiblee = $state<string | null>(null);
   /** Dernière étape du parcours atteinte après le journal (non enregistrée) : le journal sait qu'il sert au bouclement. */
   etapeParcours = $state<Vue | null>(null);
+  /** Compte à montrer dans le grand livre (palette de commandes, phase V4). */
+  compteCible = $state<string | null>(null);
   /** Chapitre de théorie à ouvrir (lien « Revoir la théorie » sous un indice). */
   chapitreCible = $state<string | null>(null);
 
@@ -344,6 +353,22 @@ class Etat {
     s.exercice = { ...s.exercice, ouvertureActif: actif, ouverturePassif: passif };
     s.dossier = { ...s.dossier, ouverture: ouvertureDepuisBilan(actif, passif) };
     s.derniereActivite = new Date().toISOString();
+  }
+
+  /** Historique du journal : un événement de plus (création, modification, extourne, suppression). */
+  noterHistorique(ev: EvenementHistorique) {
+    if (!this.session) return;
+    this.session.historique = noterEvenement(this.session.historique, ev);
+  }
+
+  ajouterModele(mo: ModeleEcriture) {
+    if (!this.session) return;
+    this.session.modeles = [...(this.session.modeles ?? []).filter((x) => x.nom !== mo.nom), mo];
+  }
+
+  retirerModele(i: number) {
+    if (!this.session?.modeles) return;
+    this.session.modeles = this.session.modeles.filter((_, k) => k !== i);
   }
 
   /** Copie corrigée rendue par l'enseignant : attachée au dossier de cet exercice (actif ou mis en réserve). */

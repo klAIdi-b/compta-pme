@@ -25,6 +25,8 @@
   import { appliquerAjustements, pointsAccordes, type Ajustements } from '../../engine/ajustements';
   import { ajouterCopies, cleCopie, cleEleve, exerciceDeCopie } from '../../io/classe';
   import { creerRetour, EXT_RETOUR, exporterRetour } from '../../io/retour';
+  import { historiqueDePiece, resumeHistorique } from '../../engine/historique';
+  import { dateHeure } from '../format';
 
   const disponibles = $derived<Exercice[]>(
     [...enseignant.exercices, ...exercicesDemo, ...DOSSIERS_EVALUATION].filter((e) => (e.corrige?.length ?? 0) > 0),
@@ -399,6 +401,7 @@
                           {LIBELLES_DIAGNOSTIC[o.diagnostic]}
                           {#if o.piece === PIECE_BOUCLEMENT && texteAides(l.copie)}<div class="aides-vues">{texteAides(l.copie)}</div>{/if}
                           {#if texteTentatives(l.copie, o.piece)}<div class="aides-vues">{texteTentatives(l.copie, o.piece)}</div>{/if}
+                          {#if historiqueDePiece(l.copie.historique, o.piece).length > 1}<div class="aides-vues">Historique : {resumeHistorique(historiqueDePiece(l.copie.historique, o.piece), (iso) => dateHeure(iso).slice(-5))}</div>{/if}
                         </td>
                         <td class="montant" style="width:80px">{fmt(o.points)} / {fmt(o.max)}</td>
                       </tr>

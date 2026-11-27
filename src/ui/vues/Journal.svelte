@@ -1,5 +1,8 @@
 <script lang="ts">
   import { estPapier, prochainePiece } from '../../engine/papier';
+  import { decrireModification, evenement, historiqueDePiece, modeleDepuis, type ModeleEcriture } from '../../engine/historique';
+  import { filtrerEcritures, totalEcritures } from '../../engine/recherche-journal';
+  import { dateHeure } from '../format';
   import { dialogue } from '../dialogue.svelte';
   import { tick } from 'svelte';
   import { etat } from '../etat.svelte';
@@ -160,6 +163,36 @@
     return s && c && s.essais >= 2 && !s.solutionVue ? indiceNiveau2(c) : null;
   }
 
+  // ---- Saisie professionnelle (phase V4, maquette validée le 27.11.2026) ----
+  /** Saisie rapide : permise par l'exercice, choisie par l'élève, jamais sur un écran étroit (elle demande un clavier). */
+  const rapidePermise = $derived(ex.parametres.saisieRapide !== false && vueEleve(etat.genre));
+  let large = $state(typeof window === 'undefined' || window.matchMedia('(min-width: 821px)').matches);
+  $effect(() => {
+    const mq = window.matchMedia('(min-width: 821px)');
+    const maj = () => (large = mq.matches);
+    mq.addEventListener('change', maj);
+    return () => mq.removeEventListener('change', maj);
+  });
+  const rapide = $derived(rapidePermise && large && !!etat.prefs.saisieRapide);
+  const modelesPermis = $derived(ex.parametres.modeles !== false && vueEleve(etat.genre) && !etat.verrouille);
+  /** Recherche et filtres des écritures validées. */
+  let recherche = $state('');
+  let filtreCompte = $state('');
+  let filtreDu = $state('');
+  let filtreAu = $state('');
+  const filtreActif = $derived(!!(recherche.trim() || filtreCompte || filtreDu || filtreAu));
+  /** Pièce dont l'historique est déplié. */
+  let historiqueOuvert = $state<string | null>(null);
+  /** Modèles : liste à insérer ouverte, formulaire d'enregistrement ouvert. */
+  let modelesOuverts = $state(false);
+  let nouveauModele = $state<{ nom: string; montant: boolean; libelle: boolean } | null>(null);
+  let defilementJournal = $state<HTMLDivElement | undefined>();
+
+  function noter(type: Parameters<typeof evenement>[0], e: Pick<Ecriture, 'id' | 'piece' | 'lignes'>, extra: Parameters<typeof evenement>[3] = {}) {
+    if (etat.genre !== 'travail') return;
+    etat.noterHistorique(evenement(type, e, new Date(), extra));
+  }
+
   let editionId = $state<string | null>(null);
   let voirPiece = $state(true);
   /** Dernière pièce validée : son verdict s'affiche sous la saisie jusqu'à la validation suivante. */
@@ -236,7 +269,7 @@
     const etape = etapeCourante;
     const suivante = etape ? etapes.slice(etapes.indexOf(etape) + 1).find((e) => !etapesFaites.has(e.piece)) : undefined;
     const o = suivante ? undefined : prochaineOperation();
-    piece = suivante?.piece ?? o?.numero ?? (papier ? piecePapier() : '');
+    piece = suivante?.piece ?? o?.numero ?? (papier || rapide ? piecePapier() : '');
     date = suivante ? dt(d.fin) : o ? dt(o.date) : date;
     libelle = '';
     lignes = [nouvelleLigne()];
@@ -275,13 +308,26 @@
     etat.majDossier(r.valeur);
     if (ancienne && ancienne.piece !== p) evaluer(r.valeur, ancienne.piece, false);
     evaluer(r.valeur, p, true);
+    const enregistree = editionId ? r.valeur.ecritures.find((x) => x.id === editionId) : r.valeur.ecritures.at(-1);
+    if (enregistree) {
+      noter(ancienne ? 'modifiee' : 'creee', enregistree, {
+        ...(ancienne ? { avant: ancienne.lignes, ...(ancienne.piece !== p ? { pieceAvant: ancienne.piece } : {}) } : {}),
+        ...(retour ? { statut: statut(cle(p)) } : {}),
+      });
+    }
     // Les écritures attendues du bouclement dépendent des comptes : on met son état à jour.
     if (cle(p) !== PIECE_BOUCLEMENT && etat.session!.suivi[PIECE_BOUCLEMENT]) evaluer(etat.dossier, PIECE_BOUCLEMENT, false);
-    verdict = { cle: cle(p), piece: p };
+    // Saisie rapide : le verdict s'affiche sur la ligne de la pièce, dans le journal au-dessus de la grille.
+    verdict = rapide ? null : { cle: cle(p), piece: p };
     reinitialiser();
     await tick();
-    document.getElementById('saisie-libelle')?.focus({ preventScroll: true });
-    montrerVerdict();
+    if (rapide) {
+      defilementJournal?.scrollTo({ top: defilementJournal.scrollHeight });
+      document.getElementById('saisie-date')?.focus({ preventScroll: true });
+    } else {
+      document.getElementById('saisie-libelle')?.focus({ preventScroll: true });
+      montrerVerdict();
+    }
   }
 
   function champs(): HTMLElement[] {
@@ -292,13 +338,18 @@
     const cible = e.target as HTMLElement;
     const tr = cible.closest<HTMLElement>('[data-ligne]');
     const i = tr ? Number(tr.dataset.ligne) : -1;
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'm' && modelesPermis) {
+      e.preventDefault();
+      modelesOuverts = !modelesOuverts;
+      return;
+    }
     if (e.key === 'Enter' && !e.defaultPrevented) {
       e.preventDefault();
       if (equilibree) return valider();
       const l = lignes[i];
       const ligneComplete = l && (l.debit || l.credit) && l.montant !== null;
       if (ligneComplete && i === lignes.length - 1) {
-        lignes.push(nouvelleLigne());
+        lignes.push(rapide && ecart !== 0 ? { ...nouvelleLigne(), montant: Math.abs(ecart) } : nouvelleLigne());
         await tick();
         document.getElementById(`debit-${lignes[lignes.length - 1]!.cle}`)?.focus();
       } else {
@@ -338,6 +389,7 @@
     actionsOuvertes = null;
     etat.majDossier(r.valeur);
     evaluer(r.valeur, e.piece, false);
+    noter('extournee', e);
   }
 
   /** Suppression d'une écriture (et de son extourne éventuelle) ; les tentatives déjà comptées restent comptées. */
@@ -359,12 +411,43 @@
     actionsOuvertes = null;
     etat.majDossier(r.valeur);
     evaluer(r.valeur, e.piece, false);
+    noter('supprimee', e);
     // La grille propose aussitôt la pièce supprimée, pour la saisir à nouveau (si l'élève n'a rien commencé).
     if (!e.extourneDe && utiles.length === 0 && !libelle.trim()) {
       piece = e.piece;
       date = dt(e.date);
       tick().then(() => document.getElementById('saisie-libelle')?.focus());
     }
+  }
+
+  /** Dupliquer : l'écriture revient dans la grille, avec le numéro de pièce suivant, à vérifier et compléter. */
+  async function dupliquer(e: Ecriture) {
+    editionId = null;
+    actionsOuvertes = null;
+    date = dt(e.date);
+    piece = prochaineOperation()?.numero ?? piecePapier();
+    libelle = e.libelle;
+    lignes = e.lignes.map((l) => ({ cle: ++compteur, debit: l.debit, credit: l.credit, montant: l.montant }));
+    erreurs = [];
+    await tick();
+    document.getElementById('saisie-libelle')?.focus();
+  }
+
+  /** Modèle d'écriture : remet ses comptes (et son montant, son libellé s'ils ont été gardés) dans la grille. */
+  async function insererModele(mo: ModeleEcriture) {
+    modelesOuverts = false;
+    editionId = null;
+    if (mo.libelle) libelle = mo.libelle;
+    lignes = mo.lignes.map((l) => ({ cle: ++compteur, debit: l.debit, credit: l.credit, montant: l.montant }));
+    await tick();
+    document.getElementById('saisie-libelle')?.focus();
+  }
+
+  function enregistrerModele() {
+    if (!nouveauModele?.nom.trim() || utiles.length === 0) return;
+    const ecr = { libelle, lignes: utiles.map((l) => ({ debit: l.debit, credit: l.credit, montant: l.montant ?? 0 })) };
+    etat.ajouterModele(modeleDepuis(ecr, nouveauModele.nom, nouveauModele.montant, nouveauModele.libelle));
+    nouveauModele = null;
   }
 
   async function modifier(e: Ecriture) {
@@ -390,6 +473,21 @@
   const ecrituresTriees = $derived(
     d.ecritures.map((e, i) => ({ e, i })).sort((a, b) => (a.e.date < b.e.date ? -1 : a.e.date > b.e.date ? 1 : a.i - b.i)).map((x) => x.e),
   );
+
+  const ecrituresAffichees = $derived(
+    filtreActif
+      ? filtrerEcritures(ecrituresTriees, d.plan, {
+          texte: recherche,
+          compte: filtreCompte || null,
+          du: filtreDu ? lireDate(filtreDu, annee(d.debut)) : null,
+          au: filtreAu ? lireDate(filtreAu, annee(d.debut)) : null,
+        })
+      : ecrituresTriees,
+  );
+  const comptesDuJournal = $derived(
+    [...new Set(d.ecritures.flatMap((e) => e.lignes.flatMap((l) => [l.debit, l.credit])).filter((n): n is string => !!n))].sort(),
+  );
+
 
   /** Largeur d'un plateau de la balance, en pour cent du plus grand total. */
   function partBalance(x: Centimes): number {
@@ -481,7 +579,13 @@
   </span>
 </div>
 
-{#if vueEleve(etat.genre)}<BilanVivant />{/if}
+{#if rapidePermise}
+  <div class="interrupteur" role="group" aria-label="Façon de saisir">
+    <button class="seg" aria-pressed={!rapide} onclick={() => (etat.prefs.saisieRapide = false)}>Saisie guidée</button>
+    <button class="seg" aria-pressed={rapide} onclick={() => (etat.prefs.saisieRapide = true)}>Saisie rapide</button>
+  </div>
+{/if}
+{#if vueEleve(etat.genre) && !rapide}<BilanVivant />{/if}
 {#if papier}
   <p class="message information bandeau-papier">
     Énoncé sur papier : le logiciel ne corrige pas pendant la saisie. Saisissez chaque opération de la feuille avec son
@@ -489,7 +593,7 @@
   </p>
 {/if}
 <div class="mise-en-page" class:sans-enonce={papier}>
-  <div class="colonne-principale">
+  <div class="colonne-principale" class:rapide>
     <!-- Verdict de la dernière écriture validée, au-dessus de la saisie (25.11.2026, audit) : après « Valider », il est
          ramené à l'écran s'il n'y est pas ; l'énoncé de l'opération suivante et la grille viennent juste dessous. -->
     <div class="verdict" bind:this={zoneVerdict} role="status" aria-live="polite" aria-atomic="true">
@@ -657,7 +761,37 @@
       <div class="ajout-ligne">
         <button type="button" class="btn-ajout" onclick={ajouterLigne}><span aria-hidden="true">+</span> Ajouter une ligne</button>
         <span class="discret">Écriture composée : une ligne par compte, au débit ou au crédit.</span>
+        {#if modelesPermis}
+          <span class="modeles">
+            <button type="button" class="btn-ajout" aria-expanded={modelesOuverts} onclick={() => (modelesOuverts = !modelesOuverts)}>Insérer un modèle</button>
+            {#if utiles.length}<button type="button" class="btn-ajout" onclick={() => (nouveauModele = { nom: libelle.trim(), montant: true, libelle: false })}>Enregistrer comme modèle</button>{/if}
+          </span>
+        {/if}
       </div>
+      {#if modelesOuverts}
+        <div class="liste-modeles" role="region" aria-label="Vos modèles d'écritures">
+          {#each etat.session?.modeles ?? [] as mo, i (i)}
+            <div class="modele">
+              <span><b>{mo.nom}</b> <span class="discret">{mo.lignes.map((l) => [l.debit ? intitules.get(l.debit) : '', l.credit ? intitules.get(l.credit) : ''].filter(Boolean).join(' / ')).join(' ; ')}{mo.lignes.some((l) => l.montant !== null) ? ` · ${m(mo.lignes.reduce((t, l) => t + (l.debit ? (l.montant ?? 0) : 0), 0))}` : ''}</span></span>
+              <span class="boutons-modele">
+                <button class="btn btn-petit" onclick={() => insererModele(mo)}>Insérer</button>
+                <button class="btn-lien" aria-label={`Supprimer le modèle ${mo.nom}`} onclick={() => etat.retirerModele(i)}>Supprimer</button>
+              </span>
+            </div>
+          {:else}
+            <p class="discret petit">Aucun modèle pour l'instant. Saisissez une écriture qui revient, puis « Enregistrer comme modèle ». Le logiciel n'en propose aucun.</p>
+          {/each}
+        </div>
+      {/if}
+      {#if nouveauModele}
+        <form class="form-modele" onsubmit={(ev) => { ev.preventDefault(); enregistrerModele(); }}>
+          <label><span class="discret petit">Nom du modèle</span><input class="champ" bind:value={nouveauModele.nom} aria-label="Nom du modèle" /></label>
+          <label class="case"><input type="checkbox" bind:checked={nouveauModele.montant} /> Garder le montant</label>
+          <label class="case"><input type="checkbox" bind:checked={nouveauModele.libelle} /> Garder le libellé</label>
+          <button class="btn" type="button" onclick={() => (nouveauModele = null)}>Annuler</button>
+          <button class="btn btn-principal" type="submit" disabled={!nouveauModele.nom.trim()}>Enregistrer le modèle</button>
+        </form>
+      {/if}
 
       <div class="equilibre" data-visite="equilibre">
         <!-- Balance débit / crédit : les deux plateaux se rejoignent quand l'écriture est équilibrée. -->
@@ -719,14 +853,26 @@
     {/if}
 
     <section class="carte ecritures-validees" aria-label="Écritures validées">
-      <h2>Écritures validées</h2>
+      <h2>Écritures validées{#if filtreActif}<span class="trouvees"> · {ecrituresAffichees.length} écriture{ecrituresAffichees.length > 1 ? 's' : ''} trouvée{ecrituresAffichees.length > 1 ? 's' : ''} · total {m(totalEcritures(ecrituresAffichees))}</span>{/if}</h2>
+      {#if d.ecritures.length > 0}
+        <div class="filtres-journal" role="search" aria-label="Filtres du journal">
+          <input class="champ recherche-journal" type="search" bind:value={recherche} placeholder="Rechercher : libellé, compte, montant, pièce" aria-label="Rechercher dans le journal" />
+          <select class="champ" bind:value={filtreCompte} aria-label="Filtrer par compte">
+            <option value="">Tous les comptes</option>
+            {#each comptesDuJournal as n}<option value={n}>{intitules.get(n) ?? n}</option>{/each}
+          </select>
+          <input class="champ num date-filtre" bind:value={filtreDu} placeholder="du JJ.MM" aria-label="Du (date)" />
+          <input class="champ num date-filtre" bind:value={filtreAu} placeholder="au JJ.MM" aria-label="Au (date)" />
+          {#if filtreActif}<button class="btn-lien" onclick={() => { recherche = ''; filtreCompte = ''; filtreDu = ''; filtreAu = ''; }}>Effacer les filtres</button>{/if}
+        </div>
+      {/if}
       {#if d.ecritures.length === 0}
         <p class="vide">
           Aucune écriture pour l'instant.
           {#if operations[0]}Commencez par saisir l'opération {operations[0].numero}.{:else if papier}Commencez par la première opération de la feuille.{/if}
         </p>
       {:else}
-        <div class="defilement"><table class="journal">
+        <div class="defilement" bind:this={defilementJournal}><table class="journal">
           <thead>
             <tr>
               <th class="j-date">Date</th>
@@ -740,7 +886,7 @@
             </tr>
           </thead>
           <tbody>
-            {#each ecrituresTriees as e, k (e.id)}
+            {#each ecrituresAffichees as e, k (e.id)}
               {@const extournee = estExtournee(d, e.id)}
               {#each e.lignes as l, j}
                 <tr
@@ -789,6 +935,10 @@
                             <button class="action-ecr large" aria-label={`Extourner la pièce ${e.piece}`} onclick={() => demanderExtourne(e.id)}>Extourner</button>
                           {/if}
                           <button class="action-ecr large supprimer" aria-label={`Supprimer la pièce ${e.piece}${e.extourneDe ? ' (extourne)' : ''}`} onclick={() => demanderSuppression(e.id)}>Supprimer</button>
+                          {#if !e.extourneDe}<button class="action-ecr large" aria-label={`Dupliquer la pièce ${e.piece}`} onclick={() => dupliquer(e)}>Dupliquer</button>{/if}
+                          {#if historiqueDePiece(etat.session?.historique, e.piece).length}
+                            <button class="action-ecr large" aria-label={`Historique de la pièce ${e.piece}`} onclick={() => { historiqueOuvert = historiqueOuvert === e.piece ? null : e.piece; actionsOuvertes = null; }}>Historique</button>
+                          {/if}
                         {/if}
                       </div>
                       {/if}
@@ -796,6 +946,28 @@
                   </td>
                 </tr>
               {/each}
+              {#if historiqueOuvert === e.piece && !e.extourneDe}
+                <tr class="ligne-historique">
+                  <td colspan={retour ? 8 : 7}>
+                    <div class="historique">
+                      <b>Historique · pièce {e.piece}</b>
+                      <ol>
+                        {#each historiqueDePiece(etat.session?.historique, e.piece) as h}
+                          <li>
+                            <span class="quand num">{dateHeure(h.le)}</span>
+                            <span>
+                              <b>{h.type === 'creee' ? 'Créée' : h.type === 'modifiee' ? 'Modifiée' : h.type === 'extournee' ? 'Extournée' : 'Supprimée'}</b>
+                              {#if h.type === 'modifiee' && h.avant && h.lignes} · {decrireModification(h.avant, h.lignes, (n) => intitules.get(n) ?? n, m)}{h.pieceAvant ? ` (pièce ${h.pieceAvant} → ${h.piece})` : ''}{/if}
+                              {#if h.type === 'creee' && h.lignes} · {h.lignes.map((l) => [l.debit ? intitules.get(l.debit) : '', l.credit ? intitules.get(l.credit) : ''].filter(Boolean).join(' / ')).join(' ; ')} {m(h.lignes.reduce((t, l) => t + (l.debit ? l.montant : 0), 0))}{/if}
+                            </span>
+                            {#if h.statut && h.statut !== 'manquante'}<span class={`statut ${classeStatut(h.statut)}`}>{libelleStatut(h.statut)}</span>{/if}
+                          </li>
+                        {/each}
+                      </ol>
+                    </div>
+                  </td>
+                </tr>
+              {/if}
               {@const kc = cle(e.piece)}
               {@const st = statut(kc)}
               {#if retour && derniereParPiece.get(kc) === e.id && st && st !== 'juste' && st !== 'manquante' && verdict?.cle !== kc}
@@ -872,7 +1044,32 @@
   .mise-en-page.sans-enonce { grid-template-columns: minmax(0, 1fr); }
   .bandeau-papier { margin: 0 0 var(--e-4); }
   .piece-deja { margin: var(--e-2) 0 0; }
-  .colonne-principale { min-width: 0; }
+  .colonne-principale { min-width: 0; display: flex; flex-direction: column; }
+  /* Saisie rapide : le journal au-dessus, la grille de saisie dessous, comme dans un logiciel comptable. */
+  .colonne-principale.rapide .ecritures-validees { order: -1; margin-top: 0; margin-bottom: 16px; }
+  .colonne-principale.rapide .ecritures-validees .defilement { max-height: 52vh; overflow-y: auto; }
+  .colonne-principale.rapide :global(.message.hors-enonce) { order: -2; }
+  .interrupteur { display: flex; gap: var(--e-1); margin: 0 0 var(--e-3); }
+  .seg { font: inherit; font-size: var(--t-14); padding: 0 var(--e-3); min-height: 36px; border: 1px solid var(--c-bordure-2); border-radius: 999px; background: var(--c-fond); color: var(--c-texte-2); cursor: pointer; }
+  .seg[aria-pressed='true'] { background: var(--c-structure); color: #fff; border-color: var(--c-structure); }
+  @media (max-width: 820px) { .interrupteur { display: none; } }
+  .filtres-journal { display: flex; gap: var(--e-2); flex-wrap: wrap; align-items: center; padding: 0 16px 12px; }
+  .filtres-journal .champ { width: auto; }
+  .filtres-journal .recherche-journal { flex: 1 1 220px; min-width: 0; }
+  .filtres-journal select.champ { max-width: 240px; }
+  .date-filtre { width: 100px; }
+  .trouvees { font-weight: normal; font-size: var(--t-13); color: var(--c-texte-2); }
+  .modeles { display: inline-flex; gap: var(--e-2); margin-left: auto; flex-wrap: wrap; }
+  .liste-modeles, .form-modele { margin: var(--e-2) 0; padding: var(--e-3); border: 1px solid var(--c-bordure-2); border-radius: var(--r-2); background: var(--c-fond-tete); }
+  .modele { display: flex; justify-content: space-between; gap: var(--e-3); align-items: center; padding: 4px 0; flex-wrap: wrap; }
+  .boutons-modele { display: inline-flex; gap: var(--e-2); align-items: center; }
+  .form-modele { display: flex; gap: var(--e-3); align-items: flex-end; flex-wrap: wrap; }
+  .form-modele label { display: flex; flex-direction: column; gap: 2px; }
+  .form-modele label.case { flex-direction: row; align-items: center; gap: 6px; }
+  .ligne-historique td { background: var(--c-info-fond); }
+  .historique ol { list-style: none; margin: 6px 0 0; padding: 0; }
+  .historique li { display: flex; gap: var(--e-3); align-items: baseline; flex-wrap: wrap; padding: 3px 0; font-size: var(--t-13); }
+  .historique .quand { color: var(--c-texte-2); min-width: 130px; }
   .saisie td { padding: 5px 6px; border-bottom: none; }
   .saisie tbody tr:hover td { background: none; }
   .operation-courante { padding: 12px 18px; background: #f3f8fd; border-bottom: 1px solid var(--c-bordure-3); line-height: 1.45; }

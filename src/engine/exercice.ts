@@ -120,6 +120,10 @@ export interface Exercice {
     ficheSalaire?: boolean;
     /** Calculatrice de TVA (aide au calcul, désactivée par défaut). */
     calculatriceTva?: boolean;
+    /** Journal : saisie rapide permise (phase V4) ; `false` impose la saisie guidée. */
+    saisieRapide?: boolean;
+    /** Journal : modèles d'écritures permis (phase V4) ; `false` les masque. */
+    modeles?: boolean;
     /** Corriger (entraînement) et noter (évaluation) les écritures de bouclement. */
     corrigerBouclement?: boolean;
     /** Mode compte de résultat : le logiciel passe lui-même les écritures de bouclement (bouton à l'écran Bouclement). */
