@@ -111,7 +111,8 @@ essentielles » de `CLAUDE.md`. Ne rien inventer : en cas de doute, demander.
 - Fiches CFC (`fiches-cfc.ts`) : bilan d'ouverture (capital non donné), marge brute (CAB, CAN, PRAMA, PRAMV),
   échelle des prix (PAB → PVB, chaque étape au centime).
 - Facturation (`facturation.ts`) : échéance date + 30 jours, escompte jusqu'à date + 10 jours, TVA et montant avec
-  escompte arrondis aux 5 centimes ; montants comparés au centime ; points : facture 3, paiement 2, contrôle 3.
+  escompte arrondis aux 5 centimes ; escompte non accepté : seul le montant reçu est encaissé, le solde reste en
+  1100 ; facture de services en 2010 ; montants comparés au centime ; points : facture 3, paiement 2, contrôle 3.
 - Budget (`budget.ts`) : écart = effectif − budget ; écart en % au dixième ; produit plus élevé favorable, charge plus
   élevée défavorable ; points : budget 3, comparaison 3.
 - Calculs d'Apprendre (`calculs.ts`) : tolérances 5 centimes et 0,1 point ; intérêts en année commerciale 30/360.
@@ -124,6 +125,9 @@ crédit du grossiste jusqu'au tour suivant, client insolvable 3805/1100 sans cor
 (3805/1109), emprunt 4 % en maturité (intérêts 6900/1020), véhicule amorti en direct dégressif 40 % au prorata.
 
 ## Correction automatique (moteur)
+
+- Points partiels (écriture d'au moins trois comptes ou côtés) : barème × (lignes justes − lignes en trop) / lignes
+  attendues, arrondi au demi-point inférieur.
 
 - « Bonne classe mais mauvais compte » = même premier chiffre. Une opération incomplète n'est pas une erreur.
 - Diagnostics : `inversee`, `inversee_compte`, `nette` (mêmes soldes, mouvements regroupés : faux avec message),

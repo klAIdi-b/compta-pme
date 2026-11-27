@@ -77,7 +77,8 @@ seulement pour une question sur le passé. Travail en cours et décisions attend
 - 2000 Dettes fournisseurs seulement pour les marchandises à revendre ; 2010 Autres dettes pour les
   investissements et les autres factures.
 - Matériel informatique (ordinateurs, écrans, imprimantes…) en 1521 Infrastructure informatique, jamais en 1520.
-- 2205 Dettes AFC (TVA et impôt anticipé). 2800 « Capital » (raison individuelle) ou « Capital-actions » (SA).
+- 2205 Dettes AFC (TVA et impôt anticipé). 2800 « Capital » (raison individuelle), « Capital-actions » (SA)
+  ou « Capital social » (Sàrl).
 - États financiers en forme de compte (art. 959a et 959b CO adaptés au niveau). Bilan avant bouclement : bénéfice
   dans les capitaux propres, perte à l'actif sur une ligne séparée.
 - Comptes en T : SI / SF par défaut, San / Spb en paramètre. Vocabulaire : « extourner », « extourne ».
@@ -104,7 +105,7 @@ seulement pour une question sur le passé. Travail en cours et décisions attend
 - Entraînement : indice dès la première erreur, « Voir la solution » dès cette erreur, raisonnement sous la
   solution, statut « Juste avec la solution » ; l'élève peut toujours modifier une écriture validée.
 - Évaluation : aucun retour pendant la saisie. Barème par défaut 1 point, 2 points dès trois comptes ou côtés ;
-  points partiels pour les écritures multiples. Note = 1 + points / max × 5, au demi-point, bornée de 1 à 6.
+  points partiels pour les écritures multiples (formule dans `.claude/rules/comptabilite.md`). Note = 1 + points / max × 5, au demi-point, bornée de 1 à 6.
   Formative : correction et note indicative après « Terminer et voir la correction ».
 - Fichiers : `.compta-exercice.json` (corrigé absent en évaluation, encodé sinon), version enseignant en clair,
   `.compta-copie.json` (prénom, nom, classe). Une copie reprise est rejouée sur l'exercice (`dossierDeCopie`).
@@ -113,15 +114,18 @@ seulement pour une question sur le passé. Travail en cours et décisions attend
   ou une variante réécrite (assistant de réécriture) ; les dossiers fournis s'exportent en formative. À l'import,
   les copies sont rejouées et contrôlées (`alertesCopie`, `copiesIdentiques`). Fiches incluses dans la copie.
 - Orthographe jamais évaluée. Copies rendues dans Google Classroom.
-- Apprendre : maîtrise à 8 points sur 10 avec au moins la moitié des points par type de question ; révision espacée ;
-  états « réussie une fois », « confirmée », « à raviver » ; rien n'est jamais retiré.
+- Apprendre : une question à plusieurs réponses compte au prorata ; maîtrise à 8 points sur 10 avec au moins la
+  moitié des points par type de question ; révision espacée à 1, 3, 7, 14 et 30 jours (un échec ramène à 1 jour),
+  réussie seulement si ses deux questions sont entièrement justes ; états « réussie une fois », « confirmée »,
+  « à raviver » ; rien n'est jamais retiré.
 
 ## Pédagogie et interface
 
 - Retour immédiat et précis en entraînement ; n'afficher que ce qui sert au niveau ; vocabulaire du cours.
 - L'élève choisit toujours lui-même le compte : aucune suggestion de contrepartie. Comptes choisis par leur nom
   dans une liste déroulante ; numéro en petit ; Tab choisit le compte désigné, comme Entrée.
-- Messages d'erreur qui disent quoi corriger ; états vides explicites ; visite guidée de cinq étapes au plus.
+- Messages d'erreur qui disent quoi corriger ; états vides explicites ; infobulles rares ; visite guidée de cinq
+  étapes au plus, désactivable.
 - Gamification : aucune, sauf le classement entre groupes du simulateur (règle en cours de révision avec
   l'enseignant, voir `TRAVAIL_EN_COURS.md`).
 - Inspiration : logiciels suisses (Banana, Abacus, bexio). Charte, couleurs, police Inter, tailles et rayons par
@@ -141,3 +145,18 @@ seulement pour une question sur le passé. Travail en cours et décisions attend
 - Documents : `VISION_LOGICIEL.md` (feuille de route V1 à V12), `AUDIT_COMPTA_PME.md` et `AUDIT_COMPTA_PME_2.md`,
   `docs/simulateur-cahier-des-charges.md`, `docs/historique.md`.
 - Maquettes validées : `public/maquettes/` (les plus anciennes montrent des numéros de comptes LPG : archives).
+
+## Outils du projet (`.claude/`)
+
+- Sous-agents (`.claude/agents/`) : `relecteur` (lecture seule ; relit un changement avant commit), `expert-comptable`
+  (lecture seule ; vérifie écritures, corrigés, calculs et règles, cite les sources officielles), `testeur-ecrans`
+  (compile, Playwright, captures, axe ; n'écrit que des tests temporaires `e2e/zz-*`). Les appeler comme
+  `/fin-de-phase` l'indique, ou quand l'enseignant demande « fais relire ».
+- Commandes (`.claude/skills/`) : `/publier-apercu` et `/fusionner-main` (lancées seulement par l'enseignant),
+  `/guide`, `/fin-de-phase`.
+- Garde-fous (`.claude/settings.json`, scripts dans `.claude/hooks/`) : avant un commit, refus sur `main`, refus
+  d'une information privée (chemins de disque, motifs de `.claude/motifs-prives.local`, non versionné,
+  CLAUDE.local.md), puis `npm test` et `npm run check` (environ 30 s) ; avant un push, refus vers `main` et des
+  pushs forcés ; accord demandé pour `gh pr merge` et pour modifier CLAUDE.local.md ; rappel de `npm run guide`.
+  Un refus se corrige à la source, jamais en contournant le garde-fou. Désactiver tous les hooks :
+  `"disableAllHooks": true` dans `.claude/settings.local.json` (non versionné).

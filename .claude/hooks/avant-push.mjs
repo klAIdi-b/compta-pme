@@ -31,7 +31,10 @@ if (!pushs.length) process.exit(0);
 for (const args of pushs) {
   const options = args.filter((a) => a.startsWith('-'));
   const positions = args.filter((a) => !a.startsWith('-'));
-  if (options.some((o) => ['--force', '-f', '--force-with-lease', '--mirror', '--all', '--delete', '-d'].includes(o) || o.startsWith('--force'))) {
+  // Options longues interdites, et options courtes groupées contenant f (force) ou d (suppression), par ex. -uf.
+  const interdite = (o) =>
+    ['--mirror', '--all', '--delete'].includes(o) || o.startsWith('--force') || (/^-[a-zA-Z]+$/.test(o) && /[fd]/.test(o));
+  if (options.some(interdite)) {
     refuser(`option « ${options.join(' ')} » non permise. Seul un push simple vers apercu est autorisé.`);
   }
   const refs = positions.slice(1); // le premier mot est le dépôt distant (origin)
@@ -41,7 +44,8 @@ for (const args of pushs) {
     return /^(refs\/heads\/)?main$/.test(cible);
   };
   if (refs.some(versMain)) refuser("vers main. Poussez sur apercu, puis demandez à l'enseignant la fusion dans main.");
-  if (refs.length === 0) {
+  // Sans branche nommée, ou avec HEAD, c'est la branche active qui est poussée.
+  if (refs.length === 0 || refs.some((r) => (r.includes(':') ? r.split(':').pop() : r) === 'HEAD')) {
     const branche = execSync('git rev-parse --abbrev-ref HEAD', { cwd: racine, encoding: 'utf8' }).trim();
     if (branche === 'main') refuser("la branche active est main. Poussez sur apercu, puis demandez à l'enseignant la fusion dans main.");
   }
