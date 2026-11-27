@@ -418,7 +418,7 @@ Depuis l'éditeur, **« Imprimer l'énoncé »** et **« Imprimer le corrigé »
 
 ## g. Feuille de route
 
-Chaque phase est utilisable seule, livrée sur `apercu`, avec ses tests, une vérification dans le navigateur, le guide mis à jour (`npm run guide`), puis arrêt et attente de l'accord ; fusion dans `main` sur accord explicite. Maquettes avant chaque phase qui touche l'interface. Pour les phases L, équipe d'agents selon `PROMPT_EQUIPE.md` (moteur, interface, relecteur indépendant).
+Chaque phase est utilisable seule, livrée sur `apercu`, avec ses tests, une vérification dans le navigateur, le guide mis à jour (`npm run guide`), puis arrêt et attente de l'accord ; fusion dans `main` sur accord explicite. Maquettes avant chaque phase qui touche l'interface. Pour les phases L, sous-agents du projet (`.claude/agents/` : relecteur, expert-comptable, testeur d'écrans) et commande `/fin-de-phase`.
 
 | Phase | Contenu | Utile seule parce que… | Effort |
 |---|---|---|---|
