@@ -39,10 +39,10 @@ describe('formulaire officiel de décompte TVA', () => {
     });
   }
 
-  it('Électroménager du Rhône : exportation en 220, escompte accordé en 235', () => {
+  it('Électroménager des Acacias : exportation en 220, escompte accordé en 235', () => {
     const f = formulaireTva(dossierCorrige(dossierElectromenager));
-    expect(f.c220).toBe(chf(18500));
-    expect(f.c235).toBe(chf(600));
+    expect(f.c220).toBe(chf(16000));
+    expect(f.c235).toBe(chf(660));
     expect(f.parTaux.map((t) => t.chiffre)).toEqual(['303']);
     const champs = champsFormulaireTva(f).map((c) => c.cle);
     expect(champs).toEqual(['200', '220', '235', '289', '299', '303b', '303i', '399', '400', '405', '479', '500']);

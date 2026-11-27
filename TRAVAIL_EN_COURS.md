@@ -210,3 +210,5 @@ Corrections faites une à une, sur accord de l'enseignant, d'abord sur `apercu`.
   2 points dès trois lignes, mention « option Finances », abonnements 6500 ou 6700 admis, PDF par élève sans corrigé,
   provisions selon l'art. 960e al. 4 CO). Fusionné dans `main` le 27.11.2026 sur l'accord de l'enseignant (PR 28).
   Restent : droits de publication des contenus tirés des manuels, puis licence.
+- [x] 27.11.2026 : contenus construits sur les manuels, mêmes écritures, noms et montants changés (neuf exercices de
+  journal, quatre dossiers de pièces), corrigés recalculés et tests mis à jour, sur `apercu`. Correspondance dans `CLAUDE.md`.

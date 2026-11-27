@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { exercicesManuel, manuelFavre, manuelVinotheque } from '../src/data/exercices-manuel';
+import { exercicesManuel, manuelCaveEauxVives, manuelGolay } from '../src/data/exercices-manuel';
 import { boucler } from '../src/engine/closing';
 import type { Dossier } from '../src/engine/dossier';
 import { controlerExercice, creerDossier, type Exercice } from '../src/engine/exercice';
@@ -24,56 +24,58 @@ function dossierCorrige(ex: Exercice): Dossier {
 const attendus: Record<string, { resultat: number; soldes: Record<string, number> }> = {
   'manuel-cfc1-favre-evenements': {
     resultat: 0,
-    soldes: { '1020': 3290, '1010': 7265, '1000': 750, '1100': 0, '1510': 58200, '1530': 57500, '2010': -19305 },
+    soldes: { '1020': 4880, '1010': 8065, '1000': 1000, '1100': 0, '1510': 67350, '1530': 68800, '2010': -22825 },
   },
+  // Ventes 40'260.00 − déductions 849.60 − frais de ventes 280.00 + prélèvement 420.00 ; achats nets 30'000.00 − 852.00
+  // + frais 610.00 − variation de stock 3'000.00 ; loyer 3'100.00.
   'manuel-cfc1-vinotheque-des-paquis': {
-    resultat: 8553,
-    soldes: { '1020': 38863, '1000': 6100, '1100': 5550, '2000': -16340, '1200': 25500 },
+    resultat: 9692.4,
+    soldes: { '1020': 43542.4, '1000': 7750, '1100': 6460, '2000': -18980, '1200': 29000 },
   },
-  // Ventes 64'600.00 − achats nets 33'700.00 − autres charges 800.00 ; comptes de TVA soldés par le décompte.
+  // Ventes 74'600.00 − achats nets 37'400.00 − autres charges 930.00 ; comptes de TVA soldés par le décompte.
   'manuel-cfc2-maison-lacroix-tva': {
-    resultat: 30100,
+    resultat: 36270,
     soldes: {
-      '1000': 22727.8, '1010': 13157.2, '1020': 16714, '1100': 14800, '2000': -15729,
-      '1170': 0, '1171': 0, '2200': 0, '2205': 0, '2850': 12430,
+      '1000': 25687, '1010': 15019.4, '1020': 20438.6, '1100': 17100, '2000': -17810,
+      '1170': 0, '1171': 0, '2200': 0, '2205': 0, '2850': 15835,
     },
   },
-  // Ventes 34'700.00 − pertes nettes 33'391.50 + produits exceptionnels 15'050.00.
+  // Ventes 39'200.00 − pertes nettes 35'357.50 + produits exceptionnels 14'000.00.
   'manuel-cfc3-materiaux-brodard-creances': {
-    resultat: 16358.5,
-    soldes: { '1000': 6500, '1010': 20217, '1020': 70500, '1100': 19170, '1108': 19000, '1109': -958.5, '2000': -12070 },
+    resultat: 17842.5,
+    soldes: { '1000': 7500, '1010': 21780, '1020': 75500, '1100': 23750, '1108': 21000, '1109': -1187.5, '2000': -14800 },
   },
-  // Amortissements 58'869.00 (perte, aucune autre opération de résultat).
+  // Amortissements 63'749.00 (perte, aucune autre opération de résultat).
   'manuel-cfc3-imprimerie-mont-blanc-amortissements': {
-    resultat: -58869,
-    soldes: { '1500': 198000, '1509': -88500, '1549': -9600, '1510': 16000, '1521': 6480, '1530': 1, '1020': 32000 },
+    resultat: -63749,
+    soldes: { '1500': 212000, '1509': -96500, '1549': -10800, '1510': 18250, '1521': 7200, '1530': 1, '1020': 33000 },
   },
-  // Charges de l'exercice : assurances 3'000, réparations 3'900 + 6'000, salaires 32'000, intérêt 2'300.
+  // Charges de l'exercice : assurances 3'700, réparations 4'200 + 7'500, salaires 36'000, intérêt 2'400.
   'manuel-cfc3-truffaz-transports-transitoires': {
-    resultat: -47200,
-    soldes: { '1300': 18800, '2300': -44200, '1020': 98200, '6000': 0, '6500': 0, '6300': 3000 },
+    resultat: -53800,
+    soldes: { '1300': 21380, '2300': -50100, '1020': 104920, '6000': 0, '6500': 0, '6300': 3700 },
   },
-  // Produits 1'557'450.00 − charges 1'175'030.00 − ducroire 2'500.00.
+  // Produits 1'713'100.00 − charges 1'295'275.00.
   'manuel-cfc4-lambert-horlogerie-cloture': {
-    resultat: 379920,
+    resultat: 417825,
     soldes: {
-      '1020': 390000, '1010': 7700, '1100': 350000, '1109': -17500, '1200': 360000, '1510': 24000, '1521': 14000,
-      '1539': -27000, '1609': -47200, '1300': 1700, '2300': -26380, '2000': -95000, '2850': -31400,
+      '1020': 429000, '1010': 8440, '1100': 385000, '1109': -19250, '1200': 396000, '1510': 26400, '1521': 15400,
+      '1539': -29700, '1609': -51920, '1300': 1880, '2300': -29085, '2000': -104500, '2850': -34540,
     },
   },
-  // Frais de fondation 2'620.00 et d'augmentation 6'500.00 ; 40'000.00 encore à libérer.
+  // Frais de fondation 2'885.50 et d'augmentation 7'200.00 ; 48'000.00 encore à libérer.
   'manuel-mp3-zephyr-automation-fondation': {
-    resultat: -9120,
-    soldes: { '1850': 40000, '1860': 0, '1020': 215380, '2800': -300000, '2810': -50000, '2900': -20000, '1109': -3000, '1100': 30000 },
+    resultat: -10085.5,
+    soldes: { '1850': 48000, '1860': 0, '1020': 273314.5, '2800': -360000, '2810': -60000, '2900': -30000, '1109': -3200, '1100': 32000 },
   },
-  // Produits des titres 4'303.00 − droits de garde 50.00.
+  // Produits des titres 4'938.50 − droits de garde 60.00.
   'manuel-mp4-rive-gauche-participations-titres': {
-    resultat: 4253,
-    soldes: { '1060': 74000, '1176': 0, '1300': 175, '1020': 250078 },
+    resultat: 4878.5,
+    soldes: { '1060': 71000, '1176': 0, '1300': 262.5, '1020': 283616 },
   },
 };
 
-describe('exercices tirés du manuel E&S (CFC) et de F&C (MP)', () => {
+describe('exercices construits sur les cas du manuel E&S (CFC) et de F&C (MP)', () => {
   for (const ex of exercicesManuel) {
     describe(ex.titre, () => {
       it("passe le contrôle de l'exercice sans erreur ni avertissement", () => {
@@ -104,45 +106,45 @@ describe('exercices tirés du manuel E&S (CFC) et de F&C (MP)', () => {
     });
   }
 
-  it("Favre Événements : la fiche « Bilan d'ouverture » donne une fortune nette de 86'400.00", () => {
-    const b = bilanOuverture(manuelFavre.ouvertureActif, manuelFavre.ouverturePassif);
-    expect(b.totaux.actifsCirculants).toBe(chf(29900));
-    expect(b.totaux.actifsImmobilises).toBe(chf(103000));
-    expect(b.fortuneNette).toBe(chf(86400));
+  it("Golay Événements : la fiche « Bilan d'ouverture » donne une fortune nette de 100'110.00", () => {
+    const b = bilanOuverture(manuelGolay.ouvertureActif, manuelGolay.ouverturePassif);
+    expect(b.totaux.actifsCirculants).toBe(chf(35610));
+    expect(b.totaux.actifsImmobilises).toBe(chf(120000));
+    expect(b.fortuneNette).toBe(chf(100110));
   });
 
-  it('Vinothèque des Pâquis : marge brute et échelle des prix', () => {
-    const r = margeBrute(dossierCorrige(manuelVinotheque));
-    expect(r.can).toBe(chf(34823));
-    expect(r.prama).toBe(chf(25970));
-    expect(r.prmv).toBe(chf(23470));
-    expect(r.margeBrute).toBe(chf(11353));
-    const e = echelle(manuelVinotheque.parametres.echellePrix!);
-    expect([e.pac, e.pan, e.pra, e.pr, e.pvn, e.pvb].map((c) => c / 100)).toEqual([85.5, 83.79, 90, 112.5, 135, 150]);
+  it('Cave des Eaux-Vives : marge brute et échelle des prix', () => {
+    const r = margeBrute(dossierCorrige(manuelCaveEauxVives));
+    expect(r.can).toBe(chf(39550.4));
+    expect(r.prama).toBe(chf(29758));
+    expect(r.prmv).toBe(chf(26758));
+    expect(r.margeBrute).toBe(chf(12792.4));
+    const e = echelle(manuelCaveEauxVives.parametres.echellePrix!);
+    expect([e.pac, e.pan, e.pra, e.pr, e.pvn, e.pvb].map((c) => c / 100)).toEqual([114, 111.72, 120, 150, 180, 200]);
   });
 });
 
-describe('dossiers de pièces tirés des chapitres 1 et 12', () => {
-  it('Garage du Pont-Rouge : résultat et soldes de contrôle', async () => {
+describe('dossiers de pièces construits sur les chapitres 1 et 12', () => {
+  it('Garage de la Praille : résultat et soldes de contrôle', async () => {
     const { dossierGarage } = await import('../src/data/dossiers/cfc-manuel');
     const d = dossierCorrige(dossierGarage);
-    expect(compteDeResultat(d).resultat).toBe(chf(1850 + 420 - 2600));
-    expect(soldeDe(d, '1020')).toBe(chf(24000 - 17100 - 2600 + 1850 + 10000 - 5000));
-    expect(soldeDe(d, '1530')).toBe(chf(46000));
-    expect(soldeDe(d, '2010')).toBe(chf(-(2800 + 18000 - 900 - 17100 + 2300 + 32000)));
+    expect(compteDeResultat(d).resultat).toBe(chf(2100 + 480 - 2900));
+    expect(soldeDe(d, '1020')).toBe(chf(28000 - 19950 - 2900 + 2100 + 12000 - 6000));
+    expect(soldeDe(d, '1530')).toBe(chf(52000));
+    expect(soldeDe(d, '2010')).toBe(chf(-(3200 + 21000 - 1050 - 19950 + 2540 + 36000)));
     expect(boucler(d).ok).toBe(true);
   });
 
-  it('Hi-Fi Plainpalais : escompte, marge brute et variation de stock', async () => {
-    const { dossierHifi } = await import('../src/data/dossiers/cfc-manuel');
-    const d = dossierCorrige(dossierHifi);
-    expect(soldeDe(d, '4209')).toBe(chf(-171));
-    expect(soldeDe(d, '1200')).toBe(chf(63400));
+  it('Son & Image Servette : escompte, marge brute et variation de stock', async () => {
+    const { dossierSonImage } = await import('../src/data/dossiers/cfc-manuel');
+    const d = dossierCorrige(dossierSonImage);
+    expect(soldeDe(d, '4209')).toBe(chf(-187.2));
+    expect(soldeDe(d, '1200')).toBe(chf(66800));
     const r = margeBrute(d);
-    expect(r.can).toBe(chf(7985));
-    expect(r.prama).toBe(chf(8759));
-    expect(r.prmv).toBe(chf(5359));
-    expect(r.margeBrute).toBe(chf(2626));
+    expect(r.can).toBe(chf(8835));
+    expect(r.prama).toBe(chf(9592.8));
+    expect(r.prmv).toBe(chf(5792.8));
+    expect(r.margeBrute).toBe(chf(3042.2));
     expect(boucler(d).ok).toBe(true);
   });
 });

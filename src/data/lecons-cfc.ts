@@ -97,9 +97,9 @@ export const LECONS_CFC: Record<string, PartieLecon[]> = {
         "L'escompte pour paiement rapide, avec sa correction de la TVA, est vu en maturité professionnelle.",
       ],
       exemples: [
-        ex("Des marchandises reçues sont défectueuses : le fournisseur accorde un rabais de 540.50 TVA comprise.", {
-          lignes: ["Rabais TVA comprise : 540.50, dont 500.00 hors taxe et 40.50 de TVA (8,1 %)."],
-          tableau: T(['Débit', 'Crédit'], ["Dettes fournisseurs 540.50", "Achats de marchandises 500.00 et IP s/marchandises et services 40.50"]),
+        ex("Des marchandises reçues sont défectueuses : le fournisseur accorde un rabais de 648.60 TVA comprise.", {
+          lignes: ["Rabais TVA comprise : 648.60, dont 600.00 hors taxe et 48.60 de TVA (8,1 %)."],
+          tableau: T(['Débit', 'Crédit'], ["Dettes fournisseurs 648.60", "Achats de marchandises 600.00 et IP s/marchandises et services 48.60"]),
         }),
       ],
       retenir: "Rabais obtenu : la dette diminue du montant TVA comprise ; l'achat et l'impôt préalable diminuent chacun de leur part.",
