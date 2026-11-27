@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "deny": [
+      "Bash(git push origin main)",
+      "Bash(git push origin main *)",
+      "Bash(git push --force *)",
+      "Bash(git push -f *)"
+    ],
+    "ask": [
+      "Bash(gh pr merge *)",
+      "Edit(./CLAUDE.local.md)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "if": "Bash(git commit *)",
+            "command": "node",
+            "args": ["${CLAUDE_PROJECT_DIR}/.claude/hooks/avant-commit.mjs"],
+            "timeout": 300,
+            "statusMessage": "Garde-fou : branche, confidentialité, tests et types avant le commit"
+          },
+          {
+            "type": "command",
+            "if": "Bash(git push *)",
+            "command": "node",
+            "args": ["${CLAUDE_PROJECT_DIR}/.claude/hooks/avant-push.mjs"],
+            "timeout": 30,
+            "statusMessage": "Garde-fou : pas de push sur main"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node",
+            "args": ["${CLAUDE_PROJECT_DIR}/.claude/hooks/rappel-guide.mjs"],
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
