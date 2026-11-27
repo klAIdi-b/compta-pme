@@ -30,8 +30,9 @@ seulement pour une question sur le passé. Travail en cours et décisions attend
 ## Dépôt public et données
 
 - Le dépôt GitHub est public : jamais le nom de l'école ni un chemin de ses disques dans un fichier versionné.
-- Contenus construits sur les manuels du cours : reformulés, entreprises genevoises fictives, noms et montants changés,
-  jamais de copie mot pour mot ; PDF verrouillés jamais contournés. Règles d'usage dans `CLAUDE.local.md`.
+- Contenus construits sur les manuels du cours : dans le dépôt seulement s'ils sont transformés (mêmes écritures,
+  entreprise genevoise fictive, noms, montants et textes changés, corrigé recalculé) ; sinon dans le dossier réservé
+  à l'école (`CLAUDE.local.md`). Jamais de copie mot pour mot ; PDF verrouillés jamais contournés.
 - 100 % navigateur : aucune donnée d'élève en ligne (LPD, LIPAD). Stockage localStorage, échanges par fichiers.
   Seule exception (accord de l'école) : le simulateur d'entreprise échange en ligne des données anonymes du jeu
   (code de partie, nom d'équipe, décisions, résultats), jamais un nom d'élève, une saisie comptable ni une note ;
@@ -126,8 +127,10 @@ seulement pour une question sur le passé. Travail en cours et décisions attend
   dans une liste déroulante ; numéro en petit ; Tab choisit le compte désigné, comme Entrée.
 - Messages d'erreur qui disent quoi corriger ; états vides explicites ; infobulles rares ; visite guidée de cinq
   étapes au plus, désactivable.
-- Gamification : aucune, sauf le classement entre groupes du simulateur (règle en cours de révision avec
-  l'enseignant, voir `TRAVAIL_EN_COURS.md`).
+- Gamification (décision du 27.11.2026) : permise seulement si elle récompense une maîtrise prouvée par le
+  logiciel (paliers par notion, carte de progression, écritures trouvées sans la solution, défi de classe projeté).
+  Interdits : points, badges à collectionner, classement individuel, mascotte, récompense du temps ou des clics.
+  Rien en ligne, aucun effet sur la note. Seul classement : entre groupes, dans le simulateur.
 - Inspiration : logiciels suisses (Banana, Abacus, bexio). Charte, couleurs, police Inter, tailles et rayons par
   variables, exceptions de l'accueil : `.claude/rules/interface.md`. WCAG AA ; ordinateur, tablette, téléphone,
   projecteur. Aucun émoji.

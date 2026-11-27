@@ -32,7 +32,9 @@ de `CLAUDE.md`. Toute nouvelle interface passe d'abord par une maquette dans `pu
   survol des cartes, aucun émoji, aucune illustration, aucune animation superflue.
 - Exception de l'accueil (`Accueil.svelte` seulement) : visuels qui montrent la comptabilité, animations courtes qui
   ont un sens (coupées par `prefers-reduced-motion`), survol animé des cartes. Interdits partout : émojis, points,
-  badges, classements (sauf le simulateur), mascotte, dégradés décoratifs, verre dépoli, textes marketing creux.
+  badges à collectionner, classement individuel (seul le simulateur classe des groupes), mascotte, dégradés
+  décoratifs, verre dépoli, textes marketing creux. Gamification permise seulement pour une maîtrise prouvée
+  (voir `CLAUDE.md`).
 
 ## Navigation
 
