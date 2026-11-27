@@ -5,8 +5,8 @@ attend une décision ; les chantiers terminés sont dans `docs/historique.md`. L
 
 ## En cours
 
-- 27.11.2026 : outillage de Claude Code (CLAUDE.md court, règles dans `.claude/rules/`, hooks, sous-agents,
-  commandes). Un commit par point sur `apercu`, à fusionner dans `main` sur accord de l'enseignant.
+- Rien. Dernier chantier : outillage de Claude Code (CLAUDE.md court, règles dans `.claude/rules/`, garde-fous,
+  sous-agents, commandes), fusionné dans `main` le 27.11.2026 sur l'accord de l'enseignant (PR 32).
 
 ## Prochaine étape
 
