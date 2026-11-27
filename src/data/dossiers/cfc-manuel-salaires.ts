@@ -82,7 +82,7 @@ const ecritureFiche = (r: typeof s2) => {
 
 export const dossierPatisserie = construireDossier(
   {
-    id: 'dossier-cfc3-confiserie-bourg-de-four-salaires',
+    id: 'dossier-cfc3-patisserie-molard-salaires',
     titre: 'Pâtisserie du Molard — dossier de pièces, décomptes de salaire de juin',
     niveau: 'CFC2',
     filiere: 'CFC',

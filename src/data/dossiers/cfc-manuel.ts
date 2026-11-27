@@ -1,6 +1,6 @@
 // Dossiers CFC, niveau 1, construits sur la structure de cas du manuel E&S 2019 (vol. 1 ch. 1 et vol. 2 ch. 12) :
 // droits d'utilisation obtenus par l'enseignant (09.11.2026). Décision de l'enseignant du 27.11.2026 : mêmes écritures,
-// noms et montants changés. Entreprises, personnes et numéros fictifs ; identifiants gardés pour les copies rendues.
+// noms et montants changés. Entreprises, personnes et numéros fictifs ; identifiants renommés le 27.11.2026.
 import { avisBancaire, facture, noteCredit, noteInterne, quittance, ticket } from '../../engine/pieces';
 import { BANQUE, C, construireDossier, D, f, S } from './outils';
 
@@ -70,7 +70,7 @@ const g12 = facture({
 
 export const dossierGarage = construireDossier(
   {
-    id: 'dossier-cfc1-garage-pont-rouge',
+    id: 'dossier-cfc1-garage-praille',
     titre: 'Garage de la Praille — dossier de pièces, premier trimestre',
     niveau: 'CFC1',
     filiere: 'CFC',
@@ -190,7 +190,7 @@ const h12 = noteInterne({
 
 export const dossierSonImage = construireDossier(
   {
-    id: 'dossier-cfc1-hifi-plainpalais',
+    id: 'dossier-cfc1-son-image-servette',
     titre: 'Son & Image Servette — dossier de pièces, marchandises',
     niveau: 'CFC1',
     filiere: 'CFC',

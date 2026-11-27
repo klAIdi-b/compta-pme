@@ -211,4 +211,7 @@ Corrections faites une à une, sur accord de l'enseignant, d'abord sur `apercu`.
   provisions selon l'art. 960e al. 4 CO). Fusionné dans `main` le 27.11.2026 sur l'accord de l'enseignant (PR 28).
   Restent : droits de publication des contenus tirés des manuels, puis licence.
 - [x] 27.11.2026 : contenus construits sur les manuels, mêmes écritures, noms et montants changés (neuf exercices de
-  journal, quatre dossiers de pièces), corrigés recalculés et tests mis à jour, sur `apercu`. Correspondance dans `CLAUDE.md`.
+  journal, quatre dossiers de pièces), corrigés recalculés et tests mis à jour. Correspondance dans `CLAUDE.md`. Fusionné
+  dans `main` le 27.11.2026 sur l'accord de l'enseignant (PR 29).
+- [x] 27.11.2026 : identifiants de ces treize contenus renommés (anciens liens redirigés, anciennes copies refusées avec
+  un message), sur `apercu`.

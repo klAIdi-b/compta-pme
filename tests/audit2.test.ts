@@ -249,3 +249,14 @@ describe('décisions de l’enseignant du 26.11.2026', () => {
     expect(operationsNonReecrites(reecrite)).toHaveLength(2);
   });
 });
+
+describe('identifiants renommés le 27.11.2026', () => {
+  it('chaque ancien identifiant mène à un exercice existant, et aucun exercice ne garde un ancien identifiant', async () => {
+    const { ANCIENS_IDS } = await import('../src/ui/lien');
+    const ids = new Set(exercicesDemo.map((x) => x.id));
+    for (const [ancien, nouveau] of Object.entries(ANCIENS_IDS)) {
+      expect(ids.has(nouveau), nouveau).toBe(true);
+      expect(ids.has(ancien), ancien).toBe(false);
+    }
+  });
+});
