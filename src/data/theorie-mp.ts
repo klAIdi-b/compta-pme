@@ -243,7 +243,7 @@ export function enrichirMp(chapitres: Chapitre[]): Chapitre[] {
           { terme: 'Provision', definition: 'dette probable, dont le montant ou la date sont incertains.' },
           { terme: 'Constitution', definition: 'création ou augmentation de la provision, par une charge.' },
           { terme: 'Utilisation', definition: 'paiement de la dépense prévue, au débit de la provision.' },
-          { terme: 'Dissolution', definition: "annulation d'une provision devenue inutile." },
+          { terme: 'Dissolution', definition: "annulation d'une provision devenue inutile ; permise, mais pas obligatoire (art. 960e al. 4 CO)." },
         ],
         apres: {
           Principe: [
@@ -258,7 +258,7 @@ export function enrichirMp(chapitres: Chapitre[]): Chapitre[] {
             {
               type: 'exemple',
               enonce: "Une provision de 5'000.00 a été constituée pour une réparation. La réparation coûte finalement 4'200.00, payés par la banque.",
-              calcul: ["Utilisation : 4'200.00.", "Il reste 800.00 de provision sans objet : on la dissout par le compte de charge d'origine."],
+              calcul: ["Utilisation : 4'200.00.", "Il reste 800.00 de provision sans objet : la loi permet de la garder, mais on choisit ici de la dissoudre, par le compte de charge d'origine."],
               lignes: [...s('2600', '1020', 4200), ...s('2600', '6100', 800)],
               effets: { actif: "Banque − 4'200.00", passif: "Provision − 5'000.00", resultat: 'Charges − 800.00 : le bénéfice augmente' },
               variante: {
@@ -273,7 +273,11 @@ export function enrichirMp(chapitres: Chapitre[]): Chapitre[] {
         erreurs: [
           { erreur: 'Repasser la dépense en charge au moment du paiement.', correction: 'La charge a été comptée à la constitution : le paiement débite la provision.' },
           { erreur: 'Créditer la banque à la constitution.', correction: "Aucun argent ne sort : on crédite le compte de provision." },
-          { erreur: 'Laisser au bilan une provision sans objet.', correction: 'Une provision devenue inutile est dissoute.' },
+          {
+            erreur: 'Croire qu’une provision devenue inutile doit obligatoirement être dissoute.',
+            correction:
+              "La loi permet de la garder (art. 960e al. 4 CO) : elle devient alors une réserve latente. Si on la dissout, on crédite le compte de charge d'origine.",
+          },
         ],
         questions: [
           { question: "Provision pour impôts de 6'000.00 à constituer. Quelle écriture ?", reponse: "Impôts / Provision pour impôts, 6'000.00." },

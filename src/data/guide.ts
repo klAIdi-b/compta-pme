@@ -357,8 +357,9 @@ export const GUIDE: PartieGuide[] = [
               'Les élèves indiquent leur nom et leur classe, travaillent, puis cliquent sur « Exporter ma copie » et vous ' +
                 'remettent le fichier.',
               'Évaluation : « Variante d’évaluation » crée dans vos exercices une copie dont tous les montants sont ' +
-                'multipliés par un même nombre ; les opérations et les comptes ne changent pas. Modifiez au moins quelques ' +
-                'opérations, faites passer l’épreuve en classe, puis exportez-la pour les élèves ; son corrigé reste chez vous.',
+                'multipliés par un même nombre. L’éditeur vous indique trois opérations à réécrire (texte et nouveau corrigé) : ' +
+                'elles ne sont citées par aucune autre, les liens de l’exercice restent justes. Faites passer l’épreuve en ' +
+                'classe, puis exportez-la pour les élèves ; son corrigé reste chez vous.',
               'Correction : onglet « Copies », importez les fichiers reçus (notes, erreurs, CSV, PDF).',
               'Sauvegardez vos exercices et partagez la sauvegarde avec vos collègues.',
             ],
@@ -453,7 +454,8 @@ export const GUIDE: PartieGuide[] = [
                 'plusieurs écritures simples avec le même numéro de pièce, c’est accepté.',
               'La date n’est pas contrôlée ; les montants le sont à 5 centimes près.',
               'Points partiels : cochez l’option pour accorder une partie des points sur les écritures touchant au moins trois ' +
-                'comptes.',
+                'comptes ou côtés. Ces écritures valent 2 points par défaut (1 point pour les autres) ; par exemple, sur 2 points, ' +
+                'un élève qui a juste 2 lignes sur 3 sans ligne en trop obtient 1 point (2 × 2 ÷ 3 = 1,33, au demi-point inférieur).',
               "Exercices tirés d'un manuel : reformulez l'énoncé et changez les données (entreprise, montants). Les manuels " +
                 'protégés ne doivent pas être recopiés dans un fichier distribué.',
             ],
@@ -634,6 +636,8 @@ export const GUIDE: PartieGuide[] = [
               '« Exporter les résultats (CSV) » produit un fichier qui s’ouvre dans Excel.',
               '« Copies corrigées (PDF) » produit un seul document pour la classe : le tableau des notes, puis une page par ' +
                 'élève avec le résultat de chaque opération et, pour les erreurs, ses écritures à côté du corrigé.',
+              '« Un PDF par élève (ZIP) » produit une archive avec un PDF par élève, à déposer dans Classroom : la note et le ' +
+                'résultat de chaque opération, sans le corrigé (cochez « avec le corrigé » quand toutes les classes ont passé l’épreuve).',
             ],
           },
           {

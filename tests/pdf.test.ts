@@ -39,3 +39,24 @@ describe('PDF des copies corrigées', () => {
     for (const t of ['Copies corrig', 'Martin L', 'Corrig', 'Page 2 /']) expect(texte).toContain(t);
   });
 });
+
+describe('PDF rendu à un élève (décision du 26.11.2026)', () => {
+  it('une seule page, sans résultats de la classe ni corrigé', async () => {
+    const { genererPdfCopiesCorrigees } = await import('../src/pdf/copies-corrigees');
+    const { corrigerCopie } = await import('../src/engine/notation');
+    let d = creerDossier(demoCfc2, plan);
+    const c1 = demoCfc2.corrige![0]!;
+    const r = ajouterEcriture(d, {
+      id: 'E1', date: demoCfc2.operations[0]!.date, piece: c1.piece, libelle: 'faux',
+      lignes: c1.lignes.map((l) => ({ debit: l.credit, credit: l.debit, montant: l.montant })),
+    });
+    if (r.ok) d = r.valeur;
+    const copie = { eleve: { prenom: 'Léa', nom: 'Martin', classe: '2CFC1' }, exerciceId: demoCfc2.id, exerciceTitre: demoCfc2.titre, mode: demoCfc2.mode, dossier: d, suivi: {}, exporteLe: '2026-11-06T10:00:00Z' };
+    const blob = await genererPdfCopiesCorrigees(demoCfc2, [{ copie, correction: corrigerCopie(demoCfc2, d) }], 'eleve.pdf', { classe: false, corrige: false });
+    const texte = await blob.text();
+    expect(texte).toContain('Vos ');
+    expect(texte).not.toContain('Copies corrig');
+    expect(texte).not.toContain('Corrigé :');
+    expect(texte).toContain('Page 1 /');
+  });
+});

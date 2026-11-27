@@ -55,6 +55,11 @@ export interface Operation {
 export interface EcritureCorrigee {
   piece: string;
   lignes: LigneEcriture[];
+  /**
+   * Autres écritures admises comme justes (décision de l'enseignant du 26.11.2026, par exemple un abonnement en 6500
+   * ou en 6700). La solution montrée à l'élève et les points partiels suivent `lignes`.
+   */
+  variantes?: LigneEcriture[][];
 }
 
 export type Filiere = 'CFC' | 'MP';
@@ -68,6 +73,11 @@ export interface Exercice {
   filiere?: Filiere;
   /** Niveau de difficulté dans la formation : 1 = le plus simple. */
   difficulte?: number;
+  /**
+   * Variante d'évaluation : opérations que l'enseignant doit réécrire (texte et corrigé) avant de l'exporter, avec leur
+   * texte d'origine (assistant de réécriture, 26.11.2026).
+   */
+  aReecrire?: { numero: string; texte: string }[];
   /** Sujets traités, affichés aux élèves (par exemple « TVA », « Amortissements »). */
   sujets?: string[];
   raisonSociale: string;
@@ -381,9 +391,9 @@ export const LIBELLES_FILIERE: Record<Filiere, string> = { CFC: 'CFC', MP: 'Matu
 export const TITRES_DIFFICULTE: Record<Filiere, Record<number, string>> = {
   CFC: {
     1: 'Bases : bilan, comptes, journal, bouclement',
-    2: 'TVA',
-    3: 'Opérations de clôture : amortissements, transitoires, créances, salaires',
-    4: 'Synthèse de plusieurs chapitres',
+    2: 'TVA (option Finances)',
+    3: 'Opérations de clôture : amortissements, transitoires, créances, salaires (option Finances)',
+    4: 'Synthèse de plusieurs chapitres (option Finances)',
   },
   MP: {
     1: 'Opérations financières et commerciales : intérêts, impôt anticipé, escomptes, monnaies étrangères',
@@ -404,8 +414,16 @@ export function difficulteDe(ex: Pick<Exercice, 'difficulte'>): number {
 }
 
 /** « CFC · niveau 3 » */
+/**
+ * Contenu de l'option Finances du plan de formation CFC (c6 : TVA comptabilisée, clôture, salaires) : niveaux CFC 2 à 4.
+ * Décision de l'enseignant du 26.11.2026 : ces contenus sont marqués « option Finances », sans être déplacés.
+ */
+export function estOptionFinances(ex: Pick<Exercice, 'filiere' | 'niveau' | 'difficulte'>): boolean {
+  return filiereDe(ex) === 'CFC' && difficulteDe(ex) >= 2;
+}
+
 export function etiquetteNiveau(ex: Pick<Exercice, 'filiere' | 'niveau' | 'difficulte'>): string {
-  return `${filiereDe(ex)} · niveau ${difficulteDe(ex)}`;
+  return `${filiereDe(ex)} · niveau ${difficulteDe(ex)}${estOptionFinances(ex) ? ' · option Finances' : ''}`;
 }
 
 export interface GroupeExercices {

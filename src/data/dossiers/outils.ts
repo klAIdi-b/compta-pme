@@ -24,6 +24,8 @@ export interface ElementDossier {
   date: DateISO;
   piece: PieceComptable;
   lignes: LigneEcriture[];
+  /** Autres écritures admises comme justes (voir `EcritureCorrigee.variantes`). */
+  variantes?: LigneEcriture[][];
 }
 
 function majusculeInitiale(t: string): string {
@@ -49,7 +51,7 @@ export function construireDossier(
   elements.forEach((e, i) => {
     const numero = String(i + 1);
     operations.push({ numero, date: e.date, texte: texteDePiece(e.piece), piece: e.piece });
-    corrige.push({ piece: numero, lignes: e.lignes });
+    corrige.push({ piece: numero, lignes: e.lignes, ...(e.variantes ? { variantes: e.variantes } : {}) });
   });
   const { parametres, ...reste } = base;
   return {

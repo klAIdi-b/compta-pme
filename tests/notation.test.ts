@@ -78,7 +78,8 @@ describe('correction d\'une copie et synthèse', () => {
   it('applique le barème de l\'enseignant', () => {
     const ex = { ...demoCfc1, bareme: { '1': 5 } };
     const c = corrigerCopie(ex, dossierAvec(['1']));
-    expect(c.max).toBe(19);
+    // 15 opérations : 5 points pour l'op. 1, 2 points par défaut pour l'écriture composée (op. 14), 1 pour les autres.
+    expect(c.max).toBe(20);
     expect(c.points).toBe(5);
   });
 

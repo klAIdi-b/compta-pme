@@ -260,7 +260,8 @@ export const manuelLacroix: Exercice = {
     { piece: '8', lignes: [D('2000', 540.5), C('4200', 500), C('1170', 40.5)] },
     { piece: '9', lignes: s('2000', '1020', 26700.7) },
     { piece: '10', lignes: [D('4200', 9000), D('1170', 729), C('2000', 9729)] },
-    { piece: '11', lignes: [D('6700', 400), D('1171', 10.4), C('1010', 410.4)] },
+    // Abonnement : 6700 ou 6500 admis (décision de l'enseignant du 26.11.2026).
+    { piece: '11', lignes: [D('6700', 400), D('1171', 10.4), C('1010', 410.4)], variantes: [[D('6500', 400), D('1171', 10.4), C('1010', 410.4)]] },
     { piece: '12', lignes: [D('1000', 32430), C('3200', 30000), C('2200', 2430)] },
     { piece: '13', lignes: [D('1020', 20000), D('2850', 12430), C('1000', 32430)] },
     { piece: '14', lignes: [D('2200', 4357.8), C('1170', 2729.7), C('1171', 42.8), C('2205', 1585.3)] },
@@ -422,10 +423,11 @@ export const manuelTruffaz: Exercice = {
     { piece: '1', lignes: s('6300', '1020', 2400) },
     { piece: '2', lignes: s('6300', '1020', 3000) },
     { piece: '3', lignes: s('6000', '1020', 15000) },
-    { piece: '4', lignes: s('6500', '1020', 600) },
+    // Abonnements : 6500 ou 6700 admis (décision de l'enseignant du 26.11.2026), ici et à l'opération 7.
+    { piece: '4', lignes: s('6500', '1020', 600), variantes: [s('6700', '1020', 600)] },
     { piece: '5', lignes: s('6300', '1020', 800) },
     { piece: '6', lignes: s('1300', '6000', 15000) },
-    { piece: '7', lignes: s('1300', '6500', 600) },
+    { piece: '7', lignes: s('1300', '6500', 600), variantes: [s('1300', '6700', 600)] },
     { piece: '8', lignes: s('1300', '6300', 800) },
     { piece: '9', lignes: s('1300', '6300', 400) }, // 2 mois sur 12
     { piece: '10', lignes: s('1300', '6300', 2000) }, // 4 mois sur 6
@@ -517,7 +519,7 @@ export const manuelLambert: Exercice = {
     { piece: '4', lignes: s('2000', '1020', 880000) },
     { piece: '5', lignes: s('5200', '1020', 180000) },
     { piece: '6', lignes: s('6500', '1020', 18000) },
-    { piece: '7', lignes: s('6500', '1010', 300) },
+    { piece: '7', lignes: s('6500', '1010', 300), variantes: [s('6700', '1010', 300)] }, // abonnement : 6500 ou 6700 admis
     { piece: '8', lignes: s('1020', '8100', 60000) },
     { piece: '9', lignes: s('8000', '1020', 12000) },
     { piece: '10', lignes: s('2850', '1020', 40000) },
@@ -527,7 +529,7 @@ export const manuelLambert: Exercice = {
     { piece: '14', lignes: s('6800', '1539', 12000) },
     { piece: '15', lignes: s('8000', '1609', 7200) }, // (400'000 − 40'000) × 2 %
     { piece: '16', lignes: s('6900', '2300', 8200) },
-    { piece: '17', lignes: s('1300', '6500', 250) }, // 10 mois sur 12
+    { piece: '17', lignes: s('1300', '6500', 250), variantes: [s('1300', '6700', 250)] }, // 10 mois sur 12 ; 6500 ou 6700 admis
     { piece: '18', lignes: s('8100', '2300', 3750) },
     { piece: '19', lignes: s('1300', '8100', 1200) },
     { piece: '20', lignes: s('8000', '2300', 2250) }, // 250'000 × 3,6 % × 3/12
