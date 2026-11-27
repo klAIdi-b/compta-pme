@@ -255,3 +255,6 @@ Règles : une phase à la fois sur `apercu`, maquette avant l'interface, tests, 
   ouverture et annulation de l'année suivante, bilan d'ouverture reporté, consultation d'une année clôturée, copie de
   l'exercice de l'énoncé. Rappels de clôture par année : non faits, liste de l'enseignant attendue. Reste : accord de
   l'enseignant sur V5.
+- 27.11.2026 : V5 publiée sur la prévisualisation (commit `53340e0`). Phases V1 à V5 fusionnées dans `main` sur l'accord de
+  l'enseignant (« Fusionner dans main », PR 31) et publiées sur le site des élèves. Suite : V6 (variantes par élève), sur
+  maquette, quand l'enseignant le demandera.
