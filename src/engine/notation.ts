@@ -39,6 +39,14 @@ export function estMultiple(c: EcritureCorrigee): boolean {
   return agreger(c.lignes).size >= 3;
 }
 
+/**
+ * Barème par défaut d'une opération (décision de l'enseignant du 26.11.2026) : 2 points pour une écriture multiple
+ * (au moins trois comptes ou côtés), pour que les points partiels aient un effet ; 1 point sinon.
+ */
+export function pointsParDefaut(c: EcritureCorrigee | undefined): number {
+  return c && estMultiple(c) ? 2 : POINTS_PAR_DEFAUT;
+}
+
 const auDemiPointInferieur = (x: number) => Math.floor(x * 2 + 1e-9) / 2;
 
 export interface ResultatOperation {
@@ -100,7 +108,7 @@ export function corrigerCopie(ex: Exercice, d: Dossier, fiches?: { facturation?:
   const ecritures = ecrituresPourNotation(d, ex);
   const operations = (ex.corrige ?? [])
     .filter((c) => ex.operations.some((o) => o.numero === c.piece))
-    .map((c) => pointsOperation(ecritures, c, bareme[c.piece] ?? POINTS_PAR_DEFAUT, partiels));
+    .map((c) => pointsOperation(ecritures, c, bareme[c.piece] ?? pointsParDefaut(c), partiels));
   if (bouclementCorrige(ex)) {
     const max = bareme[PIECE_BOUCLEMENT] ?? POINTS_BOUCLEMENT_PAR_DEFAUT;
     const c = corrigeBouclement(d, ex);

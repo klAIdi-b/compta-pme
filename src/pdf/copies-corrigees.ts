@@ -22,7 +22,19 @@ export interface CopieCorrigee {
 
 const fmt = (x: number) => (Number.isInteger(x) ? String(x) : x.toFixed(1));
 
-export async function genererPdfCopiesCorrigees(ex: Exercice, copies: CopieCorrigee[], nomDocument: string): Promise<Blob> {
+/**
+ * Options : `classe` (page des résultats de la classe, par défaut oui) et `corrige` (écritures attendues à côté de celles
+ * de l'élève, par défaut oui). Le PDF rendu à un élève n'a ni l'une ni l'autre tant que toutes les classes n'ont pas
+ * passé l'épreuve (décision de l'enseignant du 26.11.2026).
+ */
+export async function genererPdfCopiesCorrigees(
+  ex: Exercice,
+  copies: CopieCorrigee[],
+  nomDocument: string,
+  options: { classe?: boolean; corrige?: boolean } = {},
+): Promise<Blob> {
+  const avecClasse = options.classe ?? true;
+  const avecCorrige = options.corrige ?? true;
   const { jsPDF } = await import('jspdf');
   const { autoTable } = await import('jspdf-autotable');
   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
@@ -33,6 +45,7 @@ export async function genererPdfCopiesCorrigees(ex: Exercice, copies: CopieCorri
     p === PIECE_BOUCLEMENT ? 'Écritures de bouclement' : (ex.operations.find((o) => o.numero === p)?.texte ?? '');
 
   // Page 1 : résultats de la classe.
+  if (avecClasse) {
   doc.setFont('helvetica', 'bold').setFontSize(15).setTextColor(...BLEU).text('Copies corrigées', marge, marge + 6);
   doc.setFont('helvetica', 'normal').setFontSize(10).setTextColor(60).text(`${ex.titre} · ${etiquetteNiveau(ex)}`, marge, marge + 13);
   const moyenne = copies.length ? copies.reduce((s, c) => s + c.correction.note, 0) / copies.length : 0;
@@ -51,10 +64,11 @@ export async function genererPdfCopiesCorrigees(ex: Exercice, copies: CopieCorri
     headStyles: entete,
     columnStyles: { 2: { halign: 'right', cellWidth: 28 }, 3: { halign: 'right', cellWidth: 18 } },
   });
+  }
 
   // Une page par élève.
-  for (const c of copies) {
-    doc.addPage();
+  copies.forEach((c, rang) => {
+    if (avecClasse || rang > 0) doc.addPage();
     const nom = new Map(c.copie.dossier.plan.map((x) => [x.numero, x.intitule]));
     const cpt = (n: string) => `${nom.get(n) ?? n} (${n})`;
     const lisibles = (lignes: LigneEcriture[]) =>
@@ -76,11 +90,15 @@ export async function genererPdfCopiesCorrigees(ex: Exercice, copies: CopieCorri
       ]);
       if (!juste) {
         const cmp = comparaisonOperation(ex, c.copie.dossier, o.piece);
-        corps.push([
-          '',
-          { content: `Élève :\n${lisibles(cmp.eleve)}`, styles: { fillColor: GRIS, fontSize: 7.5 } },
-          { content: `Corrigé :\n${lisibles(cmp.corrige)}`, colSpan: 2, styles: { fillColor: GRIS, fontSize: 7.5 } },
-        ]);
+        corps.push(
+          avecCorrige
+            ? [
+                '',
+                { content: `Élève :\n${lisibles(cmp.eleve)}`, styles: { fillColor: GRIS, fontSize: 7.5 } },
+                { content: `Corrigé :\n${lisibles(cmp.corrige)}`, colSpan: 2, styles: { fillColor: GRIS, fontSize: 7.5 } },
+              ]
+            : ['', { content: `Vos écritures :\n${lisibles(cmp.eleve)}`, colSpan: 3, styles: { fillColor: GRIS, fontSize: 7.5 } }],
+        );
       }
     }
     autoTable(doc, {
@@ -92,7 +110,7 @@ export async function genererPdfCopiesCorrigees(ex: Exercice, copies: CopieCorri
       headStyles: entete,
       columnStyles: { 0: { cellWidth: 12 }, 2: { cellWidth: 52 }, 3: { halign: 'right', cellWidth: 20 } },
     });
-  }
+  });
 
   const n = doc.getNumberOfPages();
   for (let i = 1; i <= n; i++) {

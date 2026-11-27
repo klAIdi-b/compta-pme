@@ -103,8 +103,17 @@ function inverser(a: Agregat): Agregat {
 const compteDe = (cle: string) => cle.split('|')[0]!;
 const sensDe = (cle: string) => cle.split('|')[1]!;
 
-/** Diagnostic d'une opération : écritures de l'élève (même pièce) comparées au corrigé. */
+/**
+ * Diagnostic d'une opération : écritures de l'élève (même pièce) comparées au corrigé. Une écriture égale à l'une des
+ * variantes admises du corrigé est juste ; sinon, le diagnostic se fait par rapport au corrigé principal.
+ */
 export function diagnostiquer(eleve: readonly Ecriture[], corrige: EcritureCorrigee): Diagnostic {
+  const d = diagnostiquerContre(eleve, corrige);
+  if (d === 'juste' || !corrige.variantes?.length) return d;
+  return corrige.variantes.some((lignes) => diagnostiquerContre(eleve, { piece: corrige.piece, lignes }) === 'juste') ? 'juste' : d;
+}
+
+function diagnostiquerContre(eleve: readonly Ecriture[], corrige: EcritureCorrigee): Diagnostic {
   const e = agreger(ecrituresRetenues(eleve).filter((x) => x.piece === corrige.piece).flatMap((x) => x.lignes));
   const c = agreger(corrige.lignes);
   if (e.size === 0) return 'manquante';

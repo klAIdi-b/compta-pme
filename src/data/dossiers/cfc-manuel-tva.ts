@@ -136,7 +136,8 @@ export const dossierElectromenager = construireDossier(
     { date: '2026-03-12', piece: e6.piece, lignes: [D('1100', e6.ttc), C('3200', e6.ht), C('2200', e6.tva)] },
     { date: '2026-03-15', piece: e7.piece, lignes: [D('1020', e7.total), D('3209', escompteVenteHT), D('2200', escompteVenteTVA), C('1100', e6.ttc)] },
     { date: '2026-03-18', piece: e8.piece, lignes: S('1100', '3200', e8.ttc) },
-    { date: '2026-03-20', piece: e9.piece, lignes: [D('6500', e9.ht), D('1171', e9.tva), C('1000', e9.ttc)] },
+    // Revues : 6500 ou 6700 admis (décision de l'enseignant du 26.11.2026).
+    { date: '2026-03-20', piece: e9.piece, lignes: [D('6500', e9.ht), D('1171', e9.tva), C('1000', e9.ttc)], variantes: [[D('6700', e9.ht), D('1171', e9.tva), C('1000', e9.ttc)]] },
     { date: '2026-03-31', piece: e10.piece, lignes: [D('1000', e10.ttc), C('3200', e10.ht), C('2200', e10.tva)] },
     { date: '2026-03-31', piece: e11.piece, lignes: [D('2200', tvaDue), C('1170', ipMarch), C('1171', ipInv), C('2205', solde)] },
     { date: '2026-04-28', piece: e12.piece, lignes: S('2205', '1020', solde) },

@@ -203,5 +203,9 @@ Corrections faites une à une, sur accord de l'enseignant, d'abord sur `apercu`.
   validation, fais tout d'une traite »), sur `apercu` : réponses justes refusées et messages faux, évaluation (formative
   pour les dossiers fournis, fichier sans réponses, contrôles à l'import, maximum fixe), signal de maîtrise (révision à
   deux questions, états confirmée et à raviver), retours (explications, calculs de 2ème CFC, synthèse de clôture),
-  conventions du cours. Détail dans `CLAUDE.md`. Reste : relecture de l'enseignant, puis fusion dans `main` sur son accord.
+  conventions du cours. Détail dans `CLAUDE.md`. Fusionné dans `main` le 26.11.2026 sur l'accord de l'enseignant (« Fusionner dans main », PR 27) ;
+  contenus nouveaux relus et acceptés par l'enseignant le 26.11.2026 (« C'est ok »).
 - [ ] Points du rapport laissés à la décision de l'enseignant (section 8.3) : non traités.
+- [x] 26.11.2026 : décisions de la section 8.3 appliquées sur `apercu` (assistant de réécriture de la variante, barème de
+  2 points dès trois lignes, mention « option Finances », abonnements 6500 ou 6700 admis, PDF par élève sans corrigé,
+  provisions selon l'art. 960e al. 4 CO). Restent : droits de publication des contenus tirés des manuels, puis licence.

@@ -56,7 +56,11 @@ export function varianteExercice(ex: Exercice, facteur: number, id: string): Exe
     ouvertureActif: record(ex.ouvertureActif, k),
     ouverturePassif: record(ex.ouverturePassif, k),
     operations: ex.operations.map((o) => ({ ...o, texte: t(o.texte), ...(o.piece ? { piece: multiplierPiece(o.piece, k) } : {}) })),
-    corrige: (ex.corrige ?? []).map((c) => ({ ...c, lignes: c.lignes.map((l) => ({ ...l, montant: fois(l.montant, k) })) })),
+    corrige: (ex.corrige ?? []).map((c) => ({
+      ...c,
+      lignes: c.lignes.map((l) => ({ ...l, montant: fois(l.montant, k) })),
+      ...(c.variantes ? { variantes: c.variantes.map((v) => v.map((l) => ({ ...l, montant: fois(l.montant, k) }))) } : {}),
+    })),
     parametres: {
       ...structuredClone(p),
       ...(p.repartition
@@ -154,5 +158,27 @@ export function varianteSure(
           'Vous pouvez corriger ces montants dans l’éditeur.',
       ]
     : [];
-  return { ok: true, valeur: meilleur, avertissements };
+  const aReecrire = operationsAReecrire(meilleur).map((numero) => ({ numero, texte: meilleur.operations.find((o) => o.numero === numero)!.texte }));
+  return { ok: true, valeur: { ...meilleur, aReecrire }, avertissements };
+}
+
+// ---------- Assistant de réécriture (décision de l'enseignant du 26.11.2026) ----------
+
+/**
+ * Opérations à réécrire par l'enseignant dans une variante : celles qu'aucune autre opération ne cite (« opération 3 »)
+ * et qui n'en citent pas, pour ne casser aucun lien (paiement d'une facture, décompte). Trois au plus, réparties dans
+ * l'énoncé. Réécrire leur texte et leur corrigé rend la variante différente de l'exercice public.
+ */
+export function operationsAReecrire(ex: Pick<Exercice, 'operations'>, n = 3): string[] {
+  const cite = (t: string) => [...t.matchAll(/opérations?\s+([\d, et]+)/gi)].flatMap((m) => m[1]!.match(/\d+/g) ?? []);
+  const citees = new Set(ex.operations.flatMap((o) => cite(o.texte)));
+  const libres = ex.operations.filter((o) => !citees.has(o.numero) && cite(o.texte).length === 0 && !o.piece);
+  const pool = libres.length >= n ? libres : ex.operations.filter((o) => !citees.has(o.numero) && cite(o.texte).length === 0);
+  if (pool.length <= n) return pool.map((o) => o.numero);
+  return Array.from({ length: n }, (_, i) => pool[Math.floor(((i + 1) * pool.length) / (n + 1))]!.numero);
+}
+
+/** Opérations signalées à réécrire dont le texte n'a pas encore changé. */
+export function operationsNonReecrites(ex: Pick<Exercice, 'operations' | 'aReecrire'>): string[] {
+  return (ex.aReecrire ?? []).filter((r) => ex.operations.find((o) => o.numero === r.numero)?.texte.trim() === r.texte.trim()).map((r) => r.numero);
 }

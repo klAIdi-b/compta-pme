@@ -5,6 +5,7 @@
   import { exercicesDemo } from '../../data/demos';
   import { plan } from '../../data/plan';
   import { controlerExercice, etiquetteNiveau, exerciceVierge, LIBELLES_MODE, type Exercice } from '../../engine/exercice';
+  import { operationsNonReecrites } from '../../engine/variante';
   import {
     EXT_EXERCICE,
     ErreurFichier,
@@ -109,13 +110,25 @@
       : 'Aucune sauvegarde',
   );
 
-  function exporter(ex: Exercice, version: 'eleves' | 'enseignant') {
+  async function exporter(ex: Exercice, version: 'eleves' | 'enseignant') {
     message = '';
     if (version === 'eleves') {
       const { erreurs } = controlerExercice(ex, plan);
       if (erreurs.length) {
         message = `L'exercice « ${ex.titre || 'sans titre'} » contient des erreurs : ouvrez-le pour les corriger avant de le distribuer.`;
         return;
+      }
+      const restantes = operationsNonReecrites(ex);
+      if (restantes.length) {
+        const ok = await dialogue.demander({
+          titre: 'Variante pas encore réécrite',
+          texte: [
+            `Les opérations ${restantes.join(', ')} ont encore le texte de l'exercice public : un élève qui le connaît retrouvera le corrigé.`,
+            'Exporter quand même ?',
+          ],
+          confirmer: 'Exporter quand même',
+        });
+        if (!ok) return;
       }
       telecharger(nomFichier([ex.titre], EXT_EXERCICE), exporterExercice(ex));
     } else {

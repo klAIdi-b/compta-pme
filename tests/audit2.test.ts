@@ -217,3 +217,35 @@ describe('contenus mis en cohérence', () => {
     expect(controlerChamp({ cle: '303i', libelle: 'impôt', type: 'chf', attendu: 51675, tolerance: 5 }, '516.72')).toBe(true);
   });
 });
+
+describe('décisions de l’enseignant du 26.11.2026', () => {
+  it('barème par défaut : 2 points pour une écriture d’au moins trois comptes ou côtés', async () => {
+    const { pointsParDefaut } = await import('../src/engine/notation');
+    expect(pointsParDefaut({ piece: '1', lignes: [S('1020', '3200', 100)] })).toBe(1);
+    expect(pointsParDefaut(manuelFavre.corrige!.find((c) => c.piece === '14'))).toBe(2);
+  });
+  it('abonnement : 6500 et 6700 sont admis (Lacroix op. 11)', () => {
+    const c = manuelLacroix.corrige!.find((x) => x.piece === '11')!;
+    const en = (compte: string) => [e('11', [D(compte, 400), D('1171', 10.4), C('1010', 410.4)])];
+    expect(diagnostiquer(en('6700'), c)).toBe('juste');
+    expect(diagnostiquer(en('6500'), c)).toBe('juste');
+    expect(diagnostiquer(en('6000'), c)).not.toBe('juste');
+  });
+  it('option Finances : marquée sur les exercices CFC de niveau 2 à 4', async () => {
+    const { etiquetteNiveau } = await import('../src/engine/exercice');
+    expect(etiquetteNiveau({ filiere: 'CFC', niveau: 'CFC1', difficulte: 1 })).toBe('CFC · niveau 1');
+    expect(etiquetteNiveau({ filiere: 'CFC', niveau: 'CFC2', difficulte: 3 })).toBe('CFC · niveau 3 · option Finances');
+  });
+  it('variante : trois opérations à réécrire, jamais citées par une autre, suivies jusqu’à leur réécriture', async () => {
+    const { operationsNonReecrites } = await import('../src/engine/variante');
+    const r = varianteSure(demoCfc1, 2, 'v');
+    if (!r.ok) throw new Error(r.erreurs.join());
+    const v = r.valeur;
+    expect(v.aReecrire).toHaveLength(3);
+    const citees = v.operations.flatMap((o) => [...o.texte.matchAll(/opérations?\s+(\d+)/gi)].map((m) => m[1]));
+    for (const a of v.aReecrire!) expect(citees).not.toContain(a.numero);
+    expect(operationsNonReecrites(v)).toHaveLength(3);
+    const reecrite = { ...v, operations: v.operations.map((o) => (o.numero === v.aReecrire![0]!.numero ? { ...o, texte: 'Autre opération' } : o)) };
+    expect(operationsNonReecrites(reecrite)).toHaveLength(2);
+  });
+});

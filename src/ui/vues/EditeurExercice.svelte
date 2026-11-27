@@ -3,6 +3,7 @@
   import { enseignant } from '../enseignant.svelte';
   import { etat } from '../etat.svelte';
   import { plan } from '../../data/plan';
+  import { pointsParDefaut } from '../../engine/notation';
   import {
     basculerCompte,
     comptesChoisis,
@@ -96,7 +97,7 @@
   let actif = $state<LigneBilan[]>(versLignes(source.ouvertureActif));
   let passif = $state<LigneBilan[]>(versLignes(source.ouverturePassif));
   let operations = $state<LigneOp[]>(
-    source.operations.map((o) => ({ cle: ++n, numero: o.numero, date: dt(o.date), texte: o.texte, points: source.bareme?.[o.numero] ?? 1 })),
+    source.operations.map((o) => ({ cle: ++n, numero: o.numero, date: dt(o.date), texte: o.texte, points: source.bareme?.[o.numero] ?? pointsParDefaut(source.corrige?.find((c) => c.piece === o.numero)) })),
   );
   let pointsPartiels = $state(source.pointsPartiels ?? true);
   let corrigerBouclement = $state(source.parametres.corrigerBouclement ?? false);
@@ -275,6 +276,11 @@
   }
 
   const corrigeSaisi = $derived(new Set((enseignant.trouver(id)?.corrige ?? []).map((c) => c.piece)));
+  /** Variante d'évaluation : opérations à réécrire, et celles dont le texte n'a pas encore changé (assistant, 26.11.2026). */
+  const aReecrire = source.aReecrire ?? [];
+  const nonReecrites = $derived(
+    aReecrire.filter((r) => operations.find((o) => o.numero.trim() === r.numero)?.texte.trim() === r.texte.trim()).map((r) => r.numero),
+  );
 </script>
 
 <div class="titre">
@@ -285,6 +291,26 @@
   </div>
 </div>
 {#if message}<p class="info" role="status">{message}</p>{/if}
+{#if aReecrire.length}
+  <section class="carte reecrire" aria-label="Opérations à réécrire">
+    <div class="corps-carte">
+      <h2>Variante : réécrivez {aReecrire.length} opération{aReecrire.length > 1 ? 's' : ''} avant de l'exporter</h2>
+      <p>
+        Cette variante reprend les opérations de l'exercice public, montants multipliés : un élève qui le connaît retrouve
+        le corrigé. Changez le texte des opérations ci-dessous (autre bien, autre moyen de paiement, autre fournisseur…),
+        puis saisissez leur nouveau corrigé dans le journal. Ces opérations ne sont citées par aucune autre : les liens de
+        l'exercice restent justes.
+      </p>
+      <ul>
+        {#each aReecrire as r}
+          <li>
+            Opération {r.numero} : {nonReecrites.includes(r.numero) ? 'à réécrire' : 'réécrite, pensez à saisir son nouveau corrigé'}
+          </li>
+        {/each}
+      </ul>
+    </div>
+  </section>
+{/if}
 
 <section class="carte">
   <h2>Informations générales</h2>
@@ -634,4 +660,6 @@
   .compte.hors span:first-of-type { font-style: italic; color: var(--c-texte-2); }
   .numero { font-size: var(--t-12); color: var(--c-texte-2); font-variant-numeric: tabular-nums; }
   @media (max-width: 1100px) { .grille { grid-template-columns: 1fr 1fr; } .deux { grid-template-columns: 1fr; } }
+  .reecrire { border-left: 4px solid var(--c-avert-trait); }
+  .reecrire h2 { margin: 0 0 6px; font-size: var(--t-15); }
 </style>

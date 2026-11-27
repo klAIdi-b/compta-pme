@@ -133,6 +133,32 @@
     }
   }
 
+  /**
+   * Un PDF par élève, réunis dans une archive à déposer dans Classroom (décision de l'enseignant du 26.11.2026) : note
+   * et résultat de chaque opération, sans le corrigé tant que toutes les classes n'ont pas passé l'épreuve.
+   */
+  let avecCorrigeEleves = $state(false);
+  let zipEnCours = $state(false);
+  async function exporterPdfEleves() {
+    if (!exercice) return;
+    zipEnCours = true;
+    try {
+      const [{ genererPdfCopiesCorrigees }, { creerZip }] = await Promise.all([import('../../pdf/copies-corrigees'), import('../../io/zip')]);
+      const fichiers = [];
+      for (const l of lignes) {
+        const nom = nomFichier([l.copie.eleve.nom, l.copie.eleve.prenom, l.copie.eleve.classe, exercice.titre], '.pdf');
+        const blob = await genererPdfCopiesCorrigees(exercice, [{ copie: l.copie, correction: l.correction }], nom, { classe: false, corrige: avecCorrigeEleves });
+        fichiers.push({ nom, donnees: new Uint8Array(await blob.arrayBuffer()) });
+      }
+      const zip = creerZip(fichiers);
+      telechargerBlob(nomFichier([exercice.titre, 'copies-par-eleve'], '.zip'), new Blob([zip], { type: 'application/zip' }));
+    } catch (e) {
+      messages = [`Les PDF n'ont pas pu être créés : ${e instanceof Error ? e.message : String(e)}`];
+    } finally {
+      zipEnCours = false;
+    }
+  }
+
   const fmt = (x: number) => (Number.isInteger(x) ? String(x) : x.toFixed(1));
   let voirJustes = $state(false);
 
@@ -176,6 +202,8 @@
     <button class="btn btn-principal" disabled={!exercice} onclick={importer}>Importer des copies…</button>
     <button class="btn" disabled={!lignes.length} onclick={exporterCsv}>Exporter les résultats (CSV)</button>
     <button class="btn" disabled={!lignes.length || pdfEnCours} onclick={exporterPdf}>{pdfEnCours ? 'Création du PDF…' : 'Copies corrigées (PDF)'}</button>
+    <button class="btn" disabled={!lignes.length || zipEnCours} onclick={exporterPdfEleves}>{zipEnCours ? 'Création des PDF…' : 'Un PDF par élève (ZIP)'}</button>
+    <label class="petit"><input type="checkbox" bind:checked={avecCorrigeEleves} /> avec le corrigé</label>
   </div>
   <p class="discret petit aide">
     Les copies importées restent dans cette page : elles ne sont ni enregistrées ni envoyées en ligne. Seuls les exercices
