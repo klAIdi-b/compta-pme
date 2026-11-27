@@ -9,6 +9,8 @@
   import { EXT_COPIE, EXT_EXERCICE, ErreurFichier, importerCopie, importerExercice, statutExport, type Copie } from '../../io/fichiers';
   import { dossierDeCopie } from '../../engine/reprise';
   import { exerciceDuCode, exercicePapier } from '../../engine/papier';
+  import { exerciceDansAdresse, lireExerciceDuLien } from '../../io/lien-exercice';
+  import { importerRetour, type Retour } from '../../io/retour';
   import { lireDate } from '../../engine/dates';
   import { LIBELLES_ANNEE } from '../../engine/exercice';
   import type { Niveau } from '../../engine/plan';
@@ -45,6 +47,23 @@
 
   // ---- Exercices ----
   let importes = $state<Exercice[]>([]);
+  /** Exercice reçu par un lien autonome (#ex=…, phase V3). */
+  let exRecu = $state<Exercice | null>(null);
+  const contenuLien = exerciceDansAdresse(location.hash);
+  if (contenuLien) {
+    history.replaceState(null, '', `${location.pathname}${location.search}`);
+    lireExerciceDuLien(contenuLien)
+      .then((ex) => {
+        importes = [ex, ...importes.filter((x) => x.id !== ex.id)];
+        exRecu = ex;
+        choix = ex.id;
+        montrer(typeDe(ex));
+      })
+      .catch((e) => {
+        erreurImport = e instanceof ErreurFichier ? e.message : "Ce lien n'a pas pu être lu.";
+        montrer('entrainement');
+      });
+  }
   const tous = $derived([...importes, ...exercicesDemo]);
   let erreurImport = $state('');
 
@@ -72,6 +91,8 @@
       }
       return;
     }
+    // Un fichier de retour contient aussi la copie de l'élève : il est reconnu en premier.
+    if (f.texte.includes('"compta-pme/retour"')) return lireRetour(f.texte);
     if (f.texte.includes('"compta-pme/copie"')) return lireCopie(f.texte);
     try {
       const ex = importerExercice(f.texte);
@@ -118,6 +139,28 @@
       return;
     }
     await reprendreCopie(c, ex);
+  }
+
+  /**
+   * Copie corrigée rendue par l'enseignant (phase V3) : elle rejoint le dossier de l'exercice ; si ce navigateur ne l'a
+   * pas, la copie contenue dans le fichier est d'abord reprise.
+   */
+  async function lireRetour(texte: string) {
+    erreurImport = '';
+    let r: Retour;
+    try {
+      r = importerRetour(texte);
+    } catch (e) {
+      erreurImport = e instanceof ErreurFichier ? e.message : "Le fichier n'a pas pu être lu.";
+      return;
+    }
+    if (!etat.sessionDe(r.copie.exerciceId)) {
+      const ex = r.copie.papier?.exercice ?? tous.find((x) => x.id === r.copie.exerciceId) ?? r.exercice;
+      await reprendreCopie(r.copie, ex);
+      if (!etat.sessionDe(r.copie.exerciceId)) return;
+    }
+    etat.attacherRetour(r);
+    etat.ouvrirDossier(etat.sessionDe(r.copie.exerciceId)!);
   }
 
   async function reprendreCopie(c: Copie, ex: Exercice) {
@@ -620,6 +663,15 @@
         {:else}Choisissez votre formation, puis une entreprise. Votre travail s'enregistre dans ce navigateur : vous pouvez vous arrêter et reprendre plus tard.{/if}
       </p>
     </section>
+    {#if exRecu && !exLien}
+      <section class="carte lien" aria-labelledby="titre-lien">
+        <h2 id="titre-lien" class="tete-simple">Exercice reçu de votre enseignant</h2>
+        <div class="corps-carte">
+          <strong>{exRecu.titre}</strong> <span class="discret petit">· {etiquetteNiveau(exRecu)} · {LIBELLES_MODE[exRecu.mode]} · {exRecu.operations.length} opérations</span>
+          <p class="petit">Indiquez votre prénom, votre nom et votre classe plus bas, puis cliquez sur « {etat.sessionDe(exRecu.id) ? 'Reprendre' : 'Commencer'} ». L'exercice rejoindra « Mes dossiers » : vous le retrouverez là, même sans le lien.</p>
+        </div>
+      </section>
+    {/if}
     {#if exLien}
       <section class="carte lien" aria-labelledby="titre-lien">
         <h2 id="titre-lien" class="tete-simple">Exercice donné par votre enseignant</h2>

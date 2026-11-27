@@ -1,0 +1,508 @@
+<!doctype html>
+<html lang="fr-CH">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex" />
+<title>Compta PME · Distribuer, corriger, suivre la classe (phase V3)</title>
+<style>
+/* Maquette du 27.11.2026 (VISION_LOGICIEL.md, phases V1 et V2). Variables du design system validé (theme.css).
+   Chaque écran est écrit une fois (<template>) et affiché dans deux cadres : ordinateur (1100 px) et téléphone (360 px) ;
+   la mise en page du téléphone vient des requêtes de conteneur (@container). Maquette statique. */
+:root {
+  --c-structure: #1f4e78; --c-structure-2: #163a5a; --c-nuit: #11304d; --c-encre: #0f2742;
+  --c-selection: #d6e4f0; --c-bleu-doux: #eaf1f8; --c-fond-tete: #f8fafc; --c-fond-page: #f6f7f9; --c-fond: #ffffff;
+  --c-zebra: #fafbfd;
+  --c-action: #c4501a; --c-action-fonce: #a8420f; --c-accent: #e8601c; --c-orange-doux: #fdf0e8;
+  --c-texte: #1b2430; --c-texte-2: #56616f; --c-bordure: #8793a2; --c-bordure-2: #dfe5ec; --c-bordure-3: #eef2f6;
+  --c-succes: #1d6b3a; --c-succes-fond: #e6f3ea; --c-erreur: #b00020; --c-erreur-fond: #fdecee;
+  --c-avert: #7a5200; --c-avert-fond: #fff5db; --c-avert-trait: #c98a00; --c-info-fond: #eaf1f8;
+  --t-12: 0.75rem; --t-13: 0.8125rem; --t-14: 0.875rem; --t-15: 0.9375rem; --t-17: 1.0625rem; --t-20: 1.25rem; --t-26: 1.625rem;
+  --e-1: 4px; --e-2: 8px; --e-3: 12px; --e-4: 16px; --e-5: 24px; --e-6: 32px; --e-7: 48px;
+  --r-1: 4px; --r-2: 6px; --r-3: 8px;
+  --ombre-haute: 0 10px 30px rgba(15, 39, 66, 0.1), 0 2px 6px rgba(15, 39, 66, 0.06);
+  --police: 'Inter Variable', 'Inter', 'Segoe UI Variable Text', 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif;
+}
+* { box-sizing: border-box; }
+body { margin: 0; font-family: var(--police); font-size: var(--t-15); line-height: 1.5; color: var(--c-texte); background: var(--c-fond-page); -webkit-font-smoothing: antialiased; }
+h1, h2, h3, p { margin: 0; }
+.num, .montant { font-variant-numeric: tabular-nums lining-nums; }
+.montant { text-align: right; white-space: nowrap; }
+:focus-visible { outline: 2px solid var(--c-accent); outline-offset: 2px; }
+button, input, select { font: inherit; }
+
+/* ---------- Page de présentation ---------- */
+.doc { max-width: 1560px; margin: 0 auto; padding: var(--e-6) var(--e-5) var(--e-7); }
+.doc > header { max-width: 82ch; margin-bottom: var(--e-5); }
+.doc > header h1 { font-size: var(--t-26); color: var(--c-encre); letter-spacing: -0.015em; }
+.doc > header p { margin-top: var(--e-2); }
+.sommaire { display: flex; flex-wrap: wrap; gap: var(--e-2); margin-top: var(--e-4); }
+.sommaire a { font-size: var(--t-14); color: var(--c-structure); background: var(--c-fond); border: 1px solid var(--c-bordure-2); border-radius: var(--r-2); padding: 6px 10px; text-decoration: none; }
+.phase { margin-top: var(--e-7); font-size: var(--t-20); color: var(--c-encre); padding-bottom: var(--e-2); border-bottom: 2px solid var(--c-structure); }
+.ecran-doc { margin-top: var(--e-6); }
+.ecran-doc > h3 { font-size: var(--t-17); color: var(--c-encre); }
+.ecran-doc > p.explication { max-width: 90ch; margin: var(--e-2) 0 var(--e-4); color: var(--c-texte); }
+.cadres { display: flex; gap: var(--e-5); align-items: flex-start; flex-wrap: wrap; }
+.etiq { font-size: var(--t-12); color: var(--c-texte-2); font-weight: 600; text-transform: uppercase; letter-spacing: .05em; margin-bottom: var(--e-2); }
+.cadre { container-type: inline-size; background: var(--c-fond-page); border: 1px solid #c3ccd7; border-radius: var(--r-3); overflow: hidden; box-shadow: var(--ombre-haute); }
+.cadre.ordi { width: 1100px; max-width: 100%; }
+.cadre.tel { width: 360px; border-radius: 22px; }
+.question { max-width: 90ch; margin-top: var(--e-4); background: var(--c-orange-doux); border-left: 4px solid var(--c-accent); border-radius: var(--r-2); padding: var(--e-3) var(--e-4); font-size: var(--t-14); }
+.question b { display: block; }
+
+/* ---------- Composants de l'application ---------- */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--e-2); min-height: 40px; padding: 0 var(--e-4); border-radius: var(--r-2); border: 1px solid var(--c-bordure); background: var(--c-fond); color: var(--c-structure); font-weight: 600; cursor: pointer; text-decoration: none; white-space: nowrap; }
+.btn.principal { background: var(--c-action); border-color: var(--c-action); color: #fff; }
+.btn.petit { min-height: 32px; padding: 0 var(--e-3); font-size: var(--t-14); }
+.lien { color: var(--c-structure); font-weight: 550; text-decoration: underline; text-underline-offset: 2px; }
+.discret { color: var(--c-texte-2); }
+.pastille { display: inline-block; font-size: var(--t-12); font-weight: 600; padding: 2px 8px; border-radius: 999px; background: var(--c-bleu-doux); color: var(--c-structure); white-space: nowrap; }
+.pastille.papier { background: var(--c-orange-doux); color: var(--c-action-fonce); }
+.pastille.fichier { background: #eef0f3; color: var(--c-texte-2); }
+.pastille.ok { background: var(--c-succes-fond); color: var(--c-succes); }
+.message { border-radius: var(--r-2); padding: var(--e-3) var(--e-4); font-size: var(--t-14); border: 1px solid; }
+.message.information { background: var(--c-info-fond); border-color: #c6d7ea; color: var(--c-encre); }
+.message.avert { background: var(--c-avert-fond); border-color: var(--c-avert-trait); color: var(--c-avert); }
+.message.succes { background: var(--c-succes-fond); border-color: #a9d3b6; color: var(--c-succes); }
+.message.erreur { background: var(--c-erreur-fond); border-color: #f0b3bc; color: var(--c-erreur); }
+.carte { background: var(--c-fond); border: 1px solid var(--c-bordure-2); border-radius: var(--r-3); }
+.carte > header { padding: var(--e-3) var(--e-4); border-bottom: 1px solid var(--c-bordure-3); display: flex; align-items: center; justify-content: space-between; gap: var(--e-3); flex-wrap: wrap; }
+.carte > header h2 { font-size: var(--t-17); color: var(--c-encre); }
+.carte > .corps { padding: var(--e-4); }
+table.t { width: 100%; border-collapse: collapse; font-size: var(--t-14); }
+table.t th { text-align: left; font-size: var(--t-13); font-weight: 600; color: var(--c-texte-2); background: var(--c-fond-tete); padding: 8px 12px; border-bottom: 1px solid var(--c-bordure-2); }
+table.t td { padding: 8px 12px; border-bottom: 1px solid var(--c-bordure-3); vertical-align: top; }
+table.t tbody tr:nth-child(even) td { background: var(--c-zebra); }
+table.t th.montant, table.t td.montant { text-align: right; }
+table.t td.num:first-child { white-space: nowrap; }
+table.t tfoot td { font-weight: 650; border-top: 2px solid var(--c-bordure-2); }
+.no { font-size: var(--t-12); color: var(--c-texte-2); margin-left: 6px; }
+.champ { display: flex; flex-direction: column; gap: 4px; }
+.champ label { font-size: var(--t-13); font-weight: 600; color: var(--c-texte); }
+.champ .aide { font-size: var(--t-12); color: var(--c-texte-2); }
+.saisie { min-height: 40px; border: 1px solid var(--c-bordure); border-radius: var(--r-1); padding: 0 10px; background: #fff; display: flex; align-items: center; color: var(--c-texte); }
+.saisie.vide { color: var(--c-texte-2); }
+.saisie.actif { outline: 2px solid var(--c-accent); outline-offset: 0; }
+.saisie.montant { justify-content: flex-end; }
+
+/* Bandeau commun aux trois espaces */
+.bandeau { display: flex; align-items: center; gap: var(--e-3); min-height: 56px; padding: 0 var(--e-5); background: var(--c-fond); border-bottom: 1px solid var(--c-bordure-2); flex-wrap: wrap; }
+.marque { display: flex; align-items: center; gap: var(--e-2); font-weight: 700; color: var(--c-encre); }
+.marque i { width: 28px; height: 28px; border-radius: var(--r-2); background: var(--c-action); color: #fff; display: grid; place-items: center; font-size: var(--t-12); font-style: normal; }
+.onglets { display: flex; gap: var(--e-1); margin-left: var(--e-4); }
+.onglets a { color: var(--c-structure); text-decoration: none; font-weight: 600; padding: 16px 12px 14px; border-bottom: 3px solid transparent; font-size: var(--t-15); }
+.onglets a.actif { border-bottom-color: var(--c-accent); color: var(--c-encre); }
+.annexes { margin-left: auto; display: flex; gap: var(--e-1); }
+.annexes a { color: var(--c-structure); text-decoration: none; font-weight: 550; padding: 8px 10px; border-radius: var(--r-2); font-size: var(--t-14); }
+.initiales { width: 32px; height: 32px; border-radius: 50%; background: var(--c-bleu-doux); color: var(--c-structure); display: grid; place-items: center; font-size: var(--t-13); font-weight: 700; }
+.page { padding: var(--e-5); display: flex; flex-direction: column; gap: var(--e-5); }
+.titre-page { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--e-4); flex-wrap: wrap; }
+.titre-page h1 { font-size: var(--t-26); color: var(--c-encre); letter-spacing: -0.015em; }
+.titre-page .sous { color: var(--c-texte-2); margin-top: 2px; }
+.actions { display: flex; gap: var(--e-2); flex-wrap: wrap; }
+
+/* Accueil */
+.portes { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--e-4); }
+.porte { background: var(--c-fond); border: 1px solid var(--c-bordure-2); border-radius: var(--r-3); padding: var(--e-4); display: flex; flex-direction: column; gap: var(--e-2); }
+.porte .espace { font-size: var(--t-12); font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--c-action-fonce); }
+.porte h2 { font-size: var(--t-17); color: var(--c-encre); }
+.porte p { font-size: var(--t-14); color: var(--c-texte-2); flex: 1; }
+.reprise { display: grid; grid-template-columns: 1fr auto; gap: var(--e-4); align-items: center; background: var(--c-fond); border: 1px solid var(--c-bordure-2); border-left: 4px solid var(--c-structure); border-radius: var(--r-3); padding: var(--e-4) var(--e-5); }
+.barre-av { height: 8px; background: var(--c-bordure-3); border-radius: 999px; overflow: hidden; margin-top: var(--e-2); max-width: 420px; }
+.barre-av span { display: block; height: 100%; background: var(--c-structure); }
+
+/* Mes dossiers */
+.liste-dossiers .ligne-dossier { display: grid; grid-template-columns: 1.6fr 1fr 0.9fr 1fr auto; gap: var(--e-3); align-items: center; padding: var(--e-3) var(--e-4); border-bottom: 1px solid var(--c-bordure-3); }
+.liste-dossiers .ligne-dossier.tete { font-size: var(--t-13); font-weight: 600; color: var(--c-texte-2); background: var(--c-fond-tete); }
+.ligne-dossier .nom b { display: block; color: var(--c-encre); }
+.ligne-dossier .nom span { font-size: var(--t-13); color: var(--c-texte-2); }
+.ligne-dossier .av { font-size: var(--t-13); color: var(--c-texte-2); }
+.ligne-dossier .av .barre-av { margin-top: 4px; height: 6px; }
+.menu-nouveau { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--e-3); }
+.choix { border: 1px solid var(--c-bordure-2); border-radius: var(--r-3); padding: var(--e-3) var(--e-4); background: var(--c-fond); }
+.choix b { display: block; color: var(--c-encre); }
+.choix span { font-size: var(--t-13); color: var(--c-texte-2); }
+.choix.mis-en-avant { border-color: var(--c-accent); background: var(--c-orange-doux); }
+
+/* Dans un dossier : cadre de logiciel */
+.appli { display: grid; grid-template-columns: 220px 1fr; min-height: 640px; }
+.laterale { background: var(--c-nuit); color: #dce6f0; padding: var(--e-4) 0; font-size: var(--t-14); }
+.laterale .dossier-nom { padding: 0 var(--e-4) var(--e-3); border-bottom: 1px solid rgba(255,255,255,.12); margin-bottom: var(--e-2); }
+.laterale .dossier-nom b { display: block; color: #fff; font-size: var(--t-15); }
+.laterale .dossier-nom span { font-size: var(--t-12); color: #a9bccf; }
+.laterale .groupe { padding: var(--e-3) var(--e-4) 4px; font-size: var(--t-12); text-transform: uppercase; letter-spacing: .06em; color: #8fa6bd; font-weight: 600; }
+.laterale a { display: flex; justify-content: space-between; align-items: center; padding: 7px var(--e-4); color: #dce6f0; text-decoration: none; border-left: 3px solid transparent; }
+.laterale a.actif { background: rgba(255,255,255,.08); border-left-color: var(--c-accent); color: #fff; font-weight: 600; }
+.laterale a .coche { font-size: var(--t-12); color: #9fd3b0; }
+.tete-dossier { display: flex; align-items: center; gap: var(--e-3); padding: var(--e-3) var(--e-5); background: var(--c-fond); border-bottom: 1px solid var(--c-bordure-2); flex-wrap: wrap; }
+.tete-dossier .fil { font-size: var(--t-14); color: var(--c-texte-2); }
+.tete-dossier .fil b { color: var(--c-encre); }
+.tete-dossier .droite { margin-left: auto; display: flex; gap: var(--e-2); align-items: center; }
+.bouton-menu { display: none; }
+.corps-dossier { display: grid; grid-template-columns: 1fr 300px; gap: var(--e-4); padding: var(--e-4) var(--e-5); align-items: start; }
+.corps-dossier.plein { grid-template-columns: 1fr; }
+.enonce { font-size: var(--t-14); }
+.enonce ol { margin: 0; padding-left: 0; list-style: none; }
+.enonce li { padding: 6px 0; border-bottom: 1px solid var(--c-bordure-3); display: grid; grid-template-columns: 28px 1fr auto; gap: 6px; }
+.enonce li .n { font-weight: 700; color: var(--c-structure); }
+.enonce li.courante { background: var(--c-bleu-doux); margin: 0 -16px; padding: 6px 16px; }
+.enonce li .fait { font-size: var(--t-12); color: var(--c-succes); }
+.grille { display: grid; grid-template-columns: 80px 110px 1fr; gap: var(--e-3); }
+.lignes-saisie { display: grid; grid-template-columns: 1fr 1fr 120px; gap: var(--e-2) var(--e-3); margin-top: var(--e-3); }
+.lignes-saisie .entete-col { font-size: var(--t-13); font-weight: 600; color: var(--c-texte-2); }
+.equilibre { display: flex; justify-content: space-between; align-items: center; gap: var(--e-3); margin-top: var(--e-3); padding-top: var(--e-3); border-top: 1px solid var(--c-bordure-3); flex-wrap: wrap; }
+.equilibre .ok { color: var(--c-succes); font-weight: 600; font-size: var(--t-14); }
+.saisie-carte { box-shadow: 0 1px 2px rgba(16,24,40,.06), 0 4px 14px rgba(16,24,40,.07); }
+
+/* Ouverture */
+.deux-colonnes { display: grid; grid-template-columns: 1fr 1fr; gap: var(--e-4); }
+.bilan-saisie td .saisie { min-height: 34px; }
+.etapes { display: flex; gap: var(--e-2); font-size: var(--t-13); flex-wrap: wrap; }
+.etapes span { padding: 4px 10px; border-radius: 999px; background: var(--c-bordure-3); color: var(--c-texte-2); font-weight: 600; }
+.etapes span.fait { background: var(--c-succes-fond); color: var(--c-succes); }
+.etapes span.encours { background: var(--c-structure); color: #fff; }
+.formulaire { display: grid; grid-template-columns: 1fr 1fr; gap: var(--e-4); }
+.formulaire .large { grid-column: 1 / -1; }
+
+/* Corriger */
+.etats-copies td .pastille { margin-right: 4px; }
+.statut-juste { color: var(--c-succes); font-weight: 600; }
+.statut-faux { color: var(--c-erreur); font-weight: 600; }
+.statut-partiel { color: var(--c-avert); font-weight: 600; }
+.note { font-size: var(--t-20); font-weight: 700; color: var(--c-encre); }
+
+/* Impression */
+.feuille { background: #fff; border: 1px solid var(--c-bordure-2); box-shadow: 0 2px 10px rgba(15,39,66,.1); width: 100%; max-width: 520px; aspect-ratio: 210 / 297; padding: 28px 30px; font-family: Helvetica, Arial, sans-serif; font-size: 10px; line-height: 1.4; overflow: hidden; }
+.feuille h4 { font-size: 15px; margin: 0 0 2px; color: #0f2742; }
+.feuille .code { float: right; border: 1.5px solid #0f2742; padding: 4px 8px; font-weight: 700; font-size: 11px; }
+.feuille table { width: 100%; border-collapse: collapse; margin: 6px 0 10px; }
+.feuille td, .feuille th { border-bottom: 0.5px solid #c3ccd7; padding: 2px 4px; text-align: left; }
+.feuille .m { text-align: right; }
+.feuille .sect { font-weight: 700; margin-top: 8px; color: #1f4e78; }
+.imprimer-grille { display: grid; grid-template-columns: 320px 1fr; gap: var(--e-5); align-items: start; }
+.options-impr label { display: flex; gap: var(--e-2); align-items: flex-start; padding: 6px 0; font-size: var(--t-14); }
+.case { width: 18px; height: 18px; border: 1.5px solid var(--c-bordure); border-radius: 3px; flex: none; margin-top: 2px; display: grid; place-items: center; font-size: 12px; color: #fff; }
+.case.cochee { background: var(--c-structure); border-color: var(--c-structure); }
+
+/* Cours */
+.sous-onglets { display: flex; gap: var(--e-2); border-bottom: 1px solid var(--c-bordure-2); }
+.sous-onglets a { padding: 8px 12px; text-decoration: none; color: var(--c-structure); font-weight: 600; border-bottom: 3px solid transparent; font-size: var(--t-14); }
+.sous-onglets a.actif { border-bottom-color: var(--c-accent); color: var(--c-encre); }
+.modules { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--e-3); }
+.module { background: var(--c-fond); border: 1px solid var(--c-bordure-2); border-radius: var(--r-3); padding: var(--e-3) var(--e-4); display: flex; flex-direction: column; gap: 4px; }
+.module b { color: var(--c-encre); }
+.module .etat { font-size: var(--t-13); color: var(--c-texte-2); }
+.module .etat.reussi { color: var(--c-succes); }
+.pont { display: flex; justify-content: space-between; align-items: center; gap: var(--e-4); flex-wrap: wrap; background: var(--c-bleu-doux); border-radius: var(--r-3); padding: var(--e-3) var(--e-4); }
+
+/* ---------- Téléphone (cadre étroit) ---------- */
+@container (max-width: 600px) {
+  .bandeau { padding: var(--e-2) var(--e-4) 0; gap: var(--e-2); }
+  .onglets { order: 3; width: 100%; margin-left: 0; }
+  .onglets a { padding: 10px 8px 9px; font-size: var(--t-14); }
+  .onglets a.cache-tel { display: none; }
+  .annexes a.texte { display: none; }
+  .page { padding: var(--e-4); gap: var(--e-4); }
+  .titre-page h1 { font-size: var(--t-20); }
+  .portes, .menu-nouveau, .modules, .deux-colonnes, .formulaire, .imprimer-grille { grid-template-columns: 1fr; }
+  .reprise { grid-template-columns: 1fr; padding: var(--e-4); }
+  .reprise .btn { width: 100%; }
+  .liste-dossiers .ligne-dossier { grid-template-columns: 1fr auto; gap: 4px var(--e-3); }
+  .liste-dossiers .ligne-dossier.tete { display: none; }
+  .liste-dossiers .ligne-dossier .origine, .liste-dossiers .ligne-dossier .av { grid-column: 1; }
+  .liste-dossiers .ligne-dossier .modif { display: none; }
+  .liste-dossiers .ligne-dossier .ouvrir { grid-column: 2; grid-row: 1 / span 3; }
+  .actions { width: 100%; }
+  .actions .btn { flex: 1; }
+  .appli { grid-template-columns: 1fr; min-height: 0; }
+  .laterale { display: none; }
+  .bouton-menu { display: inline-flex; }
+  .tete-dossier { padding: var(--e-2) var(--e-4); }
+  .tete-dossier .droite .pastille.mode { display: none; }
+  .corps-dossier { grid-template-columns: 1fr; padding: var(--e-3) var(--e-4); }
+  .corps-dossier .enonce-colonne { order: -1; }
+  .enonce li:not(.courante) { display: none; }
+  .enonce .tout { display: block; }
+  .grille { grid-template-columns: 1fr 1fr; }
+  .grille .large-tel { grid-column: 1 / -1; }
+  .lignes-saisie { grid-template-columns: 1fr; }
+  .lignes-saisie .entete-col { display: none; }
+  .lignes-saisie .etiquette-tel { display: block; }
+  table.empile thead { display: none; }
+  table.empile tr { display: block; border-bottom: 1px solid var(--c-bordure-2); padding: 6px 0; }
+  table.empile td { display: flex; justify-content: space-between; gap: var(--e-3); border: none; padding: 3px 12px; }
+  table.empile td::before { content: attr(data-etiquette); font-size: var(--t-12); color: var(--c-texte-2); font-weight: 600; }
+  table.empile td.libre::before { content: none; }
+  table.empile tbody tr:nth-child(even) td { background: none; }
+  .feuille { max-width: 100%; padding: 14px; font-size: 8px; }
+  .cache-tel { display: none !important; }
+}
+.etiquette-tel { display: none; font-size: var(--t-12); font-weight: 600; color: var(--c-texte-2); margin-bottom: -4px; }
+.seul-tel { display: none; }
+@container (max-width: 600px) { .seul-tel { display: revert; } }
+</style>
+<style>
+/* Écrans de la phase V3 (s'ajoutent aux styles de la maquette V1 et V2). */
+.segments, .filtres { display: flex; gap: var(--e-1); flex-wrap: wrap; align-items: center; }
+.seg { padding: 6px 12px; border: 1px solid var(--c-bordure-2); border-radius: 999px; font-size: var(--t-14); color: var(--c-texte-2); background: var(--c-fond); }
+.seg.actif { background: var(--c-structure); color: #fff; border-color: var(--c-structure); }
+.filtres .lien { margin-left: auto; font-size: var(--t-14); }
+.grille-distribuer { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--e-4); }
+.option { min-width: 0; }
+.option .corps { display: flex; flex-direction: column; gap: var(--e-3); }
+.aide { font-size: var(--t-13); color: var(--c-texte-2); margin: 0; }
+.lien-court { font-size: var(--t-13); overflow: hidden; white-space: nowrap; }
+.qr-corps { flex-direction: row !important; align-items: flex-start; }
+.qr { width: 120px; height: 120px; flex: none; border: 1px solid var(--c-bordure-2); }
+.recu { border-left: 4px solid var(--c-structure); }
+.retour { border-left: 4px solid var(--c-succes); }
+.ligne-retour { display: flex; justify-content: space-between; align-items: baseline; gap: var(--e-3); flex-wrap: wrap; margin-top: 4px; }
+.bilan-import { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; font-size: var(--t-14); }
+.petit-champ { width: 64px; min-height: 34px; justify-content: flex-end; }
+tr.ajuste td { background: var(--c-orange-doux) !important; }
+tr.commentaire td { background: var(--c-info-fond) !important; font-size: var(--t-13); }
+.defile { overflow-x: auto; }
+table.classe th, table.classe td { text-align: center; white-space: nowrap; }
+table.classe th:first-child, table.classe td:first-child { text-align: left; }
+.pas-rendu { color: var(--c-erreur); font-size: var(--t-13); font-weight: 600; }
+.n { font-weight: 700; }
+.n.c { color: var(--c-succes); } .n.r { color: var(--c-structure); } .n.a { color: var(--c-avert); }
+@container (max-width: 600px) {
+  .grille-distribuer { grid-template-columns: minmax(0, 1fr); }
+  .qr-corps { flex-direction: column !important; }
+  .filtres .lien { margin-left: 0; }
+  .petit-champ { width: 80px; }
+}
+</style>
+</head>
+<body>
+<div class="doc">
+  <header>
+    <h1>Distribuer, corriger, suivre la classe : maquettes de la phase V3</h1>
+    <p>Maquette du 27.11.2026, d'après <code>VISION_LOGICIEL.md</code> (section e) et vos décisions du même jour. Chaque écran est montré sur ordinateur (1100 px) et sur téléphone (360 px). Contenu réel : l'exercice Cycles du Léman (1ère CFC, 15 opérations), les comptes du plan du cours, une classe fictive 1CA. Maquette statique : les boutons ne fonctionnent pas, les codes QR sont dessinés pour l'exemple.</p>
+    <p><b>Ce qui ne change pas :</b> aucune donnée d'élève n'est envoyée en ligne ; les fichiers d'exercice et de copie restent les mêmes ; la correction, le barème et la note suivent les règles validées. Tout ce qui concerne la classe reste sur l'ordinateur de l'enseignant, dans un fichier de classe.</p>
+    <p><b>Mesure faite avant la maquette :</b> un exercice placé dans un lien occupe de 2,1 à 5,1 ko selon sa taille (Cycles du Léman : 2,8 ko). Un code QR contient au plus 2,9 ko environ, et il devient difficile à lire au-delà de 1 ko depuis le fond d'une classe. Le lien fonctionne donc pour tous les exercices ; le code QR seulement pour les plus courts (13 exercices fournis sur 45) ; pour les autres, il mène à l'exercice du logiciel ou il est remplacé par le fichier.</p>
+    <nav class="sommaire" aria-label="Écrans">
+      <a href="#v3-distribuer">V3.1 Distribuer</a><a href="#v3-lien">V3.2 L'élève ouvre le lien</a><a href="#v3-import">V3.3 Copies en lot</a><a href="#v3-ajuster">V3.4 Ajuster les points</a><a href="#v3-retour">V3.5 Retour à l'élève</a><a href="#v3-classe">V3.6 Ma classe</a>
+    </nav>
+  </header>
+
+  <h2 class="phase">Distribuer un exercice</h2>
+
+  <section class="ecran-doc" id="v3-distribuer" data-modele="m-distribuer">
+    <h3>V3.1 Espace enseignant · Distribuer un exercice</h3>
+    <p class="explication">Un seul panneau « Distribuer », ouvert depuis la liste de vos exercices ou depuis l'éditeur. Il propose les quatre façons de donner l'exercice, du plus simple au plus complet. Le mode (entraînement, formative, évaluation) se choisit en haut et s'applique à toutes : en évaluation, le corrigé n'est jamais dans le lien ni dans le fichier. Le lien contient l'exercice lui-même, après le signe « # » : le navigateur ne l'envoie à aucun serveur, il reste entre vous et vos élèves. Le paquet de classe ajoute la consigne à coller dans le devoir Google Classroom.</p>
+  </section>
+
+  <section class="ecran-doc" id="v3-lien" data-modele="m-lien">
+    <h3>V3.2 L'élève ouvre le lien ou scanne le code</h3>
+    <p class="explication">L'élève arrive directement sur l'exercice, sans chercher dans une liste ni ouvrir de fichier. Il indique son nom (repris de la dernière fois) et commence. L'exercice rejoint ensuite « Mes dossiers » : le lien n'est plus nécessaire pour reprendre le travail. Un lien abîmé (copié à moitié) est refusé avec un message clair.</p>
+  </section>
+
+  <h2 class="phase">Corriger et rendre</h2>
+
+  <section class="ecran-doc" id="v3-import" data-modele="m-import">
+    <h3>V3.3 Copies · importer toute la classe en une fois</h3>
+    <p class="explication">Google Classroom permet de télécharger tous les fichiers rendus d'un devoir dans une archive ZIP. Cette archive s'importe telle quelle, ou les fichiers un par un comme aujourd'hui. Les contrôles actuels restent : copie la plus récente gardée, copie d'un autre exercice écartée avec son nom, journal rejoué, copies identiques signalées. Les élèves de la liste de classe qui n'ont rien rendu apparaissent aussi.</p>
+  </section>
+
+  <section class="ecran-doc" id="v3-ajuster" data-modele="m-ajuster">
+    <h3>V3.4 Ajuster les points d'une opération, avec un commentaire</h3>
+    <p class="explication">Dans le détail d'une copie, chaque opération reçoit un champ « Points accordés » (entre 0 et le barème, au demi-point) et un commentaire facultatif. Le point calculé par le logiciel reste affiché à côté ; la note se recalcule. Exemple : à l'opération 14, Léa a mis la dette en « Autres dettes » ; le logiciel donne 0,5 point sur 2 ; l'enseignant accorde 1,5 point. Total 16,5 sur 19, note 5,5. Les ajustements sont gardés dans le fichier de classe (V3.6), pas dans le navigateur.</p>
+  </section>
+
+  <section class="ecran-doc" id="v3-retour" data-modele="m-retour">
+    <h3>V3.5 Retour à l'élève : la copie corrigée s'ouvre dans son dossier</h3>
+    <p class="explication">« Rendre les copies » crée un fichier de retour par élève (une archive ZIP pour toute la classe, à déposer dans Classroom comme les PDF d'aujourd'hui). L'élève l'ouvre dans « Mes dossiers » : son journal affiche le statut de chaque écriture et vos commentaires, avec la note et les points. Les solutions ne sont jointes que si vous cochez « avec les solutions » (non coché par défaut, comme le PDF par élève).</p>
+    <div class="question"><b>À trancher</b>Le fichier de retour remplace-t-il le PDF par élève, ou s'y ajoute-t-il ? Ma recommandation : s'y ajouter. Le PDF reste utile pour imprimer ou archiver ; le fichier de retour permet à l'élève de revoir son travail dans le logiciel et de corriger ses écritures en entraînement.</div>
+  </section>
+
+  <h2 class="phase">Suivre la classe</h2>
+
+  <section class="ecran-doc" id="v3-classe" data-modele="m-classe">
+    <h3>V3.6 Espace enseignant · Ma classe</h3>
+    <p class="explication">Un tableau par classe : une ligne par élève de la liste, une colonne par exercice distribué et une par notion d'Apprendre. On y voit d'un coup d'œil qui a rendu, sa note, et les notions confirmées (C), réussies une fois (R) ou à raviver (À). Le filtre « n'a pas rendu » montre les élèves à relancer. La liste de classe se colle depuis un tableur ou s'importe en CSV. Tout est enregistré dans un fichier de classe (<code>1CA.compta-classe.json</code>) que vous gardez où vous voulez et rouvrez la fois suivante, sur n'importe quel ordinateur : rien n'est gardé dans le navigateur ni envoyé en ligne.</p>
+    <div class="question"><b>À trancher</b>Les copies importées dans « Copies » rejoignent-elles automatiquement le fichier de classe ouvert ? Ma recommandation : oui, dès qu'un fichier de classe est ouvert, avec un rappel « Fichier de classe modifié : enregistrez-le » tant qu'il ne l'est pas.</div>
+  </section>
+</div>
+
+<template id="m-distribuer">
+  <div class="bandeau">
+    <span class="marque"><i>CP</i>Compta PME</span>
+    <nav class="onglets" aria-label="Espaces"><a href="#" class="cache-tel">Accueil</a><a href="#">Comptabilité</a><a href="#">Cours</a></nav>
+    <span class="annexes"><a href="#" class="texte">Guide</a><a href="#" class="texte" style="color:var(--c-encre);font-weight:700">Espace enseignant</a></span>
+  </div>
+  <div class="page">
+    <div class="titre-page"><div><h1>Distribuer · Cycles du Léman</h1><p class="sous">Premier trimestre · 1ère CFC · 15 opérations · corrigé saisi</p></div></div>
+    <div class="carte"><div class="corps">
+      <div class="champ"><label>Mode</label>
+        <div class="segments"><span class="seg actif">Entraînement</span><span class="seg">Évaluation formative</span><span class="seg">Évaluation</span></div>
+        <span class="aide">Entraînement : correction à chaque écriture. Évaluation : aucun retour, le corrigé n'est ni dans le lien ni dans le fichier.</span>
+      </div>
+    </div></div>
+    <div class="grille-distribuer">
+      <div class="carte option"><header><h2>1 · Lien à donner</h2><span class="pastille ok">Le plus simple</span></header><div class="corps">
+        <div class="saisie lien-court">https://…/compta-pme/#ex=eJzNVt1u2zYUfh<span class="discret">…</span></div>
+        <div class="actions"><a class="btn principal" href="#">Copier le lien</a></div>
+        <p class="aide">À coller dans le devoir Classroom ou dans un message. L'exercice est dans le lien (2,8 ko) : rien n'est envoyé à un serveur.</p>
+      </div></div>
+      <div class="carte option"><header><h2>2 · Code QR à projeter</h2></header><div class="corps qr-corps">
+        <svg class="qr" viewBox="0 0 29 29" aria-label="Code QR (exemple dessiné)" role="img"><rect width="29" height="29" fill="#fff"/><g fill="#0f2742"><rect x="1" y="1" width="7" height="7"/><rect x="2" y="2" width="5" height="5" fill="#fff"/><rect x="3" y="3" width="3" height="3"/><rect x="21" y="1" width="7" height="7"/><rect x="22" y="2" width="5" height="5" fill="#fff"/><rect x="23" y="3" width="3" height="3"/><rect x="1" y="21" width="7" height="7"/><rect x="2" y="22" width="5" height="5" fill="#fff"/><rect x="3" y="23" width="3" height="3"/><rect x="10" y="2" width="1" height="1"/><rect x="12" y="3" width="2" height="1"/><rect x="15" y="1" width="1" height="3"/><rect x="17" y="5" width="2" height="1"/><rect x="10" y="7" width="3" height="1"/><rect x="9" y="10" width="1" height="2"/><rect x="11" y="11" width="3" height="1"/><rect x="15" y="9" width="2" height="2"/><rect x="19" y="10" width="1" height="3"/><rect x="22" y="11" width="3" height="1"/><rect x="26" y="9" width="2" height="2"/><rect x="2" y="11" width="2" height="1"/><rect x="5" y="13" width="1" height="2"/><rect x="1" y="16" width="3" height="1"/><rect x="7" y="17" width="2" height="1"/><rect x="10" y="15" width="1" height="3"/><rect x="12" y="17" width="3" height="1"/><rect x="16" y="14" width="2" height="2"/><rect x="20" y="16" width="3" height="1"/><rect x="24" y="15" width="1" height="3"/><rect x="26" y="18" width="2" height="1"/><rect x="10" y="21" width="2" height="1"/><rect x="13" y="23" width="1" height="3"/><rect x="15" y="20" width="3" height="1"/><rect x="19" y="22" width="2" height="2"/><rect x="22" y="25" width="3" height="1"/><rect x="26" y="22" width="1" height="2"/><rect x="11" y="26" width="2" height="1"/><rect x="16" y="26" width="1" height="2"/><rect x="21" y="27" width="2" height="1"/></g></svg>
+        <div><div class="actions"><a class="btn" href="#">Projeter en grand</a><a class="btn" href="#">Imprimer</a></div>
+        <p class="aide">Les élèves le scannent avec la caméra du téléphone ou de la tablette. Exercice trop long pour un code QR : le logiciel le dit et propose le lien ou le fichier.</p></div>
+      </div></div>
+      <div class="carte option"><header><h2>3 · Fichier pour Classroom</h2></header><div class="corps">
+        <p class="aide" style="margin-top:0">Le fichier <code>.compta-exercice.json</code> d'aujourd'hui, à joindre au devoir. Toujours possible, quelle que soit la taille de l'exercice.</p>
+        <div class="actions"><a class="btn" href="#">Télécharger le fichier</a><a class="btn" href="#">Paquet de classe (ZIP)</a></div>
+        <p class="aide">Paquet de classe : le fichier, le lien, le code QR en image et la consigne prête à coller dans Classroom.</p>
+      </div></div>
+      <div class="carte option"><header><h2>4 · Énoncé sur papier</h2></header><div class="corps">
+        <p class="aide" style="margin-top:0">L'énoncé imprimé avec son code (phase V2). Codes de cet exercice : <b class="num">CYCLES-PT5</b> (bilan d'ouverture fourni) ou <b class="num">CYCLES-4V3</b> (à saisir).</p>
+        <div class="actions"><a class="btn" href="#">Imprimer l'énoncé (PDF)</a></div>
+      </div></div>
+    </div>
+  </div>
+</template>
+
+<template id="m-lien">
+  <div class="bandeau">
+    <span class="marque"><i>CP</i>Compta PME</span>
+    <nav class="onglets" aria-label="Espaces"><a href="#" class="cache-tel">Accueil</a><a href="#" class="actif">Comptabilité</a><a href="#">Cours</a></nav>
+    <span class="annexes"><a href="#" class="texte">Guide</a><span class="initiales">LM</span></span>
+  </div>
+  <div class="page">
+    <div class="carte recu"><div class="corps">
+      <div class="etiq" style="margin:0">Exercice reçu de votre enseignant</div>
+      <h1 style="font-size:var(--t-20);color:var(--c-encre);margin-top:4px">Cycles du Léman · premier trimestre</h1>
+      <p class="discret">1ère CFC · 15 opérations · Entraînement, avec correction à chaque écriture</p>
+      <p style="margin-top:var(--e-3)">Sandra Rochat exploite le magasin de vélos Cycles du Léman, à Carouge. Passez au journal les écritures du premier trimestre, puis bouclez l'exercice.</p>
+    </div></div>
+    <div class="carte"><div class="corps formulaire">
+      <div class="champ"><label>Prénom</label><div class="saisie">Léa</div></div>
+      <div class="champ"><label>Nom</label><div class="saisie">Martin</div></div>
+      <div class="champ"><label>Classe</label><div class="saisie">1CA</div></div>
+      <div class="champ large" style="flex-direction:row;justify-content:flex-end"><a class="btn principal" href="#">Commencer</a></div>
+    </div></div>
+    <p class="discret" style="font-size:var(--t-14)">L'exercice rejoint « Mes dossiers » : vous le retrouverez là, même sans le lien.</p>
+    <p class="message erreur">Exemple de lien abîmé : « Ce lien est incomplet : l'exercice n'a pas pu être lu. Demandez le lien à votre enseignant ou ouvrez le fichier du devoir. »</p>
+  </div>
+</template>
+
+<template id="m-import">
+  <div class="bandeau">
+    <span class="marque"><i>CP</i>Compta PME</span>
+    <nav class="onglets" aria-label="Espaces"><a href="#" class="cache-tel">Accueil</a><a href="#">Comptabilité</a><a href="#">Cours</a></nav>
+    <span class="annexes"><a href="#" class="texte" style="color:var(--c-encre);font-weight:700">Espace enseignant</a></span>
+  </div>
+  <div class="page">
+    <div class="titre-page"><div><h1>Copies · Cycles du Léman</h1><p class="sous">Classe 1CA · fichier de classe ouvert</p></div>
+      <div class="actions"><a class="btn principal" href="#">Importer des copies…</a></div></div>
+    <p class="message information">Choisissez les fichiers rendus, ou l'archive ZIP téléchargée depuis le devoir Classroom (« Télécharger » sur la page des travaux rendus).</p>
+    <div class="carte"><header><h2>Import de « Devoir 12 - Cycles du Léman.zip »</h2></header><div class="corps">
+      <ul class="bilan-import">
+        <li class="statut-juste">22 copies importées.</li>
+        <li>Rossier Noah : deux copies rendues, la plus récente (14.12.2026, 16:05) est gardée.</li>
+        <li>Dupraz Inès : copie de l'exercice « Golay Événements », écartée.</li>
+        <li class="statut-faux">Pas de copie : Bernasconi Luca, Favre Chloé (liste de la classe).</li>
+      </ul>
+    </div></div>
+    <div class="carte"><header><h2>Résultats · 22 copies · moyenne 4,81</h2><a class="btn petit" href="#">Rendre les copies (ZIP)</a></header>
+      <table class="t empile"><thead><tr><th>Élève</th><th>Rendu le</th><th>Alertes</th><th class="montant">Points</th><th class="montant">Note</th></tr></thead><tbody>
+        <tr><td data-etiquette="Élève"><b>Martin Léa</b></td><td data-etiquette="Rendu le">14.12.2026</td><td data-etiquette="Alertes" class="discret">aucune</td><td data-etiquette="Points" class="montant num">15,5 / 19</td><td data-etiquette="Note" class="montant num"><b>5</b></td></tr>
+        <tr><td data-etiquette="Élève"><b>Rossier Noah</b></td><td data-etiquette="Rendu le">14.12.2026</td><td data-etiquette="Alertes" class="discret">aucune</td><td data-etiquette="Points" class="montant num">19 / 19</td><td data-etiquette="Note" class="montant num"><b>6</b></td></tr>
+        <tr><td data-etiquette="Élève"><b>Weber Tom</b></td><td data-etiquette="Rendu le">13.12.2026</td><td data-etiquette="Alertes"><span class="pastille" style="background:var(--c-avert-fond);color:var(--c-avert)">Écritures identiques à Keller Zoé</span></td><td data-etiquette="Points" class="montant num">12 / 19</td><td data-etiquette="Note" class="montant num"><b>4</b></td></tr>
+      </tbody></table>
+    </div>
+  </div>
+</template>
+
+<template id="m-ajuster">
+  <div class="bandeau">
+    <span class="marque"><i>CP</i>Compta PME</span>
+    <nav class="onglets" aria-label="Espaces"><a href="#" class="cache-tel">Accueil</a><a href="#">Comptabilité</a><a href="#">Cours</a></nav>
+    <span class="annexes"><a href="#" class="texte" style="color:var(--c-encre);font-weight:700">Espace enseignant</a></span>
+  </div>
+  <div class="page">
+    <div class="titre-page"><div><h1>Détail · Martin Léa</h1><p class="sous">Cycles du Léman · 16,5 / 19 points · note 5,5 (5 sans l'ajustement)</p></div></div>
+    <div class="carte">
+      <table class="t empile"><thead><tr><th>Pièce</th><th>Statut</th><th>Écriture de l'élève</th><th class="montant">Calculé</th><th>Accordé</th><th>Commentaire</th></tr></thead><tbody>
+        <tr><td data-etiquette="Pièce" class="num">12</td><td data-etiquette="Statut" class="statut-faux">Bonne classe, mauvais compte</td><td data-etiquette="Écriture">Publicité / Dettes fournisseurs 650.00</td><td data-etiquette="Calculé" class="montant num">0 / 1</td><td data-etiquette="Accordé"><div class="saisie num petit-champ">0</div></td><td data-etiquette="Commentaire"><div class="saisie vide">Ajouter un commentaire…</div></td></tr>
+        <tr class="ajuste"><td data-etiquette="Pièce" class="num">14</td><td data-etiquette="Statut" class="statut-partiel">Écriture erronée · points partiels</td><td data-etiquette="Écriture">Achats de marchandises 3'000.00 / Caisse 1'000.00, Autres dettes 2'000.00</td><td data-etiquette="Calculé" class="montant num">0,5 / 2</td><td data-etiquette="Accordé"><div class="saisie num petit-champ actif">1,5</div></td><td data-etiquette="Commentaire"><div class="saisie">Bon découpage ; la dette envers le fournisseur de marchandises va en Dettes fournisseurs.</div></td></tr>
+        <tr><td data-etiquette="Pièce" class="num">15</td><td data-etiquette="Statut" class="statut-juste">Juste</td><td data-etiquette="Écriture" class="discret">Conforme au corrigé</td><td data-etiquette="Calculé" class="montant num">1 / 1</td><td data-etiquette="Accordé"><div class="saisie num petit-champ">1</div></td><td data-etiquette="Commentaire"><div class="saisie vide">Ajouter un commentaire…</div></td></tr>
+      </tbody></table>
+      <p class="aide" style="padding:var(--e-2) var(--e-4)">Points accordés entre 0 et le barème, au demi-point. « Revenir au calcul » efface l'ajustement d'une opération.</p>
+    </div>
+  </div>
+</template>
+
+<template id="m-retour">
+  <div class="bandeau">
+    <span class="marque"><i>CP</i>Compta PME</span>
+    <nav class="onglets" aria-label="Espaces"><a href="#" class="cache-tel">Accueil</a><a href="#" class="actif">Comptabilité</a><a href="#">Cours</a></nav>
+    <span class="annexes"><a href="#" class="texte">Guide</a><span class="initiales">LM</span></span>
+  </div>
+  <div class="page">
+    <div class="carte retour"><div class="corps">
+      <div class="etiq" style="margin:0">Copie corrigée par votre enseignant · 15.12.2026</div>
+      <div class="ligne-retour"><h1 style="font-size:var(--t-20);color:var(--c-encre)">Cycles du Léman · note 5,5</h1><span class="discret num">16,5 / 19 points</span></div>
+      <p class="discret">13 opérations justes sur 15 · bouclement juste · 2 commentaires de votre enseignant</p>
+    </div></div>
+    <div class="carte"><header><h2>Journal corrigé</h2><a class="btn petit" href="#">Revoir dans le journal</a></header>
+      <table class="t empile"><thead><tr><th>Pièce</th><th>Écriture</th><th>Statut</th><th class="montant">Points</th></tr></thead><tbody>
+        <tr><td data-etiquette="Pièce" class="num">13</td><td data-etiquette="Écriture">Emprunt bancaire à long terme / Banque (n/avoir) 5'000.00</td><td data-etiquette="Statut" class="statut-juste">Juste</td><td data-etiquette="Points" class="montant num">1 / 1</td></tr>
+        <tr><td data-etiquette="Pièce" class="num">14</td><td data-etiquette="Écriture">Achats de marchandises 3'000.00 / Caisse 1'000.00, Autres dettes 2'000.00</td><td data-etiquette="Statut" class="statut-partiel">Points partiels</td><td data-etiquette="Points" class="montant num">1,5 / 2</td></tr>
+        <tr class="commentaire"><td colspan="4" class="libre"><b>Commentaire :</b> Bon découpage ; la dette envers le fournisseur de marchandises va en Dettes fournisseurs.</td></tr>
+        <tr><td data-etiquette="Pièce" class="num">15</td><td data-etiquette="Écriture">Assurances / Poste (CP) 480.00</td><td data-etiquette="Statut" class="statut-juste">Juste</td><td data-etiquette="Points" class="montant num">1 / 1</td></tr>
+      </tbody></table>
+    </div>
+    <p class="discret" style="font-size:var(--t-14)">Sans « avec les solutions », l'écriture attendue n'est pas montrée : l'élève sait où chercher, pas la réponse.</p>
+  </div>
+</template>
+
+<template id="m-classe">
+  <div class="bandeau">
+    <span class="marque"><i>CP</i>Compta PME</span>
+    <nav class="onglets" aria-label="Espaces"><a href="#" class="cache-tel">Accueil</a><a href="#">Comptabilité</a><a href="#">Cours</a></nav>
+    <span class="annexes"><a href="#" class="texte" style="color:var(--c-encre);font-weight:700">Espace enseignant</a></span>
+  </div>
+  <div class="page">
+    <div class="titre-page"><div><h1>Ma classe · 1CA</h1><p class="sous">24 élèves · fichier <code>1CA.compta-classe.json</code> · enregistré le 15.12.2026 à 17:20</p></div>
+      <div class="actions"><a class="btn principal" href="#">Enregistrer le fichier de classe</a><a class="btn" href="#">Ouvrir un autre fichier…</a></div></div>
+    <div class="filtres"><span class="seg actif">Tous</span><span class="seg">N'a pas rendu</span><span class="seg">Sous 4</span><a class="lien" href="#">Coller la liste de la classe</a></div>
+    <div class="carte defile">
+      <table class="t classe"><thead><tr><th>Élève</th><th>Golay Événements<br><span class="discret">12.11</span></th><th>Cycles du Léman<br><span class="discret">14.12</span></th><th>Cycles (papier)<br><span class="discret">16.12</span></th><th>Bilan</th><th>Débit et crédit</th><th>Charges et produits</th></tr></thead><tbody>
+        <tr><td><b>Bernasconi Luca</b></td><td class="num">4,5</td><td class="pas-rendu">Pas rendu</td><td class="pas-rendu">Pas rendu</td><td class="n c">C</td><td class="n r">R</td><td class="n"></td></tr>
+        <tr><td><b>Dupraz Inès</b></td><td class="num">5</td><td class="num">5,5</td><td class="num">5,5</td><td class="n c">C</td><td class="n c">C</td><td class="n r">R</td></tr>
+        <tr><td><b>Favre Chloé</b></td><td class="num">3,5</td><td class="pas-rendu">Pas rendu</td><td class="num">4</td><td class="n a">À</td><td class="n r">R</td><td class="n"></td></tr>
+        <tr><td><b>Martin Léa</b></td><td class="num">5</td><td class="num">5,5</td><td class="num">5</td><td class="n c">C</td><td class="n c">C</td><td class="n r">R</td></tr>
+        <tr><td><b>Rossier Noah</b></td><td class="num">6</td><td class="num">6</td><td class="num">6</td><td class="n c">C</td><td class="n c">C</td><td class="n c">C</td></tr>
+        <tr><td><b>Weber Tom</b></td><td class="num">4</td><td class="num">4</td><td class="pas-rendu">Pas rendu</td><td class="n r">R</td><td class="n a">À</td><td class="n"></td></tr>
+      </tbody></table>
+    </div>
+    <p class="aide">C : notion confirmée · R : réussie une fois · À : à raviver (mêmes états que l'onglet « Progression »). Cliquez sur une note pour ouvrir la copie ; sur un nom pour la fiche de l'élève (toutes ses copies et ses notions).</p>
+  </div>
+</template>
+
+<script>
+// Chaque section de la page reçoit son écran dans deux cadres : ordinateur et téléphone.
+for (const section of document.querySelectorAll('.ecran-doc')) {
+  const modele = document.getElementById(section.dataset.modele);
+  const cadres = document.createElement('div');
+  cadres.className = 'cadres';
+  for (const [classe, etiquette] of [['ordi', 'Ordinateur · 1100 px'], ['tel', 'Téléphone · 360 px']]) {
+    const bloc = document.createElement('div');
+    const etiq = document.createElement('div');
+    etiq.className = 'etiq';
+    etiq.textContent = etiquette;
+    const cadre = document.createElement('div');
+    cadre.className = `cadre ${classe}`;
+    cadre.appendChild(modele.content.cloneNode(true));
+    bloc.append(etiq, cadre);
+    cadres.appendChild(bloc);
+  }
+  const question = section.querySelector('.question');
+  section.insertBefore(cadres, question);
+}
+</script>
+</body>
+</html>

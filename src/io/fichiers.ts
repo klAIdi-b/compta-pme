@@ -86,6 +86,8 @@ export interface Copie {
    * d'ouverture, code de l'exercice tapé par l'élève). Il sert à reprendre la copie et à la rattacher au corrigé.
    */
   papier?: { exercice: Exercice };
+  /** Fichier de classe seulement : exercice de correction auquel une copie d'énoncé papier a été rattachée. */
+  rattacheeA?: string;
   exporteLe: string;
 }
 

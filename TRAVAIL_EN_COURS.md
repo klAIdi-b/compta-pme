@@ -226,7 +226,7 @@ Règles : une phase à la fois sur `apercu`, maquette avant l'interface, tests, 
 - [x] V1. Séparer la Comptabilité et le Cours : bandeau à trois espaces, page « Mes dossiers », barre latérale groupée.
 - [x] V2. Mode énoncé papier (ouverture saisie ou pré-remplie, numéros de pièce libres, code d'exercice, correction
   par pièce, impression de l'énoncé et du corrigé de tous les exercices).
-- [ ] V3. Distribution, retour et « Ma classe » (fichier de classe).
+- [x] V3. Distribution, retour et « Ma classe » (fichier de classe).
 
 - 27.11.2026 : V1 faite sur `apercu` (non commitée) : `npm test`, `check`, `build`, tests d'écran et vérification
   dans le navigateur ; 662 tests, 60 tests d’écran (6 adaptés à la nouvelle navigation). Reste : accord de l’enseignant
@@ -235,3 +235,9 @@ Règles : une phase à la fois sur `apercu`, maquette avant l'interface, tests, 
 - 27.11.2026 : V2 faite sur `apercu`, publiée sur la prévisualisation sur l’accord de l’enseignant : moteur `papier.ts` et ses tests, dossier papier, bilan d'ouverture,
   journal sans corrigé, copies papier dans « Copies », impression de l'énoncé et du corrigé. Reste : accord de
   l'enseignant sur V2, puis V3.
+- 27.11.2026 : maquette de la phase V3 (`public/maquettes/distribution-classe.html`, six écrans : distribuer, lien,
+  copies en lot, ajustement des points, retour à l'élève, Ma classe), non commitée, à valider. Mesure : un exercice tient
+  en 2,1 à 5,1 ko dans un lien ; seuls 13 exercices fournis sur 45 tiennent dans un code QR (2,9 ko au plus).
+- 27.11.2026 : maquette V3 validée (« Oui, réaliser V3 », avec les deux recommandations). V3 faite sur `apercu`, publiée
+  sur la prévisualisation sur l’accord de l’enseignant : lien autonome et code QR (`qrcode-generator` 2.0.4), archive ZIP de Classroom, ajustement des points,
+  fichier de retour, fichier de classe et onglet « Ma classe ». Reste : accord de l'enseignant sur V3.

@@ -11,6 +11,7 @@ import { plan as planParDefaut } from '../data/plan';
 import { exercicesDemo } from '../data/demos';
 import { ecrire, lire } from '../io/stockage';
 import { chapitreDuLien } from './lien';
+import type { Retour } from '../io/retour';
 import { empreinteTravail, type DernierExport } from '../io/fichiers';
 import type { Suivi } from '../engine/correction';
 import { aMettreDeCote, ecranAffiche, genreSession, peutOuvrirAccueil, vueEleve, type Ecran, type GenreSession } from './modes';
@@ -69,6 +70,8 @@ export interface Session {
   apercu?: boolean;
   /** Évaluation formative : l'élève a terminé ; la correction est affichée et la saisie verrouillée. */
   formativeTerminee?: boolean;
+  /** Copie corrigée rendue par l'enseignant (phase V3) : note, statuts, commentaires. */
+  retour?: Retour;
 }
 
 export interface FicheSalaire {
@@ -155,7 +158,8 @@ class Etat {
       this.autres = Object.fromEntries(Object.entries(s.autres ?? {}).map(([k, v]) => [k, completer(v)!]));
     }
     // Arrivée sur le site (sans rubrique dans l'adresse) avec un travail en cours : l'accueil propose de le reprendre.
-    const lienExercice = new URLSearchParams(location.search).has('exercice');
+    // Lien vers un exercice du logiciel (?exercice=) ou lien autonome qui contient l'exercice (#ex=, phase V3).
+    const lienExercice = new URLSearchParams(location.search).has('exercice') || location.hash.startsWith('#ex=');
     if (this.genre === 'travail' && (lienExercice || !location.hash || location.hash === '#')) this.accueilOuvert = true;
     // Lien direct d'un enseignant : la page des exercices s'ouvre, l'exercice déjà choisi.
     if (lienExercice) this.pageAccueil = 'exercices';
@@ -340,6 +344,14 @@ class Etat {
     s.exercice = { ...s.exercice, ouvertureActif: actif, ouverturePassif: passif };
     s.dossier = { ...s.dossier, ouverture: ouvertureDepuisBilan(actif, passif) };
     s.derniereActivite = new Date().toISOString();
+  }
+
+  /** Copie corrigée rendue par l'enseignant : attachée au dossier de cet exercice (actif ou mis en réserve). */
+  attacherRetour(r: Retour): boolean {
+    const s = this.sessionDe(r.copie.exerciceId);
+    if (!s) return false;
+    s.retour = r;
+    return true;
   }
 
   /** Bouton « Commencer la saisie » : ouvre le journal, avec la visite guidée la première fois. */

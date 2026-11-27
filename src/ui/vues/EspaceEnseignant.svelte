@@ -27,6 +27,7 @@
   import Relecture from './Relecture.svelte';
   import ProgressionClasse from './ProgressionClasse.svelte';
   import BoutonLien from '../composants/BoutonLien.svelte';
+  import Distribuer from '../composants/Distribuer.svelte';
   import Differe from '../composants/Differe.svelte';
 
   let code = $state('');
@@ -193,11 +194,12 @@
   {:else}
     <main class="contenu">
       <div class="titre">
-        <h1>{enseignant.onglet === 'copies' ? 'Copies des élèves' : enseignant.onglet === 'progression' ? 'Progression de la classe' : enseignant.onglet === 'dossiers' ? 'Dossiers de pièces comptables' : enseignant.onglet === 'simulateur' ? "Simulateur d'entreprise" : enseignant.onglet === 'parametres' ? 'Paramètres' : enseignant.onglet === 'relecture' ? 'Relecture du contenu' : 'Exercices'}</h1>
+        <h1>{enseignant.onglet === 'copies' ? 'Copies des élèves' : enseignant.onglet === 'classe' ? 'Ma classe' : enseignant.onglet === 'progression' ? 'Progression de la classe' : enseignant.onglet === 'dossiers' ? 'Dossiers de pièces comptables' : enseignant.onglet === 'simulateur' ? "Simulateur d'entreprise" : enseignant.onglet === 'parametres' ? 'Paramètres' : enseignant.onglet === 'relecture' ? 'Relecture du contenu' : 'Exercices'}</h1>
         <div class="segments" role="group" aria-label="Rubrique">
           <button aria-pressed={enseignant.onglet === 'exercices'} onclick={() => (enseignant.onglet = 'exercices')}>Exercices</button>
           <button aria-pressed={enseignant.onglet === 'dossiers'} onclick={() => (enseignant.onglet = 'dossiers')}>Dossiers</button>
           <button aria-pressed={enseignant.onglet === 'copies'} onclick={() => (enseignant.onglet = 'copies')}>Copies</button>
+          <button aria-pressed={enseignant.onglet === 'classe'} onclick={() => (enseignant.onglet = 'classe')}>Ma classe</button>
           <button aria-pressed={enseignant.onglet === 'progression'} onclick={() => (enseignant.onglet = 'progression')}>Progression</button>
           <button aria-pressed={enseignant.onglet === 'simulateur'} onclick={() => (enseignant.onglet = 'simulateur')}>Simulateur</button>
           <button aria-pressed={enseignant.onglet === 'relecture'} onclick={() => (enseignant.onglet = 'relecture')}>Relecture</button>
@@ -206,6 +208,9 @@
       </div>
       {#if message}<p class="info" role="status">{message}</p>{/if}
 
+      {#if enseignant.onglet === 'exercices' && enseignant.distribuer && enseignant.trouver(enseignant.distribuer)}
+        <Distribuer ex={enseignant.trouver(enseignant.distribuer)!} fermer={() => (enseignant.distribuer = null)} />
+      {/if}
       {#if enseignant.onglet === 'exercices'}
         <div class="barre">
           <button class="btn btn-principal" onclick={nouveau}>Nouvel exercice</button>
@@ -291,6 +296,7 @@
                     <td class="actions">
                       <button class="btn-lien" onclick={() => (enseignant.edition = ex.id)}>Modifier</button>
                       <button class="btn-lien" onclick={() => apercu(ex)}>Aperçu</button>
+                      <button class="btn-lien" onclick={() => { enseignant.distribuer = ex.id; window.scrollTo(0, 0); }}>Distribuer</button>
                       <button class="btn-lien" onclick={() => exporter(ex, 'eleves')}>Exporter pour les élèves</button>
                       <button class="btn-lien" onclick={() => exporter(ex, 'enseignant')}>Version enseignant</button>
                       <button class="btn-lien" onclick={() => supprimer(ex)}>Supprimer</button>
@@ -311,6 +317,8 @@
         <Relecture />
       {:else if enseignant.onglet === 'copies'}
         <SyntheseCopies />
+      {:else if enseignant.onglet === 'classe'}
+        <Differe charger={() => import('./MaClasse.svelte')} props={{}} />
       {:else if enseignant.onglet === 'progression'}
         <ProgressionClasse />
       {:else if enseignant.onglet === 'simulateur'}

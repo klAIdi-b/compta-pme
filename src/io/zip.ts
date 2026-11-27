@@ -91,3 +91,55 @@ export function creerZip(fichiers: FichierZip[], maintenant = new Date()): Uint8
   }
   return r;
 }
+
+/**
+ * Lecture d'une archive ZIP (phase V3) : les fichiers rendus d'un devoir Google Classroom se téléchargent en une
+ * archive, que l'enseignant importe telle quelle. Fichiers stockés ou compressés (« deflate », décompressés par le
+ * navigateur) ; les dossiers sont ignorés ; un CRC faux ou une méthode inconnue écartent le fichier, sans tout refuser.
+ * Rend les fichiers lus et les noms écartés.
+ */
+export async function lireZip(zip: Uint8Array): Promise<{ fichiers: FichierZip[]; ecartes: string[] }> {
+  const v = new DataView(zip.buffer, zip.byteOffset, zip.byteLength);
+  // Fin du répertoire central : cherchée depuis la fin (un commentaire d'archive peut suivre).
+  let fin = -1;
+  for (let i = zip.length - 22; i >= Math.max(0, zip.length - 22 - 65535); i--) {
+    if (v.getUint32(i, true) === 0x06054b50) {
+      fin = i;
+      break;
+    }
+  }
+  if (fin < 0) throw new Error("Ce fichier n'est pas une archive ZIP.");
+  const n = v.getUint16(fin + 10, true);
+  let p = v.getUint32(fin + 16, true);
+  const dec = new TextDecoder();
+  const fichiers: FichierZip[] = [];
+  const ecartes: string[] = [];
+  for (let k = 0; k < n; k++) {
+    if (v.getUint32(p, true) !== 0x02014b50) throw new Error("L'archive ZIP est endommagée.");
+    const methode = v.getUint16(p + 10, true);
+    const crc = v.getUint32(p + 16, true);
+    const tailleZ = v.getUint32(p + 20, true);
+    const ln = v.getUint16(p + 28, true);
+    const lx = v.getUint16(p + 30, true);
+    const lc = v.getUint16(p + 32, true);
+    const local = v.getUint32(p + 42, true);
+    const nom = dec.decode(zip.subarray(p + 46, p + 46 + ln));
+    p += 46 + ln + lx + lc;
+    if (nom.endsWith('/')) continue;
+    const debut = local + 30 + v.getUint16(local + 26, true) + v.getUint16(local + 28, true);
+    const brut = zip.subarray(debut, debut + tailleZ);
+    try {
+      let donnees: Uint8Array;
+      if (methode === 0) donnees = brut;
+      else if (methode === 8) {
+        const flux = new Blob([brut as BlobPart]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+        donnees = new Uint8Array(await new Response(flux).arrayBuffer());
+      } else throw new Error('méthode');
+      if (crc32(donnees) !== crc) throw new Error('crc');
+      fichiers.push({ nom, donnees });
+    } catch {
+      ecartes.push(nom);
+    }
+  }
+  return { fichiers, ecartes };
+}

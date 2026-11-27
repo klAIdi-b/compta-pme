@@ -358,6 +358,20 @@ export const GUIDE: PartieGuide[] = [
               'façon : « Envoyer ou reprendre ma progression », puis « Reprendre ma progression… ».',
           },
           {
+            type: 'p',
+            texte:
+              'Lien ou code QR de votre enseignant : ouvrez le lien (ou scannez le code avec la caméra) ; l’exercice ' +
+              's’ouvre directement, sans fichier. Indiquez votre nom, puis « Commencer » : l’exercice rejoint « Mes ' +
+              'dossiers », vous n’avez plus besoin du lien pour le reprendre.',
+          },
+          {
+            type: 'p',
+            texte:
+              'Copie corrigée : votre enseignant peut vous rendre un fichier .compta-retour.json. Ouvrez-le avec « Ouvrir un ' +
+              'fichier… » (espace « Comptabilité ») : « Votre mission » affiche la note, les points et le statut de chaque ' +
+              'opération, avec ses commentaires.',
+          },
+          {
             type: 'retenir',
             texte:
               "Votre travail n'existe que dans le navigateur de cet ordinateur. Exportez votre copie avant de changer " +
@@ -433,9 +447,10 @@ export const GUIDE: PartieGuide[] = [
           {
             type: 'liste',
             items: [
-              'Exercices : vos exercices (création, modification, import, export).',
+              'Exercices : vos exercices (création, modification, import, export) et « Distribuer » (lien, code QR, fichier, papier).',
               'Dossiers : les dossiers de pièces comptables prêts à distribuer (PDF élève, corrigé PDF, fichiers d’exercice).',
               'Copies : correction automatique des copies rendues par les élèves, notes et statistiques de la classe.',
+              'Ma classe : suivi d’une classe dans un fichier de classe (copies rendues, notes, notions d’Apprendre).',
               'Progression : tableau des notions d’Apprendre, d’après les fichiers de progression rendus par les élèves.',
               'Simulateur : préparer et animer une partie du simulateur d’entreprise (voir « Le simulateur d’entreprise »).',
               'Relecture : liste de tout le contenu (théorie, exercices, dossiers, niveaux des comptes) à commenter.',
@@ -500,9 +515,15 @@ export const GUIDE: PartieGuide[] = [
           {
             type: 'etapes',
             items: [
-              '« Exporter pour les élèves » enregistre un fichier .compta-exercice.json dans vos téléchargements.',
-              'Déposez ce fichier dans un devoir Google Classroom de la classe.',
-              "L'élève ouvre le site, clique sur « Ouvrir un exercice reçu… » et choisit le fichier.",
+              'Onglet « Exercices », « Distribuer » : choisissez le mode (entraînement, formative, évaluation), puis une des ' +
+                'quatre façons de donner l’exercice.',
+              'Lien : « Copier le lien », puis collez-le dans le devoir Classroom. L’exercice est dans le lien lui-même, ' +
+                'après le signe « # » : rien n’est envoyé à un serveur. L’élève l’ouvre et commence directement.',
+              'Code QR : à projeter (« Projeter en grand ») ou à imprimer ; les élèves le scannent avec la caméra. Il ne ' +
+                'convient qu’aux exercices courts : pour un exercice trop long, le logiciel le dit et propose le lien ou le fichier.',
+              'Fichier : « Télécharger le fichier » (.compta-exercice.json), à joindre au devoir ; l’élève l’ouvre avec ' +
+                '« Ouvrir un fichier… ». « Paquet de classe (ZIP) » ajoute le lien, le code QR en image et la consigne à coller.',
+              'Énoncé sur papier : voir « Énoncés sur papier ».',
             ],
           },
           {
@@ -695,7 +716,8 @@ export const GUIDE: PartieGuide[] = [
               'Les élèves cliquent sur « Exporter ma copie » et vous remettent leur fichier .compta-copie.json.',
               'Onglet « Copies » : choisissez l’exercice. Il doit se trouver dans vos exercices avec son corrigé ; pour une ' +
                 'évaluation préparée par un collègue, importez d’abord sa version enseignant.',
-              '« Importer des copies… » : sélectionnez tous les fichiers reçus en une fois.',
+              '« Importer des copies… » : sélectionnez tous les fichiers reçus en une fois, ou l’archive ZIP téléchargée ' +
+                'depuis la page des travaux rendus du devoir Classroom (seules les copies y sont lues).',
               'Le tableau donne les points et la note de chaque élève, le détail par opération et les erreurs les plus ' +
                 'fréquentes de la classe.',
               '« Détail » affiche, pour chaque opération fausse, les écritures de l’élève à côté du corrigé (la case à ' +
@@ -707,6 +729,12 @@ export const GUIDE: PartieGuide[] = [
                 'élève avec le résultat de chaque opération et, pour les erreurs, ses écritures à côté du corrigé.',
               '« Un PDF par élève (ZIP) » produit une archive avec un PDF par élève, à déposer dans Classroom : la note et le ' +
                 'résultat de chaque opération, sans le corrigé (cochez « avec le corrigé » quand toutes les classes ont passé l’épreuve).',
+              'Ajuster les points : dans « Détail », chaque opération a un champ « Points accordés » (au demi-point, entre 0 ' +
+                'et le barème) et un commentaire pour l’élève. Le calcul du logiciel reste affiché ; « Revenir au calcul » ' +
+                'efface l’ajustement. Avec un fichier de classe ouvert, les ajustements y sont enregistrés.',
+              '« Rendre les copies (ZIP) » produit un fichier de retour par élève (.compta-retour.json) à déposer dans ' +
+                'Classroom : l’élève l’ouvre dans le logiciel et voit sa note, le statut de chaque opération et vos ' +
+                'commentaires ; les écritures attendues seulement si vous cochez « avec les solutions ». Il s’ajoute au PDF.',
             ],
           },
           {
@@ -716,6 +744,37 @@ export const GUIDE: PartieGuide[] = [
               'facture établie vaut 3 points, chaque ordre de paiement 2 points et le contrôle des paiements 3 points, au ' +
               'prorata des champs justes (au demi-point inférieur). Avec la rubrique Budget : 3 points pour le budget préparé ' +
               'et 3 points pour la comparaison.',
+          },
+        ],
+      },
+      {
+        id: 'ma-classe',
+        titre: 'Ma classe',
+        blocs: [
+          {
+            type: 'p',
+            texte:
+              'L’onglet « Ma classe » montre une classe d’un coup d’œil : une ligne par élève, une colonne par exercice rendu ' +
+              '(la note, « Pas rendu ») et une par notion d’Apprendre (C : confirmée, R : réussie une fois, À : à raviver).',
+          },
+          {
+            type: 'etapes',
+            items: [
+              'Créez la classe (son nom), puis « Coller la liste de la classe » : une ligne par élève, nom puis prénom, ' +
+                'copiés depuis un tableur.',
+              'Dans « Copies », les copies importées rejoignent le fichier de classe ouvert ; les élèves sans copie sont ' +
+                'signalés. « Importer des progressions d’Apprendre… » ajoute les fichiers de progression.',
+              'Filtres « N’a pas rendu » et « Sous 4 » pour savoir qui relancer. Une note suivie de * tient compte d’un ' +
+                'ajustement de points.',
+              '« Enregistrer le fichier de classe » : un fichier .compta-classe.json, à garder où vous voulez et à rouvrir la ' +
+                'fois suivante, sur n’importe quel ordinateur.',
+            ],
+          },
+          {
+            type: 'retenir',
+            texte:
+              'Rien de la classe n’est gardé dans le navigateur ni envoyé en ligne : tant qu’un rappel « Fichier de classe ' +
+              'modifié » est affiché, enregistrez le fichier pour ne pas perdre vos changements.',
           },
         ],
       },
