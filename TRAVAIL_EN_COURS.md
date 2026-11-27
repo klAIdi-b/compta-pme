@@ -22,7 +22,7 @@ attend une décision ; les chantiers terminés sont dans `docs/historique.md`. L
   (plan d'études complet) ; 4. formulaire TVA ; 5. leçons de 1ère CFC ; 6. leçons de 2ème CFC et option Finances ;
   7. leçons de maturité ; 8. refonte de l'interface ; 9. propositions jamais validées et points de maturité
   ci-dessous.
-  Lot 1 fait le 27.11.2026 (non commité) : six défauts corrigés (écriture inversée sans explication de confusion,
+  Lot 1 fait le 27.11.2026, fusionné dans `main` sur l'accord de l'enseignant (PR 33) : six défauts corrigés (écriture inversée sans explication de confusion,
   encaissement et amortissement sous condition, « Cette opération concerne », phrase du ducroire, 2205 hors de la
   notion TVA) ; notions rangées par nature, salaire de 1ère CFC en « Charges et produits », notion « Intérêts et frais
   bancaires » en maturité, « moyen de paiement » renvoyé au chapitre Bilan ; texte 1170 / 1171 gardé ; pas de
