@@ -16,7 +16,7 @@ import { bilanSerie, genererSerie, hasard, questionsRevision, revisionReussie } 
 import { exporterExercice } from '../src/io/fichiers';
 import { exercicesDemo } from '../src/data/demos';
 import { demoCfc1 } from '../src/data/demo-cfc1';
-import { manuelFavre, manuelLacroix } from '../src/data/exercices-manuel';
+import { manuelGolay, manuelVuilleumier } from '../src/data/exercices-manuel';
 import { dossierFacturationLeman } from '../src/data/dossiers/cfc-facturation';
 import { MODULES, modeleParId } from '../src/data/apprendre';
 import { chf, plan } from './fixtures';
@@ -39,9 +39,9 @@ describe('réponses justes acceptées (F1)', () => {
 });
 
 describe('diagnostic « incomplète » et écriture nette (F2)', () => {
-  const reprise: EcritureCorrigee = manuelFavre.corrige!.find((c) => c.piece === '14')!;
+  const reprise: EcritureCorrigee = manuelGolay.corrige!.find((c) => c.piece === '14')!;
   it('une écriture nette est signalée comme telle, et comptée comme un essai', () => {
-    const nette = [e('14', [S('1530', '1020', 20000)])];
+    const nette = [e('14', [S('1530', '1020', 24000)])];
     const d = diagnostiquer(nette, reprise);
     expect(d).toBe('nette');
     const suivi = enregistrerTentative({}, '14', d);
@@ -203,10 +203,10 @@ describe('2ème CFC : le calcul est exercé (PED3-08) et les énoncés varient (
 });
 
 describe('contenus mis en cohérence', () => {
-  it('Maison Lacroix, op. 5 : électricité en 6400 et téléphone en 6510, montants donnés', () => {
-    const op = manuelLacroix.operations.find((o) => o.numero === '5')!;
-    expect(op.texte).toMatch(/électricité 270.25 et téléphone 162.15/);
-    const c = manuelLacroix.corrige!.find((x) => x.piece === '5')!;
+  it('Maison Vuilleumier, op. 5 : électricité en 6400 et téléphone en 6510, montants donnés', () => {
+    const op = manuelVuilleumier.operations.find((o) => o.numero === '5')!;
+    expect(op.texte).toMatch(/électricité 324.30 et téléphone 194.60/);
+    const c = manuelVuilleumier.corrige!.find((x) => x.piece === '5')!;
     expect(c.lignes.map((l) => l.debit ?? l.credit)).toEqual(['6400', '6510', '1171', '1010']);
   });
   it('bénéficiaire d’un paiement : l’orthographe ne compte pas (ENS17)', () => {
@@ -222,11 +222,11 @@ describe('décisions de l’enseignant du 26.11.2026', () => {
   it('barème par défaut : 2 points pour une écriture d’au moins trois comptes ou côtés', async () => {
     const { pointsParDefaut } = await import('../src/engine/notation');
     expect(pointsParDefaut({ piece: '1', lignes: [S('1020', '3200', 100)] })).toBe(1);
-    expect(pointsParDefaut(manuelFavre.corrige!.find((c) => c.piece === '14'))).toBe(2);
+    expect(pointsParDefaut(manuelGolay.corrige!.find((c) => c.piece === '14'))).toBe(2);
   });
-  it('abonnement : 6500 et 6700 sont admis (Lacroix op. 11)', () => {
-    const c = manuelLacroix.corrige!.find((x) => x.piece === '11')!;
-    const en = (compte: string) => [e('11', [D(compte, 400), D('1171', 10.4), C('1010', 410.4)])];
+  it('abonnement : 6500 et 6700 sont admis (Vuilleumier op. 11)', () => {
+    const c = manuelVuilleumier.corrige!.find((x) => x.piece === '11')!;
+    const en = (compte: string) => [e('11', [D(compte, 450), D('1171', 11.7), C('1010', 461.7)])];
     expect(diagnostiquer(en('6700'), c)).toBe('juste');
     expect(diagnostiquer(en('6500'), c)).toBe('juste');
     expect(diagnostiquer(en('6000'), c)).not.toBe('juste');
